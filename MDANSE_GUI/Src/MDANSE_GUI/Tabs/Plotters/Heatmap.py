@@ -33,11 +33,11 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
-    import numpy.typing as npt
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
     from matplotlib.image import AxesImage
 
+    from MDANSE.util_types import FloatArray
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
@@ -48,17 +48,19 @@ class Heatmap(Plotter):
     @dataclass
     class BackupInfo:
         ind: int
-        image: AxesImage | None = None
-        array: np.ndarray = field(default_factory=lambda: np.empty((0,), dtype=float))
+        image: AxesImage = None
+        array: FloatArray = field(default_factory=lambda: np.empty((0,), dtype=float))
         minmax: tuple[float, float] = (-np.inf, np.inf)
         limits: tuple[float, float, float, float] = (-np.inf, np.inf, -np.inf, np.inf)
         interp: interp1d = None
+        title: str = ""
 
     def __init__(self) -> None:
         """Initialise all plotting parameters to defaults."""
         super().__init__()
         self._figure = None
-        self._backup: dict[int, Heatmap.BackupInfo] = {}
+        self._axes_titles: list[str] = []
+        self._backup: dict[str, Heatmap.BackupInfo] = {}
         self._current_x_axes = []
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
@@ -116,9 +118,8 @@ class Heatmap(Plotter):
     def handle_slider(self, new_value: list[float]):
         """Adjust colormap values based on slider values."""
         super().handle_slider(new_value)
-        target = self._figure
 
-        if target is None or new_value[1] <= new_value[0]:
+        if self._figure is None or new_value[1] <= new_value[0]:
             return
 
         self._slider_values = [new_value[0], new_value[1]]
@@ -153,7 +154,19 @@ class Heatmap(Plotter):
                 else:
                     self._figure.canvas.draw_idle()
                     backup.minmax = (newmin, newmax)
-        target.canvas.draw()
+        self._figure.canvas.draw()
+
+    def toggle_legend(self, enabled: bool) -> None:
+        if self._figure is None:
+            return
+
+        for axes, title in zip(self._axes, self._axes_titles, strict=True):
+            axes.set_title(
+                title if enabled else "",
+                fontsize=self.title_fontsize(title),
+            )
+
+        self._figure.canvas.draw()
 
     def check_curve_lengths(self):
         """Find the maximum number of elements in the x axes of the plot data."""
@@ -192,63 +205,65 @@ class Heatmap(Plotter):
         self._figure.set_layout_engine(layout="constrained")
         self._current_x_axes = []
 
-        # minmax_bak = {key: val.minmax for key, val in self._backup.items()}
         scale_interpolators = {val.ind: val.interp for val in self._backup.values()}
-        self._backup = {
-            databundle.row: self.BackupInfo(ind=databundle.row)
-            for databundle in plotting_context.datasets().values()
-        }
-        self._axes = []
+
+        self._backup.clear()
+        self._axes.clear()
+        self._axes_titles.clear()
 
         self.apply_settings(plotting_context)
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
 
-        nplots = min(ilen(plotting_context.planes(self._slice_axis)), self._plot_limit)
+        self._n_curves = min(
+            ilen(plotting_context.planes(self._slice_axis)), self._plot_limit
+        )
 
-        if not nplots:
+        if not self.n_curves:
             self.plot_blank()
             return
 
-        # Check interpolators
-        for databundle in plotting_context.datasets().values():
+        def get_interp(ind: int, data: FloatArray):
+            # Check interpolators
             try:
-                scale_interpolators[databundle.row](51.2)
+                scale_interpolators[ind](51.2)
             except Exception:
                 percentiles = np.linspace(0, 100.0, 21)
                 results = [
-                    np.percentile(np.nan_to_num(databundle.dataset._data), perc)
-                    for perc in percentiles
+                    np.percentile(np.nan_to_num(data), perc) for perc in percentiles
                 ]
-                self._backup[databundle.row].interp = interp1d(
-                    percentiles,
-                    results,
-                )
+                return interp1d(percentiles, results)
             else:
-                self._backup[databundle.row].interp = scale_interpolators[
-                    databundle.row
-                ]
+                return scale_interpolators[ind]
 
-        grid_size = self.grid_size(nplots)
+        grid_size = self.grid_size(self.n_curves)
         gs = self._figure.add_gridspec(*grid_size)
 
-        for ind, (databundle, label, plane) in enumerate(
+        for ind, (databundle, label, plane, axis_labels) in enumerate(
             islice(plotting_context.planes(self._slice_axis), self._plot_limit),
         ):
+            self._backup[label] = Heatmap.BackupInfo(ind=ind)
             dataset = databundle.dataset
 
             axes = self._figure.add_subplot(gs[ind])
 
             image = self._plot_single(
-                axes, plane, databundle, label=label, colour=plotting_context.colormap
+                axes,
+                plane[:, ::-1].T,
+                databundle,
+                label=label,
+                axis_labels=axis_labels,
+                colour=plotting_context.colormap,
             )
 
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
-            interpolator = self._backup[databundle.row].interp
+
+            self._backup[label].interp = get_interp(ind, plane)
+
             last_minmax = (
-                interpolator(self._slider_values[0]),
-                interpolator(self._slider_values[1]),
+                self._backup[label].interp(self._slider_values[0]),
+                self._backup[label].interp(self._slider_values[1]),
             )
 
             try:
@@ -259,30 +274,18 @@ class Heatmap(Plotter):
                 )
 
             if update_only:
-                self._backup[databundle.row].limits = (
-                    xlimits[0],
-                    xlimits[1],
-                    ylimits[0],
-                    ylimits[1],
-                )
+                self._backup[label].limits = (*xlimits, *ylimits)
             else:
-                self._backup[databundle.row].minmax = (
+                self._backup[label].minmax = (
                     np.nanmin(dataset._data),
                     np.nanmax(dataset._data),
                 )
-                self._backup[databundle.row].limits = (
-                    xlimits[0],
-                    xlimits[1],
-                    ylimits[0],
-                    ylimits[1],
-                )
+                self._backup[label].limits = (*xlimits, *ylimits)
 
-        if ind > 1:
-            legend = axes.legend()
-            legend.set_visible(plotting_context.use_legend)
-            axes.grid(plotting_context.use_grid)
+        self.toggle_legend(plotting_context.use_legend)
+        self.toggle_grid(plotting_context.use_grid)
 
-        if nplots == 1:  # Exploit label from loop for one plot
+        if self.n_curves == 1:  # Exploit label from loop for one plot
             self._figure.suptitle(label)
 
         self.check_curve_lengths()
@@ -354,19 +357,16 @@ class Heatmap(Plotter):
     def _plot_single(
         self,
         axes: Axes,
-        plane: npt.NDArray[np.floating],
+        plane: FloatArray,
         databundle: PlotArgs,
         *,
         label: str,
+        axis_labels: tuple[str, str],
         colour: str,
     ) -> AxesImage:
-
         dataset = databundle.dataset
 
-        x_label = databundle.main_axis
-        y_label = nth(dataset._axes, self._slice_axis)
-        if y_label is None:
-            y_label = nth(dataset._axes, 1)
+        x_label, y_label = axis_labels
 
         x_axis = dataset.x_axis(x_label)
         y_axis = dataset.x_axis(y_label)
@@ -382,12 +382,13 @@ class Heatmap(Plotter):
             interpolation=None,
             cmap=colour,
         )
-        axes.set_title(label)
+
         colorbar = mpl_colorbar(image, ax=image.axes, format="%.1e", pad=0.02)
         colorbar.set_label(dataset._data_unit)
 
         self._axes.append(axes)
-        self._backup[databundle.row].array = plane
-        self._backup[databundle.row].image = image
+        self._axes_titles.append(label)
+        self._backup[label].array = plane
+        self._backup[label].image = image
 
         return image

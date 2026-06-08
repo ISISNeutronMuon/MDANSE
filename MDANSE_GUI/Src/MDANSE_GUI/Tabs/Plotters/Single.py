@@ -186,15 +186,15 @@ class Single(Plotter):
             LOG.debug("Axis check failed.")
             return
 
-        total_n_curves = sum(
-            map(ilen, plotting_context.curves(self._curve_limit_per_dataset))
+        self._n_curves = sum(
+            ds.dataset.n_curves for ds in plotting_context.datasets().values()
         )
 
-        if not total_n_curves:
+        if not self._n_curves:
             self.plot_blank()
             return
 
-        self.enable_slider(allow_slider=total_n_curves > 1)
+        self.enable_slider(allow_slider=self._n_curves > 1)
 
         colours = {}
         for databundle in plotting_context.datasets().values():
@@ -206,7 +206,7 @@ class Single(Plotter):
         axes = target.add_subplot(111)
         self._axes = [axes]
 
-        for databundle, _, curve in islice(
+        for databundle, label, curve in islice(
             flatten(plotting_context.curves(self._curve_limit_per_dataset)),
             self._plot_limit,
         ):
@@ -214,6 +214,7 @@ class Single(Plotter):
                 axes,
                 curve,
                 databundle,
+                label=f"{databundle.legend_label} {label}",
                 colour=next(colours[databundle.row]),
             )
 
@@ -235,11 +236,11 @@ class Single(Plotter):
             self._backup_limits = [*axes.get_xlim(), *axes.get_ylim()]
 
         axes.set_xlabel(", ".join(np.unique(x_axis_labels)))
+        axes.legend()
 
-        if plotting_context.use_legend:
-            axes.legend()
+        self.toggle_legend(plotting_context.use_legend)
+        self.toggle_grid(plotting_context.use_grid)
 
-        axes.grid(plotting_context.use_grid)
         self.check_curve_lengths()
         self.offset_curves()
 
@@ -249,6 +250,7 @@ class Single(Plotter):
         curve: tuple[np.ndarray, np.ndarray] | tuple[np.ndarray],
         databundle: PlotArgs,
         *,
+        label: str,
         colour: tuple[float, float, float],
     ):
         """Plot a single curve to axes.
@@ -264,10 +266,11 @@ class Single(Plotter):
         colour : tuple[float, float, float]
             Curve colour.
         """
+
         lines: list[Line2D] = axes.plot(
             *curve,
             linestyle=databundle.line_style,
-            label=databundle.legend_label,
+            label=self.label(label, len(self._active_curves)),
             color=colour,
         )
 

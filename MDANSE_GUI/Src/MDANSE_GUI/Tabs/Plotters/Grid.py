@@ -146,27 +146,26 @@ class Grid(Plotter):
         self._normalisation_errors = []
         self.apply_settings(plotting_context)
 
-        nplots = min(
+        self._n_curves = min(
             sum(db.dataset.n_curves for db in plotting_context.datasets().values()),
             self._plot_limit,
         )
-        grid_size = self.grid_size(nplots)
+        grid_size = self.grid_size(self.n_curves)
         gs = self._figure.add_gridspec(*grid_size)
 
         for ind, (databundle, label, curve) in enumerate(
             islice(flatten(plotting_context.curves()), self._plot_limit)
         ):
             axes = target.add_subplot(gs[ind])
-            self._axes_titles.append(databundle.dataset._name)
+            self._axes_titles.append(f"{databundle.dataset._name} {label}")
 
             self._plot_single(
                 axes,
                 curve,
                 databundle,
-                label=label,
+                label="",
                 colour=databundle.colour,
             )
-            axes.legend()
             self._axes.append(axes)
 
         self.toggle_legend(plotting_context.use_legend)

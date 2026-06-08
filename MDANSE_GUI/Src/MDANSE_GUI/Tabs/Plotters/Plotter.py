@@ -19,7 +19,6 @@ import copy
 import csv
 import enum
 import math
-from collections.abc import Generator
 from itertools import count
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
 
@@ -34,7 +33,7 @@ from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Generator, Iterator
 
     from matplotlib.axes import Axes
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
@@ -113,6 +112,7 @@ class Plotter(RegisterFactory):
         6: (2, 3),
     }
     _title_length_limit: ClassVar[int] = 30
+    _max_labels = 5
 
     def __init__(self) -> None:
         """Create defaults common to all plotters."""
@@ -127,6 +127,7 @@ class Plotter(RegisterFactory):
         self.curve_length_limit = 10
         self._normalisation_values = copy.copy(NORMALISATION_DEFAULTS)
         self._normalisation_errors = []
+        self._n_curves = 0
 
     def request_slider_values(self):
         """Manually read values from sliders, if they are present."""
@@ -485,8 +486,14 @@ class Plotter(RegisterFactory):
         """
         return cls.GRID_SIZES.get(n_plots, (math.ceil(n_plots**0.5),) * 2)
 
-    @staticmethod
-    def get_label(ind: int, n_curves: int, limit: int, label: str):
+    def label(
+        self,
+        label: str,
+        ind: int,
+        *,
+        n_curves: int | None = None,
+        limit: int | None = None,
+    ) -> str | None:
         """Get label for legend.
 
         For the abbreviated legend return None for those which are
@@ -504,11 +511,21 @@ class Plotter(RegisterFactory):
         label : str
             Current label.
         """
+        if n_curves is None:
+            n_curves = self.n_curves
+        if limit is None:
+            limit = self._max_labels
+
         if ind == limit:
             return "..."
         if limit < ind < n_curves - 1:
             return None
         return label
+
+    @property
+    def n_curves(self) -> int:
+        """Number of expected/total curves."""
+        return self._n_curves
 
     @staticmethod
     def colours(colour: str, n_curves: int) -> Generator[tuple[float, float, float]]:

@@ -197,7 +197,7 @@ class Vectors(Plotter):
                         try:
                             axes.bar(
                                 *curve,
-                                label=self.get_label(
+                                label=self.label(
                                     ind=ind,
                                     n_curves=n_curves,
                                     limit=self._legend_limit_for_histogram,

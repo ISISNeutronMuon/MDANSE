@@ -17,12 +17,11 @@ from __future__ import annotations
 
 import copy
 import functools
-from collections.abc import Generator, Iterable, Sequence
 from contextlib import suppress
 from itertools import islice
 from math import prod
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, NamedTuple, overload
+from typing import TYPE_CHECKING, NamedTuple
 
 import h5py
 import matplotlib.pyplot as mpl
@@ -32,16 +31,16 @@ from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
 from matplotlib.lines import lineStyles
 from matplotlib.markers import MarkerStyle
-from more_itertools import first, locate, nth, nth_product, sort_together, unzip
+from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
-from MDANSE.util_types import ComplexArray, FloatArray
+from MDANSE.util_types import ComplexArray, FloatArray, IntArray
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Generator, Iterable, Iterator, Sequence
 
     import h5py
 
@@ -484,7 +483,7 @@ class SingleDataset:
         return {aname: axis for aname, axis in self._axes.items() if aname != la}
 
     @property
-    def data(self) -> npt.NDArray[np.floating]:
+    def data(self) -> FloatArray:
         """Data array, scaled if requested in the GUI table.
 
         Returns
@@ -605,9 +604,9 @@ class SingleDataset:
         ------
         str
             Plot label.
-        npt.NDArray[np.floating]
+        FloatArray
             x-axis.
-        npt.NDArray[np.floating]
+        FloatArray
             Curve to plot.
         """
         match axis_label:
@@ -622,7 +621,7 @@ class SingleDataset:
         x_axis = self.x_axis(axis_label)
 
         if self._data.ndim == 1:
-            yield axis_label, (x_axis, self.data)
+            yield "", (x_axis, self.data)
             return
 
         data_shape = self._data.shape
@@ -642,7 +641,7 @@ class SingleDataset:
                     slicer.append([slice(None)])
                     continue
 
-                indices: npt.NDArray[np.integer] = np.arange(data_shape[current_dim])
+                indices: IntArray = np.arange(data_shape[current_dim])
                 slicer.append(indices)
                 indexer.append(indices)
                 label_lookup.append(axis_name)
@@ -689,67 +688,94 @@ class SingleDataset:
 
     def planes_vs_axis(
         self,
-        axis_number: int,
-        max_limit: int = 1,
-    ) -> Generator[tuple[str, FloatArray]]:
+        main_axis: str,
+        max_limit: int = 9,
+    ) -> Generator[tuple[str, FloatArray, tuple[str, str]]]:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
         ----------
-        axis_number : int
-            index of the axis perpendicular to the plotted array
+        main_axis : str
+            Label of the axis perpendicular to the plotted array.
 
         Yields
         ------
-        str
+        main_label : str
             Grid label.
-        npt.NDArray[np.floating]
+        image_array : FloatArray
             2D array.
-
+        axis_labels : tuple[str, ...]
+            Labels for each axis.
         """
+        main_axis_index = self.main_axis_index(main_axis)
+        other_labels = self._axis_labels(main_axis)
+
         match self._data.ndim:
             case 1:
                 pass
-            case 2 if axis_number == 1:
-                yield self._labels["medium"], self.data.T
+            case 2 if main_axis_index == 1:
+                yield self._labels["medium"], self.data.T, (main_axis, other_labels[0])
             case 2:
-                yield self._labels["medium"], self.data
+                yield self._labels["medium"], self.data, (main_axis, other_labels[0])
             case 3:
                 perpendicular_axis_name, perpendicular_axis = nth(
-                    self._axes.items(), axis_number, default=(None, None)
+                    self._axes.items(), main_axis_index, default=(None, None)
                 )
 
                 if perpendicular_axis is None:
                     return
 
-                reordered_view = np.moveaxis(self.data, axis_number, 0)
+                reordered_view = np.moveaxis(self.data, main_axis_index, 0)
 
                 for plane_number in self.curve_ind(max_limit):
+                    if plane_number > len(reordered_view):
+                        continue
+
                     yield (
                         f"{self._labels['minimal']}:{perpendicular_axis_name}={perpendicular_axis[plane_number]}",
                         reordered_view[plane_number],
+                        other_labels,
                     )
             case _:
                 raise NotImplementedError(
                     f"Cannot handle {self._data.ndim}-dimensional data."
                 )
 
-    def main_axis_index(self, main_axis: str | None, *, default: int) -> int:
+    def main_axis_index(
+        self, main_axis: str | None, *, default: int | None = None
+    ) -> int:
         """Find index of main axis.
 
         Parameters
         ----------
         main_axis : str
             Main axis name to search for.
-        default : int
+        default : int, optional
             Index if ``main_axis`` not found.
 
         Returns
         -------
         int
             Index of main axis.
+
+        Raises
+        ------
+        ValueError
+            Axis not found and no default.
         """
-        return first(locate(self._axes, pred=lambda x: x == main_axis), default)
+        ind = first(locate(self._axes, pred=main_axis.__eq__), default)
+        if ind is None:
+            raise ValueError(
+                f"Cannot find axis {main_axis} in {','.join(self._axes.keys())}"
+            )
+        return ind
+
+    def _axis_labels(self, main_axis: str) -> tuple[str] | tuple[str, str]:
+        main_axis_index = self.main_axis_index(main_axis)
+
+        return tuple(
+            label for i, label in enumerate(self._axes) if i != main_axis_index
+        )
 
 
 plotting_column_labels = [
@@ -1060,18 +1086,16 @@ class PlottingContext(QStandardItemModel):
         self._datasets.pop(dkey, None)
 
     def planes(
-        self, default_axis: int = 0, planes_per_dataset: int | None = None
-    ) -> Generator[tuple[PlotArgs, str, npt.NDArray[np.floating]]]:
+        self, default_axis: int | None = None, planes_per_dataset: int | None = None
+    ) -> Generator[tuple[PlotArgs, str, FloatArray, tuple[str, str]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
-            for label, plane in islice(
-                ds.planes_vs_axis(
-                    ds.main_axis_index(databundle.main_axis, default=default_axis)
-                ),
+            for label, plane, axis_labels in islice(
+                ds.planes_vs_axis(databundle.main_axis),
                 planes_per_dataset,
             ):
-                yield databundle, label, plane
+                yield databundle, label, plane, axis_labels
 
     def curves(
         self, curves_per_dataset: int | None = None
@@ -1080,7 +1104,7 @@ class PlottingContext(QStandardItemModel):
             tuple[
                 PlotArgs,
                 str,
-                tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]],
+                tuple[FloatArray, FloatArray],
             ]
         ]
     ]:

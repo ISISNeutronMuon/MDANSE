@@ -172,10 +172,10 @@ class SliderPack(QWidget):
     @Slot()
     def slider_to_box(self):
         """Update spin boxes if slider is moving."""
-        vals = np.zeros_like(self._valarray)
         clicks = np.zeros_like(self._clickarray)
         for ns, slider in enumerate(self._sliders):
             clicks[ns] = slider.value()
+
         vals = self._minarray + clicks * self._steparray
         for ns, box in enumerate(self._spinboxes):
             box.setValue(vals[ns])
@@ -185,7 +185,7 @@ class SliderPack(QWidget):
         """Update sliders if spin boxes have changed."""
         with block_signals(self):
             vals = np.zeros_like(self._valarray)
-            clicks = np.zeros_like(self._clickarray)
+
             for ns, box in enumerate(self._spinboxes):
                 vals[ns] = box.value()
             clicks = np.round((vals - self._minarray) / self._steparray).astype(int)

@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
     from matplotlib.lines import Line2D
 
+    from MDANSE.util_types import FloatArray
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs, PlottingContext
 
 
@@ -46,7 +47,7 @@ class Grouped(Plotter):
         self._backup_limits: list[tuple[float, float, float, float]] = []
         self._active_curves: list[Line2D] = []
         self._backup_curves: list[
-            tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]]
+            tuple[FloatArray, FloatArray]
         ] = []
         self._plot_limit = 9
         self.height_max, self.length_max = -np.inf, -np.inf
@@ -201,14 +202,17 @@ class Grouped(Plotter):
 
         self.height_max, self.length_max = 0.0, 0.0
         self._figure = target
+
         self._axes = []
         self._axes_titles = []
         self._backup_curves = []
         self._active_curves = []
         self._normalisation_errors = []
+
         self.apply_settings(plotting_context)
 
-        nplots = min(ilen(plotting_context.curves()), self._plot_limit)
+        self._n_curves = sum(ilen(curves) for curves in plotting_context.curves())
+        nplots = min(len(plotting_context.datasets()), self._plot_limit)
         grid_size = self.grid_size(nplots)
         gs = self._figure.add_gridspec(*grid_size)
         limits = [(0.0, 0.0, 0.0, 0.0) for _ in range(nplots)]
@@ -229,16 +233,18 @@ class Grouped(Plotter):
 
             colours = self.colours(db.colour, ds.n_curves)
 
-            for (databundle, label, curve), colour in zip(
-                dataclump, colours, strict=True
+            for curve_ind, ((databundle, label, curve), colour) in enumerate(
+                zip(dataclump, colours, strict=True)
             ):
                 self._plot_single(
                     axes,
                     curve,
                     databundle,
+                    ind=curve_ind,
                     label=label,
                     colour=colour,
                 )
+
             axes.legend()
             self._axes.append(axes)
             limits[ind] = (*axes.get_xlim(), *axes.get_ylim())
@@ -283,6 +289,7 @@ class Grouped(Plotter):
         curve: tuple[np.ndarray, np.ndarray] | tuple[np.ndarray],
         databundle: PlotArgs,
         *,
+        ind: int,
         label: str,
         colour: tuple[float, float, float] | str,
     ):
@@ -304,7 +311,7 @@ class Grouped(Plotter):
         lines: list[Line2D] = axes.plot(
             *curve,
             linestyle=databundle.line_style,
-            label=label,
+            label=self.label(label, ind, n_curves=databundle.dataset.n_curves),
             color=colour,
         )
 
