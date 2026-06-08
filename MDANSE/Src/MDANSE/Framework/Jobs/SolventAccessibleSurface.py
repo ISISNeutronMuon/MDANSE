@@ -517,6 +517,8 @@ class SolventAccessibleSurface(IJob):
             self.trajectory.chemical_system._clusters,
         )
 
+        self.bonds = self.trajectory.chemical_system._bonds
+
     def run_step(self, index):
         """
         Runs a single step of the job.
@@ -532,7 +534,7 @@ class SolventAccessibleSurface(IJob):
         conf = self.trajectory.configuration(frameIndex)
 
         # The configuration is made continuous.
-        conf = conf.continuous_configuration()
+        conf = conf.continuous_configuration(self.bonds)
         unit_cell = conf._unit_cell
 
         if conf.is_periodic:

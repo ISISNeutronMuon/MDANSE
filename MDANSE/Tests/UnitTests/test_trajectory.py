@@ -42,7 +42,7 @@ class TestTrajectory(unittest.TestCase):
             allUnitCells.append(np.random.uniform(0, 10, (3, 3)))
             allCoordinates.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             conf = PeriodicRealConfiguration(
-                self._chemical_system, allCoordinates[-1], UnitCell(allUnitCells[-1])
+                allCoordinates[-1], UnitCell(allUnitCells[-1])
             )
             tw.dump_configuration(conf, i)
 
@@ -75,7 +75,7 @@ class TestTrajectory(unittest.TestCase):
             allCoordinates.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             allVelocities.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             conf = PeriodicRealConfiguration(
-                self._chemical_system, allCoordinates[-1], UnitCell(allUnitCells[-1])
+                allCoordinates[-1], UnitCell(allUnitCells[-1])
             )
             conf.variables["velocities"] = allVelocities[-1]
             tw.dump_configuration(conf, i)
@@ -114,7 +114,7 @@ class TestTrajectory(unittest.TestCase):
             allVelocities.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             allGradients.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             conf = PeriodicRealConfiguration(
-                self._chemical_system, allCoordinates[-1], UnitCell(allUnitCells[-1])
+                allCoordinates[-1], UnitCell(allUnitCells[-1])
             )
             conf.variables["velocities"] = allVelocities[-1]
             conf.variables["gradients"] = allGradients[-1]

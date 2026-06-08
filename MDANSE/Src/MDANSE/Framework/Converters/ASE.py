@@ -224,15 +224,11 @@ class ASE(Converter):
 
         try:
             if self._isPeriodic:
-                real_conf = PeriodicRealConfiguration(
-                    self._trajectory.chemical_system, coords, unitCell, **variables
-                )
+                real_conf = PeriodicRealConfiguration(coords, unitCell, **variables)
                 if self._configuration["fold"]["value"]:
                     real_conf.fold_coordinates()
             else:
-                real_conf = RealConfiguration(
-                    self._trajectory.chemical_system, coords, **variables
-                )
+                real_conf = RealConfiguration(coords, **variables)
 
         except ValueError:
             self._keep_running = False

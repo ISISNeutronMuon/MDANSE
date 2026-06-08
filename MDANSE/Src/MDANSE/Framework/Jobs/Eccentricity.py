@@ -21,6 +21,7 @@ from more_itertools import always_iterable
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
 
 
 @IJob.register("Eccentricity")
@@ -90,6 +91,8 @@ class Eccentricity(IJob):
             ]
         )
 
+        self.grouped_indices = group_cluster_indices(self.trajectory.chemical_system)
+
     def run_step(self, index: int):
         """Calculate the eccentricity for the selected atoms at the
         frame index.
@@ -102,7 +105,7 @@ class Eccentricity(IJob):
         frameIndex = self.configuration["frames"]["value"][index]
 
         conf = self.trajectory.configuration(frameIndex)
-        conf = conf.contiguous_configuration()
+        conf = conf.contiguous_configuration(self.grouped_indices)
         series = conf["coordinates"][self._indices, :]
 
         if np.allclose(self._selectionMasses, 0.0):

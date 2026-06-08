@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from collections import ChainMap, defaultdict
 from collections.abc import Iterable, Mapping
-from functools import cached_property
+from functools import cached_property, reduce
 from pathlib import Path
 
 import h5py
@@ -68,6 +68,7 @@ class MdanseTrajectory(TrajectoryFile):
         rdcc_nbytes: int | None = None,
         rdcc_w0: float | None = None,
         rdcc_nslots: int | None = None,
+        fast_load: bool = False,
     ):
         """Open the file and build a trajectory.
 
@@ -103,12 +104,21 @@ class MdanseTrajectory(TrajectoryFile):
         self._load_unit_cells()
 
         # Load the chemical system
-        self._chemical_system = ChemicalSystem(self._h5_filename.stem, self)
+        self._chemical_system = ChemicalSystem(
+            self._h5_filename.stem, self, fast_load=fast_load
+        )
+        if fast_load:
+            return
         self._chemical_system.load(self._h5_file)
 
         if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
             configuration = self.configuration(0)
-            contiguous_configuration = configuration.contiguous_configuration()
+            grouped_indices = reduce(
+                list.__add__, self._chemical_system._clusters.values(), []
+            )
+            contiguous_configuration = configuration.contiguous_configuration(
+                grouped_indices
+            )
             coords = contiguous_configuration.coordinates
             self._chemical_system.set_bond_orders(coords)
 
@@ -300,10 +310,9 @@ class MdanseTrajectory(TrajectoryFile):
         coordinates = variables.pop("coordinates")
 
         if unit_cell is None:
-            conf = RealConfiguration(self._chemical_system, coordinates, **variables)
+            conf = RealConfiguration(coordinates, **variables)
         else:
             conf = PeriodicRealConfiguration(
-                self._chemical_system,
                 coordinates,
                 unit_cell,
                 **variables,

@@ -29,7 +29,6 @@ from MDANSE.util_types import FloatArray, IntArray
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
-    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -291,12 +290,9 @@ class ConfigurationError(Exception):
 class _Configuration(metaclass=abc.ABCMeta):
     is_periodic: bool
 
-    def __init__(self, chemical_system: ChemicalSystem, coords: ArrayLike, **variables):
+    def __init__(self, coords: ArrayLike, **variables):
         """
         Constructor.
-
-        :param chemical_system: The chemical system described by this configuration.
-        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalSystem.ChemicalSystem`
 
         :param coords: the coordinates of all the particles in the chemical system
         :type coords: numpy.ndarray
@@ -304,11 +300,10 @@ class _Configuration(metaclass=abc.ABCMeta):
         :param variables: keyword arguments for any other variables that should be saved to this configuration
         """
 
-        self._chemical_system = chemical_system
-
         self._variables = {}
 
         self["coordinates"] = np.array(coords, dtype=float)
+        self._n_atoms = len(self["coordinates"])
 
         for k, v in variables.items():
             if k in {"velocities", "forces"}:
@@ -363,31 +358,21 @@ class _Configuration(metaclass=abc.ABCMeta):
                 self._variables[name] = value
                 return
 
-        if item.shape != (self._chemical_system.number_of_atoms, 3):
+        if any(
+            item.shape != existing_item.shape
+            for existing_item in self._variables.values()
+        ):
             raise ValueError(
-                f"Invalid item dimensions for {name}; a shape of {(self._chemical_system.number_of_atoms, 3)} was "
+                f"Invalid item dimensions for {name}; a shape of {(self._n_atoms, 3)} was "
                 f"expected but data with shape of {item.shape} was provided."
             )
 
         self._variables[name] = value
 
-    @property
-    def chemical_system(self) -> ChemicalSystem:
-        """
-        Returns the chemical system stored in this configuration.
-
-        :return: the chemical system that this configuration describes
-        :rtype: :class: `MDANSE.Chemistry.ChemicalSystem.ChemicalSystem`
-        """
-        return self._chemical_system
-
     @abc.abstractmethod
-    def clone(self, chemical_system: ChemicalSystem):
+    def clone(self):
         """
         Clones this configuration.
-
-        :param chemical_system: the chemical system that this configuration describes
-        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalSystem.ChemicalSystem`
         """
         pass
 
@@ -425,16 +410,12 @@ class _Configuration(metaclass=abc.ABCMeta):
 class _PeriodicConfiguration(_Configuration):
     def __init__(
         self,
-        chemical_system: ChemicalSystem,
         coords: ArrayLike,
         unit_cell: UnitCell,
         **variables,
     ):
         """
         Constructor.
-
-        :param chemical_system: The chemical system described by this configuration.
-        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalSystem.ChemicalSystem`
 
         :param coords: the coordinates of all the particles in the chemical system
         :type coords: numpy.ndarray
@@ -445,39 +426,22 @@ class _PeriodicConfiguration(_Configuration):
         :param variables: keyword arguments for any other variables that should be saved to this configuration
         """
 
-        super().__init__(chemical_system, coords, **variables)
+        super().__init__(coords, **variables)
 
         if unit_cell.direct.shape != (3, 3):
             raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
-    def clone(self, chemical_system: ChemicalSystem | None = None):
+    def clone(self):
         """
         Creates a deep copy of this configuration, using the provided chemical system.
-
-        :param chemical_system: the chemical system that is to be used for copying. It must have the same number of
-                                atoms as the chemical system that this configuration describes
-        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalSystem.ChemicalSystem):
         """
-        if chemical_system is None:
-            chemical_system = self._chemical_system
-        elif (
-            chemical_system.total_number_of_atoms
-            != self.chemical_system.total_number_of_atoms
-        ):
-            raise ConfigurationError(
-                "Mismatch between the chemical systems; the provided chemical system, "
-                f"{chemical_system.name}, has {chemical_system.total_number_of_atoms} atoms "
-                f"which does not match the chemical system of this configuration, "
-                f"{self.chemical_system.name} which has "
-                f"{self.chemical_system.total_number_of_atoms} atoms."
-            )
 
         unit_cell = copy.deepcopy(self._unit_cell)
         variables = copy.deepcopy(self.variables)
         coords = variables.pop("coordinates")
 
-        return self.__class__(chemical_system, coords, unit_cell, **variables)
+        return self.__class__(coords, unit_cell, **variables)
 
     def fold_coordinates(self):
         """Fold the coordinates into simulation box."""
@@ -554,14 +518,12 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         variables = copy.deepcopy(self._variables)
         variables.pop("coordinates")
 
-        real_conf = PeriodicRealConfiguration(
-            self._chemical_system, coords, self._unit_cell, **variables
-        )
+        real_conf = PeriodicRealConfiguration(coords, self._unit_cell, **variables)
 
         return real_conf
 
     def contiguous_configuration(
-        self, bring_to_centre: bool = False
+        self, indices_grouped, bring_to_centre: bool = False
     ) -> PeriodicBoxConfiguration:
         """
         Return a configuration with chemical entities made contiguous.
@@ -569,10 +531,6 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         :return: the contiguous configuration
         :rtype: :class: `MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration`
         """
-
-        indices_grouped = reduce(
-            list.__add__, self._chemical_system._clusters.values(), []
-        )
 
         contiguous_coords = contiguous_coordinates_box(
             self._variables["coordinates"],
@@ -611,9 +569,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         variables = copy.deepcopy(self._variables)
         variables.pop("coordinates")
 
-        box_conf = PeriodicBoxConfiguration(
-            self._chemical_system, coords, self._unit_cell, **variables
-        )
+        box_conf = PeriodicBoxConfiguration(coords, self._unit_cell, **variables)
 
         return box_conf
 
@@ -628,7 +584,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         return self._variables["coordinates"]
 
     def contiguous_configuration(
-        self, bring_to_centre: bool = False
+        self, indices_grouped, bring_to_centre: bool = False
     ) -> PeriodicRealConfiguration:
         """
         Return a configuration with chemical entities made contiguous.
@@ -636,10 +592,6 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         :return: the contiguous configuration
         :rtype: :class: `MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration`
         """
-
-        indices_grouped = reduce(
-            list.__add__, self._chemical_system._clusters.values(), []
-        )
 
         contiguous_coords = contiguous_coordinates_real(
             self._variables["coordinates"],
@@ -653,7 +605,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         conf._variables["coordinates"] = contiguous_coords
         return conf
 
-    def continuous_configuration(self) -> PeriodicRealConfiguration:
+    def continuous_configuration(self, bonds) -> PeriodicRealConfiguration:
         """
         Return a configuration with chemical entities made continuous.
 
@@ -665,7 +617,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
             self._variables["coordinates"],
             self._unit_cell.direct,
             self._unit_cell.inverse,
-            self.chemical_system._bonds,
+            bonds,
         )
 
         conf = self.clone()
@@ -676,30 +628,19 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 class RealConfiguration(_Configuration):
     is_periodic = False
 
-    def clone(self, chemical_system: ChemicalSystem | None = None) -> RealConfiguration:
+    def clone(self) -> RealConfiguration:
         """
         Creates a deep copy of this configuration, using the provided chemical system.
-
-        :param chemical_system: the chemical system that is to be used for copying. It must have the same number of
-                                atoms as the chemical system that this configuration describes
-        :type chemical_system: :class: `MDANSE.Chemistry.ChemicalSystem.ChemicalSystem`
 
         :return: the cloned configuration
         :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
         """
-        if chemical_system is None:
-            chemical_system = self._chemical_system
-        elif (
-            chemical_system.total_number_of_atoms
-            != self.chemical_system.total_number_of_atoms
-        ):
-            raise ConfigurationError("Mismatch between the chemical systems")
 
         variables = copy.deepcopy(self.variables)
 
         coords = variables.pop("coordinates")
 
-        return self.__class__(chemical_system, coords, **variables)
+        return self.__class__(coords, **variables)
 
     def fold_coordinates(self) -> None:
         """Does nothing since coordinates can only be folded if the configuration has a unit cell."""
@@ -715,7 +656,7 @@ class RealConfiguration(_Configuration):
         return self._variables["coordinates"]
 
     def contiguous_configuration(
-        self, bring_to_centre: bool = False
+        self, _=None, bring_to_centre: bool = False
     ) -> RealConfiguration:
         """
         Return a configuration with chemical entities made contiguous, which is always itself.
@@ -725,7 +666,7 @@ class RealConfiguration(_Configuration):
         """
         return self
 
-    def continuous_configuration(self) -> RealConfiguration:
+    def continuous_configuration(self, _=None) -> RealConfiguration:
         """
         Return a configuration with chemical entities made continuous, which is always itself.
 

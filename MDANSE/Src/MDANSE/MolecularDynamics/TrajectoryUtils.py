@@ -25,6 +25,7 @@ from more_itertools import chunked_even
 from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 mb_ram_per_process = os.environ.get("MDANSE_MAX_RAM_PER_PROCESS", "512")

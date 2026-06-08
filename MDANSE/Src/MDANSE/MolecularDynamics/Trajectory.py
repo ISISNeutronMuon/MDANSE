@@ -179,7 +179,8 @@ class Trajectory:
                  hdf5_driver: str | None = None,
                  rdcc_nbytes: int | None = None,
                  rdcc_w0: float | None = None,
-                 rdcc_nslots: int | None = None):
+                 rdcc_nslots: int | None = None,
+                 fast_load: bool = False):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
         self._rdcc_nbytes = rdcc_nbytes
@@ -194,6 +195,7 @@ class Trajectory:
                                                     self._rdcc_nbytes,
                                                     self._rdcc_w0,
                                                     self._rdcc_nslots,
+                                                    fast_load = fast_load
                                                     )
         self._min_span = None
         self._max_span = None
@@ -470,6 +472,7 @@ class Trajectory:
                         rdcc_nbytes,
                         rdcc_w0,
                         rdcc_nslots,
+                        fast_load: bool = False
                         ):
         trajectory_class = available_formats[trajectory_format]
         trajectory = trajectory_class(self._filename,
@@ -477,6 +480,7 @@ class Trajectory:
                                     rdcc_nbytes = rdcc_nbytes,
                                     rdcc_w0 = rdcc_w0,
                                     rdcc_nslots = rdcc_nslots,
+                                    fast_load = fast_load
                                       )
         return trajectory
 
@@ -506,7 +510,7 @@ class Trajectory:
 
     def __setstate__(self, state):
         self.__dict__ = state
-        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver, self._rdcc_nbytes, self._rdcc_w0, self._rdcc_nslots)
+        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver, self._rdcc_nbytes, self._rdcc_w0, self._rdcc_nslots, fast_load=True)
 
     def __len__(self):
         return len(self._trajectory)

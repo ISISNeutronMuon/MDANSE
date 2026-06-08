@@ -110,15 +110,11 @@ class Forcite(Converter):
         self._chemical_system.find_clusters_from_bonds()
 
         if self.xtd_file.pbc:
-            boxConf = PeriodicBoxConfiguration(
-                self._chemical_system, coordinates, self.xtd_file.cell
-            )
+            boxConf = PeriodicBoxConfiguration(coordinates, self.xtd_file.cell)
             real_conf = boxConf.to_real_configuration()
         else:
             coordinates *= measure(1.0, "ang").toval("nm")
-            real_conf = RealConfiguration(
-                self._chemical_system, coordinates, unit_cell=self.xtd_file._cell
-            )
+            real_conf = RealConfiguration(coordinates, unit_cell=self.xtd_file._cell)
 
         real_conf.fold_coordinates()
         self.system = real_conf

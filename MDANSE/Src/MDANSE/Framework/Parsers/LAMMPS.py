@@ -610,9 +610,7 @@ class LAMMPScustom(LAMMPSReader):
 
             coords -= origin_recip
 
-            conf = PeriodicBoxConfiguration(
-                self._trajectory.chemical_system, coords, unit_cell
-            )
+            conf = PeriodicBoxConfiguration(coords, unit_cell)
 
             real_conf = conf.to_real_configuration()
 
@@ -621,9 +619,7 @@ class LAMMPScustom(LAMMPSReader):
             coords -= self._first_origin
             coords *= len_conv
 
-            real_conf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, coords, unit_cell
-            )
+            real_conf = PeriodicRealConfiguration(coords, unit_cell)
 
         if self._fold:
             # The whole configuration is folded in to the simulation box.
@@ -811,15 +807,11 @@ class LAMMPSxyz(LAMMPSReader):
         time = timestep * self._timestep * measure(1.0, self.units["time"]).toval("ps")
 
         if self._fractionalCoordinates:
-            conf = PeriodicBoxConfiguration(
-                self._trajectory.chemical_system, positions, unit_cell
-            )
+            conf = PeriodicBoxConfiguration(positions, unit_cell)
             real_conf = conf.to_real_configuration()
         else:
             positions *= measure(1.0, self.units["length"]).toval("nm")
-            real_conf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, positions, unit_cell
-            )
+            real_conf = PeriodicRealConfiguration(positions, unit_cell)
 
         if self._fold:
             # The whole configuration is folded in to the simulation box.

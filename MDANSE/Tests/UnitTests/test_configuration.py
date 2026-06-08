@@ -24,6 +24,7 @@ from MDANSE.MolecularDynamics.Configuration import (
     RealConfiguration,
     ConfigurationError,
 )
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -48,9 +49,8 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_init_valid(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords, velocities=vels)
+        conf = RealConfiguration(coords, velocities=vels)
 
-        self.assertEqual(self.chem_system, conf._chemical_system)
         self.assertEqual(["coordinates", "velocities"], list(conf._variables.keys()))
         self.assertTrue(
             np.allclose(coords, conf._variables["coordinates"]),
@@ -64,7 +64,7 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_contains(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords, velocities=vels)
+        conf = RealConfiguration(coords, velocities=vels)
 
         self.assertTrue("coordinates" in conf)
         self.assertTrue("velocities" in conf)
@@ -73,7 +73,7 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_getitem(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords, velocities=vels)
+        conf = RealConfiguration(coords, velocities=vels)
 
         self.assertTrue(
             np.allclose(coords, conf["coordinates"]),
@@ -88,7 +88,7 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_setitem_valid(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         gradients = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords)
+        conf = RealConfiguration(coords)
 
         conf["gradients"] = gradients
         self.assertTrue(
@@ -97,7 +97,7 @@ class TestConfiguration(unittest.TestCase):
 
     def test_dunder_setitem_invalid_shape(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords)
+        conf = RealConfiguration(coords)
 
         with self.assertRaises(ValueError):
             conf["velocities"] = np.random.uniform(0, 1, (self._nAtoms + 1, 3))
@@ -107,9 +107,8 @@ class TestConfiguration(unittest.TestCase):
     def test_properties(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords, velocities=vels)
+        conf = RealConfiguration(coords, velocities=vels)
 
-        self.assertEqual(self.chem_system, conf.chemical_system)
         self.assertTrue(
             np.allclose(coords, conf.coordinates), f"\nactual = {conf.coordinates}"
         )
@@ -142,11 +141,10 @@ class TestPeriodicConfiguration(unittest.TestCase):
         self.coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         self.unit_cell = UnitCell(np.random.uniform(0, 1, (3, 3)))
         self.conf = PeriodicBoxConfiguration(
-            self.chem_system, self.coords, self.unit_cell
+            self.coords, self.unit_cell
         )
 
     def test_instantiation_valid(self):
-        self.assertEqual(self.chem_system, self.conf.chemical_system)
         self.assertTrue(np.allclose(self.coords, self.conf["coordinates"]))
         self.assertEqual(self.unit_cell, self.conf.unit_cell)
 
@@ -154,17 +152,9 @@ class TestPeriodicConfiguration(unittest.TestCase):
         with self.assertRaises(ValueError):
             UnitCell(np.random.uniform(0, 1, (4, 4)))
 
-    def test_clone_valid_chemical_system(self):
-        clone = self.conf.clone(self.chem_system)
-
-        self.assertEqual(self.chem_system, clone.chemical_system)
-        self.assertTrue(np.allclose(self.coords, clone["coordinates"]))
-        self.assertEqual(self.unit_cell, clone.unit_cell)
-
     def test_clone_valid_none(self):
         clone = self.conf.clone()
 
-        self.assertEqual(self.chem_system, clone.chemical_system)
         self.assertTrue(np.allclose(self.coords, clone["coordinates"]))
         self.assertEqual(self.unit_cell, clone.unit_cell)
 
@@ -199,7 +189,7 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicBoxConfiguration(coords, unit_cell)
 
         self.assertTrue(
             np.allclose(
@@ -220,7 +210,7 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
-        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicBoxConfiguration(coords, unit_cell)
 
         self.assertTrue(
             np.allclose(coords, conf.to_box_coordinates()),
@@ -232,7 +222,7 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
-        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicBoxConfiguration(coords, unit_cell)
 
         self.assertTrue(
             np.allclose(
@@ -252,11 +242,10 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
-        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicBoxConfiguration(coords, unit_cell)
         real = conf.to_real_configuration()
 
         self.assertTrue(isinstance(real, PeriodicRealConfiguration))
-        self.assertEqual(repr(self.chem_system), repr(real._chemical_system))
         self.assertEqual(["coordinates"], list(real._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -275,11 +264,10 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
     def test_contiguous_configuration(self):
         unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
         coords = [[0.1, 0.1, 0.1], [0.3, 0.2, 0.4], [-1.3, -1.1, -1.3], [1.9, 1.5, 1.9]]
-        conf = PeriodicBoxConfiguration(self.chem_system, coords, unit_cell)
-        contiguous_conf = conf.contiguous_configuration()
+        conf = PeriodicBoxConfiguration(coords, unit_cell)
+        contiguous_conf = conf.contiguous_configuration(group_cluster_indices(self.chem_system))
 
         self.assertTrue(isinstance(contiguous_conf, PeriodicBoxConfiguration))
-        self.assertEqual(repr(self.chem_system), repr(contiguous_conf._chemical_system))
         self.assertEqual(["coordinates"], list(contiguous_conf._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -318,7 +306,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
             ]
         )
         unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
-        conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicRealConfiguration(coords, unit_cell)
         conf.fold_coordinates()
 
         self.assertTrue(
@@ -347,7 +335,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicRealConfiguration(coords, unit_cell)
 
         box = conf.to_box_coordinates()
         self.assertTrue(
@@ -367,11 +355,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicRealConfiguration(coords, unit_cell)
 
         box_conf = conf.to_box_configuration()
         self.assertTrue(isinstance(box_conf, PeriodicBoxConfiguration))
-        self.assertEqual(repr(self.chem_system), repr(box_conf._chemical_system))
         self.assertEqual(["coordinates"], list(box_conf._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -393,7 +380,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicRealConfiguration(coords, unit_cell)
 
         real = conf.to_real_coordinates()
         self.assertTrue(np.allclose(coords, real), f"\nactual = {real}")
@@ -410,11 +397,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicRealConfiguration(coords, unit_cell)
 
-        result = conf.contiguous_configuration()
+        result = conf.contiguous_configuration(group_cluster_indices(self.chem_system))
         self.assertTrue(isinstance(result, PeriodicRealConfiguration))
-        self.assertEqual(repr(self.chem_system), repr(result._chemical_system))
         self.assertEqual(["coordinates"], list(result._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -448,8 +434,8 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
                 [-1.8123033523559569, -0.3780877590179443, -0.5149454593658447],
             ]
         )
-        conf = PeriodicRealConfiguration(self.chem_system, coords.copy(), unit_cell)
-        result = conf.contiguous_configuration()
+        conf = PeriodicRealConfiguration(coords.copy(), unit_cell)
+        result = conf.contiguous_configuration(group_cluster_indices(self.chem_system))
         new_coords = result.coordinates
         assert np.allclose(coords, new_coords)
 
@@ -465,11 +451,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicRealConfiguration(coords, unit_cell)
 
-        result = conf.continuous_configuration()
+        result = conf.continuous_configuration([])
         self.assertTrue(isinstance(result, PeriodicRealConfiguration))
-        self.assertEqual(repr(self.chem_system), repr(result._chemical_system))
         self.assertEqual(["coordinates"], list(result._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -498,11 +483,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         self.chem_system.add_bonds([(0, 1), (2, 3)])
-        conf = PeriodicRealConfiguration(self.chem_system, coords, unit_cell)
+        conf = PeriodicRealConfiguration(coords, unit_cell)
 
-        result = conf.continuous_configuration()
+        result = conf.continuous_configuration(self.chem_system._bonds)
         self.assertTrue(isinstance(result, PeriodicRealConfiguration))
-        self.assertEqual(repr(self.chem_system), repr(result._chemical_system))
         self.assertEqual(["coordinates"], list(result._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -534,7 +518,7 @@ class TestRealConfiguration(unittest.TestCase):
 
     def test_clone_valid_no_input(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coordinates)
+        conf = RealConfiguration(coordinates)
         clone = conf.clone()
 
         self.assertTrue(isinstance(clone, RealConfiguration))
@@ -546,8 +530,8 @@ class TestRealConfiguration(unittest.TestCase):
 
     def test_clone_valid_chemical_system_provided(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coordinates)
-        clone = conf.clone(self.chem_system)
+        conf = RealConfiguration(coordinates)
+        clone = conf.clone()
 
         self.assertTrue(isinstance(clone, RealConfiguration))
         self.assertEqual(["coordinates"], list(clone._variables.keys()))
@@ -556,17 +540,9 @@ class TestRealConfiguration(unittest.TestCase):
             f'\nactual = {clone["coordinates"]}',
         )
 
-    def test_clone_invalid_system(self):
-        coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coordinates)
-
-        cs = ChemicalSystem()
-        with self.assertRaises(ConfigurationError):
-            conf.clone(cs)
-
     def test_fold_coordinates(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coordinates)
+        conf = RealConfiguration(coordinates)
         conf.fold_coordinates()
 
         self.assertTrue(
@@ -576,19 +552,19 @@ class TestRealConfiguration(unittest.TestCase):
 
     def test_to_real_coordinates(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coordinates)
+        conf = RealConfiguration(coordinates)
         real = conf.to_real_coordinates()
 
         self.assertTrue(np.allclose(coordinates, real), f"\nactual = {real}")
 
     def test_contiguous_configuration(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords)
+        conf = RealConfiguration(coords)
 
         self.assertEqual(conf, conf.contiguous_configuration())
 
     def test_continuous_configuration(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(self.chem_system, coords)
+        conf = RealConfiguration(coords)
 
         self.assertEqual(conf, conf.continuous_configuration())

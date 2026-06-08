@@ -21,6 +21,7 @@ from scipy.special import legendre
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
 from MDANSE.util_types import FloatArray
 
 
@@ -140,6 +141,8 @@ class ReorientationalTimeCorrelationFunction(IJob):
         self.legendre_order = self.configuration["polynomial_order"]["value"]
         self.numberOfSteps = len(self.molecules)
 
+        self.grouped_indices = group_cluster_indices(self.trajectory.chemical_system)
+
         self.masses = np.array(
             self.trajectory.chemical_system.atom_property(
                 "atomic_weight",
@@ -227,7 +230,9 @@ class ReorientationalTimeCorrelationFunction(IJob):
             configuration = self.trajectory.configuration(
                 frame_index,
             )
-            coordinates = configuration.contiguous_configuration().coordinates[molecule]
+            coordinates = configuration.contiguous_configuration(
+                self.grouped_indices
+            ).coordinates[molecule]
             if self.inner_index2 is not None:
                 ref_pos = coordinates[self.inner_index2]
             else:

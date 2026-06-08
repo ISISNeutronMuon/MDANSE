@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from functools import reduce
+
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import (
@@ -151,19 +153,23 @@ class TrajectoryEditor(IJob):
             coords = conf.coordinates[indices]
             if conf.is_periodic:
                 com_conf = PeriodicRealConfiguration(
-                    new_chemical_system,
                     coords,
                     conf.unit_cell,
                 )
             else:
                 com_conf = RealConfiguration(
-                    new_chemical_system,
                     coords,
                 )
-            coords = com_conf.contiguous_configuration().coordinates
+            self.grouped_indices = reduce(
+                list.__add__, new_chemical_system._clusters.values(), []
+            )
+            coords = com_conf.contiguous_configuration(self.grouped_indices).coordinates
         else:
             assign_molecules_after_atom_selection(
                 self._indices, self._input_chemical_system, new_chemical_system
+            )
+            self.grouped_indices = reduce(
+                list.__add__, new_chemical_system._clusters.values(), []
             )
 
         # The output trajectory is opened for writing.
@@ -191,7 +197,7 @@ class TrajectoryEditor(IJob):
         frameIndex = self.configuration["frames"]["value"][index]
 
         conf = self.trajectory.configuration(frameIndex)
-        conf = conf.contiguous_configuration(bring_to_centre=True)
+        conf = conf.contiguous_configuration(self.grouped_indices, bring_to_centre=True)
         charges = self.trajectory.charges(frameIndex)
         coords = conf.coordinates
 
@@ -207,14 +213,12 @@ class TrajectoryEditor(IJob):
 
         if conf.is_periodic:
             com_conf = PeriodicRealConfiguration(
-                self._output_trajectory.chemical_system,
                 coords[self._indices],
                 conf.unit_cell,
                 **variables,
             )
         else:
             com_conf = RealConfiguration(
-                self._output_trajectory.chemical_system,
                 coords[self._indices],
                 **variables,
             )

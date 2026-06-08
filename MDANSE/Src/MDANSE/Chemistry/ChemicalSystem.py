@@ -84,7 +84,12 @@ def assign_molecules_after_atom_selection(
 class ChemicalSystem:
     """Stores the contents and topology of a trajectory."""
 
-    def __init__(self, name: str = "", trajectory: Trajectory | None = None):
+    def __init__(
+        self,
+        name: str = "",
+        trajectory: Trajectory | None = None,
+        fast_load: bool = False,
+    ):
         """Populate the arrays with values from the trajectory.
 
         Parameters
@@ -93,9 +98,12 @@ class ChemicalSystem:
             text label of this system
         trajectory : Trajectory, optional
             instance of the Trajectory class, by default None
+        fast_load : bool, optional
+            Skip molecule detection if True, by default False
         """
         self.name = str(name)
         self._database = ATOMS_DATABASE
+        self._fast_load = fast_load
         if trajectory is not None:
             self._database = trajectory
 

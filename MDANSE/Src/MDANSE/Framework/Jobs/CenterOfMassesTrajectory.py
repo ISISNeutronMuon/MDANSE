@@ -26,6 +26,7 @@ from MDANSE.MolecularDynamics.Configuration import (
     RealConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
 
 
 @IJob.register("CenterOfMassesTrajectory")
@@ -116,6 +117,14 @@ class CenterOfMassesTrajectory(IJob):
             cluster_name: [] for cluster_name in chemical_system._clusters
         }
         self.selected_indices = selected_indices
+        self.clusters = chemical_system._clusters
+        self.masses = {
+            atom_index: self.trajectory.get_atom_property(
+                chemical_system.atom_list[atom_index], "atomic_weight"
+            )
+            for atom_index in self.trajectory.atom_indices
+        }
+        self.grouped_indices = group_cluster_indices(chemical_system)
 
     def run_step(self, index):
         """
@@ -130,33 +139,29 @@ class CenterOfMassesTrajectory(IJob):
 
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]
-        chemical_system = self.trajectory.chemical_system
-        atom_database = self.trajectory
 
         n_coms = self._output_trajectory.chemical_system.number_of_atoms
 
         conf = self.trajectory.configuration(frameIndex)
-        conf = conf.contiguous_configuration()
-        temp_radii = {cluster_name: [] for cluster_name in chemical_system._clusters}
+        conf = conf.contiguous_configuration(self.grouped_indices)
+        temp_radii = {cluster_name: [] for cluster_name in self.clusters}
 
         com_coords = np.empty((n_coms, 3), dtype=np.float64)
         mol_index = 0
-        for cluster_name in chemical_system._clusters:
-            for cluster in chemical_system._clusters[cluster_name]:
+        for cluster_name in self.clusters:
+            for cluster in self.clusters[cluster_name]:
                 if not set(cluster).issubset(self.selected_indices):
                     continue
-                masses = [
-                    atom_database.get_atom_property(
-                        chemical_system.atom_list[cluster_index], "atomic_weight"
-                    )
-                    for cluster_index in cluster
-                ]
+
                 individual_coordinates = conf.coordinates[cluster]
-                centre_of_mass = center_of_mass(individual_coordinates, masses)
+                centre_of_mass = center_of_mass(
+                    individual_coordinates,
+                    [self.masses[at_index] for at_index in cluster],
+                )
                 com_coords[mol_index] = centre_of_mass
                 average_radius = individual_coordinates - centre_of_mass.reshape(1, 3)
                 average_radius = np.linalg.norm(average_radius, axis=1)
-                average_radius = np.average(average_radius, weights=masses)
+                average_radius = np.average(average_radius, weights=self.masses)
                 temp_radii[cluster_name].append(average_radius)
                 mol_index += 1
         for atom_index in self.selected_indices:
@@ -165,13 +170,9 @@ class CenterOfMassesTrajectory(IJob):
                 mol_index += 1
 
         if conf.is_periodic:
-            com_conf = PeriodicRealConfiguration(
-                self._output_trajectory.chemical_system, com_coords, conf.unit_cell
-            )
+            com_conf = PeriodicRealConfiguration(com_coords, conf.unit_cell)
         else:
-            com_conf = RealConfiguration(
-                self._output_trajectory.chemical_system, com_coords
-            )
+            com_conf = RealConfiguration(com_coords)
 
         if self.configuration["fold"]["value"]:
             com_conf.fold_coordinates()

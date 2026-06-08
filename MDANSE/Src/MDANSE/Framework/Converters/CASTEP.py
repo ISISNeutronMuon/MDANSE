@@ -123,9 +123,7 @@ class CASTEP(Converter):
             "gradients": np.vstack(tuple(arr[1] for arr in frame["F"])),
         }
 
-        conf = PeriodicRealConfiguration(
-            self._trajectory.chemical_system, coords, unit_cell, **variables
-        )
+        conf = PeriodicRealConfiguration(coords, unit_cell, **variables)
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()

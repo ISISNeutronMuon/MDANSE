@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from collections import ChainMap
 from enum import Enum
+from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -137,6 +138,7 @@ class H5MDTrajectory(TrajectoryFile):
         rdcc_nbytes: int | None = None,
         rdcc_w0: float | None = None,
         rdcc_nslots: int | None = None,
+        fast_load: bool = False,
     ):
         """Constructor.
 
@@ -181,7 +183,16 @@ class H5MDTrajectory(TrajectoryFile):
             chemical_elements = [
                 reverse_lookup[type_number] for type_number in particle_types
             ]
-        self._chemical_system = ChemicalSystem(self._h5_filename.stem)
+        self._chemical_system = ChemicalSystem(
+            self._h5_filename.stem, fast_load=fast_load
+        )
+
+        self._variables_to_skip = set()
+        self._load_units()
+        self._load_unit_cells()
+
+        if fast_load:
+            return
 
         try:
             self._chemical_system.initialise_atoms(chemical_elements)
@@ -191,13 +202,14 @@ class H5MDTrajectory(TrajectoryFile):
             )
             return
 
-        self._variables_to_skip = set()
-        self._load_units()
-        self._load_unit_cells()
-
         if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
             configuration = self.configuration(0)
-            contiguous_configuration = configuration.contiguous_configuration()
+            grouped_indices = reduce(
+                list.__add__, self._chemical_system._clusters.values(), []
+            )
+            contiguous_configuration = configuration.contiguous_configuration(
+                grouped_indices
+            )
             coords = contiguous_configuration.coordinates
             self._chemical_system.set_bond_orders(coords)
 
@@ -384,11 +396,9 @@ class H5MDTrajectory(TrajectoryFile):
         coordinates = self.coordinates(frame)
 
         if unit_cell is None:
-            conf = RealConfiguration(self._chemical_system, coordinates, **variables)
+            conf = RealConfiguration(coordinates, **variables)
         else:
-            conf = PeriodicRealConfiguration(
-                self._chemical_system, coordinates, unit_cell, **variables
-            )
+            conf = PeriodicRealConfiguration(coordinates, unit_cell, **variables)
 
         return conf
 

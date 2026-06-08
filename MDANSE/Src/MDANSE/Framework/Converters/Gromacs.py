@@ -181,7 +181,6 @@ class Gromacs(Converter):
         coords = np.squeeze(coords)
 
         conf = PeriodicRealConfiguration(
-            self._trajectory.chemical_system,
             coords,
             UnitCell(box[0, :, :]),
             **variables,

@@ -177,7 +177,6 @@ class CP2K(Converter):
         data["cell"] = UnitCell(data["cell"])
 
         real_conf = PeriodicRealConfiguration(
-            self._trajectory.chemical_system,
             data.pop("coordinates"),
             data.pop("cell"),
             **data,

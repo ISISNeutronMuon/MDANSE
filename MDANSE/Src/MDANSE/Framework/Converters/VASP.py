@@ -140,9 +140,7 @@ class VASP(Converter):
         coords = frame["coords"]
         unitCell = frame["unit_cell"]
 
-        conf = PeriodicBoxConfiguration(
-            self._trajectory.chemical_system, coords, unitCell
-        )
+        conf = PeriodicBoxConfiguration(coords, unitCell)
 
         # The coordinates in VASP are in box format. Convert them into real coordinates.
         real_conf = conf.to_real_configuration()

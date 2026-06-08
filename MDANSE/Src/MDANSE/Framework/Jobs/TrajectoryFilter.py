@@ -360,9 +360,8 @@ def get_output_configuration(
     """
     if parent.is_periodic:
         return PeriodicRealConfiguration(
-            output_chemical_system,
             output_coordinates,
             parent.unit_cell,
         )
 
-    return RealConfiguration(output_chemical_system, output_coordinates)
+    return RealConfiguration(output_coordinates)

@@ -46,7 +46,6 @@ def sample_configuration(chemical_system):
     coords[2] = [10.0, 1.0, 5.11]
     coords[3] = [10.0, 2.0, 5.09]
     temp = RealConfiguration(
-        chemical_system,
         coords,
         # unit_cell
     )

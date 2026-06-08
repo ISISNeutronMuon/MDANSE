@@ -119,9 +119,7 @@ class DCD(Converter):
         # The x, y and z values of the current frame.
         unit_cell, config = next(self.frames)
 
-        conf = PeriodicRealConfiguration(
-            self._trajectory._chemical_system, config, unit_cell
-        )
+        conf = PeriodicRealConfiguration(config, unit_cell)
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()

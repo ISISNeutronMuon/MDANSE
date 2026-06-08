@@ -214,12 +214,10 @@ class MDAnalysis(Converter):
         # default units in MDAnalysis
         if self.u.trajectory.ts.triclinic_dimensions is None:
             conf = RealConfiguration(
-                self._trajectory._chemical_system,
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
             )
         else:
             conf = PeriodicRealConfiguration(
-                self._trajectory._chemical_system,
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
                 UnitCell(
                     self.u.trajectory.ts.triclinic_dimensions

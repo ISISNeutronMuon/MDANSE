@@ -188,12 +188,10 @@ class MDTraj(Converter):
         """
         if self.traj.unitcell_vectors is None:
             conf = RealConfiguration(
-                self._trajectory._chemical_system,
                 self.traj.xyz[index],
             )
         else:
             conf = PeriodicRealConfiguration(
-                self._trajectory._chemical_system,
                 self.traj.xyz[index],
                 UnitCell(
                     self.traj.unitcell_vectors[index],

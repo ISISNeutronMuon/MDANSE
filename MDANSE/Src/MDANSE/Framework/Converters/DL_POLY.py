@@ -138,13 +138,9 @@ class DL_POLY(Converter):
         frame = next(self.frames)
 
         if self.history_file.imcon:
-            conf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, frame["positions"], frame["unit_cell"]
-            )
+            conf = PeriodicRealConfiguration(frame["positions"], frame["unit_cell"])
         else:
-            conf = RealConfiguration(
-                self._trajectory.chemical_system, frame["positions"]
-            )
+            conf = RealConfiguration(frame["positions"])
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()
