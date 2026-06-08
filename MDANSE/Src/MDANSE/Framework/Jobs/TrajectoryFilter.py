@@ -31,8 +31,8 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
     _Configuration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -354,14 +354,14 @@ def get_output_configuration(
 
     Returns
     -------
-    RealConfiguration | PeriodicRealConfiguration
+    AbsoluteConfiguration | PeriodicAbsoluteConfiguration
         Output configuration for the trajectory.
 
     """
     if parent.is_periodic:
-        return PeriodicRealConfiguration(
+        return PeriodicAbsoluteConfiguration(
             output_coordinates,
             parent.unit_cell,
         )
 
-    return RealConfiguration(output_coordinates)
+    return AbsoluteConfiguration(output_coordinates)

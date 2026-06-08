@@ -29,8 +29,8 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
     _Configuration,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
@@ -205,7 +205,7 @@ class H5MDTrajectory(TrajectoryFile):
         if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
             configuration = self.configuration(0)
             grouped_indices = reduce(
-                list.__add__, self._chemical_system._clusters.values(), []
+                list.__add__, self._chemical_system.clusters.values(), []
             )
             contiguous_configuration = configuration.contiguous_configuration(
                 grouped_indices
@@ -396,9 +396,9 @@ class H5MDTrajectory(TrajectoryFile):
         coordinates = self.coordinates(frame)
 
         if unit_cell is None:
-            conf = RealConfiguration(coordinates, **variables)
+            conf = AbsoluteConfiguration(coordinates, **variables)
         else:
-            conf = PeriodicRealConfiguration(coordinates, unit_cell, **variables)
+            conf = PeriodicAbsoluteConfiguration(coordinates, unit_cell, **variables)
 
         return conf
 

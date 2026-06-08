@@ -21,8 +21,8 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -213,11 +213,11 @@ class MDAnalysis(Converter):
         # see https://userguide.mdanalysis.org/stable/units.html for
         # default units in MDAnalysis
         if self.u.trajectory.ts.triclinic_dimensions is None:
-            conf = RealConfiguration(
+            conf = AbsoluteConfiguration(
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
             )
         else:
-            conf = PeriodicRealConfiguration(
+            conf = PeriodicAbsoluteConfiguration(
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
                 UnitCell(
                     self.u.trajectory.ts.triclinic_dimensions

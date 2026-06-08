@@ -22,7 +22,7 @@ import numpy as np
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import PDBFile
-from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -180,7 +180,7 @@ class Gromacs(Converter):
 
         coords = np.squeeze(coords)
 
-        conf = PeriodicRealConfiguration(
+        conf = PeriodicAbsoluteConfiguration(
             coords,
             UnitCell(box[0, :, :]),
             **variables,

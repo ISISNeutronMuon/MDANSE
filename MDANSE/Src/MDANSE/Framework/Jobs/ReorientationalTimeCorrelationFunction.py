@@ -133,7 +133,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
         self.molecules = self.configuration["trajectory"][
             "instance"
-        ].chemical_system._clusters[self.configuration["molecule_and_axis"]["value"]]
+        ].chemical_system.clusters[self.configuration["molecule_and_axis"]["value"]]
 
         self.inner_index1 = self.configuration["molecule_and_axis"]["index1"]
         self.inner_index2 = self.configuration["molecule_and_axis"]["index2"]

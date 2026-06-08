@@ -22,7 +22,7 @@ from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import XDATCARFile
-from MDANSE.MolecularDynamics.Configuration import PeriodicBoxConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicFractionalConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
@@ -140,10 +140,10 @@ class VASP(Converter):
         coords = frame["coords"]
         unitCell = frame["unit_cell"]
 
-        conf = PeriodicBoxConfiguration(coords, unitCell)
+        conf = PeriodicFractionalConfiguration(coords, unitCell)
 
         # The coordinates in VASP are in box format. Convert them into real coordinates.
-        real_conf = conf.to_real_configuration()
+        real_conf = conf.to_absolute_configuration()
 
         if self.configuration["fold"]["value"]:
             # The real coordinates are folded then into the simulation box (-L/2,L/2).

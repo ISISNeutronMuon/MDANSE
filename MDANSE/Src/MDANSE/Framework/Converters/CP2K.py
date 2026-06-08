@@ -26,7 +26,7 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
 from MDANSE.Framework.Units import measure
-from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -176,7 +176,7 @@ class CP2K(Converter):
         }
         data["cell"] = UnitCell(data["cell"])
 
-        real_conf = PeriodicRealConfiguration(
+        real_conf = PeriodicAbsoluteConfiguration(
             data.pop("coordinates"),
             data.pop("cell"),
             **data,

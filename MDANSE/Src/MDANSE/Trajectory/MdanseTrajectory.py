@@ -31,8 +31,8 @@ from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
     BAD_CELL,
@@ -114,7 +114,7 @@ class MdanseTrajectory(TrajectoryFile):
         if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
             configuration = self.configuration(0)
             grouped_indices = reduce(
-                list.__add__, self._chemical_system._clusters.values(), []
+                list.__add__, self._chemical_system.clusters.values(), []
             )
             contiguous_configuration = configuration.contiguous_configuration(
                 grouped_indices
@@ -283,7 +283,7 @@ class MdanseTrajectory(TrajectoryFile):
     def configuration(
         self,
         frame: int = 0,
-    ) -> RealConfiguration | PeriodicRealConfiguration:
+    ) -> AbsoluteConfiguration | PeriodicAbsoluteConfiguration:
         """Return the atom configuration for a specific frame.
 
         Parameters
@@ -293,7 +293,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         Returns
         -------
-        Union[RealConfiguration, PeriodicRealConfiguration]
+        Union[AbsoluteConfiguration, PeriodicAbsoluteConfiguration]
             Atom configuration, with unit cell (if defined)
 
         """
@@ -310,9 +310,9 @@ class MdanseTrajectory(TrajectoryFile):
         coordinates = variables.pop("coordinates")
 
         if unit_cell is None:
-            conf = RealConfiguration(coordinates, **variables)
+            conf = AbsoluteConfiguration(coordinates, **variables)
         else:
-            conf = PeriodicRealConfiguration(
+            conf = PeriodicAbsoluteConfiguration(
                 coordinates,
                 unit_cell,
                 **variables,

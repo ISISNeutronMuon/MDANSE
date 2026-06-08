@@ -17,7 +17,7 @@ import tempfile
 import unittest
 import numpy as np
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import Trajectory, TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -41,7 +41,7 @@ class TestTrajectory(unittest.TestCase):
             allTimes.append(i)
             allUnitCells.append(np.random.uniform(0, 10, (3, 3)))
             allCoordinates.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
-            conf = PeriodicRealConfiguration(
+            conf = PeriodicAbsoluteConfiguration(
                 allCoordinates[-1], UnitCell(allUnitCells[-1])
             )
             tw.dump_configuration(conf, i)
@@ -74,7 +74,7 @@ class TestTrajectory(unittest.TestCase):
             allUnitCells.append(np.random.uniform(0, 10, (3, 3)))
             allCoordinates.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             allVelocities.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
-            conf = PeriodicRealConfiguration(
+            conf = PeriodicAbsoluteConfiguration(
                 allCoordinates[-1], UnitCell(allUnitCells[-1])
             )
             conf.variables["velocities"] = allVelocities[-1]
@@ -113,7 +113,7 @@ class TestTrajectory(unittest.TestCase):
             allCoordinates.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             allVelocities.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
             allGradients.append(np.random.uniform(0, 10, (self._nAtoms, 3)))
-            conf = PeriodicRealConfiguration(
+            conf = PeriodicAbsoluteConfiguration(
                 allCoordinates[-1], UnitCell(allUnitCells[-1])
             )
             conf.variables["velocities"] = allVelocities[-1]

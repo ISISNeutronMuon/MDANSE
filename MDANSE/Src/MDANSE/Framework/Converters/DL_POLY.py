@@ -25,8 +25,8 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import DLPField, DLPHistory
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
@@ -138,9 +138,9 @@ class DL_POLY(Converter):
         frame = next(self.frames)
 
         if self.history_file.imcon:
-            conf = PeriodicRealConfiguration(frame["positions"], frame["unit_cell"])
+            conf = PeriodicAbsoluteConfiguration(frame["positions"], frame["unit_cell"])
         else:
-            conf = RealConfiguration(frame["positions"])
+            conf = AbsoluteConfiguration(frame["positions"])
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()

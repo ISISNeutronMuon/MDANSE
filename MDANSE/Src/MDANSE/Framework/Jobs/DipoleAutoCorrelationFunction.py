@@ -75,7 +75,7 @@ class DipoleAutoCorrelationFunction(IJob):
             "instance"
         ].chemical_system
 
-        self.molecules = self.chemical_system._clusters[
+        self.molecules = self.chemical_system.clusters[
             self.configuration["molecule_name"]["value"]
         ]
 

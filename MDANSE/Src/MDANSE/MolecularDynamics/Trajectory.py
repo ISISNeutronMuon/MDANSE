@@ -142,7 +142,7 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
             val.append(f"{k}: {v}")
 
     val.append("\nMolecular types found:")
-    for molname, mollist in traj.chemical_system._clusters.items():
+    for molname, mollist in traj.chemical_system.clusters.items():
         val.append(f"Molecule: {molname}; Count: {len(mollist)}")
 
     val = "\n".join(val)
@@ -157,7 +157,7 @@ def chemical_system_summary(cs: ChemicalSystem) -> str:
     atoms, counts = np.unique(cs.atom_list, return_counts=True)
     for atom, count in zip(atoms, counts, strict=False):
         text += f"Element: {atom}; Count: {count}\n"
-    for molname, mollist in cs._clusters.items():
+    for molname, mollist in cs.clusters.items():
         text += f"Molecule: {molname}; Count: {len(mollist)}\n"
     text += " ===== \n"
     return html.escape(text)
@@ -234,7 +234,7 @@ class Trajectory:
         mapping = {element: element for element in self.unique_elements}
         if self._grouping_level == GroupingLevels.MOLECULE:
             temp_names = {}
-            for mol_name, clusters in self.chemical_system._clusters.items():
+            for mol_name, clusters in self.chemical_system.clusters.items():
                 for cluster in clusters:
                     overlap = set(cluster).intersection(self.atom_indices)
                     for x in overlap:
@@ -252,9 +252,9 @@ class Trajectory:
         of all atoms belonging to the group.
         """
         temp_dict = {}
-        for mol_name in self.chemical_system._clusters:
+        for mol_name in self.chemical_system.clusters:
             temp_dict.setdefault(mol_name, 0)
-            for cluster in self.chemical_system._clusters[mol_name]:
+            for cluster in self.chemical_system.clusters[mol_name]:
                 overlap = set(cluster).intersection(self.atom_indices)
                 temp_dict[mol_name] += len(overlap)
         return {k: v for k, v in temp_dict.items() if v}
@@ -285,7 +285,7 @@ class Trajectory:
         return sorted(
             {
                 self.atom_types[x]
-                for cluster in self.chemical_system._clusters[grp_name]
+                for cluster in self.chemical_system.clusters[grp_name]
                 for x in cluster
                 if x in self.atom_indices
             }
@@ -296,7 +296,7 @@ class Trajectory:
         """Labels of ALL the atoms, after transmutation."""
         if self._grouping_level == GroupingLevels.MOLECULE:
             temp_names = {}
-            for mol_name, clusters in self.chemical_system._clusters.items():
+            for mol_name, clusters in self.chemical_system.clusters.items():
                 for cluster in clusters:
                     overlap = set(cluster).intersection(self.atom_indices)
                     for x in overlap:
@@ -628,7 +628,7 @@ class Trajectory:
             self.calculate_coordinate_span()
         return self._min_span
 
-    def to_real_coordinates(
+    def to_absolute_coordinates(
         self,
         box_coordinates: FloatArray,
         first: int = 0,
@@ -654,7 +654,7 @@ class Trajectory:
             2D array containing the real coordinates converted from box coordinates.
 
         """
-        return self._trajectory.to_real_coordinates(box_coordinates, first, last, step)
+        return self._trajectory.to_absolute_coordinates(box_coordinates, first, last, step)
 
     def read_atomic_trajectory(
         self,

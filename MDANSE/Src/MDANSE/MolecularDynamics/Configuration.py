@@ -17,8 +17,9 @@ from __future__ import annotations
 
 import abc
 import copy
+from collections.abc import Sequence
 from functools import reduce
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import networkx as nx
 import numpy as np
@@ -61,7 +62,7 @@ def remove_jumps(input_coords: FloatArray) -> FloatArray:
     return input_coords + offsets
 
 
-def contiguous_coordinates_real(
+def contiguous_coordinates_absolute(
     coords: FloatArray,
     cell: FloatArray,
     rcell: FloatArray,
@@ -117,7 +118,7 @@ def contiguous_coordinates_real(
     return contiguous_coords
 
 
-def contiguous_coordinates_box(
+def contiguous_coordinates_fractional(
     frac_coords: FloatArray,
     indices: list[tuple[int, ...]],
     bring_to_centre: bool = False,
@@ -204,7 +205,7 @@ def continuous_coordinates(
             atom_pool.pop(atom_pool.index(atom))
         segment = [last_atom, *others]
         segments.append(sorted(segment))
-    return contiguous_coordinates_real(coords, cell, rcell, segments)
+    return contiguous_coordinates_absolute(coords, cell, rcell, segments)
 
 
 def padded_coordinates(
@@ -291,14 +292,6 @@ class _Configuration(metaclass=abc.ABCMeta):
     is_periodic: bool
 
     def __init__(self, coords: ArrayLike, **variables):
-        """
-        Constructor.
-
-        :param coords: the coordinates of all the particles in the chemical system
-        :type coords: numpy.ndarray
-
-        :param variables: keyword arguments for any other variables that should be saved to this configuration
-        """
 
         self._variables = {}
 
@@ -312,38 +305,51 @@ class _Configuration(metaclass=abc.ABCMeta):
                 self[k] = v
 
     def __contains__(self, item: str) -> bool:
-        """
-        Returns True if the provided variable belongs to the configuration.
+        """Check if a variable is stored in this configuration.
 
-        :param item: the variable to be confirmed
-        :type item: str
+        Parameters
+        ----------
+        item : str
+            Name of the atom property array.
 
-        :return: True if the configuration has the given item, otherwise False
-        :rtype: bool
+        Returns
+        -------
+        bool
+            True if 'item' is the configuration's variables, False otherwise.
         """
         return item in self._variables
 
     def __getitem__(self, item: str) -> FloatArray:
-        """
-        Returns the configuration value for a given item.
+        """Return the selected atom property array.
 
-        :param item: the variable whose value is to be retrieved
-        :type item: str
+        Parameters
+        ----------
+        item : str
+            Name of the array, e.g. 'velocities'
 
-        :return: the value of the variable
+        Returns
+        -------
+        np.ndarray
+            An (N_ATOMS, 3) data array.
         """
         return self._variables[item]
 
     def __setitem__(self, name: str, value: ArrayLike) -> None:
-        """
-        Sets the provided variable to the provided value, but only if the value has the shape of
-        (number of atoms in the chemical system, 3).
+        """Store a data array in this Configuration instance.
 
-        :param name: the variable to be set
-        :type name: str
+        Parameters
+        ----------
+        name : str
+            Key under which the array will be stored.
+        value : ArrayLike
+            Input data array.
 
-        :param value: the value of the variable to be set
-        :type value: numpy.ndarray
+        Raises
+        ------
+        ValueError
+            If the unit cell array is not a (3, 3) array.
+        ValueError
+            If the shape of the array does not match the number of atoms.
         """
         item = np.array(value)
 
@@ -371,71 +377,48 @@ class _Configuration(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def clone(self):
-        """
-        Clones this configuration.
-        """
+        """Return a copy of this configuration."""
         pass
 
     @property
     def coordinates(self) -> FloatArray:
-        """
-        Returns the coordinates.
-
-        :return: the coordinates stored in this configuration
-        :rtype: numpy.ndarray
-        """
+        """The array of atom coordinates."""
         return self._variables["coordinates"]
 
     @abc.abstractmethod
-    def to_real_coordinates(self):
-        """
-        Return the coordinates of this configuration converted to real coordinates.
-
-        Returns:
-            ndarray: the real coordinates
-        """
+    def to_absolute_coordinates(self):
+        """Return the atom positions as absolute coordinates."""
         pass
 
     @property
     def variables(self) -> dict[str, FloatArray]:
-        """
-        Returns the configuration variable dictionary.
+        """Return all atom data arrays in a dictionary.
 
-        :return: all the variables stored in this configuration
-        :rtype: dict
+        Returns
+        -------
+        dict[str, np.ndarray]
+            Dictionary containing atom positions (optionally also velocities, ...)
         """
         return self._variables
 
 
 class _PeriodicConfiguration(_Configuration):
+    """Class storing atom positions with periodic boundary conditions."""
+
     def __init__(
         self,
         coords: ArrayLike,
         unit_cell: UnitCell,
         **variables,
     ):
-        """
-        Constructor.
-
-        :param coords: the coordinates of all the particles in the chemical system
-        :type coords: numpy.ndarray
-
-        :param unit_cell: the unit cell of the system in this configuration
-        :type unit_cell: :class: `MDANSE.MolecularDynamics.UnitCell.UnitCell`
-
-        :param variables: keyword arguments for any other variables that should be saved to this configuration
-        """
-
         super().__init__(coords, **variables)
 
         if unit_cell.direct.shape != (3, 3):
             raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
-    def clone(self):
-        """
-        Creates a deep copy of this configuration, using the provided chemical system.
-        """
+    def clone(self) -> _PeriodicConfiguration:
+        """Return a deep copy of this configuration."""
 
         unit_cell = copy.deepcopy(self._unit_cell)
         variables = copy.deepcopy(self.variables)
@@ -453,86 +436,86 @@ class _PeriodicConfiguration(_Configuration):
         self._variables["coordinates"] = (coords @ inverse_unit_cell % 1) @ unit_cell
 
     @abc.abstractmethod
-    def to_box_coordinates(self):
-        """Return this configuration converted to box coordinates.
-
-        Returns:
-            ndarray: the box coordinates
-        """
+    def to_fractional_coordinates(self):
+        """Return this configuration converted to fractional coordinates."""
         pass
 
     @property
     def unit_cell(self) -> UnitCell:
-        """
-        Return the nit cell stored in this configuration.
+        """Return the unit cell of this configuration.
 
-        :return: the unit cell associated with this chemical system
-        :rtype: :class: `MDANSE.MolecularDynamics.UnitCell.UnitCell
+        Returns
+        -------
+        UnitCell
+            A unit cell with the current simulation box dimensions.
         """
         return self._unit_cell
 
     @unit_cell.setter
     def unit_cell(self, unit_cell: UnitCell) -> None:
-        """
-        Sets the unit cell.
+        """Replace the unit cell of the configuration with the input one.
 
-        :param unit_cell: the new unit cell
-        :type unit_cell: :class: `MDANSE.MolecularDynamics.UnitCell.UnitCell`
+        Parameters
+        ----------
+        unit_cell : UnitCell
+            Unit cell instance with the dimensions of the simulation box.
+
+        Raises
+        ------
+        ValueError
+            If the unit cell does not contain a valid (3, 3) cell array.
         """
         if unit_cell.direct.shape != (3, 3):
             raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
 
-class PeriodicBoxConfiguration(_PeriodicConfiguration):
+class PeriodicFractionalConfiguration(_PeriodicConfiguration):
     is_periodic = True
 
-    def to_box_coordinates(self) -> FloatArray:
-        """
-        Return this configuration converted to box coordinates.
-
-        :return: the box coordinates
-        :rtype: numpy.ndarray
-        """
+    def to_fractional_coordinates(self) -> FloatArray:
+        """Return atom positions as fractional coordinates."""
         return self._variables["coordinates"]
 
-    def to_real_coordinates(self) -> FloatArray:
-        """
-        Return the coordinates of this configuration converted to real coordinates.
-
-        :return: the real coordinates
-        :rtype: numpy.ndarray
-        """
+    def to_absolute_coordinates(self) -> FloatArray:
+        """Return atom positions as absolute coordinates."""
         return np.matmul(self._variables["coordinates"], self._unit_cell.direct)
 
-    def to_real_configuration(self) -> PeriodicRealConfiguration:
-        """
-        Return this configuration converted to real coordinates.
+    def to_absolute_configuration(self) -> PeriodicAbsoluteConfiguration:
+        """Return atom positions as absolute coordinates in a configuration instance."""
 
-        :return: the configuration
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.PeriodicRealConfiguration`
-        """
-
-        coords = self.to_real_coordinates()
+        coords = self.to_absolute_coordinates()
 
         variables = copy.deepcopy(self._variables)
         variables.pop("coordinates")
 
-        real_conf = PeriodicRealConfiguration(coords, self._unit_cell, **variables)
+        real_conf = PeriodicAbsoluteConfiguration(coords, self._unit_cell, **variables)
 
         return real_conf
 
     def contiguous_configuration(
-        self, indices_grouped, bring_to_centre: bool = False
-    ) -> PeriodicBoxConfiguration:
-        """
-        Return a configuration with chemical entities made contiguous.
+        self, indices_grouped: Sequence[Sequence[int]], bring_to_centre: bool = False
+    ) -> PeriodicFractionalConfiguration:
+        """Return a configuration with contiguous coordinates.
 
-        :return: the contiguous configuration
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration`
+        Atoms will be moved by unit cell vectors to minimise the distance
+        between atoms belonging to groups defined in the input list.
+
+        Parameters
+        ----------
+        indices_grouped : Sequence[Sequence[int]]
+            List containing a list of atom indices for every molecule in the system.
+        bring_to_centre : bool, optional
+            If True, atoms in each molecule will be shifted towards the molecule
+            centre. If False, they will be shifted to the first atom. By default False
+
+        Returns
+        -------
+        PeriodicFractionalConfiguration
+            A configuration instance containing shifted atom positions.
         """
 
-        contiguous_coords = contiguous_coordinates_box(
+        contiguous_coords = contiguous_coordinates_fractional(
             self._variables["coordinates"],
             indices_grouped,
             bring_to_centre,
@@ -543,57 +526,51 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         return conf
 
 
-class PeriodicRealConfiguration(_PeriodicConfiguration):
+class PeriodicAbsoluteConfiguration(_PeriodicConfiguration):
     is_periodic = True
 
-    def to_box_coordinates(self) -> FloatArray:
-        """
-        Returns the (real) coordinates stored in this configuration converted into box coordinates.
-
-        :return: box coordinates
-        :rtype: numpy.ndarray
-        """
-
+    def to_fractional_coordinates(self) -> FloatArray:
+        """Return atom positions as fractional coordinates in the current unit cell."""
         return np.matmul(self._variables["coordinates"], self._unit_cell.inverse)
 
-    def to_box_configuration(self) -> PeriodicBoxConfiguration:
-        """
-        Creates a copy of this configuration with its coordinates converted into box coordinates.
+    def to_fractional_configuration(self) -> PeriodicFractionalConfiguration:
+        """Return atom fractional coordinates in a configuration instance."""
 
-        :return: a configuration with all parameters the same except for coordinates which are box instead of real
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration`
-        """
-
-        coords = self.to_box_coordinates()
+        coords = self.to_fractional_coordinates()
 
         variables = copy.deepcopy(self._variables)
         variables.pop("coordinates")
 
-        box_conf = PeriodicBoxConfiguration(coords, self._unit_cell, **variables)
+        box_conf = PeriodicFractionalConfiguration(coords, self._unit_cell, **variables)
 
         return box_conf
 
-    def to_real_coordinates(self) -> FloatArray:
-        """
-        Return the coordinates of this configuration converted to real coordinates, i.e. the coordinates registered with
-        this configuration.
-
-        :return: the real coordinates
-        :rtype: numpy.ndarray
-        """
+    def to_absolute_coordinates(self) -> FloatArray:
+        """Return atom positions as an array of absolute coordinates."""
         return self._variables["coordinates"]
 
     def contiguous_configuration(
-        self, indices_grouped, bring_to_centre: bool = False
-    ) -> PeriodicRealConfiguration:
-        """
-        Return a configuration with chemical entities made contiguous.
+        self, indices_grouped: Sequence[Sequence[int]], bring_to_centre: bool = False
+    ) -> PeriodicAbsoluteConfiguration:
+        """Return atoms positions made contiguous in a configuration instance.
 
-        :return: the contiguous configuration
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration`
+        Normally, for each index list in the input, atoms are translated by
+        unit cell vectors to be as close as possible to the first atom in the list.
+
+        Parameters
+        ----------
+        indices_grouped : Sequence[Sequence[int]]
+            A list of atom coordinate lists, one per molecule.
+        bring_to_centre : bool, optional
+            Shift atoms closer to the molecule centre, by default False
+
+        Returns
+        -------
+        PeriodicAbsoluteConfiguration
+            Configuration instance containing the shifted coordinates.
         """
 
-        contiguous_coords = contiguous_coordinates_real(
+        contiguous_coords = contiguous_coordinates_absolute(
             self._variables["coordinates"],
             self._unit_cell.direct,
             self._unit_cell.inverse,
@@ -605,12 +582,25 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         conf._variables["coordinates"] = contiguous_coords
         return conf
 
-    def continuous_configuration(self, bonds) -> PeriodicRealConfiguration:
-        """
-        Return a configuration with chemical entities made continuous.
+    def continuous_configuration(
+        self, bonds: Sequence[Sequence[int]]
+    ) -> PeriodicAbsoluteConfiguration:
+        """Return atom positions in a configuration with continuous molecules.
 
-        :return:  the continuous configuration
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.PeriodicBoxConfiguration`
+        The continuous coordinates are made by translating atoms by unit cell vectors
+        to ensure that none of the bonds in the input list are broken. This may not
+        work for large molecules, and is certain not to work correctly for infinite
+        molecular chains.
+
+        Parameters
+        ----------
+        bonds : Sequence[Sequence[int]]
+            List of pairs of atom indices defining chemical bonds in the system.
+
+        Returns
+        -------
+        PeriodicAbsoluteConfiguration
+            Configuration instance containing shifted atoms with continuous molecules.
         """
 
         continuous_coords = continuous_coordinates(
@@ -625,16 +615,11 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
         return conf
 
 
-class RealConfiguration(_Configuration):
+class AbsoluteConfiguration(_Configuration):
     is_periodic = False
 
-    def clone(self) -> RealConfiguration:
-        """
-        Creates a deep copy of this configuration, using the provided chemical system.
-
-        :return: the cloned configuration
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
-        """
+    def clone(self) -> AbsoluteConfiguration:
+        """Return a copy of itself."""
 
         variables = copy.deepcopy(self.variables)
 
@@ -643,34 +628,43 @@ class RealConfiguration(_Configuration):
         return self.__class__(coords, **variables)
 
     def fold_coordinates(self) -> None:
-        """Does nothing since coordinates can only be folded if the configuration has a unit cell."""
+        """Do nothing. Folding is not possible without a unit cell."""
         return
 
-    def to_real_coordinates(self) -> FloatArray:
-        """
-        Return the coordinates of this configuration converted to real coordinates.
-
-        :return: the real coordinates
-        :rtype: numpy.ndarray
-        """
+    def to_absolute_coordinates(self) -> FloatArray:
+        """Return the atom coordinates."""
         return self._variables["coordinates"]
 
     def contiguous_configuration(
-        self, _=None, bring_to_centre: bool = False
-    ) -> RealConfiguration:
-        """
-        Return a configuration with chemical entities made contiguous, which is always itself.
+        self, _: Any = None, bring_to_centre: bool = False
+    ) -> AbsoluteConfiguration:
+        """Return itself. A dummy operation, included for compatibility.
 
-        :return: itself
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
+        Parameters
+        ----------
+        _ : Any, optional
+            Ignored, by default None
+        bring_to_centre : bool, optional
+            Ignored, by default False
+
+        Returns
+        -------
+        AbsoluteConfiguration
+            This configuration instance.
         """
         return self
 
-    def continuous_configuration(self, _=None) -> RealConfiguration:
-        """
-        Return a configuration with chemical entities made continuous, which is always itself.
+    def continuous_configuration(self, _: Any = None) -> AbsoluteConfiguration:
+        """Return itself. Included for compatibility with other configurations.
 
-        :return: itself
-        :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
+        Parameters
+        ----------
+        _ : Any, optional
+            Ignored, by default None
+
+        Returns
+        -------
+        AbsoluteConfiguration
+            This configuration instance.
         """
         return self

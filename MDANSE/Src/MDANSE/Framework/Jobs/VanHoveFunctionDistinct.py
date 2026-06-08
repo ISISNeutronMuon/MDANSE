@@ -312,8 +312,8 @@ def intramolecular_lookup_dict(
     """
     result = -1 * np.arange(chemical_system.number_of_atoms, dtype=int)
     mol_index = 1
-    for molecule in chemical_system._clusters:
-        for mol_indices in chemical_system._clusters[molecule]:
+    for molecule in chemical_system.clusters:
+        for mol_indices in chemical_system.clusters[molecule]:
             for index in mol_indices:
                 result[index] = mol_index
             mol_index += 1

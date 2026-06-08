@@ -26,8 +26,8 @@ from MDANSE.Chemistry.ChemicalSystem import (
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -152,16 +152,16 @@ class TrajectoryEditor(IJob):
             )
             coords = conf.coordinates[indices]
             if conf.is_periodic:
-                com_conf = PeriodicRealConfiguration(
+                com_conf = PeriodicAbsoluteConfiguration(
                     coords,
                     conf.unit_cell,
                 )
             else:
-                com_conf = RealConfiguration(
+                com_conf = AbsoluteConfiguration(
                     coords,
                 )
             self.grouped_indices = reduce(
-                list.__add__, new_chemical_system._clusters.values(), []
+                list.__add__, new_chemical_system.clusters.values(), []
             )
             coords = com_conf.contiguous_configuration(self.grouped_indices).coordinates
         else:
@@ -169,7 +169,7 @@ class TrajectoryEditor(IJob):
                 self._indices, self._input_chemical_system, new_chemical_system
             )
             self.grouped_indices = reduce(
-                list.__add__, new_chemical_system._clusters.values(), []
+                list.__add__, new_chemical_system.clusters.values(), []
             )
 
         # The output trajectory is opened for writing.
@@ -212,13 +212,13 @@ class TrajectoryEditor(IJob):
             ].astype(np.float64)
 
         if conf.is_periodic:
-            com_conf = PeriodicRealConfiguration(
+            com_conf = PeriodicAbsoluteConfiguration(
                 coords[self._indices],
                 conf.unit_cell,
                 **variables,
             )
         else:
-            com_conf = RealConfiguration(
+            com_conf = AbsoluteConfiguration(
                 coords[self._indices],
                 **variables,
             )

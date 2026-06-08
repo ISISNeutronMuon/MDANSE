@@ -29,8 +29,8 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -224,11 +224,11 @@ class ASE(Converter):
 
         try:
             if self._isPeriodic:
-                real_conf = PeriodicRealConfiguration(coords, unitCell, **variables)
+                real_conf = PeriodicAbsoluteConfiguration(coords, unitCell, **variables)
                 if self._configuration["fold"]["value"]:
                     real_conf.fold_coordinates()
             else:
-                real_conf = RealConfiguration(coords, **variables)
+                real_conf = AbsoluteConfiguration(coords, **variables)
 
         except ValueError:
             self._keep_running = False

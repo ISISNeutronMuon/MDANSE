@@ -22,8 +22,8 @@ from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
@@ -88,8 +88,8 @@ class CenterOfMassesTrajectory(IJob):
         new_element_list = []
         used_up_atoms = set()
         new_chemical_system = ChemicalSystem()
-        for cluster_name in chemical_system._clusters:
-            for cluster in chemical_system._clusters[cluster_name]:
+        for cluster_name in chemical_system.clusters:
+            for cluster in chemical_system.clusters[cluster_name]:
                 if selected_indices and set(cluster) <= selected_indices:
                     if cluster_name not in self.cluster_composition:
                         self.cluster_composition[cluster_name] = [
@@ -114,10 +114,10 @@ class CenterOfMassesTrajectory(IJob):
         )
         self._unique_atoms = np.unique(new_element_list)
         self._molecule_radii = {
-            cluster_name: [] for cluster_name in chemical_system._clusters
+            cluster_name: [] for cluster_name in chemical_system.clusters
         }
         self.selected_indices = selected_indices
-        self.clusters = chemical_system._clusters
+        self.clusters = chemical_system.clusters
         self.masses = {
             atom_index: self.trajectory.get_atom_property(
                 chemical_system.atom_list[atom_index], "atomic_weight"
@@ -170,9 +170,9 @@ class CenterOfMassesTrajectory(IJob):
                 mol_index += 1
 
         if conf.is_periodic:
-            com_conf = PeriodicRealConfiguration(com_coords, conf.unit_cell)
+            com_conf = PeriodicAbsoluteConfiguration(com_coords, conf.unit_cell)
         else:
-            com_conf = RealConfiguration(com_coords)
+            com_conf = AbsoluteConfiguration(com_coords)
 
         if self.configuration["fold"]["value"]:
             com_conf.fold_coordinates()

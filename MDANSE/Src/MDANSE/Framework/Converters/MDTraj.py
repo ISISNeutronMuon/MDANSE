@@ -22,8 +22,8 @@ from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -187,11 +187,11 @@ class MDTraj(Converter):
             A tuple of the job index and None.
         """
         if self.traj.unitcell_vectors is None:
-            conf = RealConfiguration(
+            conf = AbsoluteConfiguration(
                 self.traj.xyz[index],
             )
         else:
-            conf = PeriodicRealConfiguration(
+            conf = PeriodicAbsoluteConfiguration(
                 self.traj.xyz[index],
                 UnitCell(
                     self.traj.unitcell_vectors[index],

@@ -19,9 +19,9 @@ import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicBoxConfiguration,
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    PeriodicFractionalConfiguration,
+    PeriodicAbsoluteConfiguration,
+    AbsoluteConfiguration,
     ConfigurationError,
 )
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
@@ -30,7 +30,7 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 class TestConfiguration(unittest.TestCase):
     """
-    Uses :class: `MDNASE.MolecularDynamics.Configuration.RealConfiguration` to test methods of the abstract base
+    Uses :class: `MDNASE.MolecularDynamics.Configuration.AbsoluteConfiguration` to test methods of the abstract base
     class :class: `MDANSE.MolecularDynamics.Configuration._Configuration`.
     """
 
@@ -49,7 +49,7 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_init_valid(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords, velocities=vels)
+        conf = AbsoluteConfiguration(coords, velocities=vels)
 
         self.assertEqual(["coordinates", "velocities"], list(conf._variables.keys()))
         self.assertTrue(
@@ -64,7 +64,7 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_contains(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords, velocities=vels)
+        conf = AbsoluteConfiguration(coords, velocities=vels)
 
         self.assertTrue("coordinates" in conf)
         self.assertTrue("velocities" in conf)
@@ -73,7 +73,7 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_getitem(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords, velocities=vels)
+        conf = AbsoluteConfiguration(coords, velocities=vels)
 
         self.assertTrue(
             np.allclose(coords, conf["coordinates"]),
@@ -88,7 +88,7 @@ class TestConfiguration(unittest.TestCase):
     def test_dunder_setitem_valid(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         gradients = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords)
+        conf = AbsoluteConfiguration(coords)
 
         conf["gradients"] = gradients
         self.assertTrue(
@@ -97,7 +97,7 @@ class TestConfiguration(unittest.TestCase):
 
     def test_dunder_setitem_invalid_shape(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords)
+        conf = AbsoluteConfiguration(coords)
 
         with self.assertRaises(ValueError):
             conf["velocities"] = np.random.uniform(0, 1, (self._nAtoms + 1, 3))
@@ -107,7 +107,7 @@ class TestConfiguration(unittest.TestCase):
     def test_properties(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         vels = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords, velocities=vels)
+        conf = AbsoluteConfiguration(coords, velocities=vels)
 
         self.assertTrue(
             np.allclose(coords, conf.coordinates), f"\nactual = {conf.coordinates}"
@@ -124,7 +124,7 @@ class TestConfiguration(unittest.TestCase):
 
 
 class TestPeriodicConfiguration(unittest.TestCase):
-    """Uses PeriodicBoxConfiguration to test the methods of its abstract base class, _PeriodicConfiguration."""
+    """Uses PeriodicFractionalConfiguration to test the methods of its abstract base class, _PeriodicConfiguration."""
 
     def setUp(self):
         self.chem_system = ChemicalSystem()
@@ -140,7 +140,7 @@ class TestPeriodicConfiguration(unittest.TestCase):
 
         self.coords = np.random.uniform(0, 1, (self._nAtoms, 3))
         self.unit_cell = UnitCell(np.random.uniform(0, 1, (3, 3)))
-        self.conf = PeriodicBoxConfiguration(
+        self.conf = PeriodicFractionalConfiguration(
             self.coords, self.unit_cell
         )
 
@@ -164,7 +164,7 @@ class TestPeriodicConfiguration(unittest.TestCase):
         self.assertEqual(unit_cell_new, self.conf.unit_cell)
 
 
-class TestPeriodicBoxConfiguration(unittest.TestCase):
+class TestPeriodicFractionalConfiguration(unittest.TestCase):
     def setUp(self):
         self.chem_system = ChemicalSystem()
         self._nAtoms = 4
@@ -189,7 +189,7 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicBoxConfiguration(coords, unit_cell)
+        conf = PeriodicFractionalConfiguration(coords, unit_cell)
 
         self.assertTrue(
             np.allclose(
@@ -205,24 +205,24 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
             f'actual = {conf["coordinates"]}',
         )
 
-    def test_to_box_coordinates(self):
+    def test_to_fractional_coordinates(self):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
-        conf = PeriodicBoxConfiguration(coords, unit_cell)
+        conf = PeriodicFractionalConfiguration(coords, unit_cell)
 
         self.assertTrue(
-            np.allclose(coords, conf.to_box_coordinates()),
-            f"\nactual = {conf.to_box_coordinates()}",
+            np.allclose(coords, conf.to_fractional_coordinates()),
+            f"\nactual = {conf.to_fractional_coordinates()}",
         )
 
-    def test_to_real_coordinates(self):
+    def test_to_absolute_coordinates(self):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
-        conf = PeriodicBoxConfiguration(coords, unit_cell)
+        conf = PeriodicFractionalConfiguration(coords, unit_cell)
 
         self.assertTrue(
             np.allclose(
@@ -232,20 +232,20 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
                     [50.0, 15.0, 24.0],
                     [68.0, 21.0, 33.0],
                 ],
-                conf.to_real_coordinates(),
+                conf.to_absolute_coordinates(),
             ),
-            f"\nactual = {conf.to_real_coordinates()}",
+            f"\nactual = {conf.to_absolute_coordinates()}",
         )
 
-    def test_to_real_configuration(self):
+    def test_to_absolute_configuration(self):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         coords = np.array(([1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]))
-        conf = PeriodicBoxConfiguration(coords, unit_cell)
-        real = conf.to_real_configuration()
+        conf = PeriodicFractionalConfiguration(coords, unit_cell)
+        real = conf.to_absolute_configuration()
 
-        self.assertTrue(isinstance(real, PeriodicRealConfiguration))
+        self.assertTrue(isinstance(real, PeriodicAbsoluteConfiguration))
         self.assertEqual(["coordinates"], list(real._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -264,10 +264,10 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
     def test_contiguous_configuration(self):
         unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
         coords = [[0.1, 0.1, 0.1], [0.3, 0.2, 0.4], [-1.3, -1.1, -1.3], [1.9, 1.5, 1.9]]
-        conf = PeriodicBoxConfiguration(coords, unit_cell)
+        conf = PeriodicFractionalConfiguration(coords, unit_cell)
         contiguous_conf = conf.contiguous_configuration(group_cluster_indices(self.chem_system))
 
-        self.assertTrue(isinstance(contiguous_conf, PeriodicBoxConfiguration))
+        self.assertTrue(isinstance(contiguous_conf, PeriodicFractionalConfiguration))
         self.assertEqual(["coordinates"], list(contiguous_conf._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -283,7 +283,7 @@ class TestPeriodicBoxConfiguration(unittest.TestCase):
         )
 
 
-class TestPeriodicRealConfiguration(unittest.TestCase):
+class TestPeriodicAbsoluteConfiguration(unittest.TestCase):
     def setUp(self):
         self.chem_system = ChemicalSystem()
         self._nAtoms = 4
@@ -306,7 +306,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
             ]
         )
         unit_cell = UnitCell(np.array([[2, 1, 0], [-3, 2, 0], [2, 1, -4]]))
-        conf = PeriodicRealConfiguration(coords, unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
         conf.fold_coordinates()
 
         self.assertTrue(
@@ -323,7 +323,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
             f'actual = {conf["coordinates"]}',
         )
 
-    def test_to_box_coordinates(self):
+    def test_to_fractional_coordinates(self):
         coords = np.array(
             [
                 [14.0, 3.0, 6.0],
@@ -335,15 +335,15 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(coords, unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
 
-        box = conf.to_box_coordinates()
+        box = conf.to_fractional_coordinates()
         self.assertTrue(
             np.allclose([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]], box),
             f"\nactual = {box}",
         )
 
-    def test_to_box_configuration(self):
+    def test_to_fractional_configuration(self):
         coords = np.array(
             [
                 [14.0, 3.0, 6.0],
@@ -355,10 +355,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(coords, unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
 
-        box_conf = conf.to_box_configuration()
-        self.assertTrue(isinstance(box_conf, PeriodicBoxConfiguration))
+        box_conf = conf.to_fractional_configuration()
+        self.assertTrue(isinstance(box_conf, PeriodicFractionalConfiguration))
         self.assertEqual(["coordinates"], list(box_conf._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -368,7 +368,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         )
         self.assertEqual(unit_cell, box_conf._unit_cell)
 
-    def test_to_real_coordinates(self):
+    def test_to_absolute_coordinates(self):
         coords = np.array(
             [
                 [14.0, 3.0, 6.0],
@@ -380,9 +380,9 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(coords, unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
 
-        real = conf.to_real_coordinates()
+        real = conf.to_absolute_coordinates()
         self.assertTrue(np.allclose(coords, real), f"\nactual = {real}")
 
     def test_contiguous_configuration(self):
@@ -397,10 +397,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(coords, unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
 
         result = conf.contiguous_configuration(group_cluster_indices(self.chem_system))
-        self.assertTrue(isinstance(result, PeriodicRealConfiguration))
+        self.assertTrue(isinstance(result, PeriodicAbsoluteConfiguration))
         self.assertEqual(["coordinates"], list(result._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -434,7 +434,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
                 [-1.8123033523559569, -0.3780877590179443, -0.5149454593658447],
             ]
         )
-        conf = PeriodicRealConfiguration(coords.copy(), unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords.copy(), unit_cell)
         result = conf.contiguous_configuration(group_cluster_indices(self.chem_system))
         new_coords = result.coordinates
         assert np.allclose(coords, new_coords)
@@ -451,10 +451,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         unit_cell = UnitCell(
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
-        conf = PeriodicRealConfiguration(coords, unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
 
         result = conf.continuous_configuration([])
-        self.assertTrue(isinstance(result, PeriodicRealConfiguration))
+        self.assertTrue(isinstance(result, PeriodicAbsoluteConfiguration))
         self.assertEqual(["coordinates"], list(result._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -483,10 +483,10 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
             np.array([[1.0, 2.0, 1.0], [2.0, -1.0, 1.0], [3.0, 1.0, 1.0]])
         )
         self.chem_system.add_bonds([(0, 1), (2, 3)])
-        conf = PeriodicRealConfiguration(coords, unit_cell)
+        conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
 
         result = conf.continuous_configuration(self.chem_system._bonds)
-        self.assertTrue(isinstance(result, PeriodicRealConfiguration))
+        self.assertTrue(isinstance(result, PeriodicAbsoluteConfiguration))
         self.assertEqual(["coordinates"], list(result._variables.keys()))
         self.assertTrue(
             np.allclose(
@@ -503,7 +503,7 @@ class TestPeriodicRealConfiguration(unittest.TestCase):
         self.assertEqual(unit_cell, result._unit_cell)
 
 
-class TestRealConfiguration(unittest.TestCase):
+class TestAbsoluteConfiguration(unittest.TestCase):
     def setUp(self):
         self.chem_system = ChemicalSystem()
         self._nAtoms = 4
@@ -518,10 +518,10 @@ class TestRealConfiguration(unittest.TestCase):
 
     def test_clone_valid_no_input(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coordinates)
+        conf = AbsoluteConfiguration(coordinates)
         clone = conf.clone()
 
-        self.assertTrue(isinstance(clone, RealConfiguration))
+        self.assertTrue(isinstance(clone, AbsoluteConfiguration))
         self.assertEqual(["coordinates"], list(clone._variables.keys()))
         self.assertTrue(
             np.allclose(coordinates, clone["coordinates"]),
@@ -530,10 +530,10 @@ class TestRealConfiguration(unittest.TestCase):
 
     def test_clone_valid_chemical_system_provided(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coordinates)
+        conf = AbsoluteConfiguration(coordinates)
         clone = conf.clone()
 
-        self.assertTrue(isinstance(clone, RealConfiguration))
+        self.assertTrue(isinstance(clone, AbsoluteConfiguration))
         self.assertEqual(["coordinates"], list(clone._variables.keys()))
         self.assertTrue(
             np.allclose(coordinates, clone["coordinates"]),
@@ -542,7 +542,7 @@ class TestRealConfiguration(unittest.TestCase):
 
     def test_fold_coordinates(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coordinates)
+        conf = AbsoluteConfiguration(coordinates)
         conf.fold_coordinates()
 
         self.assertTrue(
@@ -550,21 +550,21 @@ class TestRealConfiguration(unittest.TestCase):
             f'\nactual = {conf["coordinates"]}',
         )
 
-    def test_to_real_coordinates(self):
+    def test_to_absolute_coordinates(self):
         coordinates = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coordinates)
-        real = conf.to_real_coordinates()
+        conf = AbsoluteConfiguration(coordinates)
+        real = conf.to_absolute_coordinates()
 
         self.assertTrue(np.allclose(coordinates, real), f"\nactual = {real}")
 
     def test_contiguous_configuration(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords)
+        conf = AbsoluteConfiguration(coords)
 
         self.assertEqual(conf, conf.contiguous_configuration())
 
     def test_continuous_configuration(self):
         coords = np.random.uniform(0, 1, (self._nAtoms, 3))
-        conf = RealConfiguration(coords)
+        conf = AbsoluteConfiguration(coords)
 
         self.assertEqual(conf, conf.continuous_configuration())

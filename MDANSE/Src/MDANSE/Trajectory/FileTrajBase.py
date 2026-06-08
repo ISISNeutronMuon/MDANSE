@@ -231,7 +231,7 @@ class TrajectoryFile(ABC):
 
         return self.variable(variable)[slc, index, :].astype(np.float64)
 
-    def to_real_coordinates(
+    def to_absolute_coordinates(
         self,
         box_coordinates: FloatArray,
         first: int = 0,

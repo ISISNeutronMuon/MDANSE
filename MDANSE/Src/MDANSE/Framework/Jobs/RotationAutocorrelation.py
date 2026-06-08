@@ -71,7 +71,7 @@ class RotationAutocorrelation(IJob):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        molecules = self.trajectory.chemical_system._clusters[
+        molecules = self.trajectory.chemical_system.clusters[
             self.configuration["molecule"]["value"]
         ]
 
