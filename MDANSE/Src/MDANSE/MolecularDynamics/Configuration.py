@@ -18,11 +18,12 @@ from __future__ import annotations
 import abc
 import copy
 from collections.abc import Sequence
-from functools import reduce
 from typing import TYPE_CHECKING, Any
 
+import more_itertools
 import networkx as nx
 import numpy as np
+import typing_extensions
 
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray, IntArray
@@ -200,7 +201,7 @@ def continuous_coordinates(
     while len(atom_pool) > 0:
         last_atom = atom_pool.pop()
         temp_dict = nx.dfs_successors(total_graph, last_atom)
-        others = reduce(list.__add__, temp_dict.values(), [])
+        others = list(more_itertools.flatten(temp_dict.values()))
         for atom in others:
             atom_pool.pop(atom_pool.index(atom))
         segment = [last_atom, *others]
@@ -292,7 +293,6 @@ class _Configuration(metaclass=abc.ABCMeta):
     is_periodic: bool
 
     def __init__(self, coords: ArrayLike, **variables):
-
         self._variables = {}
 
         self["coordinates"] = np.array(coords, dtype=float)
@@ -417,7 +417,7 @@ class _PeriodicConfiguration(_Configuration):
             raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
-    def clone(self) -> _PeriodicConfiguration:
+    def clone(self) -> typing_extensions.Self:
         """Return a deep copy of this configuration."""
 
         unit_cell = copy.deepcopy(self._unit_cell)

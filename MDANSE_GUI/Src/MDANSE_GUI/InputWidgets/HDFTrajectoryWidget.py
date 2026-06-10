@@ -162,12 +162,11 @@ class HDFTrajectoryWidget(WidgetBase):
         else:
             self._label.setToolTip(self._tooltip)
         hdf5_driver = self._driver_widget.currentText()
-        hdf5_driver = None if hdf5_driver == "default" else hdf5_driver
         rdcc = {}
         for name, widget in self._extra_widgets.items():
             rdcc[name] = widget.value() if widget.isEnabled() else None
         return (
-            result,
+            str(result),
             hdf5_driver,
             rdcc["rdcc_nbytes"] * 1024**2 if rdcc["rdcc_nbytes"] is not None else None,
             rdcc["rdcc_nslots"],

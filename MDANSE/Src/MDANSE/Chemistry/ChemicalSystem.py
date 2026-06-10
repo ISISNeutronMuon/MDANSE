@@ -19,11 +19,11 @@ import copy
 import itertools as it
 from collections import defaultdict
 from collections.abc import Iterable
-from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, SupportsInt
 
 import h5py
+import more_itertools
 import networkx as nx
 import numpy as np
 from more_itertools import padded
@@ -440,7 +440,7 @@ class ChemicalSystem:
         while len(atom_pool) > 0:
             last_atom = atom_pool.pop()
             temp_dict = nx.dfs_successors(total_graph, last_atom)
-            others = reduce(list.__iadd__, temp_dict.values(), [])
+            others = list(more_itertools.flatten(temp_dict.values()))
             for atom in others:
                 atom_pool.remove(atom)
             molecule = [last_atom, *others]

@@ -15,8 +15,7 @@
 #
 from __future__ import annotations
 
-from functools import reduce
-
+import more_itertools
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import (
@@ -160,16 +159,17 @@ class TrajectoryEditor(IJob):
                 com_conf = AbsoluteConfiguration(
                     coords,
                 )
-            self.grouped_indices = list(more_itertools.flatten(new_chemical_system.clusters.values()))
+            self.grouped_indices = list(
+                more_itertools.flatten(new_chemical_system.clusters.values())
+            )
             coords = com_conf.contiguous_configuration(self.grouped_indices).coordinates
         else:
             assign_molecules_after_atom_selection(
                 self._indices, self._input_chemical_system, new_chemical_system
             )
-            self.grouped_indices = reduce(
-                list.__add__, new_chemical_system.clusters.values(), []
+            self.grouped_indices = list(
+                more_itertools.flatten(new_chemical_system.clusters.values())
             )
-
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],

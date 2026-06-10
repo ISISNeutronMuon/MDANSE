@@ -17,11 +17,11 @@ from __future__ import annotations
 
 from collections import ChainMap
 from enum import Enum
-from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import h5py
+import more_itertools
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -135,9 +135,10 @@ class H5MDTrajectory(TrajectoryFile):
         self,
         h5_filename: Path | str,
         hdf5_driver: str | None = None,
+        *,
         rdcc_nbytes: int | None = None,
-        rdcc_w0: float | None = None,
         rdcc_nslots: int | None = None,
+        rdcc_w0: float | None = None,
         fast_load: bool = False,
     ):
         """Constructor.
@@ -158,8 +159,8 @@ class H5MDTrajectory(TrajectoryFile):
             "r",
             driver=hdf5_driver,
             rdcc_nbytes=rdcc_nbytes,
-            rdcc_w0=rdcc_w0,
             rdcc_nslots=rdcc_nslots,
+            rdcc_w0=rdcc_w0,
         )
 
         particle_types = self._h5_file["/particles/all/species"]
@@ -204,8 +205,8 @@ class H5MDTrajectory(TrajectoryFile):
 
         if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
             configuration = self.configuration(0)
-            grouped_indices = reduce(
-                list.__add__, self._chemical_system.clusters.values(), []
+            grouped_indices = list(
+                more_itertools.flatten(self._chemical_system.clusters.values())
             )
             contiguous_configuration = configuration.contiguous_configuration(
                 grouped_indices

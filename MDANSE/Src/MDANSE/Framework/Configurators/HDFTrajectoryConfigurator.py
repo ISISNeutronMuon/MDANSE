@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import bisect
 from pathlib import Path
 
 import h5py
@@ -23,7 +24,7 @@ import numpy as np
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
-from MDANSE.MolecularDynamics.Trajectory import Trajectory, check_hdf5_driver
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 TIME_STEP_TOL = 1e-8
 DATASET_CACHE_SIZE = 2**24
@@ -98,9 +99,7 @@ def next_prime(nchunks: int) -> int:
     int
         A prime number larger than the input number.
     """
-    import bisect
-
-    ip = bisect.bisect_right(nchunks, PRIMES)
+    ip = bisect.bisect_right(PRIMES, nchunks)
     return nchunks if ip == len(PRIMES) else PRIMES[ip]
 
 
@@ -160,12 +159,12 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
                 driver = None
                 rdcc_nbytes, rdcc_nslots = guess_hdf5_trajectory_parameters(value)
                 rdcc_w0 = None
-            case (str(), str(), int(), int(), int()):
+            case (str() | Path(), str(), int(), int(), float()):
                 file_name, driver, rdcc_nbytes, rdcc_nslots, rdcc_w0 = value
                 driver = driver if driver in HDF5_DRIVERS else None
             case _:
                 self.error_status = f"Invalid value {value!r}"
-                return 
+                return
 
         self["driver"] = driver
         self["rdcc_nbytes"] = rdcc_nbytes

@@ -18,7 +18,6 @@ from MDANSE.util_types import FloatArray
 
 import copy
 import html
-import math
 import os
 from collections import Counter, defaultdict
 from enum import auto
@@ -177,9 +176,10 @@ class Trajectory:
                  filename,
                  trajectory_format: ValidFormats | None = None,
                  hdf5_driver: str | None = None,
+                 *,
                  rdcc_nbytes: int | None = None,
-                 rdcc_w0: float | None = None,
                  rdcc_nslots: int | None = None,
+                 rdcc_w0: float | None = None,
                  fast_load: bool = False):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
@@ -192,9 +192,9 @@ class Trajectory:
 
         self._trajectory = self.open_trajectory(self._format,
                                                     self._hdf5_driver,
-                                                    self._rdcc_nbytes,
-                                                    self._rdcc_w0,
-                                                    self._rdcc_nslots,
+                                                    rdcc_nbytes=self._rdcc_nbytes,
+                                                    rdcc_nslots=self._rdcc_nslots,
+                                                    rdcc_w0=self._rdcc_w0,
                                                     fast_load = fast_load
                                                     )
         self._min_span = None
@@ -469,9 +469,10 @@ class Trajectory:
     def open_trajectory(self,
                         trajectory_format,
                         hdf5_driver,
-                        rdcc_nbytes,
-                        rdcc_w0,
-                        rdcc_nslots,
+                        *,
+                        rdcc_nbytes: int | None = None,
+                        rdcc_nslots: int | None = None,
+                        rdcc_w0: float | None = None,
                         fast_load: bool = False
                         ):
         trajectory_class = available_formats[trajectory_format]
@@ -510,7 +511,12 @@ class Trajectory:
 
     def __setstate__(self, state):
         self.__dict__ = state
-        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver, self._rdcc_nbytes, self._rdcc_w0, self._rdcc_nslots, fast_load=True)
+        self._trajectory = self.open_trajectory(self._format,
+                                                self._hdf5_driver,
+                                                rdcc_nbytes=self._rdcc_nbytes,
+                                                rdcc_nslots=self._rdcc_nslots,
+                                                rdcc_w0=self._rdcc_w0,
+                                                fast_load=True)
 
     def __len__(self):
         return len(self._trajectory)
@@ -1026,10 +1032,12 @@ class TrajectoryWriter:
         chemical_system: ChemicalSystem,
         n_steps,
         selected_atoms=None,
+        *,
         positions_dtype=np.float64,
         chunking_limit=(1,128),
         compression="none",
         initial_charges=None,
+        meta_block_size: int = 65536
     ):
         """Constructor.
 
@@ -1044,7 +1052,7 @@ class TrajectoryWriter:
         """
         self._h5_filename = Path(h5_filename)
         PLATFORM.create_directory(self._h5_filename.parent)
-        self._h5_file = h5py.File(self._h5_filename, "w", meta_block_size=65536)
+        self._h5_file = h5py.File(self._h5_filename, "w", meta_block_size=meta_block_size)
 
         self._chemical_system = chemical_system
         self._last_configuration = None

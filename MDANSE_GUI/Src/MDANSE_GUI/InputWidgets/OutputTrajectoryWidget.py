@@ -69,8 +69,9 @@ class OutputTrajectoryWidget(WidgetBase):
         self.chunk_atom_box = QSpinBox(self._base)
         self.chunk_frame_box = QSpinBox(self._base)
         for typ, chunk_box in zip(
-           ("atoms", "frames"),
-           (self.chunk_atom_box, self.chunk_frame_box)
+            ("atoms", "frames"),
+            (self.chunk_atom_box, self.chunk_frame_box),
+            strict=True,
         ):
             chunk_box.setMinimum(1)
             chunk_box.setMaximum(0xFFFF)
