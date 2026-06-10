@@ -68,13 +68,16 @@ class OutputTrajectoryWidget(WidgetBase):
         self.dtype_box.setCurrentText("float64")
         self.chunk_atom_box = QSpinBox(self._base)
         self.chunk_frame_box = QSpinBox(self._base)
-        for index, chunk_box in enumerate((self.chunk_atom_box, self.chunk_frame_box)):
+        for typ, chunk_box in zip(
+           ("atoms", "frames"),
+           (self.chunk_atom_box, self.chunk_frame_box)
+        ):
             chunk_box.setMinimum(1)
             chunk_box.setMaximum(0xFFFF)
-            chunk_box.setValue(1 if index else 128)
-            chunk_box.setSingleStep(1 if index else 32)
+            chunk_box.setValue(1 if typ == "frames" else 128)
+            chunk_box.setSingleStep(1 if typ == "frames" else 32)
             chunk_box.setToolTip(
-                f"Specifies the number of {'frames' if index else 'atoms'} in a single chunk of the HDF5 file."
+                f"Specifies the number of {typ} in a single chunk of the HDF5 file."
                 "Affects the performance of reading and writing the trajectory."
             )
         self.compression_box = QComboBox(self._base)

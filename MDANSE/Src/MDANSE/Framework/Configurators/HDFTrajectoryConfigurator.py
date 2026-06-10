@@ -98,10 +98,10 @@ def next_prime(nchunks: int) -> int:
     int
         A prime number larger than the input number.
     """
-    for prime in PRIMES:
-        if prime > nchunks:
-            return prime
-    return nchunks
+    import bisect
+
+    ip = bisect.bisect_right(nchunks, PRIMES)
+    return nchunks if ip == len(PRIMES) else PRIMES[ip]
 
 
 def guess_hdf5_trajectory_parameters(
@@ -154,17 +154,18 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self.error_status = "OK"
         self.warning_status = ""
 
-        if isinstance(value, (str, Path)):
-            file_name = value
-            driver = None
-            rdcc_nbytes, rdcc_nslots = guess_hdf5_trajectory_parameters(value)
-            rdcc_w0 = None
-        else:
-            file_name = value[0]
-            driver = value[1] if value[1] in HDF5_DRIVERS else None
-            rdcc_nbytes = value[2]
-            rdcc_nslots = value[3]
-            rdcc_w0 = value[4]
+        match value:
+            case str() | Path():
+                file_name = value
+                driver = None
+                rdcc_nbytes, rdcc_nslots = guess_hdf5_trajectory_parameters(value)
+                rdcc_w0 = None
+            case (str(), str(), int(), int(), int()):
+                file_name, driver, rdcc_nbytes, rdcc_nslots, rdcc_w0 = value
+                driver = driver if driver in HDF5_DRIVERS else None
+            case _:
+                self.error_status = f"Invalid value {value!r}"
+                return 
 
         self["driver"] = driver
         self["rdcc_nbytes"] = rdcc_nbytes

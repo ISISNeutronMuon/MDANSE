@@ -651,7 +651,7 @@ class Trajectory:
         Returns
         -------
         ndarray
-            2D array containing the real coordinates converted from box coordinates.
+            2D array containing the absolute coordinates converted from fractionals.
 
         """
         return self._trajectory.to_absolute_coordinates(box_coordinates, first, last, step)

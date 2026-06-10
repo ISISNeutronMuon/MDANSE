@@ -424,7 +424,7 @@ class _PeriodicConfiguration(_Configuration):
         variables = copy.deepcopy(self.variables)
         coords = variables.pop("coordinates")
 
-        return self.__class__(coords, unit_cell, **variables)
+        return type(self)(coords, unit_cell, **variables)
 
     def fold_coordinates(self):
         """Fold the coordinates into simulation box."""
