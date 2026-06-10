@@ -708,6 +708,7 @@ class Trajectory:
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
+        reference: FloatArray | None = None,
     ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
@@ -736,6 +737,7 @@ class Trajectory:
             last=last,
             step=step,
             box_coordinates=box_coordinates,
+            reference = reference,
         )
 
     def read_configuration_trajectory(

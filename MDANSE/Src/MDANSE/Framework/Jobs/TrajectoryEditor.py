@@ -27,9 +27,11 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import (
     AbsoluteConfiguration,
     PeriodicAbsoluteConfiguration,
+    contiguous_coordinates_absolute,
 )
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -105,14 +107,21 @@ class TrajectoryEditor(IJob):
             "format": "MDTFormat",
         },
     )
+    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
         """
         super().initialize()
+        n_proc = self.configuration["running_mode"].get("slots", 1)
 
-        self.numberOfSteps = self.configuration["frames"]["number"]
+        self.grouped_indices = group_atom_indices(
+            self.trajectory, n_proc=n_proc, memory_scale_factor=8
+        )
+        self.numberOfSteps = len(self.grouped_indices)
+
+        self.number_of_frames = self.configuration["frames"]["number"]
         self._input_trajectory = self.trajectory
         self._input_chemical_system = self.configuration["trajectory"][
             "instance"
@@ -146,35 +155,32 @@ class TrajectoryEditor(IJob):
             )
             conn.find_bonds(tolerance=tolerance)
             conn.add_bond_information(new_chemical_system)
-            conf = self.trajectory.configuration(
-                self.configuration["frames"]["value"][0]
-            )
-            coords = conf.coordinates[indices]
-            if conf.is_periodic:
-                com_conf = PeriodicAbsoluteConfiguration(
-                    coords,
-                    conf.unit_cell,
-                )
-            else:
-                com_conf = AbsoluteConfiguration(
-                    coords,
-                )
-            self.grouped_indices = list(
+            self.cluster_indices = list(
                 more_itertools.flatten(new_chemical_system.clusters.values())
             )
-            coords = com_conf.contiguous_configuration(self.grouped_indices).coordinates
         else:
             assign_molecules_after_atom_selection(
                 self._indices, self._input_chemical_system, new_chemical_system
             )
-            self.grouped_indices = list(
+            self.cluster_indices = list(
                 more_itertools.flatten(new_chemical_system.clusters.values())
             )
+        conf = self.trajectory.configuration(self.configuration["frames"]["value"][0])
+        if conf.is_periodic:
+            self.ref_coords = contiguous_coordinates_absolute(
+                conf.coordinates,
+                cell=conf._unit_cell.direct,
+                rcell=conf._unit_cell.inverse,
+                indices=self.cluster_indices,
+            )
+        else:
+            self.ref_coords = conf.coordinates
+
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
             new_chemical_system,
-            self.numberOfSteps,
+            self.number_of_frames,
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
@@ -191,6 +197,33 @@ class TrajectoryEditor(IJob):
             #. index (int): The index of the step.
             #. None
         """
+        atom_index_group = self.grouped_indices[index]
+        n_atoms = len(atom_index_group)
+
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
+            first=self.configuration["frames"]["first"],
+            last=self.configuration["frames"]["last"] + 1,
+            step=self.configuration["frames"]["step"],
+            reference=self.ref_coords[atom_index_group],
+        )
+        variables = {}
+        if self.trajectory.has_variable("velocities"):
+            velocity_series = self.trajectory.read_configuration_trajectory(
+                atom_index_group,
+                first=self.configuration["frames"]["first"],
+                last=self.configuration["frames"]["last"] + 1,
+                step=self.configuration["frames"]["step"],
+                variable="velocities",
+            )
+        if self.trajectory.has_variable("gradients"):
+            gradient_series = self.trajectory.read_configuration_trajectory(
+                atom_index_group,
+                first=self.configuration["frames"]["first"],
+                last=self.configuration["frames"]["last"] + 1,
+                step=self.configuration["frames"]["step"],
+                variable="gradients",
+            )
 
         # get the Frame index
         frameIndex = self.configuration["frames"]["value"][index]

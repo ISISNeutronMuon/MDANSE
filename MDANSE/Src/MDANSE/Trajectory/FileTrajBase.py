@@ -320,6 +320,7 @@ class TrajectoryFile(ABC):
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
+        reference: FloatArray | None = None,
     ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
@@ -356,6 +357,7 @@ class TrajectoryFile(ABC):
             direct_cells,
             inverse_cells,
             box_coordinates=box_coordinates,
+            reference=reference,
         )
 
     @property
