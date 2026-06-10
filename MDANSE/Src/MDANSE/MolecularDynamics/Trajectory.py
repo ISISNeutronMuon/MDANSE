@@ -178,8 +178,8 @@ class Trajectory:
                  hdf5_driver: str | None = None,
                  *,
                  rdcc_nbytes: int | None = None,
-                 rdcc_w0: float | None = None,
                  rdcc_nslots: int | None = None,
+                 rdcc_w0: float | None = None,
                  fast_load: bool = False):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
