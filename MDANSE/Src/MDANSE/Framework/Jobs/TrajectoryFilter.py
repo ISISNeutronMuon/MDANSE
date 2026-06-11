@@ -208,9 +208,11 @@ class TrajectoryFilter(IJob):
             self.configuration["output_files"]["file"],
             output_chemical_system,
             self.configuration["frames"]["number"],
-            None,
+            selected_atoms=None,
             positions_dtype=self.configuration["output_files"]["dtype"],
             compression=self.configuration["output_files"]["compression"],
+            chunking_limit=self.configuration["output_files"]["chunk_size"],
+            meta_block_size=self.configuration["output_files"]["meta_block_size"],
         )
 
         # Write trajectory

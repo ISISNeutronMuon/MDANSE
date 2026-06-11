@@ -66,8 +66,13 @@ class OutputTrajectoryConfigurator(IConfigurator):
     def configure(self, value: tuple):
         self._original_input = value
 
-        root, dtype, chunk_size, compression, logs = value
+        root, dtype, chunk_size, compression, logs = value[:5]
         root = Path(root)
+
+        try:
+            meta_block_size = int(value[5])
+        except Exception:
+            meta_block_size = 4096
 
         if logs not in self.log_options:
             self.error_status = "log level option not recognised"
@@ -112,4 +117,5 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self["chunk_size"] = self._chunk_limit
         self["log_level"] = logs
         self["write_logs"] = logs != "no logs"
+        self["meta_block_size"] = meta_block_size
         self.error_status = "OK"

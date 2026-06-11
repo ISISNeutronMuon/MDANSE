@@ -1052,7 +1052,10 @@ class TrajectoryWriter:
         """
         self._h5_filename = Path(h5_filename)
         PLATFORM.create_directory(self._h5_filename.parent)
-        self._h5_file = h5py.File(self._h5_filename, "w", meta_block_size=meta_block_size)
+        self._h5_file = h5py.File(self._h5_filename,
+                                  "w",
+                                  meta_block_size=meta_block_size,
+                                  libver=('earliest', 'v114'),)
 
         self._chemical_system = chemical_system
         self._last_configuration = None
