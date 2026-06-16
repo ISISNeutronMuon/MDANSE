@@ -69,7 +69,10 @@ class PropertyWidget(QWidget):
         self.active = False
         self.viewer.frame_changed.connect(self.update_table)
         self._atom_props = {}
+        self._raw_props = {}
+        self._frame_props = {}
         self._trajectory_props = {}
+        self.curr_selection = {}
 
     @Slot(int)
     def _active(self, index: int):
