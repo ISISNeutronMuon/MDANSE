@@ -15,9 +15,9 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Configurators.MDTrajAnalysisConfigurator import MDTRAJ_JOBS
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.mdtraj.trajectory import build_mdtraj_topology, build_mdtraj_trajectory
-from MDANSE.mdtraj.analysis import mdtraj_initial_params
+from MDANSE.mdtraj.trajectory import build_mdtraj_trajectory
 
 
 @IJob.register("MDTrajAnalysis")
@@ -39,7 +39,7 @@ class MDTrajAnalysis(IJob):
     settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})
     settings["frames"] = (
-        "CorrelationFramesConfigurator",
+        "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
@@ -89,7 +89,8 @@ class MDTrajAnalysis(IJob):
         mdtraj_trajectory = build_mdtraj_trajectory(
             self.trajectory, frame_slice=self.frame_slice
         )
-        result = self.analysis_function(
+        function = MDTRAJ_JOBS[self.analysis_function]
+        result = function(
             mdtraj_trajectory, *self.analysis_args, **self.analysis_kwargs
         )
         return index, result

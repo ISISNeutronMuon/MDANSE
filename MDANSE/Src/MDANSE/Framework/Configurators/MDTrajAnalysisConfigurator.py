@@ -89,6 +89,7 @@ class MDTrajAnalysisConfigurator(IConfigurator):
 
             self["args"] = arguments
             self["kwargs"] = keyword_parameters
+            self["function"] = function_name
 
         except Exception as err:
             self.error_status = str(err)

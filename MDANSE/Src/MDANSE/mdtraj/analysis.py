@@ -17,12 +17,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from inspect import getfullargspec
+from typing import Any
 
 
-def mdtraj_initial_params(mdtraj_analysis: Callable):
+def mdtraj_initial_params(
+    mdtraj_analysis: Callable,
+) -> tuple[list[str], list[tuple[str, Any]]]:
     full_arg_spec = getfullargspec(mdtraj_analysis)
     param_names = full_arg_spec.args
-    default_vals = full_arg_spec.defaults
+    default_vals = list(full_arg_spec.defaults)
     pars_with_vals = []
     while default_vals:
         pars_with_vals.append((param_names.pop(), default_vals.pop()))
