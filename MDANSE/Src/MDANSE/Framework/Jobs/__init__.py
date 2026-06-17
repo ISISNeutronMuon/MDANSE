@@ -50,6 +50,7 @@ from .GaussianDynamicIncoherentStructureFactor import (
 from .IJob import IJob as IJob
 from .Infrared import Infrared as Infrared
 from .JobStatus import JobStatus as JobStatus
+from .MDTrajAnalysis import MDTrajAnalysis as MDTrajAnalysis
 from .MeanSquareDisplacement import MeanSquareDisplacement as MeanSquareDisplacement
 from .MolecularTrace import MolecularTrace as MolecularTrace
 from .NeutronDynamicTotalStructureFactor import (
