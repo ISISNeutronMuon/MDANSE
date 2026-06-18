@@ -30,10 +30,10 @@ MDTRAJ_JOBS = {
 
 @IConfigurator.register("MDTrajAnalysisConfigurator")
 class MDTrajAnalysisConfigurator(IConfigurator):
-    """ """
+    """Chooses an analysis run implemented in MDTraj and sets its input parameters."""
 
     _default = (
-        "Hydrogen Bonds: Baker-Hubbard",
+        "Hydrogen Bonds: Wernet-Nilsson",
         {},
     )
     label = "Analysis from MDTraj"

@@ -28,6 +28,18 @@ if TYPE_CHECKING:
 
 
 def build_mdtraj_topology(mdanse_traj: Trajectory) -> mdtraj_topology:
+    """Construct an MDTraj Topology object from an MDANSE trajectory.
+
+    Parameters
+    ----------
+    mdanse_traj : Trajectory
+        An MDANSE trajectory instance.
+
+    Returns
+    -------
+    mdtraj_topology
+        mdtraj.Topology instance.
+    """
     new_topology = mdtraj_topology()
     chain = new_topology.add_chain("ALL")
     default_residue = new_topology.add_residue("NONE", chain)
@@ -66,6 +78,22 @@ def build_mdtraj_topology(mdanse_traj: Trajectory) -> mdtraj_topology:
 def build_mdtraj_trajectory(
     mdanse_traj: Trajectory, frame_slice: tuple[int, int, int] | None = None
 ) -> mdtraj_trajectory:
+    """Build an MDTraj Trajectory from an MDANSE trajectory.
+
+    The output trajectory can be used as input in MDTraj analysis runs.
+
+    Parameters
+    ----------
+    mdanse_traj : Trajectory
+        An MDANSE Trajectory instance.
+    frame_slice : tuple[int, int, int] | None, optional
+        Frame selection as a (start, stop, step) index tuple, by default None
+
+    Returns
+    -------
+    mdtraj_trajectory
+        An mdtraj.Trajectory instance.
+    """
     new_topology = build_mdtraj_topology(mdanse_traj)
     unit_cell_abc = []
     unit_cell_angles = []

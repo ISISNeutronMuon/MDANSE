@@ -129,7 +129,7 @@ class MDTrajModel(QStandardItemModel):
         return args, kwargs
 
     def parse_vtype(self, vtype: str, value: str, vname: str):
-        """Validate the inputs of a type accepting multiple numbers."""
+        """Cast the input value to the type specified by the vtype keyword."""
         if vtype == "float":
             return float(value)
         elif vtype == "int":

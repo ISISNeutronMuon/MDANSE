@@ -23,8 +23,15 @@ from MDANSE.mdtraj.trajectory import build_mdtraj_trajectory
 
 @IJob.register("MDTrajAnalysis")
 class MDTrajAnalysis(IJob):
-    """This wrapper allows you to run different analysis types
+    """Run an MDTraj analysis on an MDANSE trajectory.
+
+    This wrapper allows you to run different analysis types
     implemented in MDTraj, but using an MDANSE trajectory as input.
+
+    At the moment the bottleneck in implementing MDTraj analysis runs in MDANSE
+    is the need to interpret the analysis results and write them out to a file.
+    This has to be done individually for each analysis type, limiting the list
+    of currently available MDTraj analysis types.
     """
 
     label = "MDTraj Analysis"
