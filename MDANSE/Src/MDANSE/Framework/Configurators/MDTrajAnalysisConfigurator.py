@@ -78,9 +78,9 @@ class MDTrajAnalysisConfigurator(IConfigurator):
             args, kwargs = mdtraj_initial_params(function)
             args.remove("traj")
 
-            unknown_keywords = set(keyword_parameters) - set(kwargs)
+            unknown_keywords = set(keyword_parameters) - {item[0] for item in kwargs}
             if len(unknown_keywords):
-                self.warning_status = f"Parameters {unknown_keywords} were give, but are not used by {function_name}"
+                self.warning_status = f"Parameters {unknown_keywords} were given, but are not used by {function_name}"
 
             if len(args) != len(arguments):
                 self.warning_status = (

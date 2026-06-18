@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import copy
 
-from more_itertools import first
+from more_itertools import first, nth
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
@@ -89,7 +89,7 @@ class MDTrajModel(QStandardItemModel):
                 it.setData(value, role=Qt.ItemDataRole.ToolTipRole)
             self.appendRow(items)
         for name, value in kwargs:
-            vtype = type(value)
+            vtype = type(value).__name__
             items = [QStandardItem(str(x)) for x in [name, value, vtype]]
             for it in items[0::2]:
                 it.setEditable(False)
@@ -187,6 +187,7 @@ class MDTrajAnalysisWidget(WidgetBase):
         self._view.setSizeAdjustPolicy(
             QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
         )
+        self._selector.setCurrentText(nth(MDTRAJ_JOBS, 1))
         self._selector.setCurrentText(first(MDTRAJ_JOBS))
 
     def get_widget_value(self):

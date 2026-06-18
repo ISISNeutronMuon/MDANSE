@@ -19,22 +19,47 @@ from typing import TYPE_CHECKING
 
 from mdtraj import Topology as mdtraj_topology
 from mdtraj import Trajectory as mdtraj_trajectory
+from mdtraj.core.element import Element
+
+from MDANSE.MolecularDynamics.Connectivity import Connectivity
 
 if TYPE_CHECKING:
-    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def build_mdtraj_topology(mdanse_traj: Trajectory) -> mdtraj_topology:
     new_topology = mdtraj_topology()
-    elements = mdanse_traj.atom_types
-    names = mdanse_traj.atom_names
-    residues = [""] * len(elements)
-    for label, indices in mdanse_traj.chemical_system._labels.items():
-        for index in indices:
-            residues[index] = label
-    for name, element, residue in zip(names, elements, residues, strict=True):
-        new_topology.add_atom(name, element, residue)
+    chain = new_topology.add_chain("ALL")
+    default_residue = new_topology.add_residue("NONE", chain)
+    selected_indices = mdanse_traj.atom_indices
+    mdtraj_elements = {
+        str_symbol: Element.getBySymbol(str_symbol)
+        for str_symbol in mdanse_traj.unique_elements
+    }
+    elements = [mdanse_traj.atom_types[index] for index in selected_indices]
+    names = [mdanse_traj.atom_names[index] for index in selected_indices]
+    residues = [default_residue] * len(elements)
+    for label, mol_indices in mdanse_traj.chemical_system._labels.items():
+        res = new_topology.add_residue(label, chain)
+        for index in mol_indices:
+            if index in selected_indices:
+                residues[index] = res
+    mdtraj_atoms = {}
+    for index, name, element, residue in zip(
+        selected_indices, names, elements, residues, strict=True
+    ):
+        mdtraj_atoms[index] = new_topology.add_atom(
+            name, mdtraj_elements[element], residue
+        )
+    if mdanse_traj.chemical_system._bonds:
+        bond_list = mdanse_traj.chemical_system._bonds
+    else:
+        conn = Connectivity(mdanse_traj, selection=mdanse_traj.atom_indices)
+        conn.find_bonds([0])
+        bond_list = conn._unique_bonds
+    for ind1, ind2 in bond_list:
+        if ind1 in selected_indices and ind2 in selected_indices:
+            new_topology.add_bond(mdtraj_atoms[ind1], mdtraj_atoms[ind2])
     return new_topology
 
 
@@ -45,7 +70,7 @@ def build_mdtraj_trajectory(
     unit_cell_abc = []
     unit_cell_angles = []
     the_slice = (
-        slice()
+        slice(None, None, None)
         if frame_slice is None
         else slice(frame_slice[0], frame_slice[1], frame_slice[2])
     )
@@ -55,11 +80,11 @@ def build_mdtraj_trajectory(
         else range(frame_slice[0], frame_slice[1], frame_slice[2])
     )
     for frame in the_range:
-        abc, angles = mdanse_traj.unit_cell(frame).abc_and_angles()
-        unit_cell_abc.append(abc)
-        unit_cell_angles.append(angles)
+        a, b, c, alpha, beta, gamma = mdanse_traj.unit_cell(frame).abc_and_angles
+        unit_cell_abc.append((a, b, c))
+        unit_cell_angles.append((alpha, beta, gamma))
     new_instance = mdtraj_trajectory(
-        mdanse_traj.coordinates(the_slice),
+        mdanse_traj.coordinates(the_slice, mdanse_traj.atom_indices),
         new_topology,
         time=mdanse_traj.time()[the_slice],
         unitcell_angles=unit_cell_angles,
