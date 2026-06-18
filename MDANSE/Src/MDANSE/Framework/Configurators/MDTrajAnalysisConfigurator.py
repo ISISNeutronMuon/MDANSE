@@ -23,8 +23,8 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.mdtraj.analysis import mdtraj_initial_params
 
 MDTRAJ_JOBS = {
-    "Hydrogen Bonds: Baker-Hubbard": baker_hubbard,
     "Hydrogen Bonds: Wernet-Nilsson": wernet_nilsson,
+    # "Hydrogen Bonds: Baker-Hubbard": baker_hubbard,
 }
 
 

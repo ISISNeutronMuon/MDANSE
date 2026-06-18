@@ -15,9 +15,20 @@
 #
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Callable
 from inspect import getfullargspec
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+
+from MDANSE.Framework.AtomGrouping.grouping import pair_labels
+
+if TYPE_CHECKING:
+    import numpy.typing as npt
+
+    from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def mdtraj_initial_params(
@@ -30,3 +41,71 @@ def mdtraj_initial_params(
     while default_vals:
         pars_with_vals.append((param_names.pop(), default_vals.pop()))
     return param_names, pars_with_vals[::-1]
+
+
+def process_hydrogen_bonds(
+    mdtraj_results,
+    output_data: OutputData,
+    mdanse_trajectory: Trajectory,
+    frame_selection: tuple[int, int, int],
+    **kwargs,
+):
+    time_axis = mdanse_trajectory.time()[
+        frame_selection[0] : frame_selection[1] : frame_selection[2]
+    ]
+    time_unit = "ps"
+    output_data.add(
+        "hbond/axes/time",
+        "LineOutputVariable",
+        time_axis,
+        units=time_unit,
+    )
+    output_data.add(
+        "hbond/count/total",
+        "LineOutputVariable",
+        np.zeros_like(time_axis),
+        axis="hbond/axes/time",
+        main_result=True,
+        units="counts",
+    )
+    valid_elements = mdanse_trajectory.non_dummy_elements - {"H", "H1", "H2", "H3"}
+    valid_indices = {
+        index
+        for index in mdanse_trajectory.atom_indices
+        if mdanse_trajectory.atom_types[index] in valid_elements
+    }
+    plabels = pair_labels(mdanse_trajectory)
+    for _, labels in plabels:
+        label1, label2 = sorted(labels)
+        output_data.add(
+            f"hbond/count/{label1}-{label2}",
+            "LineOutputVariable",
+            np.zeros_like(time_axis),
+            axis="hbond/axes/time",
+            units="counts",
+            main_result=True,
+            partial_result=True,
+        )
+    if len(mdtraj_results):
+        for frame_index, hbonds in enumerate(mdtraj_results):
+            valid_hbonds = [
+                (ind1, ind2)
+                for ind1, _, ind2 in hbonds
+                if ind1 in valid_indices and ind2 in valid_indices
+            ]
+            type_pairs = [
+                tuple(sorted((mdanse_trajectory.atom_names[ind1], mdanse_trajectory.atom_names[ind2])))
+                for ind1, ind2 in valid_hbonds
+            ]
+            output_data["hbond/count/total"][frame_index] = len(type_pairs)
+            pair_counter = Counter(type_pairs)
+            for (label1, label2), counts in pair_counter.items():
+                output_data[f"hbond/count/{label1}-{label2}"][frame_index] = (
+                            counts
+                        )
+
+
+MDTRAJ_POSTPROCESSING = {
+    "Hydrogen Bonds: Wernet-Nilsson": process_hydrogen_bonds,
+    # "Hydrogen Bonds: Baker-Hubbard": process_hydrogen_bonds,
+}

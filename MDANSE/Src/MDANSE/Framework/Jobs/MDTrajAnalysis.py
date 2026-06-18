@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from MDANSE.Framework.Configurators.MDTrajAnalysisConfigurator import MDTRAJ_JOBS
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.mdtraj.analysis import MDTRAJ_POSTPROCESSING
 from MDANSE.mdtraj.trajectory import build_mdtraj_trajectory
 
 
@@ -28,10 +29,7 @@ class MDTrajAnalysis(IJob):
 
     label = "MDTraj Analysis"
 
-    category = (
-        "Analysis",
-        "External",
-    )
+    category = ("External",)
     PREDICTORS = ()
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
@@ -99,4 +97,20 @@ class MDTrajAnalysis(IJob):
         self.result = result
 
     def finalize(self):
-        print(self.result)
+        postprocessing_function = MDTRAJ_POSTPROCESSING[self.analysis_function]
+        postprocessing_function(
+            self.result,
+            self._outputData,
+            self.trajectory,
+            frame_selection=self.frame_slice,
+        )
+
+        self._outputData.write(
+            self.configuration["output_files"]["root"],
+            self.configuration["output_files"]["formats"],
+            str(self),
+            self,
+        )
+
+        self.trajectory.close()
+        super().finalize()

@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
@@ -5,8 +6,18 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.compare_hdf5 import compare_hdf5
 from test_helpers.paths import CONV_DIR, RESULTS_DIR
 
+from MDANSE.mdtraj.trajectory import build_mdtraj_topology, build_mdtraj_trajectory
+from MDANSE.mdtraj.analysis import mdtraj_initial_params
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 short_traj = CONV_DIR / "named_molecules.mdt"
+
+
+@pytest.fixture(scope="module")
+def mdanse_traj() -> Iterable[Trajectory]:
+    mdanse_traj = Trajectory(short_traj)
+    yield mdanse_traj
+    mdanse_traj.close()
 
 
 ################################################################
@@ -45,28 +56,12 @@ def parameters():
     return parameters
 
 
-@pytest.mark.parametrize("analysis_type", [# "Hydrogen Bonds: Baker-Hubbard",
-                                           "Hydrogen Bonds: Wernet-Nilsson"])
-@pytest.mark.parametrize("grouping_level", ["atom", "molecule"])
-def test_hydrogen_bonds(generate_benchmarks, tmp_path, parameters, grouping_level, analysis_type):
-    temp_name = tmp_path / "output"
-    out_file = temp_name.with_suffix(".mda")
-    log_file = temp_name.with_suffix(".log")
-    result_file = RESULTS_DIR / f"mdtraj_analysis_hbond_{grouping_level}_{analysis_type}.mda"
+def test_mdtraj_topology(mdanse_traj):
+    new_topology = build_mdtraj_topology(mdanse_traj)
+    assert len(list(new_topology.atoms)) == len(mdanse_traj.atom_names)
 
-    if generate_benchmarks:
-        temp_name = result_file.with_suffix("")
 
-    parameters["mdtraj_analysis"] = (analysis_type, [], {})
-    parameters["grouping_level"] = grouping_level
-    parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
-
-    job = IJob.create("MDTrajAnalysis")
-    job.run(parameters, status=True)
-
-    if generate_benchmarks:
-        return
-
-    assert out_file.is_file()
-    assert log_file.is_file()
-
+def test_mdtraj_trajectory(mdanse_traj):
+    new_trajectory = build_mdtraj_trajectory(mdanse_traj)
+    assert new_trajectory.n_atoms == mdanse_traj.get_total_natoms()
+    

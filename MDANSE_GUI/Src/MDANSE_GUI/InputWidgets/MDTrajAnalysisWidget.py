@@ -187,8 +187,8 @@ class MDTrajAnalysisWidget(WidgetBase):
         self._view.setSizeAdjustPolicy(
             QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
         )
-        self._selector.setCurrentText(nth(MDTRAJ_JOBS, 1))
         self._selector.setCurrentText(first(MDTRAJ_JOBS))
+        self._model.switch_job_type(first(MDTRAJ_JOBS))
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
