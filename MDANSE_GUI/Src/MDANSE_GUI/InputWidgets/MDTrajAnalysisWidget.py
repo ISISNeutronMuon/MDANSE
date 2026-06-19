@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import copy
+from typing import TYPE_CHECKING
 
 from more_itertools import first, nth
 from qtpy.QtCore import QObject, Qt, Signal, Slot
@@ -37,12 +38,14 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Framework.Configurators.BooleanConfigurator import BOOL_MAPPING
-from MDANSE.Framework.Configurators.MDTrajAnalysisConfigurator import MDTRAJ_JOBS
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.mdtraj.analysis import mdtraj_initial_params
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Utils import block_signals
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class MDTrajModel(QStandardItemModel):
@@ -60,7 +63,7 @@ class MDTrajModel(QStandardItemModel):
     @Slot(str)
     def switch_job_type(
         self,
-        analysis_type: str,
+        analysis_function: Callable,
         optional_settings: dict | None = None,
     ):
         """Create a table of input parameters for the current job.
@@ -73,8 +76,7 @@ class MDTrajModel(QStandardItemModel):
             Dictionary of input parameters, by default None
         """
         self.clear()
-        self.analysis_type = analysis_type
-        args, kwargs = mdtraj_initial_params(MDTRAJ_JOBS[analysis_type])
+        args, kwargs = mdtraj_initial_params(analysis_function)
         args.pop(args.index("traj"))
         self.arg_names = args
         self.kwarg_names = [x for x, _ in kwargs]
@@ -158,17 +160,15 @@ class MDTrajAnalysisWidget(WidgetBase):
         self._relative_size = 3
         self.helper = None
         top_bar_layout = QHBoxLayout()
-        top_bar_layout.addWidget(QLabel("MDTraj analysis type:"), stretch=0)
-        self._selector = QComboBox(self._base)
-        self._selector.addItems([str(x) for x in MDTRAJ_JOBS])
+        top_bar_layout.addWidget(QLabel("MDTraj analysis function:"), stretch=0)
+        self._label = QLabel(f"mdtraj.{self._configurator.mdtraj_function.__name__}")
         self._model = MDTrajModel(self._base)
         self._view = QTableView(self._base)
-        top_bar_layout.addWidget(self._selector, stretch=1)
+        top_bar_layout.addWidget(self._label, stretch=1)
         top_bar_layout.addStretch(1)
         self._layout.addLayout(top_bar_layout)
         self._layout.addWidget(self._view)
         self._view.setModel(self._model)
-        self._selector.currentTextChanged.connect(self._model.switch_job_type)
         self._model.itemChanged.connect(self.updateValue)
         self._model.type_changed.connect(self.updateValue)
         self.updateValue()
@@ -177,9 +177,6 @@ class MDTrajAnalysisWidget(WidgetBase):
         else:
             tooltip_text = "The parameters needed by the specific MDTraj analysis can be input here"
         self._view.setToolTip(tooltip_text)
-        self._selector.setToolTip(
-            "Pick the MDTraj analysis which you want to run.",
-        )
         policy = self._view.sizePolicy()
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
@@ -187,14 +184,12 @@ class MDTrajAnalysisWidget(WidgetBase):
         self._view.setSizeAdjustPolicy(
             QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
         )
-        self._selector.setCurrentText(first(MDTRAJ_JOBS))
-        self._model.switch_job_type(first(MDTRAJ_JOBS))
+        self._model.switch_job_type(self._configurator.mdtraj_function)
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
-        analysis_type = self._selector.currentText()
         args, kwargs = self._model.params_summary()
-        return (analysis_type, args, kwargs)
+        return (args, kwargs)
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

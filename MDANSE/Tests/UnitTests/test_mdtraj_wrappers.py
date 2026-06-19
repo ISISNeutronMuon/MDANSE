@@ -1,13 +1,8 @@
 from collections.abc import Iterable
-import numpy as np
 import pytest
-from numpy.testing import assert_allclose
-from MDANSE.Framework.Jobs.IJob import IJob
-from test_helpers.compare_hdf5 import compare_hdf5
-from test_helpers.paths import CONV_DIR, RESULTS_DIR
+from test_helpers.paths import CONV_DIR
 
 from MDANSE.mdtraj.trajectory import build_mdtraj_topology, build_mdtraj_trajectory
-from MDANSE.mdtraj.analysis import mdtraj_initial_params
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 short_traj = CONV_DIR / "named_molecules.mdt"

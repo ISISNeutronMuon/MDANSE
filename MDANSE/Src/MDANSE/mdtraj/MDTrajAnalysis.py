@@ -15,13 +15,10 @@
 #
 from __future__ import annotations
 
-from MDANSE.Framework.Configurators.MDTrajAnalysisConfigurator import MDTRAJ_JOBS
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.mdtraj.analysis import MDTRAJ_POSTPROCESSING
 from MDANSE.mdtraj.trajectory import build_mdtraj_trajectory
 
 
-@IJob.register("MDTrajAnalysis")
 class MDTrajAnalysis(IJob):
     """Run an MDTraj analysis on an MDANSE trajectory.
 
@@ -36,7 +33,7 @@ class MDTrajAnalysis(IJob):
 
     label = "MDTraj Analysis"
 
-    category = ("External",)
+    category = ("External", "MDTrajAnalysis")
     PREDICTORS = ()
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
@@ -86,7 +83,7 @@ class MDTrajAnalysis(IJob):
             self.configuration["frames"]["last"],
             self.configuration["frames"]["step"],
         )
-        self.analysis_function = self.configuration["mdtraj_analysis"]["function"]
+        self.analysis_function = self.configuration["mdtraj_analysis"].mdtraj_function
         self.analysis_args = self.configuration["mdtraj_analysis"]["args"]
         self.analysis_kwargs = self.configuration["mdtraj_analysis"]["kwargs"]
 
@@ -94,30 +91,10 @@ class MDTrajAnalysis(IJob):
         mdtraj_trajectory = build_mdtraj_trajectory(
             self.trajectory, frame_slice=self.frame_slice
         )
-        function = MDTRAJ_JOBS[self.analysis_function]
-        result = function(
+        result = self.analysis_function(
             mdtraj_trajectory, *self.analysis_args, **self.analysis_kwargs
         )
         return index, result
 
     def combine(self, _, result):
         self.result = result
-
-    def finalize(self):
-        postprocessing_function = MDTRAJ_POSTPROCESSING[self.analysis_function]
-        postprocessing_function(
-            self.result,
-            self._outputData,
-            self.trajectory,
-            frame_selection=self.frame_slice,
-        )
-
-        self._outputData.write(
-            self.configuration["output_files"]["root"],
-            self.configuration["output_files"]["formats"],
-            str(self),
-            self,
-        )
-
-        self.trajectory.close()
-        super().finalize()

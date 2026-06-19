@@ -45,23 +45,21 @@ def parameters():
     return parameters
 
 
-@pytest.mark.parametrize("analysis_type", [# "Hydrogen Bonds: Baker-Hubbard",
-                                           "Hydrogen Bonds: Wernet-Nilsson"])
 @pytest.mark.parametrize("grouping_level", ["atom", "molecule"])
-def test_hydrogen_bonds(generate_benchmarks, tmp_path, parameters, grouping_level, analysis_type):
+def test_hydrogen_bonds(generate_benchmarks, tmp_path, parameters, grouping_level,):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
     log_file = temp_name.with_suffix(".log")
-    result_file = RESULTS_DIR / f"mdtraj_analysis_hbond_{grouping_level}_{analysis_type}.mda"
+    result_file = RESULTS_DIR / f"mdtraj_analysis_hbond_{grouping_level}.mda"
 
     if generate_benchmarks:
         temp_name = result_file.with_suffix("")
 
-    parameters["mdtraj_analysis"] = (analysis_type, [], {})
+    parameters["mdtraj_analysis"] = ([], {})
     parameters["grouping_level"] = grouping_level
     parameters["output_files"] = (temp_name, ("MDAFormat",), "INFO")
 
-    job = IJob.create("MDTrajAnalysis")
+    job = IJob.create("HydrogenBondStatistics")
     job.run(parameters, status=True)
 
     if generate_benchmarks:

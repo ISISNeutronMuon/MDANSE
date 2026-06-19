@@ -17,15 +17,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from mdtraj import baker_hubbard, wernet_nilsson
-
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.mdtraj.analysis import mdtraj_initial_params
-
-MDTRAJ_JOBS = {
-    "Hydrogen Bonds: Wernet-Nilsson": wernet_nilsson,
-    # "Hydrogen Bonds: Baker-Hubbard": baker_hubbard,
-}
 
 
 @IConfigurator.register("MDTrajAnalysisConfigurator")
@@ -33,7 +26,7 @@ class MDTrajAnalysisConfigurator(IConfigurator):
     """Chooses an analysis run implemented in MDTraj and sets its input parameters."""
 
     _default = (
-        "Hydrogen Bonds: Wernet-Nilsson",
+        [],
         {},
     )
     label = "Analysis from MDTraj"
@@ -41,14 +34,20 @@ class MDTrajAnalysisConfigurator(IConfigurator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        mdtraj_function = kwargs.get("mdtraj_function")
+        args, kwargs = mdtraj_initial_params(mdtraj_function)
+        args.remove("traj")
+        self.mdtraj_function = mdtraj_function
+        self.expected_args = args
+        self.expected_kwargs = kwargs
 
-    def configure(self, value: tuple[str, list[Any], dict[str, Any]]):
+    def configure(self, value: tuple[list[Any], dict[str, Any]]):
         """Create a vector generator with given parameters.
 
         Parameters
         ----------
-        value : tuple[str, dict[str, Any]]
-            Class name and dictionary of input parameters
+        value : tuple[list[Any], dict[str, Any]]
+            List of arguments and dictionary of keyword arguments with default values.
 
         """
         if not self.update_needed(value):
@@ -65,31 +64,21 @@ class MDTrajAnalysisConfigurator(IConfigurator):
                 )
 
             try:
-                function_name, arguments, keyword_parameters = value
+                arguments, keyword_parameters = value
             except ValueError as err:
                 raise Exception(f"Invalid MDTraj Analysis settings {value}") from err
 
-            if function_name not in MDTRAJ_JOBS:
-                raise ValueError(
-                    f"Analysis {function_name} is not implemented in MDANSE"
-                )
-
-            function = MDTRAJ_JOBS[function_name]
-            args, kwargs = mdtraj_initial_params(function)
-            args.remove("traj")
-
-            unknown_keywords = set(keyword_parameters) - {item[0] for item in kwargs}
+            unknown_keywords = set(keyword_parameters) - {
+                item[0] for item in self.expected_kwargs
+            }
             if len(unknown_keywords):
-                self.warning_status = f"Parameters {unknown_keywords} were given, but are not used by {function_name}"
+                self.warning_status = f"Parameters {unknown_keywords} were given, but are not used by {self.mdtraj_function}"
 
-            if len(args) != len(arguments):
-                self.warning_status = (
-                    f"Expected {len(args)} unnamed argument, but got {len(arguments)}"
-                )
+            if len(self.expected_args) != len(arguments):
+                self.warning_status = f"Expected {len(self.expected_args)} unnamed arguments, but got {len(arguments)}"
 
             self["args"] = arguments
             self["kwargs"] = keyword_parameters
-            self["function"] = function_name
 
         except Exception as err:
             self.error_status = str(err)
