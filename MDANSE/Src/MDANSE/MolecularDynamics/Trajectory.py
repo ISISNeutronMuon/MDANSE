@@ -184,10 +184,9 @@ class Trajectory:
             trajectory_format if trajectory_format else self.guess_correct_format()
         )
 
-        if self._format not in {"mock"}:
-            self._trajectory = self.open_trajectory(self._format,
-                                                    self._hdf5_driver,
-                                                    self._dataset_cache_size)
+        self._trajectory = self.open_trajectory(self._format,
+                                                self._hdf5_driver,
+                                                self._dataset_cache_size)
         self._min_span = None
         self._max_span = None
         self._grouping_level = GroupingLevels.ATOM

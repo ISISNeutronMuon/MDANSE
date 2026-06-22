@@ -68,8 +68,6 @@ class Configurable:
         in the analysis job, if this had been requested in the constructor."""
         if self.trajectory_type == "mdmc":
             return ("MDMCTrajectoryConfigurator", {})
-        if self.trajectory_type == "mock":
-            return ("MockTrajectoryConfigurator", {})
         return None
 
     def build_configuration(self):
