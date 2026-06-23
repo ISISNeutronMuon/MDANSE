@@ -161,7 +161,7 @@ def test_directional_hkl_vectors_for_nonorthogonal_cells(qvector_generator):
                 rtol=1e-7,
             )
 
-@pytest.mark.parametrize("qvector_generator", IQVectors.indirect_subclasses())
+@pytest.mark.parametrize("qvector_generator", IQVectors.available_names())
 def test_qvector_to_hkl_conversion(trajectory, qvector_generator):
     instance = IQVectors.create(qvector_generator, trajectory.unit_cell(0))
     instance.setup({"shells": (5.0, 50.0, 10.0)})
@@ -186,7 +186,7 @@ def test_qvector_to_hkl_conversion(trajectory, qvector_generator):
         assert np.allclose(original_qvectors, recalculated_qvectors)
 
 
-@pytest.mark.parametrize("qvector_generator", IQVectors.indirect_subclasses())
+@pytest.mark.parametrize("qvector_generator", IQVectors.available_names())
 def test_disf(tmp_path, trajectory, qvector_generator):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")

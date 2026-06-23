@@ -90,6 +90,7 @@ class AtomTransmuter:
         self.selector.reset()
 
 
+@IConfigurator.register("AtomTransmutationConfigurator")
 class AtomTransmutationConfigurator(IConfigurator):
     """Assigns different chemical elements to selected atoms.
 

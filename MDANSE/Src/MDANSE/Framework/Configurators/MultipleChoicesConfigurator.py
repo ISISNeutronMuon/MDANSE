@@ -18,6 +18,7 @@ from __future__ import annotations
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("MultipleChoicesConfigurator")
 class MultipleChoicesConfigurator(IConfigurator):
     """Allows to select several items from multiple choices.
 

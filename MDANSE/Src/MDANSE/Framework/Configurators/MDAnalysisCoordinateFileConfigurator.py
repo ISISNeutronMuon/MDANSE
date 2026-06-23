@@ -22,6 +22,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 
+@IConfigurator.register("MDAnalysisCoordinateFileConfigurator")
 class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
     """Take one or more filenames of files containing atomic coordinates.
 

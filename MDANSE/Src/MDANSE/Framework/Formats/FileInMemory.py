@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 from .HDFFormat import HDFFormat
 
 
+@IFormat.register("FileInMemory")
 class FileInMemory(IFormat):
     """Handles the writing of output to an in-memory HDF5 structure.
 

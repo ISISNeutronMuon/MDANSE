@@ -58,6 +58,7 @@ def linear_vectors(
     return axis[:, np.newaxis] * fact
 
 
+@IQVectors.register("LinearQVectors")
 class LinearQVectors(IQVectors):
     """Generates vectors randomly on a straight line.
 

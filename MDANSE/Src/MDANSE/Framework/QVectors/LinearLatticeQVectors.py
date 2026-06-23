@@ -21,10 +21,12 @@ from functools import partial
 import numpy as np
 from scipy.spatial import KDTree
 
+from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.QVectors.LatticeQVectors import LatticeQVectors, fpsampling
 from MDANSE.Framework.QVectors.LinearQVectors import linear_vectors
 
 
+@IQVectors.register("LinearLatticeQVectors")
 class LinearLatticeQVectors(LatticeQVectors):
     """Generates vectors randomly on a straight line.
 

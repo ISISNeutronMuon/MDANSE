@@ -1,6 +1,3 @@
-
-import numpy as np
-
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Converters.Converter import Converter
@@ -8,10 +5,9 @@ from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-configurators = sorted(IConfigurator.indirect_subclasses())
-converters = sorted(Converter.indirect_subclasses())
-jobs = sorted(IJob.indirect_subclasses())
-generators = sorted(set(IQVectors.indirect_subclasses()) - {"IQVectors", "LatticeQVectors"})
+configurators = sorted(IConfigurator.available_names())
+converters = sorted(Converter.available_names())
+jobs = sorted(IJob.available_names())
 
 job_inputs = {}
 converter_inputs = {}
@@ -62,7 +58,7 @@ for job in jobs:
         job_inputs[conf] = make_configurator_doc(conf, "analysis")
         result += f"- {iname}: :ref:`configurator-analysis-{conf}` default={defval}\n"
     job_page.append(result)
-        
+
 
 for job in converters:
     result = ""

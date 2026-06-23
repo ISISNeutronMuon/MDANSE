@@ -19,6 +19,7 @@ from typing import Any, Literal
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Converters.Converter import Converter
+from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import (
     LAMMPSConfigFile,
     LAMMPScustom,
@@ -28,6 +29,8 @@ from MDANSE.Framework.Parsers import (
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
+@IJob.register("LAMMPS")
+@Converter.register("LAMMPS")
 class LAMMPS(Converter):
     """Converts a LAMMPS trajectory to an MDT trajectory."""
 

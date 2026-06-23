@@ -21,6 +21,7 @@ from MDANSE.Framework.AtomMapping import check_mapping_valid, fill_remaining_lab
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("AtomMappingConfigurator")
 class AtomMappingConfigurator(IConfigurator):
     """The atom mapping configurator for trajectory converters.
 

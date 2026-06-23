@@ -22,6 +22,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
+@IInstrumentResolution.register("Triangular")
 class Triangular(IInstrumentResolution):
     """Defines an instrument resolution with a triangular response"""
 

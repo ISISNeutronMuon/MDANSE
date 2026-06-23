@@ -21,16 +21,15 @@ from typing import TYPE_CHECKING
 import numpy as np
 import numpy.typing as npt
 
-from MDANSE.Framework.AtomGrouping.grouping import (
-    pair_labels,
-    update_pair_results,
-)
+from MDANSE.Framework.AtomGrouping.grouping import pair_labels, update_pair_results
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
+from MDANSE.Framework.Jobs.IJob import IJob
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
+@IJob.register("CoordinationNumber")
 class CoordinationNumber(DistanceHistogram):
     """Calculates the coordination number for pairs of atom types.
 

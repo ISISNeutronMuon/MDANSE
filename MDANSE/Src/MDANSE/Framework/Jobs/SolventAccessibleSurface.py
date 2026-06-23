@@ -330,6 +330,7 @@ def identify_loose_atoms(
     return atoms_in_molecule, loose_atoms
 
 
+@IJob.register("SolventAccessibleSurface")
 class SolventAccessibleSurface(IJob):
     """Calculates the accessible surface of the selected atoms.
 

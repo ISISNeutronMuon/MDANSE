@@ -20,11 +20,13 @@ from collections.abc import Sequence
 import numpy as np
 
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 from .IConfigurator import PredictionSettings
 
 
+@IConfigurator.register("GridStepConfigurator")
 class GridStepConfigurator(FloatConfigurator):
     """Configurator to manage a finite element grid within the unit cell.
 

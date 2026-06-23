@@ -364,7 +364,7 @@ class JobHolder(QStandardItemModel):
         item_th.parameters = job_params
         item_th.free_filename.connect(self.unprotect_filename)
         if load_afterwards:
-            if job_name in Converter.subclasses():
+            if job_name in Converter.available_names():
                 item_th.for_loading.connect(self.trajectory_for_loading)
             else:
                 try:

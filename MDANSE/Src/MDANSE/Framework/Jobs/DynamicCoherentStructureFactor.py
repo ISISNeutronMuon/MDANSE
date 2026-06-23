@@ -37,6 +37,7 @@ class DynamicCoherentStructureFactorError(Exception):
     pass
 
 
+@IJob.register("DynamicCoherentStructureFactor")
 class DynamicCoherentStructureFactor(IJob):
     r"""Computes the dynamic coherent structure factor :math:`S_{\text{coh}}(\mathbf{q}, \omega)` for a set of atoms.
 

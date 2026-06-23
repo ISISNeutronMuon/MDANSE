@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
+@Plotter.register("Vectors3D")
 class Vectors3D(Plotter):
     """Plots all the datasets in the same figure."""
 

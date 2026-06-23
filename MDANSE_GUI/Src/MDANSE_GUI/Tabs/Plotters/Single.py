@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
+@Plotter.register("Single")
 class Single(Plotter):
     """Plots all the datasets in the same figure."""
 

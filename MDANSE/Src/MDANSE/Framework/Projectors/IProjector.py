@@ -15,14 +15,19 @@
 #
 from __future__ import annotations
 
-from MDANSE.Core.SubclassFactory import SubclassFactory
+from typing import ClassVar
+
+from MDANSE.Core.RegisterFactory import RegisterFactory
+from MDANSE.IO.IOUtils import UCDict
 
 
 class ProjectorError(Exception):
     pass
 
 
-class IProjector(metaclass=SubclassFactory):
+class IProjector(RegisterFactory):
+    registry: ClassVar[UCDict[str, type[IProjector]]] = UCDict()
+
     def __init__(self):
         self._axis = None
 

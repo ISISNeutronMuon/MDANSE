@@ -60,6 +60,7 @@ def spherical_vectors(
     )
 
 
+@IQVectors.register("SphericalQVectors")
 class SphericalQVectors(IQVectors):
     """Generates vectors randomly on a sphere.
 

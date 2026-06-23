@@ -38,6 +38,7 @@ from MDANSE.MolecularDynamics.Configuration import (
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
+@IJob.register("TrajectoryFilter")
 class TrajectoryFilter(IJob):
     """Design and apply a filter for the atomic trajectories.
 

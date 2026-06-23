@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
+@Plotter.register("Heatmap")
 class Heatmap(Plotter):
     """Creates a 2D heatmap plot."""
 

@@ -21,6 +21,7 @@ from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("MultiInputFileConfigurator")
 class MultiInputFileConfigurator(IConfigurator):
     """Uses multiple files as input. Parent class for more specific inputs."""
 

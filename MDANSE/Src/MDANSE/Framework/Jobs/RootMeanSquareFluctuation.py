@@ -21,6 +21,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 
 
+@IJob.register("RootMeanSquareFluctuation")
 class RootMeanSquareFluctuation(IJob):
     """Calculates the Root Mean Square Fluctuation of atom positions.
 

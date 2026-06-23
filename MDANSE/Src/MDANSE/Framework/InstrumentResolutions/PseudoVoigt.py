@@ -22,6 +22,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
+@IInstrumentResolution.register("PseudoVoigt")
 class PseudoVoigt(IInstrumentResolution):
     """Defines an instrument resolution with a pseudo-voigt response"""
 

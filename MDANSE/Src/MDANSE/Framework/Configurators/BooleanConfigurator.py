@@ -31,6 +31,7 @@ BOOL_MAPPING = {
 }
 
 
+@IConfigurator.register("BooleanConfigurator")
 class BooleanConfigurator(IConfigurator):
     """Sets a value to a logical True or False.
 

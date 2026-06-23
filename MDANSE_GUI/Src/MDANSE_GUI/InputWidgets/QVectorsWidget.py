@@ -424,9 +424,7 @@ class QVectorsWidget(WidgetBase):
         top_bar_layout = QHBoxLayout()
         top_bar_layout.addWidget(QLabel("Generator type:"), stretch=0)
         self._selector = QComboBox(self._base)
-        self._selector.addItems(
-            x for x in IQVectors.indirect_subclasses() if x != "LatticeQVectors"
-        )
+        self._selector.addItems(IQVectors.raw_names())
         self._model = VectorModel(self._base, trajectory=trajectory)
         self._view = QTableView(self._base)
         self._preview_button = QPushButton("Preview vector distribution")

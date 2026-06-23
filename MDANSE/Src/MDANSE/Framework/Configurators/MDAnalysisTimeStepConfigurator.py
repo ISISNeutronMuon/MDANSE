@@ -20,8 +20,10 @@ from contextlib import suppress
 import MDAnalysis as mda
 
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("MDAnalysisTimeStepConfigurator")
 class MDAnalysisTimeStepConfigurator(FloatConfigurator):
     """Input for the trajectory time step in the MDAnalysis converter.
 

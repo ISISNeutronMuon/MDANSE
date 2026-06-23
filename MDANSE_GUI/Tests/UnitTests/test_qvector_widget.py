@@ -16,9 +16,9 @@ from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 
 
-IJOB_SUBCLASSES = IJob.indirect_subclass_dictionary()
+IJOB_SUBCLASSES = IJob.raw_dict()
 ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
-ENABLED_QVECTORS = set(IQVectors.indirect_subclasses()) - {
+ENABLED_QVECTORS = set(IQVectors.raw_names()) - {
     "IQVectors",
     "LatticeQVectors",
 }
@@ -33,6 +33,7 @@ def trajectory():
 
 
 @pytest.mark.parametrize("qvector_type", ENABLED_QVECTORS)
+@pytest.mark.filterwarnings("ignore:q vector shells are empty")
 def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     """
     Test there are no major errors in constructing job widgets.
@@ -41,11 +42,11 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     """
     window = QMainWindow()
     curr_job_name = "DynamicCoherentStructureFactor"
-    index = [
+    index = next(
         job_index
         for job_index, job_name in enumerate(sorted(ENABLED_JOBS), 1)
         if job_name == curr_job_name
-    ][0]
+    )
 
     widget = JobTab.gui_instance(
         parent=window,
@@ -78,11 +79,11 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     ind = model.indexFromItem(item)
     view.on_select_action(ind)
 
-    widget_index = [
+    widget_index = next(
         windex
         for windex, widget_key in enumerate(action._widgets_in_layout.keys())
         if widget_key == "q_vectors"
-    ][0]
+    )
     qvec_widget = action._widgets[widget_index]
     if "SphericalLattice" in qvector_type:
         with qtbot.waitSignal(qvec_widget.value_changed):

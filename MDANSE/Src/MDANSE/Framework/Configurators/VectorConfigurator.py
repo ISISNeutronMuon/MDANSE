@@ -21,6 +21,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
+@IConfigurator.register("VectorConfigurator")
 class VectorConfigurator(IConfigurator):
     """Inputs a vector given as 3 floating point numbers."""
 

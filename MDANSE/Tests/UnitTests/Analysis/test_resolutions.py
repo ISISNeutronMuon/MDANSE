@@ -15,7 +15,7 @@ def trajectory():
     trajectory = Trajectory(short_traj)
     yield trajectory
 
-@pytest.mark.parametrize("resolution_generator", IInstrumentResolution.subclasses())
+@pytest.mark.parametrize("resolution_generator", IInstrumentResolution.available_names())
 def test_disf(tmp_path, trajectory, resolution_generator):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")
@@ -56,7 +56,7 @@ def test_disf(tmp_path, trajectory, resolution_generator):
     assert log_file.is_file()
 
 
-@pytest.mark.parametrize("resolution_generator", IInstrumentResolution.subclasses())
+@pytest.mark.parametrize("resolution_generator", IInstrumentResolution.raw_names())
 def test_dos(generate_benchmarks, tmp_path, trajectory, resolution_generator):
     temp_name = tmp_path / "output"
     out_file = temp_name.with_suffix(".mda")

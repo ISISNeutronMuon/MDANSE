@@ -26,6 +26,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
 
 
+@IJob.register("AverageStructure")
 class AverageStructure(IJob):
     """Outputs a structure file of the atom positions averaged over time.
 

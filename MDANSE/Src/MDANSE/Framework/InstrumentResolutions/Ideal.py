@@ -22,6 +22,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 
 
+@IInstrumentResolution.register("Ideal")
 class Ideal(IInstrumentResolution):
     """Defines an ideal instrument resolution with a Dirac response"""
 

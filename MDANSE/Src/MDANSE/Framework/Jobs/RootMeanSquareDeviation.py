@@ -23,6 +23,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
+@IJob.register("RootMeanSquareDeviation")
 class RootMeanSquareDeviation(IJob):
     """Calculates the Root Mean Square Deviation of the selected atoms.
 

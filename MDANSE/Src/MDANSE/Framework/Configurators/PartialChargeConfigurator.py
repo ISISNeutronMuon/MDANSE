@@ -131,6 +131,7 @@ class PartialChargeMapper:
         self._new_map = {}
 
 
+@IConfigurator.register("PartialChargeConfigurator")
 class PartialChargeConfigurator(IConfigurator):
     """Assigns partial charges to atoms."""
 

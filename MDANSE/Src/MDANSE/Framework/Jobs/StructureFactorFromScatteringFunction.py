@@ -24,6 +24,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
+@IJob.register("StructureFactorFromScatteringFunction")
 class StructureFactorFromScatteringFunction(IJob):
     """Computes the static structure factor from the results of another analysis.
 

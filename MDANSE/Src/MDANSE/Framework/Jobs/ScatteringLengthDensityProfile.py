@@ -24,6 +24,7 @@ class ScatteringLengthDensityProfileError(Exception):
     pass
 
 
+@IJob.register("ScatteringLengthDensityProfile")
 class ScatteringLengthDensityProfile(IJob):
     """Produces the time-averaged scattering length density profile.
 

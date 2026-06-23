@@ -18,6 +18,7 @@ from __future__ import annotations
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 
+@IConfigurator.register("MoleculeSelectionConfigurator")
 class MoleculeSelectionConfigurator(IConfigurator):
     """Picks a molecule type present in the trajectory.
 

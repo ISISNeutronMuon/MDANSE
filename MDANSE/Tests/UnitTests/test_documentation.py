@@ -3,7 +3,7 @@ import pytest
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
-job_list = IJob.indirect_subclasses()
+job_list = IJob.available_names()
 
 
 @pytest.mark.parametrize("job_name", job_list)

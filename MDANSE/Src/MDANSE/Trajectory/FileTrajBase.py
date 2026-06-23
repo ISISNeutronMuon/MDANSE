@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import h5py
@@ -23,7 +24,10 @@ import numpy as np
 import numpy.typing as npt
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
+from MDANSE.MolecularDynamics.TrajectoryUtils import (
+    atomic_trajectory,
+    atomic_trajectory_many,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -34,6 +38,17 @@ if TYPE_CHECKING:
         _Configuration,
     )
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+
+class TrajDataArray(Enum):
+    POSITION = auto()
+    VELOCITY = auto()
+    FORCE = auto()
+    POSITIONS = POSITION
+    VELOCITIES = VELOCITY
+    FORCES = FORCE
+    GRADIENTS = FORCE
+    GRADIENT = FORCE
 
 
 class TrajectoryFile(ABC):
@@ -49,7 +64,12 @@ class TrajectoryFile(ABC):
 
     def __setstate__(self, state: dict) -> None:
         self.__dict__ = state
-        self._h5_file = h5py.File(state["_h5_filename"], "r")
+        self._h5_file = h5py.File(
+            state["_h5_filename"],
+            "r",
+            driver=state["_h5_driver"],
+            rdcc_nbytes=state["_h5_cache_size"],
+        )
 
     def _check_frame(self, frame: slice | int) -> None:
         """Check frame in bounds.
@@ -109,6 +129,11 @@ class TrajectoryFile(ABC):
 
     @abstractmethod
     def time(self) -> npt.NDArray[float]: ...
+
+    @abstractmethod
+    def chunk_size(
+        self, dataset_type: TrajDataArray = TrajDataArray.POSITION
+    ) -> int: ...
 
     @abstractmethod
     def unit_cell(self, frame: int) -> UnitCell | None: ...
@@ -254,6 +279,52 @@ class TrajectoryFile(ABC):
         direct_cells = np.array([cell.direct for cell in self._unit_cells[slc]])
         inverse_cells = np.array([cell.inverse for cell in self._unit_cells[slc]])
         return atomic_trajectory(
+            coords,
+            direct_cells,
+            inverse_cells,
+            box_coordinates=box_coordinates,
+        )
+
+    def read_atomic_trajectory_many(
+        self,
+        index_list: list[int],
+        first: int = 0,
+        last: int | None = None,
+        step: int | None = 1,
+        *,
+        box_coordinates: bool = False,
+    ) -> npt.NDArray[float]:
+        """Read an atomic trajectory. The trajectory is corrected from box jumps.
+
+        Parameters
+        ----------
+        index : int
+            The index of the atom.
+        first : int
+            The index of the first frame. (Default value = 0)
+        last : int
+            The index of the last frame. (Default value = None)
+        step : int
+            The step in frame. (Default value = 1)
+        box_coordinates : bool
+            If True, the coordiniates are returned in box coordinates (Default value = False).
+
+        Returns
+        -------
+        ndarray
+            2D array containing the atomic trajectory for the selected frames
+
+        """
+        slc = np.s_[first:last:step]
+
+        coords = self.coordinates(slc, index_list)
+
+        if self._unit_cells is None:
+            return coords
+
+        direct_cells = np.array([cell.direct for cell in self._unit_cells[slc]])
+        inverse_cells = np.array([cell.inverse for cell in self._unit_cells[slc]])
+        return atomic_trajectory_many(
             coords,
             direct_cells,
             inverse_cells,

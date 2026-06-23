@@ -15,12 +15,14 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.SingleChoiceConfigurator import (
     SingleChoiceConfigurator,
 )
 from MDANSE.MolecularDynamics.Trajectory import GroupingLevels
 
 
+@IConfigurator.register("GroupingLevelConfigurator")
 class GroupingLevelConfigurator(SingleChoiceConfigurator):
     """Define how the partial results will be grouped in the output.
 

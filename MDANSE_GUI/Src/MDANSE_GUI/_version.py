@@ -16,21 +16,21 @@
 from __future__ import annotations
 
 import os
+from importlib.metadata import version
 
 
 def get_version():
-    """Get MDANSE version.
+    """Get MDANSE_GUI version.
 
     If not in git, return static version.
     """
-    if version := os.getenv("MDANSE_GUI_VERSION"):
-        return version
+    if default_version := os.getenv("MDANSE_GUI_VERSION"):
+        return default_version
 
+    default_version = version("MDANSE_GUI")
     try:
         from setuptools_git_versioning import version_from_git
 
-        return version_from_git()
+        return version_from_git(starting_version=default_version)
     except Exception:
-        from importlib.metadata import version
-
-        return version("MDANSE_GUI")
+        return default_version

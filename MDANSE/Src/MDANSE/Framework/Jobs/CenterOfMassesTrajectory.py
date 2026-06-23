@@ -28,6 +28,7 @@ from MDANSE.MolecularDynamics.Configuration import (
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
+@IJob.register("CenterOfMassesTrajectory")
 class CenterOfMassesTrajectory(IJob):
     """Outputs a trajectory where molecules have been replaced by artificial particles.
 

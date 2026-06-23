@@ -15,9 +15,11 @@
 #
 from __future__ import annotations
 
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
 
 
+@IConfigurator.register("InterpolationOrderConfigurator")
 class InterpolationOrderConfigurator(IntegerConfigurator):
     """Specifies the order of a numerical derivative used for interpolation.
 

@@ -25,6 +25,7 @@ from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 
+@IConfigurator.register("OutputTrajectoryConfigurator")
 class OutputTrajectoryConfigurator(IConfigurator):
     """Specifies how a trajectory should be output to a file.
 

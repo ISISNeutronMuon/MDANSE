@@ -21,6 +21,7 @@ from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
 from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
+@IProjector.register("PlanarProjector")
 class PlanarProjector(IProjector):
     def set_axis(self, axis):
         try:

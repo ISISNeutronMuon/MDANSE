@@ -41,7 +41,7 @@ from MDANSE.MolecularDynamics.UnitCell import (
     UnitCell,
 )
 
-from .FileTrajBase import TrajectoryFile
+from .FileTrajBase import TrajDataArray, TrajectoryFile
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -71,6 +71,7 @@ class H5MDTrajectory(TrajectoryFile):
     KEYS = {
         "position": "/particles/all/position/value",
         "velocity": "/particles/all/velocity/value",
+        "force": "/particles/all/force/value",
         "box": "/particles/all/box/edges/value",
         "time": "/particles/all/position/time",
     }
@@ -129,7 +130,12 @@ class H5MDTrajectory(TrajectoryFile):
     def velocities(self) -> h5py.Dataset:
         return self._h5_file[self.vel_key]
 
-    def __init__(self, h5_filename: Path | str, hdf5_driver: str | None = None):
+    def __init__(
+        self,
+        h5_filename: Path | str,
+        hdf5_driver: str | None = None,
+        rdcc_nbytes: int | None = None,
+    ):
         """Constructor.
 
         Parameters
@@ -140,8 +146,15 @@ class H5MDTrajectory(TrajectoryFile):
         self.unit_cell_warning = ""
 
         self._h5_filename = Path(h5_filename)
+        self._h5_driver = hdf5_driver
+        self._h5_cache_size = rdcc_nbytes
 
-        self._h5_file = h5py.File(self._h5_filename, "r", driver=hdf5_driver)
+        self._h5_file = h5py.File(
+            self._h5_filename,
+            "r",
+            driver=self._h5_driver,
+            rdcc_nbytes=self._h5_cache_size,
+        )
 
         particle_types = self._h5_file["/particles/all/species"]
         particle_lookup = h5py.check_enum_dtype(
@@ -311,6 +324,21 @@ class H5MDTrajectory(TrajectoryFile):
             charge = np.zeros(n_req, dtype=np.float64)
 
         return charge.astype(np.float64)
+
+    def chunk_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
+        data_key = self.KEYS[dataset_type.name.lower()]
+        try:
+            dataset = self._h5_file[data_key]
+        except KeyError:
+            LOG.error("Dataset %s was not in the trajectory file", data_key)
+            return -1
+        if (chunk_shape := getattr(dataset, "chunks", None)) is None:
+            LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
+            return -1
+        if len(chunk_shape) < 2:
+            LOG.warning("Dataset %s does not have enough dimensions", data_key)
+            return -1
+        return chunk_shape[1]
 
     def coordinates(
         self,
