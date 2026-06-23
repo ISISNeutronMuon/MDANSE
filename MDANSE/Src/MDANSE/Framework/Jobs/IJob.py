@@ -225,9 +225,10 @@ class IJob(Configurable, RegisterFactory, ABC):
         self._log_filename = None
         self._in_memory_result = None
 
-        self.inputQueue = Queue()
-        self.outputQueue = Queue()
-        self.log_queue = Queue()
+        ctx = multiprocessing.get_context("spawn")
+        self.inputQueue = ctx.Queue()
+        self.outputQueue = ctx.Queue()
+        self.log_queue = ctx.Queue()
 
     def __getstate__(self):
         d = self.__dict__.copy()
@@ -424,9 +425,10 @@ class IJob(Configurable, RegisterFactory, ABC):
         for i in range(self.numberOfSteps):
             inputQueue.put(i)
 
+        ctx = multiprocessing.get_context("spawn")
         for _ in range(self.configuration["running_mode"]["slots"]):
             self._run_multicore_check_terminate(listener)
-            p = multiprocessing.Process(
+            p = ctx.Process(
                 target=self.process_tasks_queue,
                 args=(inputQueue, outputQueue, log_queues),
             )
