@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import multiprocessing
 import os
 import warnings
 
@@ -34,6 +35,8 @@ os.environ.update(
         "NUMEXPR_NUM_THREADS": "1",
     }
 )
+
+multiprocessing.set_start_method("spawn")
 
 __version__ = str(get_version())
 
