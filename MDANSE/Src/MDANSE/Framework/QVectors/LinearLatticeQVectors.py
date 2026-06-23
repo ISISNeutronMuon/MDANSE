@@ -60,9 +60,7 @@ class LinearLatticeQVectors(LatticeQVectors):
     )
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            np.random.seed(self._configuration["seed"]["value"])
-            random.seed(self._configuration["seed"]["value"])
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         width = self._configuration["width"]["value"]
         axis = self._configuration["axis"]["vector"].array
@@ -76,7 +74,7 @@ class LinearLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            samples = linear_vectors(q, width, n_samples, axis)
+            samples = linear_vectors(q, width, n_samples, axis, rng)
             lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
                 samples,
                 self._unit_cell,
@@ -99,7 +97,8 @@ class LinearLatticeQVectors(LatticeQVectors):
             selection = fpsampling(
                 q_vectors.T,
                 nvecs_per_shell,
-                partial(linear_vectors, q=1, q_width=0, n_vecs=1, axis=axis),
+                partial(linear_vectors, q=1, q_width=0, n_vecs=1, axis=axis, rng=rng),
+                rng,
             )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
@@ -107,7 +106,7 @@ class LinearLatticeQVectors(LatticeQVectors):
             if self._configuration["force_equal_weights"]["value"]:
                 weights = np.ones(q_vectors.shape[1])
             else:
-                samples = linear_vectors(q, width, n_samples, axis)
+                samples = linear_vectors(q, width, n_samples, axis, rng)
                 tree = KDTree(q_vectors.T)
                 _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])

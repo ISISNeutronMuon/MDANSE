@@ -16,18 +16,22 @@
 from __future__ import annotations
 
 from functools import partial
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Slot
-from qtpy.QtWidgets import QWidget
 
 from MDANSE.Framework.Converters.Converter import Converter
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from qtpy.QtWidgets import QWidget
+
+    from MDANSE_GUI.Session.Session import Session
 
 tab_label = """<b>Convert your trajectory</b> to the MDANSE MDT format.
 <br><br>
@@ -40,9 +44,9 @@ MDAnalysis, MDTraj or ASE.
 class ConverterTab(GeneralTab):
     """The tab for choosing and starting a new job."""
 
-    def __init__(self, *args, **kwargs):
-        self.action = kwargs.pop("action")
+    def __init__(self, *args, action: Action | None = None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.action = action
         self._current_trajectory = ""
         self._job_starter = None
         self.action._parent_tab = self

@@ -15,8 +15,12 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
-from numpy.typing import ArrayLike
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
 
 CELL_SIZE_LIMIT = 1e-9
 NO_CELL = "Unit cell definition is missing. Add it using TrajectoryEditor."
@@ -43,6 +47,8 @@ class UnitCell:
         :param unit_cell: the unit cell matrix
         :type unit_cell: 3x3 numpy array
         """
+        if isinstance(unit_cell, UnitCell):
+            unit_cell = unit_cell._unit_cell
 
         self._unit_cell = np.array(unit_cell).astype(np.float64)
 

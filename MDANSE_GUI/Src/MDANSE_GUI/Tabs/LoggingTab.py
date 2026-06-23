@@ -17,16 +17,19 @@ from __future__ import annotations
 
 import html
 from logging import Handler, LogRecord
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import Slot, qInstallMessageHandler
 from qtpy.QtWidgets import QComboBox, QWidget
 
 from MDANSE.MLogging import FMT, LOG
-from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 from MDANSE_GUI.Widgets.DefaultCombobox import highlight_default_value
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.Session.Session import Session
 
 log_tab_label = """MDANSE_GUI <b>message log.</b>
 <br><br>

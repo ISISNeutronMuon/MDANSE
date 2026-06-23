@@ -16,20 +16,24 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import h5py
 import numpy as np
 import numpy.typing as npt
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.MolecularDynamics.Configuration import (
-    _Configuration,
-)
 from MDANSE.MolecularDynamics.TrajectoryUtils import atomic_trajectory
-from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+    from pathlib import Path
+
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+    from MDANSE.MolecularDynamics.Configuration import (
+        _Configuration,
+    )
+    from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class TrajectoryFile(ABC):

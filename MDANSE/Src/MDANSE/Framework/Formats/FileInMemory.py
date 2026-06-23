@@ -17,11 +17,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import h5py
-
 from MDANSE.Framework.Formats.IFormat import IFormat
 
 if TYPE_CHECKING:
+    import h5py
+
     from MDANSE.Framework.Jobs.IJob import IJob
     from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
 from .HDFFormat import HDFFormat

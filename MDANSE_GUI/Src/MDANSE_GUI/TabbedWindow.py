@@ -18,9 +18,8 @@ from __future__ import annotations
 import json
 import os
 from collections import defaultdict
-from collections.abc import Callable
-from importlib import metadata
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QDesktopServices
@@ -34,6 +33,8 @@ from qtpy.QtWidgets import (
     QToolBar,
 )
 
+import MDANSE
+import MDANSE_GUI
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -55,6 +56,9 @@ from MDANSE_GUI.UnitsEditor import UnitsEditor
 from MDANSE_GUI.UserSettingsEditor import UserSettingsEditor
 from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget
 from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
 MDANSE_EXAMPLES_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE-Examples")
@@ -351,8 +355,8 @@ class TabbedWindow(QMainWindow):
 
     def version_information(self):
         version = ""
-        version += f"MDANSE version: {metadata.version('MDANSE')}\n"
-        version += f"MDANSE_GUI version: {metadata.version('MDANSE_GUI')}\n"
+        version += f"MDANSE version: {MDANSE.__version__}\n"
+        version += f"MDANSE_GUI version: {MDANSE_GUI.__version__}\n"
         _popup = QMessageBox.about(self, "MDANSE Version Information", version)
 
     def show_website_code(self):

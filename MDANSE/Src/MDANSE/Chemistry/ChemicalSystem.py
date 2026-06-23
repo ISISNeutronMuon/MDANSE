@@ -21,7 +21,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from functools import reduce
 from pathlib import Path
-from typing import Any, SupportsInt
+from typing import TYPE_CHECKING, Any, SupportsInt
 
 import h5py
 import networkx as nx
@@ -34,6 +34,11 @@ from rdkit.Geometry import Point3D
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def assign_molecules_after_atom_selection(
@@ -78,7 +83,7 @@ def assign_molecules_after_atom_selection(
 class ChemicalSystem:
     """Stores the contents and topology of a trajectory."""
 
-    def __init__(self, name: str = "", trajectory=None):
+    def __init__(self, name: str = "", trajectory: Trajectory | None = None):
         """Populate the arrays with values from the trajectory.
 
         Parameters
@@ -96,12 +101,12 @@ class ChemicalSystem:
         self._total_number_of_atoms = 0
         self._atom_types = []
         self._atom_names = None
-        self._atom_indices = []
+        self._atom_indices: list[int] = []
         self._labels = {}  # arbitrary tag attached to atoms (e.g. residue name)
 
-        self._bonds = []
+        self._bonds: list[tuple[SupportsInt, SupportsInt]] = []
 
-        self._clusters = {}
+        self._clusters: dict[str, list[list[int]]] = {}
 
         self.rdkit_mol = Chem.RWMol()
         # rdkit DetermineBondOrders doesn't work with dummy atoms. we
@@ -116,7 +121,7 @@ class ChemicalSystem:
     def __str__(self):
         return (
             f"ChemicalSystem {self.name} consisting of {len(self._atom_types)}"
-            " atoms in {len(self._clusters)} molecules"
+            f" atoms in {len(self._clusters)} molecules"
         )
 
     def initialise_atoms(
@@ -150,7 +155,7 @@ class ChemicalSystem:
             if atom.GetAtomicNum() == 0
         }
 
-    def add_atom(self, atm_num: int) -> int:
+    def add_atom(self, atm_num: int | None) -> int:
         rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
         rdkit_atm.SetNumExplicitHs(0)
         rdkit_atm.SetNoImplicit(True)
@@ -285,7 +290,7 @@ class ChemicalSystem:
             self._labels[key] = self._labels.get(key, []) + item
 
     @staticmethod
-    def _rename_isotopes(element: str):
+    def _rename_isotopes(element: str) -> str:
         if element[-1].isdigit():
             return f"[{element}]"
         return element
@@ -369,11 +374,12 @@ class ChemicalSystem:
             return self._atom_names
         return self._atom_types
 
-    def atom_property(self, atom_property: str) -> list[Any]:
+    def atom_property(self, atom_property: str) -> list[float | complex | str | None]:
         """Return the values of a specific property, for all atoms in the system."""
-        lookup = {}
-        for atom in self._unique_elements:
-            lookup[atom] = self._database.get_atom_property(atom, atom_property)
+        lookup = {
+            atom: self._database.get_atom_property(atom, atom_property)
+            for atom in self._unique_elements
+        }
         return [lookup[atom] for atom in self.atom_list]
 
     def grouping_level(self, index: int) -> int:
@@ -425,7 +431,7 @@ class ChemicalSystem:
         while len(atom_pool) > 0:
             last_atom = atom_pool.pop()
             temp_dict = nx.dfs_successors(total_graph, last_atom)
-            others = reduce(list.__add__, temp_dict.values(), [])
+            others = reduce(list.__iadd__, temp_dict.values(), [])
             for atom in others:
                 atom_pool.remove(atom)
             molecule = [last_atom, *others]
@@ -524,7 +530,7 @@ class ChemicalSystem:
         if not np.allclose(old_indices, self._atom_indices):
             LOG.error("Atoms got re-indexed on loading the trajectory")
 
-        self.add_bonds([[int(pair[0]), int(pair[1])] for pair in grp["bonds"][:]])
+        self.add_bonds([(int(pair[0]), int(pair[1])) for pair in grp["bonds"][:]])
 
         self._labels = {
             label: [int(tag) for tag in grp[f"labels/{label}"]]
@@ -564,7 +570,7 @@ class ChemicalSystem:
 
         bonds = grp["bonds"]
         bond_list = bonds[:]
-        self.add_bonds([[int(pair[0]), int(pair[1])] for pair in bond_list])
+        self.add_bonds([(int(pair[0]), int(pair[1])) for pair in bond_list])
 
         if "atom_clusters" in grp:
             cluster_list = []

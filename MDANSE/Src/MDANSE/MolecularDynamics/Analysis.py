@@ -15,18 +15,24 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
-from numpy.typing import NDArray
 from scipy.signal import correlate
 
 from MDANSE.Mathematics.Geometry import center_of_mass
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
 
 class AnalysisError(Exception):
     pass
 
 
-def mean_square_displacement(coords: np.ndarray, n_configs: int) -> NDArray[np.float64]:
+def mean_square_displacement(
+    coords: NDArray[np.floating], n_configs: int
+) -> NDArray[np.float64]:
     """Computes the mean square displacement of a set of coordinates
     using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.
 
@@ -50,35 +56,39 @@ def mean_square_displacement(coords: np.ndarray, n_configs: int) -> NDArray[np.f
     return msd
 
 
-def mean_square_fluctuation(coords: np.ndarray, root: bool = False) -> float:
-    """
-    Computes the mean-square fluctuation, or the root-mean-square fluctuation if root is set to True. The following
+def mean_square_fluctuation(coords: NDArray[np.floating], root: bool = False) -> float:
+    """Computes the mean-square fluctuation, or the root-mean-square fluctuation if root is set to True. The following
     equation is used:
     .. math:: MSF = \\frac{\\sum_{i=0} ^{n} \\sum_{x=1} ^{3}(coords_{i,x} - \\frac{\\sum_{j=0} ^{n}coords_{j,x}}{n})^2}{n}
     where n is the number of particles in the system and coords are is the array of coordinates.
 
-    :param coords: the coordinates whose MSF is to be calculated
-    :type coords: np.ndarray
+    Parameters
+    ----------
+    coords : np.ndarray
+        the coordinates whose MSF is to be calculated
+    root : bool
+        boolean value determining whether the result should be a square root or not
 
-    :param root: boolean value determining whether the result should be a square root or not
-    :type root: bool
+    Returns
+    -------
+    float
+        the mean-square fluctuation
 
-    :return: the mean-square fluctuation
-    :rtype: float
     """
     msf = np.average(np.sum((coords - np.average(coords, axis=0)) ** 2, axis=1))
 
     if root:
         msf = np.sqrt(msf)
 
-    return msf
+    return float(msf)
 
 
 def radius_of_gyration(
-    coords: np.ndarray, masses: np.ndarray = None, root: bool = False
+    coords: NDArray[np.floating],
+    masses: NDArray[np.floating] | None = None,
+    root: bool = False,
 ) -> float:
-    """
-    Computes the radius of gyration for a set of coordinates and their corresponding masses. If no masses are provided,
+    """Computes the radius of gyration for a set of coordinates and their corresponding masses. If no masses are provided,
     all masses are set to 1, in which case the ROG is equivalent to the centre of gravity. The following equation is
     used:
     .. math:: ROG = \\frac{\\sum_{i=0} ^{n}((\\sum_{x=1} ^{3} (coords_{i,x} - com_x)^2) * m_i)}{\\sum_{i=0} ^{n} m_i}
@@ -86,17 +96,20 @@ def radius_of_gyration(
     provided coordinate array, com are the coordinates of the centre of mass as calculated by
     :func: `MDANSE.Mathematics.Geometry.center_of_mass`, and m is the provided array of masses.
 
-    :param coords: the set of n coordinates.
-    :type coords: (n,3) numpy array
+    Parameters
+    ----------
+    coords : (n,3) numpy array
+        the set of n coordinates.
+    masses : (n,) numpy array
+        the n input masses. If None the center of gravity is computed.
+    root : bool
+        if True, return the square root of the radius of gyration.
 
-    :param masses: the n input masses. If None the center of gravity is computed.
-    :type masses: n-numpy array
+    Returns
+    -------
+    float
+        the radius of gyration
 
-    :param root: if True, return the square root of the radius of gyration.
-    :type root: bool
-
-    :return: the radius of gyration
-    :rtype: float
     """
 
     if masses is None:

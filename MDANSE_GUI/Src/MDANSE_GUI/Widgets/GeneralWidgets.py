@@ -16,9 +16,8 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import Iterable
 from pathlib import PurePath
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import (
@@ -42,6 +41,9 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 # I think that a Trajectory Converter should, in general,
 # create a Wizard and not a single Dialog.

@@ -16,8 +16,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import h5py
 
@@ -36,7 +35,11 @@ from MDANSE.Framework.AtomSelector.spatial_selection import (
 )
 from MDANSE.IO.IOUtils import json_handler
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 function_lookup = {
     function.__name__: function

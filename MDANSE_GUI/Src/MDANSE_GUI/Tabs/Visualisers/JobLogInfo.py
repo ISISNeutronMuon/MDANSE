@@ -15,12 +15,14 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from qtpy.QtCore import Slot
 
 from .TextInfo import TextInfo
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 ErrorTypes = Literal["WARNING", "ERROR", "CRITICAL", "DEBUG", "INFO"]
 

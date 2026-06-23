@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import random
 from functools import partial
 
 import numpy as np
@@ -64,9 +63,7 @@ class CircularLatticeQVectors(LatticeQVectors):
     )
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            np.random.seed(self._configuration["seed"]["value"])
-            random.seed(self._configuration["seed"]["value"])
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
         n_samples = self._configuration["n_samples"]["value"]
@@ -83,7 +80,7 @@ class CircularLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            samples = circle_of_vectors(q, width, n_samples, rot_mat=rot_mat)
+            samples = circle_of_vectors(q, width, n_samples, rot_mat=rot_mat, rng=rng)
             lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
                 samples,
                 self._unit_cell,
@@ -106,7 +103,15 @@ class CircularLatticeQVectors(LatticeQVectors):
             selection = fpsampling(
                 q_vectors.T,
                 nvecs_per_shell,
-                partial(circle_of_vectors, q=1, q_width=0, n_vecs=1, rot_mat=rot_mat),
+                partial(
+                    circle_of_vectors,
+                    q=1,
+                    q_width=0,
+                    n_vecs=1,
+                    rot_mat=rot_mat,
+                    rng=rng,
+                ),
+                rng,
             )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
@@ -114,7 +119,9 @@ class CircularLatticeQVectors(LatticeQVectors):
             if self._configuration["force_equal_weights"]["value"]:
                 weights = np.ones(q_vectors.shape[1])
             else:
-                samples = circle_of_vectors(q, width, n_samples, rot_mat=rot_mat)
+                samples = circle_of_vectors(
+                    q, width, n_samples, rot_mat=rot_mat, rng=rng
+                )
                 tree = KDTree(q_vectors.T)
                 _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])

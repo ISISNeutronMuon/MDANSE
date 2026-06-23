@@ -49,6 +49,7 @@ def circle_of_vectors(
     q_width: float,
     n_vecs: int,
     rot_mat: npt.NDArray[float] | None,
+    rng: np.random.Generator,
 ) -> npt.NDArray[float]:
     """Generate vectors on a circle in plane.
 
@@ -65,13 +66,15 @@ def circle_of_vectors(
         Number of vectors to generate.
     rot_mat : npt.NDArray[float] | None
         Rotation matrix to be applied to the generated points.
+    rng : np.random.Generator
+        A numpy random number generator object.
 
     Returns
     -------
     npt.NDArray[float]
         Array of 3D vectors in a circle with an arbitrary orientation.
     """
-    parameter_points = np.random.uniform(0.0, 2 * np.pi, n_vecs)
+    parameter_points = rng.uniform(0.0, 2 * np.pi, n_vecs)
     regular_circle = np.vstack(
         (
             np.sin(parameter_points),
@@ -83,7 +86,7 @@ def circle_of_vectors(
         regular_circle = np.dot(rot_mat, regular_circle)
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
-    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q, rng=rng)
     return np.array(all_radii)[None, :n_vecs] * regular_circle
 
 
@@ -117,8 +120,7 @@ class CircularQVectors(IQVectors):
     )
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            np.random.seed(self._configuration["seed"]["value"])
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
         target_circle_axis = self._configuration["axis"]["value"] / np.linalg.norm(
@@ -134,7 +136,9 @@ class CircularQVectors(IQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            q_vectors = circle_of_vectors(q, width, nvecs_per_shell, rot_mat=rot_mat)
+            q_vectors = circle_of_vectors(
+                q, width, nvecs_per_shell, rot_mat=rot_mat, rng=rng
+            )
             self._configuration["q_vectors"][q] = {
                 "q_vectors": q_vectors,
                 "n_q_vectors": nvecs_per_shell,

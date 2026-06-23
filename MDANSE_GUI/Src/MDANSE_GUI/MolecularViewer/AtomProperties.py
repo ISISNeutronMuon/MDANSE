@@ -15,13 +15,16 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 import vtk
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 from vtk.util.numpy_support import numpy_to_vtk
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 RGB_COLOURS = []
 RGB_COLOURS.append((1.00, 0.20, 1.00))  # selection

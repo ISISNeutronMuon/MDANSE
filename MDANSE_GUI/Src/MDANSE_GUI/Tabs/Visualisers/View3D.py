@@ -15,12 +15,17 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
 from MDANSE_GUI.MolecularViewer import MolecularViewer
 from MDANSE_GUI.MolecularViewer.Controls import ViewerControls
+
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
+    from MDANSE_GUI.MolecularViewer.MolecularViewer import MolecularViewer
 
 
 class View3D(QWidget):

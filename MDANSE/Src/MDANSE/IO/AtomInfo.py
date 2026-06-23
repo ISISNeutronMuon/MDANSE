@@ -16,9 +16,12 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 from MDANSE.Chemistry import ATOMS_DATABASE, AtomsDatabase
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 WIDTH = 70
 

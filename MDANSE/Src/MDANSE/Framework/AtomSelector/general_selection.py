@@ -16,8 +16,10 @@
 from __future__ import annotations
 
 from collections import Counter
+from typing import TYPE_CHECKING
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def select_all(trajectory: Trajectory, **_kwargs: str) -> set[int]:

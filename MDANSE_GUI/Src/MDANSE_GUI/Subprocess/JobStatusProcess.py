@@ -18,15 +18,18 @@ from __future__ import annotations
 import os
 import time
 from contextlib import suppress
-from multiprocessing import Queue
-from multiprocessing.connection import Connection
-from multiprocessing.synchronize import Event
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QObject, Signal, Slot
 
 from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
 from MDANSE.Framework.Status import Status
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from multiprocessing import Queue
+    from multiprocessing.connection import Connection
+    from multiprocessing.synchronize import Event
 
 
 class JobCommunicator(QObject):

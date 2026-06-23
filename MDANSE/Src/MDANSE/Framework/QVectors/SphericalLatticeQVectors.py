@@ -55,8 +55,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
     settings["width"] = ("FloatConfigurator", {"mini": 1.0e-6, "default": 1.0})
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            np.random.seed(self._configuration["seed"]["value"])
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         width = self._configuration["width"]["value"]
 
@@ -69,7 +68,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            samples = spherical_vectors(q, width, n_samples)
+            samples = spherical_vectors(q, width, n_samples, rng)
             lattice_hkl_vectors, _ = self.lattice_vectors_with_weights(
                 samples,
                 self._unit_cell,
@@ -93,6 +92,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
                 q_vectors.T,
                 nvecs_per_shell,
                 partial(spherical_vectors, q=1, q_width=0, n_vecs=1),
+                rng,
             )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
             q_vectors = q_vectors.T[selection].T
@@ -100,7 +100,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
             if self._configuration["force_equal_weights"]["value"]:
                 weights = np.ones(q_vectors.shape[1])
             else:
-                samples = spherical_vectors(q, width, n_samples)
+                samples = spherical_vectors(q, width, n_samples, rng)
                 tree = KDTree(q_vectors.T)
                 _, indices = tree.query(samples.T)
                 weights = np.bincount(indices, minlength=q_vectors.shape[1])

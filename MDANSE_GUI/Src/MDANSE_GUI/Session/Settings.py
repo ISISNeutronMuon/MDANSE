@@ -16,9 +16,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 import tomlkit
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
@@ -28,6 +27,9 @@ from tomlkit.toml_file import TOMLFile
 
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 T = TypeVar("T")
 DEFAULT_SETTINGS_PATH = PLATFORM.application_directory()

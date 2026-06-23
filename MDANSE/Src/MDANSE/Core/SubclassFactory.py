@@ -18,18 +18,12 @@ from __future__ import annotations
 import difflib
 from typing import TypeVar
 
-Self = TypeVar("Self", bound="SubclassFactory")
-# The Self TypeVar is a typing hint indicating that
-# a method of a class A will be returning an object
-# of type A as well. Since we don't know for which class
-# the SubclassFactory metaclass will be used, the return
-# type has to be defined this way.
-# NOTE: the later versions of Python (3.11) define Self
-# as a type explicitly, but for now we have to define it
-# ourselves.
+from typing_extensions import Self
 
 
-def single_search(parent_class: type, name: str, case_sensitive: bool = False):
+def single_search(
+    parent_class: SubclassFactory, name: str, case_sensitive: bool = False
+):
     """Finds a subclass of a parent class in the
     by searching the _registered_subclasses dictionary.
 
@@ -53,7 +47,7 @@ def single_search(parent_class: type, name: str, case_sensitive: bool = False):
     return None
 
 
-def recursive_search(parent_class: type, name: str):
+def recursive_search(parent_class: SubclassFactory, name: str):
     """Recursively searches _registered_subclasses dictionaries,
     allowing the parent class to find a subclass of a subclass as
     well as direct subclasses.
@@ -77,7 +71,7 @@ def recursive_search(parent_class: type, name: str):
                 return return_type
 
 
-def recursive_keys(parent_class: type) -> list:
+def recursive_keys(parent_class: SubclassFactory) -> list:
     """Returns a list of class names of all the subclasses
     of a class created with SubclassFactory metaclass.
     This includes subclasses of subclasses.
@@ -98,7 +92,7 @@ def recursive_keys(parent_class: type) -> list:
         return results
 
 
-def recursive_dict(parent_class: type) -> dict:
+def recursive_dict(parent_class: SubclassFactory) -> dict:
     """Returns a dictionary of {str: type}
     of classes derived from the parent_class. The class name (str)
     is the key, and the class itself is a value.
@@ -137,7 +131,7 @@ class SubclassFactory(type):
         cls._registered_subclasses = {}
 
         @classmethod
-        def __init_subclass__(cls, **kwargs):
+        def __init_subclass__(cls, **kwargs) -> None:
             regkey = cls.__name__
             super().__init_subclass__(**kwargs)
             cls._registered_subclasses[regkey] = cls

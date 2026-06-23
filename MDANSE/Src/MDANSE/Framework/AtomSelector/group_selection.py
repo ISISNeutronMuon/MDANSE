@@ -15,11 +15,14 @@
 #
 from __future__ import annotations
 
-from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 from more_itertools import value_chain
 
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 def select_labels(

@@ -20,7 +20,7 @@ from abc import ABC, abstractmethod
 from collections import namedtuple
 from copy import copy
 from enum import Enum
-from typing import TYPE_CHECKING, ClassVar, Final, Literal, NamedTuple
+from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NamedTuple
 
 import numpy as np
 import numpy.typing as npt
@@ -288,7 +288,7 @@ class FrequencyDomain(NamedTuple):
 class Filter(ABC):
     """Base class for a filter operating on a signal."""
 
-    default_settings = {}
+    default_settings: dict[str, Any] = {}
 
     # Symbolic variable for analog filter transfer function (Laplace plane)
     S = "iw"
@@ -1103,7 +1103,7 @@ class Comb(Filter):
         self.set_freq_response(Filter.FrequencyRangeMethod.FFT)
 
 
-FILTERS: Final = (
+FILTERS: Final[tuple[type[Filter], ...]] = (
     Butterworth,
     ChebyshevTypeI,
     ChebyshevTypeII,
@@ -1113,7 +1113,7 @@ FILTERS: Final = (
     Peak,
 )
 
-FILTER_MAP: dict[str, type[Filter]] = {
+FILTER_MAP: Final[dict[str, type[Filter]]] = {
     filter_class.__name__: filter_class for filter_class in FILTERS
 }
 
@@ -1126,7 +1126,7 @@ DEFAULT_TIME_STEP: Final[float] = 0.005
 DEFAULT_N_STEPS: Final[int] = 320
 
 
-def filter_default_attributes(filter=DEFAULT_FILTER):
+def filter_default_attributes(filter: type[Filter] = DEFAULT_FILTER) -> dict[str, Any]:
     """Get the filter-specific settings dictionary for a filter class.
 
     Parameters
@@ -1149,8 +1149,8 @@ DEFAULT_FILTER_PARAMS = filter_default_attributes(DEFAULT_FILTER)
 
 
 def filter_description_string(
-    filter=DEFAULT_FILTER,
-    settings=DEFAULT_FILTER_PARAMS,
+    filter: type[Filter] = DEFAULT_FILTER,
+    settings: dict[str, Any] = DEFAULT_FILTER_PARAMS,
 ) -> str:
     """Convert a filter class and filter settings dictionary to a string.
 

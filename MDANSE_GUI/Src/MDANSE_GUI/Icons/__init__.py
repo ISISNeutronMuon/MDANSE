@@ -15,10 +15,13 @@
 #
 from __future__ import annotations
 
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QDir
 from qtpy.QtGui import QIcon
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class PyQtIcons:

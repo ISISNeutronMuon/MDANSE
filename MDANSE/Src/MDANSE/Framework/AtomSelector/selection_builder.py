@@ -16,14 +16,17 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Iterable, Sequence
 from enum import Enum, auto
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.IO.IOUtils import json_handler
-from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+    from pathlib import Path
+
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
 class OperationType(Enum):

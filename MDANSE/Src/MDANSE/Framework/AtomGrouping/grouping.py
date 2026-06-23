@@ -16,13 +16,17 @@
 from __future__ import annotations
 
 import itertools as it
-from collections.abc import Callable, Iterable
+from typing import TYPE_CHECKING
 
-import numpy.typing as npt
-
-from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.Mathematics.Arithmetic import weighted_sum
 from MDANSE.MolecularDynamics.Trajectory import GroupingLevels, Trajectory
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
+    import numpy.typing as npt
+
+    from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 
 GROUP_TEMPLATE = "{}/<{}>/{}"
 PAIR_GROUP_TEMPLATE = "{}/<{}><{}>/{}"

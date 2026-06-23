@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import copy
 import functools
-from collections.abc import Iterable
 from contextlib import suppress
 from itertools import islice
 from math import prod
@@ -40,7 +39,7 @@ from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
-    import h5py
+    from collections.abc import Iterable
 
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
@@ -169,14 +168,14 @@ class SingleDataset:
     def _(
         self,
         _source: None,
-        data: npt.NDArray[float],
+        data: npt.NDArray[np.floating],
         *,
         data_unit: str = "none",
         scaling_factor: float = 1.0,
-        plot_axes: dict[str, npt.NDArray[float]] | None = None,
+        plot_axes: dict[str, npt.NDArray[np.floating]] | None = None,
         axes_units: dict[str, str] | None = None,
-        yerror: npt.NDArray[float] | None = None,
-        xerror: npt.NDArray[float] | None = None,
+        yerror: npt.NDArray[np.floating] | None = None,
+        xerror: npt.NDArray[np.floating] | None = None,
         optional_filename: str = "no file",
         uneven_array: bool = False,
     ) -> None:
@@ -186,19 +185,19 @@ class SingleDataset:
 
         Parameters
         ----------
-        data : npt.NDArray[float]
+        data : npt.NDArray[np.floating]
             The data to be plotted. An N-dimensional array, N<=3
         data_unit : str, optional
             Physical unit of the values in the data array
         scaling_factor : float, optional
             Data will be scaled by this factor if requested, by default 1.0
-        plot_axes : dict[str, npt.NDArray[float]] | None, optional
+        plot_axes : dict[str, npt.NDArray[np.floating]] | None, optional
             Dictionary of axis_name: axis_array pairs, by default None
         axes_units : dict[str, str] | None, optional
             Dictionary of axis_name: axis_unit pairs, by default None
-        yerror: npt.NDArray[float] | None = None
+        yerror: npt.NDArray[np.floating] | None = None
             Vertical error bars associated with the data points.
-        xerror: npt.NDArray[float] | None = None
+        xerror: npt.NDArray[np.floating] | None = None
             Horizontal error bars associated with the data points.
         optional_filename: str = "no file"
             File name to be displayed as the origin of this data set.
@@ -220,11 +219,13 @@ class SingleDataset:
             self._data = np.real(data)
             self._n_dim = len(self._data.shape)
             self._data_shape = self._data.shape
+
         self._scaling_factor = scaling_factor
         self._xerror = xerror
         self._yerror = yerror
 
         self._data_unit = data_unit
+
         if plot_axes is None:
             for ax_number, npoints in enumerate(self._data.shape):
                 axis_key = f"index{ax_number}"
@@ -235,6 +236,7 @@ class SingleDataset:
                 self._current_units[axis_key] = self._axes_units[axis_key]
             self._axes_tag = "|".join([str(x) for x in self._axes])
             return
+
         for axis_key, axis_array in plot_axes.items():
             self._axes_tag = "|".join([str(x) for x in plot_axes])
             self._axes[axis_key] = axis_array

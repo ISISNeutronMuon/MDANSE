@@ -1,6 +1,6 @@
-#    This file is part of MDANSE_GUI.
+#    This file is part of MDANSE.
 #
-#    MDANSE_GUI is free software: you can redistribute it and/or modify
+#    MDANSE is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
@@ -17,24 +17,20 @@ from __future__ import annotations
 
 import os
 
-os.environ.update(
-    {
-        "OMP_NUM_THREADS": "1",
-        "OPENBLAS_NUM_THREADS": "1",
-        "MKL_NUM_THREADS": "1",
-        "VECLIB_MAXIMUM_THREADS": "1",
-        "NUMEXPR_NUM_THREADS": "1",
-    }
-)
 
-from ._version import get_version
+def get_version():
+    """Get MDANSE version.
 
-__version__ = get_version()
+    If not in git, return static version.
+    """
+    if version := os.getenv("MDANSE_VERSION"):
+        return version
 
-import warnings
+    try:
+        from setuptools_git_versioning import version_from_git
 
-warnings.filterwarnings("ignore")
+        return version_from_git()
+    except Exception:
+        from importlib.metadata import version
 
-import vtk
-
-vtk.vtkObject.GlobalWarningDisplayOff()
+        return version("MDANSE")

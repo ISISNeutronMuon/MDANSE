@@ -21,7 +21,9 @@ import numpy.typing as npt
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
-def spherical_vectors(q: float, q_width: float, n_vecs: int) -> npt.NDArray[float]:
+def spherical_vectors(
+    q: float, q_width: float, n_vecs: int, rng: np.random.Generator
+) -> npt.NDArray[float]:
     """Generate vectors on a sphere.
 
     The distribution should be uniform in angles, and normal in the
@@ -35,6 +37,8 @@ def spherical_vectors(q: float, q_width: float, n_vecs: int) -> npt.NDArray[floa
         The width of the |q| distribution.
     n_vecs : int
         Number of vectors to generate.
+    rng : np.random.Generator
+        A numpy random number generator object.
 
     Returns
     -------
@@ -43,9 +47,8 @@ def spherical_vectors(q: float, q_width: float, n_vecs: int) -> npt.NDArray[floa
     """
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
-    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q, rng=rng)
     radii = np.array(all_radii)[:n_vecs]
-    rng = np.random.default_rng()
     theta = np.arccos(2 * rng.random(size=n_vecs) - 1)
     phi = 2 * np.pi * rng.random(size=n_vecs)
     return np.vstack(
@@ -83,8 +86,7 @@ class SphericalQVectors(IQVectors):
     settings["width"] = ("FloatConfigurator", {"mini": 0.0, "default": 1.0})
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            np.random.seed(self._configuration["seed"]["value"])
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         width = self._configuration["width"]["value"]
 
@@ -96,7 +98,7 @@ class SphericalQVectors(IQVectors):
             self._status.start(len(self._configuration["shells"]["value"]))
 
         for q in self._configuration["shells"]["value"]:
-            q_vectors = spherical_vectors(q, width, nvecs_per_shell)
+            q_vectors = spherical_vectors(q, width, nvecs_per_shell, rng)
 
             self._configuration["q_vectors"][q] = {
                 "q_vectors": q_vectors,

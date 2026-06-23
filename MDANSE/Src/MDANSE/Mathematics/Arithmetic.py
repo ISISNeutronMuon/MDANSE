@@ -16,9 +16,12 @@
 from __future__ import annotations
 
 import itertools
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
-import numpy as np
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    import numpy as np
 
 
 def get_weights(

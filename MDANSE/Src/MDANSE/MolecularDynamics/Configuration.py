@@ -22,11 +22,12 @@ from typing import TYPE_CHECKING
 
 import networkx as nx
 import numpy as np
-from numpy.typing import ArrayLike
 
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -731,19 +732,3 @@ class RealConfiguration(_Configuration):
         :rtype: :class: `MDANSE.MolecularDynamics.Configuration.RealConfiguration`
         """
         return self
-
-
-if __name__ == "__main__":
-    np.random.seed(1)
-
-    n_atoms = 2
-    cs = ChemicalSystem()
-    cs.initialise_atoms(["H", "H"])
-
-    coordinates = np.empty((n_atoms, 3), dtype=float)
-    coordinates[0, :] = [1, 1, 1]
-    coordinates[1, :] = [3, 3, 3]
-
-    uc = np.array([[10.0, 0.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 10.0]])
-
-    conf = RealConfiguration(cs, coordinates)

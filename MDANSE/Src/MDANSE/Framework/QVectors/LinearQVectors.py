@@ -21,7 +21,13 @@ import numpy.typing as npt
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
 
 
-def linear_vectors(q: float, q_width: float, n_vecs: int, axis: npt.NDArray[float]):
+def linear_vectors(
+    q: float,
+    q_width: float,
+    n_vecs: int,
+    axis: npt.NDArray[float],
+    rng: np.random.Generator,
+):
     """Generate vectors on a line.
 
     The distribution will be normal in the |q| values around the
@@ -37,6 +43,8 @@ def linear_vectors(q: float, q_width: float, n_vecs: int, axis: npt.NDArray[floa
         Number of vectors to generate.
     axis: npt.NDArray[float]
         Defines a line in space on which the vectors are generated.
+    rng : np.random.Generator
+        A numpy random number generator object.
 
     Returns
     -------
@@ -45,7 +53,7 @@ def linear_vectors(q: float, q_width: float, n_vecs: int, axis: npt.NDArray[floa
     """
     qmin = max(0.01 * abs(q), q - q_width / 2)
     qmax = q + q_width / 2
-    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q)
+    all_radii = truncated_normal_distribution(n_vecs, qmin, qmax, q_width, q, rng=rng)
     fact = np.array(all_radii)[:n_vecs]
     return axis[:, np.newaxis] * fact
 
@@ -80,8 +88,7 @@ class LinearQVectors(IQVectors):
     )
 
     def _generate(self):
-        if self._configuration["seed"]["value"] != 0:
-            np.random.seed(self._configuration["seed"]["value"])
+        rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         axis = self._configuration["axis"]["vector"].array
 
@@ -95,7 +102,7 @@ class LinearQVectors(IQVectors):
         self._configuration["q_vectors"] = {}
 
         for q in self._configuration["shells"]["value"]:
-            q_vectors = linear_vectors(q, width, nvecs_per_shell, axis)
+            q_vectors = linear_vectors(q, width, nvecs_per_shell, axis, rng)
 
             self._configuration["q_vectors"][q] = {
                 "q_vectors": q_vectors,

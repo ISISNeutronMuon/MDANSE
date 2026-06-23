@@ -15,12 +15,13 @@
 #
 from __future__ import annotations
 
-import importlib.metadata
 import os
 import warnings
 
 import MDANSE.Framework
 from MDANSE.Core.Platform import PLATFORM
+
+from ._version import get_version
 
 # Limit underlying math libraries (OpenMP, BLAS, MKL, etc.) to use only 1 thread
 # to prevent them from creating many worker threads and overloading the CPU.
@@ -34,6 +35,6 @@ os.environ.update(
     }
 )
 
-__version__ = importlib.metadata.version("MDANSE")
+__version__ = str(get_version())
 
 warnings.filterwarnings("ignore")
