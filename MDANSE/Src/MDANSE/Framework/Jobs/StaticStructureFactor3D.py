@@ -29,6 +29,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 
 
+@IJob.register("StaticStructureFactor3D")
 class StaticStructureFactor3D(IJob):
     label = "Static Structure Factor 3D"
 
