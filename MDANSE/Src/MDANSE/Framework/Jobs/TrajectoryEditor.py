@@ -24,14 +24,8 @@ from MDANSE.Chemistry.ChemicalSystem import (
 )
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.MolecularDynamics.Configuration import (
-    AbsoluteConfiguration,
-    PeriodicAbsoluteConfiguration,
-    contiguous_coordinates_absolute,
-)
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
-from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
@@ -107,25 +101,43 @@ class TrajectoryEditor(IJob):
             "format": "MDTFormat",
         },
     )
-    settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):
         """
         Initialize the input parameters and analysis self variables
         """
         super().initialize()
-        n_proc = self.configuration["running_mode"].get("slots", 1)
-
-        self.grouped_indices = group_atom_indices(
-            self.trajectory, n_proc=n_proc, memory_scale_factor=8
-        )
-        self.numberOfSteps = len(self.grouped_indices)
 
         self.number_of_frames = self.configuration["frames"]["number"]
         self._input_trajectory = self.trajectory
         self._input_chemical_system = self.configuration["trajectory"][
             "instance"
         ].chemical_system
+
+        chunk_size = self.configuration["output_files"]["chunk_size"]
+        atoms_per_chunk = chunk_size[0] if isinstance(chunk_size, tuple) else chunk_size
+        frames_per_chunk = chunk_size[1] if isinstance(chunk_size, tuple) else 1
+
+        n_time_steps = np.ceil(self.number_of_frames / frames_per_chunk).astype(int)
+
+        self.grouped_indices = list(
+            more_itertools.chunked(self.trajectory.atom_indices, atoms_per_chunk)
+        )
+        self.numberOfSteps = len(self.grouped_indices) * n_time_steps
+        self.n_atom_chunks = len(self.grouped_indices)
+        self.n_frame_chunks = n_time_steps
+        self.atoms_per_chunk = atoms_per_chunk
+        self.frames_per_chunk = frames_per_chunk
+        self.grouped_frames = list(
+            more_itertools.chunked(
+                range(
+                    self.configuration["frames"]["first"],
+                    self.configuration["frames"]["last"] + 1,
+                    self.configuration["frames"]["step"],
+                ),
+                frames_per_chunk,
+            )
+        )
 
         if self.configuration["unit_cell"]["apply"]:
             self._new_unit_cell = UnitCell(
@@ -165,16 +177,6 @@ class TrajectoryEditor(IJob):
             self.cluster_indices = list(
                 more_itertools.flatten(new_chemical_system.clusters.values())
             )
-        conf = self.trajectory.configuration(self.configuration["frames"]["value"][0])
-        if conf.is_periodic:
-            self.ref_coords = contiguous_coordinates_absolute(
-                conf.coordinates,
-                cell=conf._unit_cell.direct,
-                rcell=conf._unit_cell.inverse,
-                indices=self.cluster_indices,
-            )
-        else:
-            self.ref_coords = conf.coordinates
 
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
@@ -197,77 +199,110 @@ class TrajectoryEditor(IJob):
             #. index (int): The index of the step.
             #. None
         """
-        atom_index_group = self.grouped_indices[index]
-        n_atoms = len(atom_index_group)
 
-        series = self.trajectory.read_atomic_trajectory_many(
-            atom_index_group,
-            first=self.configuration["frames"]["first"],
-            last=self.configuration["frames"]["last"] + 1,
-            step=self.configuration["frames"]["step"],
-            reference=self.ref_coords[atom_index_group],
+        chunk_index = index % self.n_atom_chunks
+        frame_index = index // self.n_atom_chunks
+
+        atom_index_group = self.grouped_indices[chunk_index]
+        frame_index_group = self.grouped_frames[frame_index]
+
+        if len(frame_index_group) == 1:
+            frame_index_slice = slice(frame_index_group[0], frame_index_group[0] + 1)
+        else:
+            frame_index_slice = slice(
+                frame_index_group[0],
+                frame_index_group[-1] + 1,
+                frame_index_group[1] - frame_index_group[0],
+            )
+
+        target_atoms = slice(
+            chunk_index * self.atoms_per_chunk, (chunk_index + 1) * self.atoms_per_chunk
         )
-        variables = {}
+        target_frames = slice(
+            frame_index * self.frames_per_chunk,
+            (frame_index + 1) * self.frames_per_chunk,
+        )
+        target_frame_list = list(
+            range(
+                frame_index * self.frames_per_chunk,
+                min((frame_index + 1) * self.frames_per_chunk, self.number_of_frames),
+            )
+        )
+
+        series = self.trajectory.coordinates(frame_index_slice, atom_index_group)
+        self._output_trajectory.write_array_fragment(
+            series,
+            "coordinates",
+            atom_indices=target_atoms,
+            frame_indices=target_frames,
+        )
         if self.trajectory.has_variable("velocities"):
             velocity_series = self.trajectory.read_configuration_trajectory(
                 atom_index_group,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
+                slc=frame_index_slice,
                 variable="velocities",
+            )
+            self._output_trajectory.write_array_fragment(
+                velocity_series,
+                "velocities",
+                atom_indices=target_atoms,
+                frame_indices=target_frames,
             )
         if self.trajectory.has_variable("gradients"):
             gradient_series = self.trajectory.read_configuration_trajectory(
                 atom_index_group,
-                first=self.configuration["frames"]["first"],
-                last=self.configuration["frames"]["last"] + 1,
-                step=self.configuration["frames"]["step"],
+                slc=frame_index_slice,
                 variable="gradients",
+            )
+            self._output_trajectory.write_array_fragment(
+                gradient_series,
+                "gradients",
+                atom_indices=target_atoms,
+                frame_indices=target_frames,
             )
 
         # get the Frame index
-        frameIndex = self.configuration["frames"]["value"][index]
-
-        conf = self.trajectory.configuration(frameIndex)
-        conf = conf.contiguous_configuration(self.grouped_indices, bring_to_centre=True)
-        charges = self.trajectory.charges(frameIndex)
-        coords = conf.coordinates
-
-        variables = {}
-        if self.trajectory.has_variable("velocities"):
-            variables["velocities"] = self.trajectory.variable("velocities")[
-                frameIndex, self._indices, :
-            ].astype(np.float64)
-        if self.trajectory.has_variable("gradients"):
-            variables["gradients"] = self.trajectory.variable("gradients")[
-                frameIndex, self._indices, :
-            ].astype(np.float64)
-
-        if conf.is_periodic:
-            com_conf = PeriodicAbsoluteConfiguration(
-                coords[self._indices],
-                conf.unit_cell,
-                **variables,
-            )
-        else:
-            com_conf = AbsoluteConfiguration(
-                coords[self._indices],
-                **variables,
+        for frame_index, target_index in zip(
+            frame_index_group, target_frame_list, strict=True
+        ):
+            charges = self.trajectory.charges(frame_index)
+            new_charges = np.zeros(len(atom_index_group))
+            for number, at_index in enumerate(atom_index_group):
+                try:
+                    q = self.configuration["atom_charges"]["charges"][at_index]
+                except KeyError:
+                    q = charges[at_index]
+                new_charges[number] = q
+            self._output_trajectory.write_charges(
+                new_charges, target_index, atom_indices=target_atoms
             )
 
-        new_charges = np.zeros(len(self._indices))
-        for number, at_index in enumerate(self._indices):
-            try:
-                q = self.configuration["atom_charges"]["charges"][at_index]
-            except KeyError:
-                q = charges[at_index]
-            new_charges[number] = q
+        if chunk_index:
+            return index, None
 
-        # The times corresponding to the running index.
-        time = self.configuration["frames"]["time"][index]
+        unit_cell_frames = []
+        unit_cell_list = []
+        for frame_index, target_index in zip(
+            frame_index_group, target_frame_list, strict=True
+        ):
+            unit_cell = self.trajectory.unit_cell(frame_index)
+            if unit_cell is None:
+                continue
+            unit_cell_frames.append(target_index)
+            unit_cell_list.append(unit_cell.direct)
+        if unit_cell_frames:
+            unit_cell_data = np.array(unit_cell_list)
+            self._output_trajectory.write_array_fragment(
+                unit_cell_data,
+                "unit_cell",
+                atom_indices=target_atoms,
+                frame_indices=unit_cell_frames,
+            )
 
-        self._output_trajectory.dump_configuration(com_conf, time)
-        self._output_trajectory.write_charges(new_charges, index)
+        time = self.trajectory.time()[frame_index_group]
+        self._output_trajectory.write_array_fragment(
+            time, "time", atom_indices=target_atoms, frame_indices=target_frames
+        )
 
         return index, None
 
