@@ -127,7 +127,7 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
     for k in traj.variables():
         v = traj.variable(k)
         try:
-            val.append(f"\t- {k}: {v.shape}")
+            val.append(f"\t- {k}: {v.shape} in chunks of {v.chunks}")
         except AttributeError:
             try:
                 val.append(f"\t- {k}: {v['value'].shape}")
