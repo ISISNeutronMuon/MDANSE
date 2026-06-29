@@ -20,7 +20,7 @@ import traceback
 from itertools import count
 from logging import Handler
 from logging.handlers import QueueListener
-from multiprocessing import Event, Pipe, Process, Queue
+from multiprocessing import Event, Process, get_context
 from typing import Any, NamedTuple
 
 from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
@@ -320,10 +320,11 @@ class JobHolder(QStandardItemModel):
     def startProcess(
         self, job_vars: tuple[str, dict[str, Any]], load_afterwards: bool = False
     ):
-        log_queue = Queue()
+        ctx = get_context("spawn")
+        log_queue = ctx.Queue()
 
-        main_pipe, child_pipe = Pipe()
-        pause_event = Event()
+        main_pipe, child_pipe = ctx.Pipe()
+        pause_event = ctx.Event()
         entry_number = next(self.job_number)
 
         job_name, job_params = job_vars

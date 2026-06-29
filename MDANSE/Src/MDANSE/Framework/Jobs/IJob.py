@@ -30,11 +30,10 @@ from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from logging import FileHandler
 from logging.handlers import QueueHandler, QueueListener
-from multiprocessing import Queue
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
 
-from more_itertools import consumer, first_true
+from more_itertools import consumer
 
 from MDANSE import PLATFORM
 from MDANSE.Core.RegisterFactory import RegisterFactory
