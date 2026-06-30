@@ -18,24 +18,37 @@ from __future__ import annotations
 import json
 import re
 from collections import UserDict
+from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from enum import Enum
 from functools import singledispatch
-from itertools import filterfalse
+from itertools import count, filterfalse, islice
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
 
 import numpy as np
 from more_itertools import first_true, last, take, value_chain
 
 from MDANSE.MLogging import LOG
 
-if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator, Sequence
-
 K = TypeVar("K", str, bytes)
 V = TypeVar("V")
 
 MAX_FILE_COUNT = 2048
+
+
+class SupportsStr(Protocol):
+    """Any class which supports __str__ method"""
+
+    def __str__(self) -> str: ...
+
+
+class SupportsRepr(Protocol):
+    """Any class which supports __repr__ method"""
+
+    def __repr__(self) -> str: ...
+
+
+SupportsFormat = SupportsStr | SupportsRepr
 
 
 class UCDict(UserDict[K, V]):
@@ -382,6 +395,87 @@ def summarise_array(
     return ", ".join(value_chain(take(show, arr), "...", last(arr)))
 
 
+@overload
+def get_next_name(
+    template: str,
+    *,
+    exists: Collection[str] | Callable[[str], bool],
+    trial: Iterable[SupportsFormat] | None = ...,
+    max_tries: int | None = ...,
+    default: None = ...,
+    **kwargs: SupportsFormat,
+) -> str | None: ...
+@overload
+def get_next_name(
+    template: str,
+    *,
+    exists: Collection[str] | Callable[[str], bool],
+    trial: Iterable[SupportsFormat] | None = ...,
+    max_tries: int | None = ...,
+    default: str = ...,
+    **kwargs: SupportsFormat,
+) -> str: ...
+def get_next_name(
+    template: str,
+    *,
+    exists: Collection[str] | Callable[[str], bool],
+    trial: Iterable[SupportsFormat] | None = None,
+    max_tries: int | None = None,
+    default: str | None = None,
+    **kwargs: SupportsFormat,
+) -> str | None:
+    """Return the first unused name given rules for next in sequence and invalid values.
+
+    Parameters
+    ----------
+    template : str
+        Base format string to modify, must contain ``trial`` field.
+    exists : Collection[str] | Callable[[str], bool]
+        Set of existing values to skip or :ref:`Callable` determining existance.
+    trial : Iterable[SupportsFormat], optional
+        Set/Generator of trial values to use. If ``None`` defaults to :ref:`itertools.count`.
+    max_tries : int, optional
+        Number of attempts to generate, unlimited if ``None``.
+    default : str, optional
+        Default to return if ``max_tries`` reached or ``trial`` exhausted.
+    **kwargs : SupportsFormat
+        Extra substitutions to pass into template.
+
+    Returns
+    -------
+    str | None
+        Next unused name.
+
+    Notes
+    -----
+    The special value which is substituted is named "trial".
+
+    Examples
+    --------
+    >>> tpl = "hello_{trial}"
+    >>> get_next_name(tpl, exists=())
+    'hello_1'
+    >>> get_next_name(tpl, exists=lambda x: x[-1] != "6")
+    'hello_6'
+    >>> get_next_name(tpl, exists={"hello_1", "hello_2"})
+    'hello_3'
+    >>> get_next_name(tpl, exists={"hello_1", "hello_2"}, max_tries=1, default="Argh!")
+    'Argh!'
+    >>> get_next_name("{a}_hello_{trial}", exists=(), a="big")
+    'big_hello_1'
+    """
+    if trial is None:
+        trial = count(1)
+
+    if isinstance(exists, Collection):
+        exists = exists.__contains__
+
+    gen = (template.format(trial=elem, **kwargs) for elem in trial)
+    return first_true(
+        islice(gen, max_tries), pred=lambda x: not exists(x), default=default
+    )
+
+
 def unused_standard_output_filename(
     path_stem: Path, job_name: str, extra_text: str = "_result", extension: str = ".mda"
 ) -> Path | None:
@@ -407,10 +501,10 @@ def unused_standard_output_filename(
     Path | None
         The first file name which does not exist. None if all names are taken.
     """
-    temp_name_generator = (
-        path_stem.with_name("".join((job_name, extra_text, str(number + 1))))
-        for number in range(MAX_FILE_COUNT)
+    name = get_next_name(
+        f"{path_stem / job_name}{extra_text}{{trial}}",
+        max_tries=MAX_FILE_COUNT,
+        exists=lambda x: Path(x).with_suffix(extension).exists(),
     )
-    return first_true(
-        temp_name_generator, pred=lambda x: not x.with_suffix(extension).exists()
-    )
+
+    return Path(name) if name else None
