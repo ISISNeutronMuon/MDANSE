@@ -329,7 +329,7 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             An (N_ATOMS, 3) data array.
         """
         return self._variables[item]
@@ -396,7 +396,7 @@ class _Configuration(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        dict[str, np.ndarray]
+        dict[str, FloatArray]
             Dictionary containing atom positions (optionally also velocities, ...)
         """
         return self._variables

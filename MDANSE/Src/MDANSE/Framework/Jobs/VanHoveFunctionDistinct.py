@@ -636,7 +636,7 @@ class VanHoveFunctionDistinct(IJob):
 
         def calc_func(
             label_i: str, label_j: str
-        ) -> Iterator[tuple[str, bool, npt.NDArray]]:
+        ) -> Iterator[tuple[str, bool, FloatArray]]:
             """Calculates the distinct part of the van Hove function
             for a given pair of element labels.
 
@@ -653,7 +653,7 @@ class VanHoveFunctionDistinct(IJob):
                 The results name.
             inter : bool
                 Whether results are for intermolecular atom pairs.
-            results : npt.NDArray
+            results : FloatArray
                 The results.
             """
             n_atms = self.trajectory.get_natoms()
