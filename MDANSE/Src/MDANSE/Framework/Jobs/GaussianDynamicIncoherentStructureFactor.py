@@ -23,9 +23,9 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
-from MDANSE.util_types import FloatArray
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement_many
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
+from MDANSE.util_types import FloatArray
 
 
 @IJob.register("GaussianDynamicIncoherentStructureFactor")

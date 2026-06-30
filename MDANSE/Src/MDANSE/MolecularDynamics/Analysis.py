@@ -44,9 +44,7 @@ def scipy_correlate_2D(
     return fft.ifft(np.sum(v * w.conj(), axis=sum_axis), axis=0)[:n_frames] / n_configs
 
 
-def mean_square_displacement(
-    coords: FloatArray, n_configs: int
-) -> FloatArray:
+def mean_square_displacement(coords: FloatArray, n_configs: int) -> FloatArray:
     """Computes the mean square displacement of a set of coordinates
     using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.
 
@@ -70,22 +68,20 @@ def mean_square_displacement(
     return msd
 
 
-def mean_square_displacement_many(
-    coords: FloatArray, n_configs: int
-) -> FloatArray:
+def mean_square_displacement_many(coords: FloatArray, n_configs: int) -> FloatArray:
     """Computes the mean square displacement of a set of coordinates
     using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         Atom coordinate array with shape (N_FRAMES, N_ATOMS, 3)
     n_configs : int
         Size of the window used to correlated positions.
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         An array of the MSD.
     """
     n_frames = coords.shape[0]
