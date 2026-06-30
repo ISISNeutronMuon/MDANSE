@@ -43,6 +43,7 @@ dependencies = [
     "more-itertools",
     "typing_extensions",
     "setuptools-git-versioning>=3.0,<4",
+    "castep_outputs==0.3.3"
 ]
 
 [dependency-groups]

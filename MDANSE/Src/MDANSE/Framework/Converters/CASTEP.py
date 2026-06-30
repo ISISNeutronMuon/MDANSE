@@ -116,11 +116,11 @@ class CASTEP(Converter):
         # Read the information in the frame
         time_step = frame["time"]
 
-        unit_cell = UnitCell(np.vstack(frame["h"]))
-        coords = np.vstack(tuple(arr[1] for arr in frame["R"]))
+        unit_cell = UnitCell(frame["h"])
+        coords = frame["R"]
         variables = {
-            "velocities": np.vstack(tuple(arr[1] for arr in frame["V"])),
-            "gradients": np.vstack(tuple(arr[1] for arr in frame["F"])),
+            "velocities": frame["V"],
+            "gradients": frame["F"],
         }
 
         conf = PeriodicRealConfiguration(
