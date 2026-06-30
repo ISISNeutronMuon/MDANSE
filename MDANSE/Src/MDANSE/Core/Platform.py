@@ -20,6 +20,23 @@ import os
 import platform
 from pathlib import Path
 
+import MDANSE
+import MDANSE_GUI
+
+
+def version_summary(show_backend: bool = True, show_gui: bool = False) -> str:
+    sys_info = platform.uname()
+    version = f"Platform: {sys_info.system} {sys_info.release} on {sys_info.machine}\n"
+    version += (
+        f"Python {platform.python_version()} ({platform.python_implementation()}),"
+        f" {platform.python_build()[1]}\n"
+    )
+    if show_backend:
+        version += f"MDANSE version: {MDANSE.__version__}\n"
+    if show_gui:
+        version += f"MDANSE_GUI version: {MDANSE_GUI.__version__}\n"
+    return version
+
 
 class PlatformError(Exception):
     """
@@ -211,4 +228,3 @@ elif system == "Darwin":
     PLATFORM = PlatformMac()
 else:
     PLATFORM = PlatformWin()
-del platform

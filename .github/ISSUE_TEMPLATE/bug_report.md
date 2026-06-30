@@ -14,6 +14,9 @@ MDANSE version: (e.g. 2.0.1)
 MDANSE_GUI version: (e.g. 2.0.1; only if you are using the GUI) 
 CPU architecture: (e.g. x86_64, ARM, ... - if you know)
 
+This summary can be produced using "Help -> Version information" in the MDANSE
+GUI or `mdanse --version` in the shell.
+
 **What were you doing?**
 What was MDANSE supposed to do?
 Were you running an analysis, converting a trajectory, plotting the results?
