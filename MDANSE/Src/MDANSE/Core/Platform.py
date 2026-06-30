@@ -20,11 +20,17 @@ import os
 import platform
 from pathlib import Path
 
-import MDANSE
-import MDANSE_GUI
 
+def version_summary(show_backend: bool = True, show_gui: bool = True) -> str:
+    import MDANSE
 
-def version_summary(show_backend: bool = True, show_gui: bool = False) -> str:
+    try:
+        import MDANSE_GUI
+    except ImportError:
+        GUI_VERSION = "not installed"
+    else:
+        GUI_VERSION = MDANSE_GUI.__version__
+    BACKEND_VERSION = MDANSE.__version__
     sys_info = platform.uname()
     version = f"Platform: {sys_info.system} {sys_info.release} on {sys_info.machine}\n"
     version += (
@@ -32,9 +38,9 @@ def version_summary(show_backend: bool = True, show_gui: bool = False) -> str:
         f" {platform.python_build()[1]}\n"
     )
     if show_backend:
-        version += f"MDANSE version: {MDANSE.__version__}\n"
+        version += f"MDANSE version: {BACKEND_VERSION}\n"
     if show_gui:
-        version += f"MDANSE_GUI version: {MDANSE_GUI.__version__}\n"
+        version += f"MDANSE_GUI version: {GUI_VERSION}\n"
     return version
 
 

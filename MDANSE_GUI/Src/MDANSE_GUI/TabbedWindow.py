@@ -33,8 +33,6 @@ from qtpy.QtWidgets import (
     QToolBar,
 )
 
-import MDANSE
-import MDANSE_GUI
 from MDANSE.Core.Platform import version_summary
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
@@ -355,9 +353,7 @@ class TabbedWindow(QMainWindow):
         self.signal_recent_plot_selection_file.emit(file)
 
     def version_information(self):
-        _popup = QMessageBox.about(
-            self, "Version Summary", version_summary(show_gui=True)
-        )
+        _popup = QMessageBox.about(self, "Version Summary", version_summary())
 
     def show_website_code(self):
         QDesktopServices.openUrl(MDANSE_CODE_WEBSITE)
