@@ -32,6 +32,14 @@ try:
 except ImportError:
     ase_available = False
 
+try:
+    from ase.atoms import Atom, Atoms
+    from ase.io import write as ase_write
+
+    ase_available = True
+except ImportError:
+    ase_available = False
+
 
 @IJob.register("AverageStructure")
 class AverageStructure(IJob):

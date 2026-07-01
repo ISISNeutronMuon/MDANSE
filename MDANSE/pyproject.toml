@@ -60,7 +60,8 @@ mdanalysis=["MDAnalysis"]
 mdtraj=["mdtraj"]
 finufft=["finufft"]
 pymixbox=["pymixbox"]
-all=["MDANSE[ase,mdanalysis,mdtraj,finufft,pymixbox]"]
+extxyz=["extxyz"]
+all=["MDANSE[ase,mdanalysis,mdtraj,extxyz,finufft,pymixbox]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
