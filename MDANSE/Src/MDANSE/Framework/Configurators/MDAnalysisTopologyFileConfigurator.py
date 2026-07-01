@@ -16,13 +16,15 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-
-import MDAnalysis as mda
+from contextlib import suppress
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+
+with suppress(ImportError):
+    import MDAnalysis as mda
 
 
 @IConfigurator.register("MDAnalysisTopologyFileConfigurator")

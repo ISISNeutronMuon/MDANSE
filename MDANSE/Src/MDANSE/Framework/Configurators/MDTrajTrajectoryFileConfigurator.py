@@ -15,13 +15,15 @@
 #
 from __future__ import annotations
 
+from contextlib import suppress
 from pathlib import Path
-
-from mdtraj.formats.registry import FormatRegistry
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 from .MultiInputFileConfigurator import MultiInputFileConfigurator
+
+with suppress(ImportError):
+    from mdtraj.formats.registry import FormatRegistry
 
 
 @IConfigurator.register("MDTrajTrajectoryFileConfigurator")

@@ -17,10 +17,11 @@ from __future__ import annotations
 
 from contextlib import suppress
 
-import MDAnalysis as mda
-
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
+with suppress(ImportError):
+    import MDAnalysis as mda
 
 
 @IConfigurator.register("MDAnalysisTimeStepConfigurator")

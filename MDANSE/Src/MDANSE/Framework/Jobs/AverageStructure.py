@@ -18,12 +18,18 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-from ase.atoms import Atom, Atoms
-from ase.io import write as ase_write
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
+
+try:
+    from ase.atoms import Atom, Atoms
+    from ase.io import write as ase_write
+
+    ase_available = True
+except ImportError:
+    ase_available = False
 
 
 @IJob.register("AverageStructure")
@@ -41,6 +47,7 @@ class AverageStructure(IJob):
     you can output just the crystalline part using a corresponding atom selection.
     """
 
+    enabled = ase_available
     label = "Average Structure"
 
     category = ("Trajectory",)

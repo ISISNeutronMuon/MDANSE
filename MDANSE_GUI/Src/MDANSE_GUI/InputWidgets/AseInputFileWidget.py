@@ -16,9 +16,9 @@
 from __future__ import annotations
 
 import os
+from contextlib import suppress
 from pathlib import PurePath
 
-from ase.io.formats import filetype
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QComboBox, QFileDialog, QLineEdit, QPushButton
 
@@ -27,6 +27,9 @@ from MDANSE.Framework.Configurators.AseInputFileConfigurator import (
 )
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+
+with suppress(ImportError):
+    from ase.io.formats import filetype
 
 
 class AseInputFileWidget(WidgetBase):

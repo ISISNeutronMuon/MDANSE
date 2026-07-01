@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import MDAnalysis as mda
-
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
@@ -28,6 +26,13 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+try:
+    import MDAnalysis as mda
+
+    mda_available = True
+except ImportError:
+    mda_available = False
 
 
 @IJob.register("MDAnalysis")
@@ -45,6 +50,7 @@ class MDAnalysis(Converter):
     <a href="https://userguide.mdanalysis.org/stable/formats/index.html#formats">formats</a>.
     """
 
+    enabled = mda_available
     category = ("Converters", "General")
     label = "MDAnalysis"
     settings = {}

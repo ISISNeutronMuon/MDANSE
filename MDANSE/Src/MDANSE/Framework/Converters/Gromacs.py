@@ -18,8 +18,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
-from mdtraj.formats.trr import TRRTrajectoryFile
-from mdtraj.formats.xtc import XTCTrajectoryFile
 
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -27,6 +25,14 @@ from MDANSE.Framework.Parsers import PDBFile
 from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+try:
+    from mdtraj.formats.trr import TRRTrajectoryFile
+    from mdtraj.formats.xtc import XTCTrajectoryFile
+
+    mdt_available = True
+except ImportError:
+    mdt_available = False
 
 
 class GromacsConverterError(Exception):
@@ -38,6 +44,7 @@ class GromacsConverterError(Exception):
 class Gromacs(Converter):
     """Converts a Gromacs trajectory to an MDT trajectory."""
 
+    enabled = mdt_available
     label = "Gromacs"
 
     settings = {}

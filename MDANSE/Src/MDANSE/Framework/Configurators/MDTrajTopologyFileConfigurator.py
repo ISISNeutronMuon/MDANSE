@@ -17,15 +17,17 @@ from __future__ import annotations
 
 import traceback
 from collections.abc import Iterable
+from contextlib import suppress
 from pathlib import Path
-
-import mdtraj as md
-from mdtraj.core.trajectory import _TOPOLOGY_EXTS
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 from .FileWithAtomDataConfigurator import FileWithAtomDataConfigurator
+
+with suppress(ImportError):
+    import mdtraj as md
+    from mdtraj.core.trajectory import _TOPOLOGY_EXTS
 
 
 @IConfigurator.register("MDTrajTopologyFileConfigurator")

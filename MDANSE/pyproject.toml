@@ -35,10 +35,7 @@ dependencies = [
     "numpy",
     "scipy<=1.17.1",
     "h5py>=3.13",
-    "ase",
     "rdkit>=2025.3.3",
-    "MDAnalysis",
-    "mdtraj",
     "networkx",
     "more-itertools",
     "typing_extensions",
@@ -48,13 +45,18 @@ dependencies = [
 [dependency-groups]
 dev = [
   {include-group = "test"},
-  {include-group = "lint"}
+  {include-group = "lint"},
+  {include-group = "external"},
 ]
+external=["MDAnalysis", "ase", "mdtraj"]
 test=["pytest", "pytest-timeout"]
 lint=["ruff<0.14"]
 
 [project.optional-dependencies]
 cli=["tqdm"]
+ase=["ase"]
+mdanalysis=["MDAnalysis"]
+mdtraj=["mdtraj"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"

@@ -17,8 +17,6 @@ from __future__ import annotations
 
 from math import isclose
 
-import mdtraj as md
-
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
@@ -29,6 +27,13 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+try:
+    import mdtraj as md
+
+    mdtraj_available = True
+except ImportError:
+    mdtraj_available = False
 
 
 @IJob.register("MDTraj")
@@ -41,6 +46,7 @@ class MDTraj(Converter):
     trajectories will be stitched together.
     """
 
+    enabled = mdtraj_available
     category = ("Converters", "General")
     label = "MDTraj"
     settings = {}

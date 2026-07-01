@@ -29,7 +29,7 @@ jobs:
 
       - name: Install MDANSE
         working-directory: MDANSE
-        run: python -m pip install --group test .
+        run: python -m pip install --group test --group external .
 
       - name: Run unit tests
         working-directory: MDANSE
@@ -66,7 +66,7 @@ jobs:
 
       - name: Install MDANSE
         working-directory: MDANSE
-        run: python -m pip install --group test .
+        run: python -m pip install --group test --group external .
 
       - name: Install MDANSE_GUI
         working-directory: MDANSE_GUI
