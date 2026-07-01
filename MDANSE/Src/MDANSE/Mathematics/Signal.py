@@ -27,11 +27,7 @@ import numpy.typing as npt
 from scipy import fftpack, signal
 from scipy.interpolate import make_interp_spline
 
-from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
-from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-
 if TYPE_CHECKING:
-    from MDANSE.Framework.OutputVariables.IOutputVariable import IOutputVariable
     from MDANSE.util_types import FloatArray
 
 
@@ -180,7 +176,91 @@ def differentiate(a, dt=1.0, order=1):
     return ts
 
 
-def differentiate_many(input_array, dt: float = 1.0, order: int = 1):
+def differentiate_verlet(a: FloatArray, dt: float = 1.0) -> FloatArray:
+    coeffs = np.array(
+        [[-3.0, 4.0, -1.0], [-1.0, 0.0, 1.0], [1.0, -4.0, 3.0]], dtype=np.float64
+    )
+
+    # outputSeries is the output resulting from the differentiation
+    ts = np.zeros(a.shape, dtype=np.float64)
+
+    fact = 1.0 / dt
+
+    ts[0] = np.sum(a[:3] * coeffs[0].reshape((3, 1, 1)), axis=0)
+    ts[-1] = np.sum(a[-3:] * coeffs[2].reshape((3, 1, 1)), axis=0)
+
+    ts[1:-1] = a[2:] - a[:-2]
+
+    fact /= 2.0
+
+    ts *= fact
+
+    return ts
+
+
+def differentiate_many(a, dt=1.0, order=1):
+    if order not in INTERPOLATION_ORDER:
+        raise SignalError("Invalid differentiation order")
+
+    coeffs = INTERPOLATION_ORDER[order]
+
+    ts = np.empty_like(a)
+
+    fact = 1.0 / dt
+
+    if order == 1:
+        ts[-1] = np.sum(coeffs[1].reshape((2, 1, 1)) * a[-2:], axis=0)
+
+        gj = a[1:] - a[:-1]
+        ts[:-1] = gj
+
+    elif order == 2:
+        ts[0] = np.sum(a[:3] * coeffs[0].reshape((3, 1, 1)), axis=0)
+        ts[-1] = np.sum(a[-3:] * coeffs[2].reshape((3, 1, 1)), axis=0)
+
+        ts[1:-1] = a[2:] - a[:-2]
+
+        fact /= 2.0
+
+    elif order == 3:
+        ts[0] = np.sum(a[:4] * coeffs[0].reshape((4, 1, 1)), axis=0)
+        ts[1] = np.sum(a[:4] * coeffs[1].reshape((4, 1, 1)), axis=0)
+        ts[-1] = np.sum(a[-4:] * coeffs[3].reshape((4, 1, 1)), axis=0)
+        ts[2:-1] = 1 * a[:-3] - 6 * a[1:-2] + 3 * a[2:-1] + 2 * a[3:]
+        fact /= 6.0
+
+    elif order == 4:
+        ts[0] = np.sum(a[:5] * coeffs[0].reshape((5, 1, 1)), axis=0)
+        ts[1] = np.sum(a[:5] * coeffs[1].reshape((5, 1, 1)), axis=0)
+        ts[-2] = np.sum(a[-5:] * coeffs[3].reshape((5, 1, 1)), axis=0)
+        ts[-1] = np.sum(a[-5:] * coeffs[4].reshape((5, 1, 1)), axis=0)
+        ts[2:-2] = 2 * a[:-4] - 16 * a[1:-3] + 16 * a[3:-1] - 2 * a[4:]
+        fact /= 24.0
+
+    elif order == 5:
+        # Special case for the first and last elements
+        ts[0] = np.sum(a[:6] * coeffs[0].reshape((6, 1, 1)), axis=0)
+        ts[1] = np.sum(a[:6] * coeffs[1].reshape((6, 1, 1)), axis=0)
+        ts[2] = np.sum(a[:6] * coeffs[2].reshape((6, 1, 1)), axis=0)
+        ts[-2] = np.sum(a[-6:] * coeffs[3].reshape((6, 1, 1)), axis=0)
+        ts[-1] = np.sum(a[-6:] * coeffs[4].reshape((6, 1, 1)), axis=0)
+        ts[3:-2] = (
+            -4 * a[:-5]
+            + 30 * a[1:-4]
+            - 120 * a[2:-3]
+            + 40 * a[3:-2]
+            + 60 * a[4:-1]
+            - 6 * a[5:]
+        )
+
+        fact /= 120.0
+
+    ts *= fact
+
+    return ts
+
+
+def differentiate_spline(input_array, dt: float = 1.0, order: int = 1):
     time_axis = np.arange(len(input_array)) * dt
     if order == 1:
         spline = make_interp_spline(time_axis, input_array, k=order, axis=0)
