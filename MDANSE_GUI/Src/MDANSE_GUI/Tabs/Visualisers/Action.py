@@ -239,6 +239,21 @@ class Action(QWidget):
                     f"traceback {traceback.format_exc()}"
                 )
                 return
+
+            if not job_instance.enabled:
+                widget = QLabel(f"""<h1>Job {job_name} not available.</h1>
+
+                <h2>Please install MDANSE with the following extras enabled: {", ".join(job_instance.requires_extras)}.</h2>
+
+                <h2>To do this, install using, e.g.:</h2>
+
+                <h2><b>pip install "mdanse[{",".join(job_instance.requires_extras)}]"</b></h2>
+                """)
+                self.layout.addWidget(widget)
+                self._widgets_in_layout["err"] = widget
+                self._widgets.append(widget)
+                return
+
             job_instance.build_configuration()
             settings = job_instance.settings
             self._job_instance = job_instance

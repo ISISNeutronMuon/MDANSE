@@ -30,9 +30,9 @@ try:
     from mdtraj.formats.trr import TRRTrajectoryFile
     from mdtraj.formats.xtc import XTCTrajectoryFile
 
-    mdt_available = True
+    mdtraj_available = True
 except ImportError:
-    mdt_available = False
+    mdtraj_available = False
 
 
 class GromacsConverterError(Exception):
@@ -44,7 +44,8 @@ class GromacsConverterError(Exception):
 class Gromacs(Converter):
     """Converts a Gromacs trajectory to an MDT trajectory."""
 
-    enabled = mdt_available
+    enabled = mdtraj_available
+    requires_extras = ("mdtraj",)
     label = "Gromacs"
 
     settings = {}

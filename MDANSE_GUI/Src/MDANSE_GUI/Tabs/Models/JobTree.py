@@ -83,7 +83,7 @@ class JobTree(QStandardItemModel):
         cat_dicts = defaultdict(list)
 
         for class_name in sorted_keys:
-            if not full_dict[class_name].enabled:
+            if not full_dict[class_name].visible:
                 continue
             cat_tuple = getattr(full_dict[class_name], "category", None)
             if cat_tuple and len(cat_tuple) > 1:
@@ -98,7 +98,7 @@ class JobTree(QStandardItemModel):
         for class_name in sorted_keys:
             class_object = full_dict[class_name]
 
-            if class_object.enabled:
+            if class_object.visible:
                 self.createNode(class_name, class_object, filter)
 
     def createNode(self, name: str, thing: Configurable, filter: str = ""):
@@ -113,6 +113,7 @@ class JobTree(QStandardItemModel):
             filter -- a string which must appear in the category tuple
         """
         new_node = QStandardItem(name)
+        new_node.setEnabled(thing.enabled)
         new_number = self.nodecounter + 1
         self.nodecounter += 1
         new_node.setData(new_number, role=Qt.ItemDataRole.UserRole)

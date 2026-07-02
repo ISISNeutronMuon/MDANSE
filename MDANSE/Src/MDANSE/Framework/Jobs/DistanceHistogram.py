@@ -41,6 +41,7 @@ class DistanceHistogram(IJob):
     type = None
 
     enabled = False
+    visible = False
 
     category = (
         "Analysis",

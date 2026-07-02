@@ -51,6 +51,7 @@ class MDAnalysis(Converter):
     """
 
     enabled = mda_available
+    requires_extras = ("mdanalysis",)
     category = ("Converters", "General")
     label = "MDAnalysis"
     settings = {}

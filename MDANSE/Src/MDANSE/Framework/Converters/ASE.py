@@ -65,6 +65,7 @@ class ASE(Converter):
     """
 
     enabled = ase_available
+    requires_extras = ("ase",)
     category = ("Converters", "General")
     label = "ASE"
 

@@ -47,6 +47,7 @@ class MDTraj(Converter):
     """
 
     enabled = mdtraj_available
+    requires_extras = ("mdtraj",)
     category = ("Converters", "General")
     label = "MDTraj"
     settings = {}

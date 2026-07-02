@@ -48,6 +48,7 @@ class AverageStructure(IJob):
     """
 
     enabled = ase_available
+    requires_extras = ("ase",)
     label = "Average Structure"
 
     category = ("Trajectory",)
