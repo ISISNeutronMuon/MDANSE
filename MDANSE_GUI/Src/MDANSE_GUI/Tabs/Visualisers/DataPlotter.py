@@ -48,7 +48,9 @@ class DataPlotter(QWidget):
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.tab_index, self.tab_count = 1, 1
+        self.tab_index, self.tab_count = 0, 1
+        self.dataset_count = 0
+        self.plotter_type = "PlotWidget"
         self._unit_lookup = unit_lookup
         layout = QVBoxLayout(self)
         control_bar = QWidget(self)
@@ -85,11 +87,38 @@ class DataPlotter(QWidget):
     def create_preview(self) -> QWidget:
         previewer = QWidget(self)
         previewer_layout = QVBoxLayout(previewer)
-        self.target_label = QLabel(
-            f"Datasets will be sent to plotter tab {self.tab_index} out of {self.tab_count}"
-        )
+        self.target_label = QLabel("Target plot in next tab.")
         self.target_label.setWordWrap(True)
         previewer_layout.addWidget(self.target_label)
+        self.update_target_plot_label()
+        return previewer
+
+    def update_target_plot_label(self):
+        self.target_label.setText(
+            "Datasets will be sent to the <b>Plot Holder</b> tab.<br>"
+            f"They will appear in tab {self.tab_index + 1} out of {self.tab_count}.<br>"
+            f"It is a {self.plotter_type}, currently containing {self.dataset_count} datasets."
+        )
+
+    @Slot(int)
+    def new_target_plot_index(self, new_index: int):
+        self.tab_index = new_index
+        self.update_target_plot_label()
+
+    @Slot(int)
+    def new_target_plot_count(self, new_count: int):
+        self.tab_count = new_count
+        self.update_target_plot_label()
+
+    @Slot(int)
+    def new_dataset_count_in_target(self, new_dataset_count: int):
+        self.dataset_count = new_dataset_count
+        self.update_target_plot_label()
+
+    @Slot(str)
+    def new_plot_widget_type(self, new_plot_widget_type: str):
+        self.plotter_type = new_plot_widget_type
+        self.update_target_plot_label()
 
     @Slot(object)
     def add_dataset(self, dataset: SingleDataset):

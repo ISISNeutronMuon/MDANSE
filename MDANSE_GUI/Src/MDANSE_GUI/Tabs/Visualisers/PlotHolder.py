@@ -34,6 +34,10 @@ class PlotHolder(QTabWidget):
 
     error = Signal(str)
     new_entry = Signal()
+    current_tab_index = Signal(int)
+    current_tab_count = Signal(int)
+    datasets_in_plot = Signal(int)
+    plot_widget_type = Signal(str)
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -75,6 +79,7 @@ class PlotHolder(QTabWidget):
         self._plotter.append(plotter)
         self.setCurrentIndex(tab_id)
         self.new_entry.emit()
+        self.send_plot_info()
         return tab_id
 
     @Slot(str)
@@ -91,6 +96,7 @@ class PlotHolder(QTabWidget):
         self._plotter.append(plotter)
         self.setCurrentIndex(tab_id)
         self.new_entry.emit()
+        self.send_plot_info()
         return tab_id
 
     @Slot(int)
@@ -108,9 +114,10 @@ class PlotHolder(QTabWidget):
             self._current_id = valid_id_values[0]
             self.setCurrentIndex(self._current_id)
         self.removeTab(tab_id)
+        self.send_plot_info()
 
     @property
-    def model(self):
+    def model(self) -> PlottingContext:
         tab_id = self.currentIndex()
         try:
             pc = self._context[tab_id]
@@ -122,7 +129,7 @@ class PlotHolder(QTabWidget):
             return pc
 
     @property
-    def plotter(self):
+    def plotter(self) -> DataWidget:
         tab_id = self.currentIndex()
         try:
             return self._plotter[tab_id]
@@ -164,3 +171,11 @@ class PlotHolder(QTabWidget):
         except Exception:
             LOG.error("Plotting failed: %s", traceback.format_exc())
             plotter.plot_blank()
+        else:
+            self.send_plot_info()
+
+    def send_plot_info(self):
+        self.current_tab_count.emit(len(self._plotter))
+        self.current_tab_index.emit(self.currentIndex())
+        self.datasets_in_plot.emit(self.model.rowCount())
+        self.plot_widget_type.emit(type(self.plotter).__name__)

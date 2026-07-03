@@ -161,6 +161,18 @@ class TabbedWindow(QMainWindow):
         self._tabs["Instruments"]._visualiser.instrument_details_changed.connect(
             self._tabs["Actions"].update_action_after_instrument_change
         )
+        self._tabs["Plot Holder"]._visualiser.current_tab_index.connect(
+            self._tabs["Plot Creator"]._visualiser.new_target_plot_index
+        )
+        self._tabs["Plot Holder"]._visualiser.current_tab_count.connect(
+            self._tabs["Plot Creator"]._visualiser.new_target_plot_count
+        )
+        self._tabs["Plot Holder"]._visualiser.datasets_in_plot.connect(
+            self._tabs["Plot Creator"]._visualiser.new_dataset_count_in_target
+        )
+        self._tabs["Plot Holder"]._visualiser.plot_widget_type.connect(
+            self._tabs["Plot Creator"]._visualiser.new_plot_widget_type
+        )
         # connect signal to the tab
         self.signal_recent_trajectory_file.connect(
             self._tabs["Trajectories"].load_trajectory

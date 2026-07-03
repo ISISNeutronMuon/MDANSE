@@ -127,7 +127,9 @@ class PlotTab(GeneralTab):
                 LOG.error(f"Visualiser failed to plot data: {e2}")
             else:
                 self.tab_notification()
+        self._visualiser.send_plot_info()
 
     @Slot(int)
     def switch_model(self, tab_id):
         self._view.setModel(self.model)
+        self._visualiser.send_plot_info()
