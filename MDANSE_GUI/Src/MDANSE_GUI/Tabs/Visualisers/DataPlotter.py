@@ -18,6 +18,7 @@ from __future__ import annotations
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
     QHBoxLayout,
+    QLabel,
     QMessageBox,
     QPushButton,
     QTableView,
@@ -47,30 +48,48 @@ class DataPlotter(QWidget):
 
     def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
-
+        self.tab_index, self.tab_count = 1, 1
         self._unit_lookup = unit_lookup
         layout = QVBoxLayout(self)
-        button_bar = QWidget(self)
-        button_layout = QHBoxLayout(button_bar)
+        control_bar = QWidget(self)
+        bar_layout = QHBoxLayout(control_bar)
         self._selection_viewer = QTableView(self)
         layout.addWidget(self._selection_viewer)
-        layout.addWidget(button_bar)
+        layout.addWidget(control_bar)
+        button_bar = self.create_buttons()
+        bar_layout.addWidget(button_bar)
+        plotter_preview = self.create_preview()
+        bar_layout.addWidget(plotter_preview)
+        self._model = PlottingContext(
+            unit_lookup=self._unit_lookup,
+        )
+        self._selection_viewer.setModel(self._model)
+        self.hide_columns()
+
+    def create_buttons(self) -> QWidget:
+        button_bar = QWidget(self)
+        button_layout = QVBoxLayout(button_bar)
         buttons = [
-            ("Plot Data", self.plot_data),
-            ("Clear", self.clear),
-            ("New Plot", self.new_plot),
-            ("New Data View (Text)", self.new_text),
+            ("New empty plot", self.new_plot),
+            ("New empty text view", self.new_text),
+            ("Send data to plotter", self.plot_data),
+            ("Clear data selection", self.clear),
         ]
         for name, function in buttons:
             button = QPushButton(name, button_bar)
             button_layout.addWidget(button)
             if function is not None:
                 button.clicked.connect(function)
-        self._model = PlottingContext(
-            unit_lookup=self._unit_lookup,
+        return button_bar
+
+    def create_preview(self) -> QWidget:
+        previewer = QWidget(self)
+        previewer_layout = QVBoxLayout(previewer)
+        self.target_label = QLabel(
+            f"Datasets will be sent to plotter tab {self.tab_index} out of {self.tab_count}"
         )
-        self._selection_viewer.setModel(self._model)
-        self.hide_columns()
+        self.target_label.setWordWrap(True)
+        previewer_layout.addWidget(self.target_label)
 
     @Slot(object)
     def add_dataset(self, dataset: SingleDataset):
