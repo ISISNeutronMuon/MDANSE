@@ -29,7 +29,7 @@ from MDANSE_GUI.Tabs.Visualisers.PlotSettings import PlotSettings
 from MDANSE_GUI.Widgets.PlotSettingsDialog import PlotSettingsEditor
 
 if TYPE_CHECKING:
-    from qtpy.QtWidgets import QDialog, QWidget
+    from qtpy.QtWidgets import QAbstractItemView, QDialog, QWidget
 
     from MDANSE_GUI.Session.Session import Session
 
@@ -66,6 +66,12 @@ class PlotTab(GeneralTab):
         )
         self.matplotlib_dialog.values_changed.connect(self._visualiser.update_plots)
         self._core.add_button("Change matplotlib settings", self.edit_matplotlib)
+        self.connected_views = [self._view]
+
+    def connect_external_view(self, new_view: QAbstractItemView):
+        if new_view not in self.connected_views:
+            self.connected_views.append(new_view)
+            new_view.setModel(self.model)
 
     def launch_dialog(self, dialog: QDialog) -> None:
         if dialog.isVisible():
@@ -131,5 +137,6 @@ class PlotTab(GeneralTab):
 
     @Slot(int)
     def switch_model(self, tab_id):
-        self._view.setModel(self.model)
+        for view in self.connected_views:
+            view.setModel(self.model)
         self._visualiser.send_plot_info()

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QMessageBox,
@@ -71,17 +72,25 @@ class DataPlotter(QWidget):
     def create_buttons(self) -> QWidget:
         button_bar = QWidget(self)
         button_layout = QVBoxLayout(button_bar)
-        buttons = [
-            ("New empty plot", self.new_plot),
-            ("New empty text view", self.new_text),
-            ("Send data to plotter", self.plot_data),
-            ("Clear data selection", self.clear),
-        ]
-        for name, function in buttons:
-            button = QPushButton(name, button_bar)
-            button_layout.addWidget(button)
-            if function is not None:
-                button.clicked.connect(function)
+        button_groups = {
+            "Empty plot creation": [
+                ("New empty plot", self.new_plot),
+                ("New empty text view", self.new_text),
+            ],
+            "Current data selection": [
+                ("Send data to plotter", self.plot_data),
+                ("Clear data selection", self.clear),
+            ],
+        }
+        for group_name, buttons in button_groups.items():
+            subgroup = QGroupBox(group_name, button_bar)
+            sublayout = QVBoxLayout(subgroup)
+            for name, function in buttons:
+                button = QPushButton(name, button_bar)
+                sublayout.addWidget(button)
+                if function is not None:
+                    button.clicked.connect(function)
+            button_layout.addWidget(subgroup)
         return button_bar
 
     def create_preview(self) -> QWidget:
@@ -90,15 +99,24 @@ class DataPlotter(QWidget):
         self.target_label = QLabel("Target plot in next tab.")
         self.target_label.setWordWrap(True)
         previewer_layout.addWidget(self.target_label)
+        info_label = QLabel(
+            f"Contents of the currently selected {self.plotter_type} in the next tab:"
+        )
+        previewer_layout.addWidget(info_label)
+        self.preview_table = QTableView(previewer)
+        previewer_layout.addWidget(self.preview_table)
         self.update_target_plot_label()
         return previewer
 
     def update_target_plot_label(self):
         self.target_label.setText(
-            "Datasets will be sent to the <b>Plot Holder</b> tab.<br>"
+            "Datasets listed above will be sent to the <b>Plot Holder</b> tab.<br>"
             f"They will appear in tab {self.tab_index + 1} out of {self.tab_count}.<br>"
             f"It is a {self.plotter_type}, currently containing {self.dataset_count} datasets."
         )
+        for col_num in range(4, 10):
+            self.preview_table.hideColumn(col_num)
+        self.preview_table.resizeColumnsToContents()
 
     @Slot(int)
     def new_target_plot_index(self, new_index: int):

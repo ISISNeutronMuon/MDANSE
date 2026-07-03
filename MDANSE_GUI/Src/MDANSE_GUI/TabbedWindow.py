@@ -173,6 +173,9 @@ class TabbedWindow(QMainWindow):
         self._tabs["Plot Holder"]._visualiser.plot_widget_type.connect(
             self._tabs["Plot Creator"]._visualiser.new_plot_widget_type
         )
+        self._tabs["Plot Holder"].connect_external_view(
+            self._tabs["Plot Creator"]._visualiser.preview_table
+        )
         # connect signal to the tab
         self.signal_recent_trajectory_file.connect(
             self._tabs["Trajectories"].load_trajectory
