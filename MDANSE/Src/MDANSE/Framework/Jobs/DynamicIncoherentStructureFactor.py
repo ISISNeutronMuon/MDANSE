@@ -116,15 +116,18 @@ class DynamicIncoherentStructureFactor(IJob):
         )
         n_proc = self.configuration["running_mode"].get("slots", 1)
 
+        self._nFrames = self.configuration["frames"]["n_frames"]
+
         self.grouped_indices = group_atom_indices(
-            self.trajectory, n_proc=n_proc, memory_scale_factor=vectors_per_shell
+            self.trajectory,
+            self._nFrames,
+            n_proc=n_proc,
+            memory_scale_factor=8 * vectors_per_shell,
         )
         self.numberOfSteps = len(self.grouped_indices)
 
         self._using_lattice_vectors = self.configuration["q_vectors"]["is_lattice"]
         self._nQShells = self.configuration["q_vectors"]["n_shells"]
-
-        self._nFrames = self.configuration["frames"]["n_frames"]
 
         self._instrResolution = self.configuration["instrument_resolution"]
 

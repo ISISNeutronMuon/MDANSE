@@ -25,7 +25,7 @@ from more_itertools import chunked_even
 if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
-mb_ram_per_process = os.environ.get("MDANSE_RAM_PER_PROCESS", "512")
+mb_ram_per_process = os.environ.get("MDANSE_MAX_RAM_PER_PROCESS", "512")
 CHUNK_SIZE_LIMIT = (
     int(mb_ram_per_process) * 2**20
 )  # 512 MB memory limit per process for now
@@ -192,6 +192,8 @@ def split_selected_atoms(
 
 def group_atom_indices(
     traj_instance: Trajectory,
+    n_frames: int,
+    *,
     n_proc: int = 1,
     memory_scale_factor: int = 10,
     size_limit: int = CHUNK_SIZE_LIMIT,
@@ -226,7 +228,7 @@ def group_atom_indices(
         List of atom index set, each set containing indices from a single HDF5 chunk
     """
     selected_indices = set(traj_instance.atom_indices)
-    total_dimensions = traj_instance.variable("position").shape
+    total_dimensions = (n_frames, traj_instance.variable("position").shape[1])
     chunk_size = traj_instance.chunk_size(array_name="position")
     max_group_size = get_natoms_per_step(
         chunk_size, total_dimensions, memory_scale_factor, size_limit
