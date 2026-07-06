@@ -33,6 +33,8 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import (
     SingleDataset,
 )
 
+WIDGET_DESCRIPTIONS = {"DataWidget": "text viewer", "PlotWidget": "plotter"}
+
 
 class DataPlotter(QWidget):
     """Part of PlotCreator which sends datasets to the plotter.
@@ -70,6 +72,7 @@ class DataPlotter(QWidget):
         self.hide_columns()
 
     def create_buttons(self) -> QWidget:
+        self._plotting_button_reference = None
         button_bar = QWidget(self)
         button_layout = QVBoxLayout(button_bar)
         button_groups = {
@@ -90,6 +93,8 @@ class DataPlotter(QWidget):
                 sublayout.addWidget(button)
                 if function is not None:
                     button.clicked.connect(function)
+                if name == "Send data to plotter":
+                    self._plotting_button_reference = button
             button_layout.addWidget(subgroup)
         return button_bar
 
@@ -99,21 +104,27 @@ class DataPlotter(QWidget):
         self.target_label = QLabel("Target plot in next tab.")
         self.target_label.setWordWrap(True)
         previewer_layout.addWidget(self.target_label)
-        info_label = QLabel(
+        self.info_label = QLabel(
             f"Contents of the currently selected {self.plotter_type} in the next tab:"
         )
-        previewer_layout.addWidget(info_label)
+        previewer_layout.addWidget(self.info_label)
         self.preview_table = QTableView(previewer)
         previewer_layout.addWidget(self.preview_table)
         self.update_target_plot_label()
         return previewer
 
     def update_target_plot_label(self):
+        output_widget = WIDGET_DESCRIPTIONS.get(self.plotter_type, "data visualiser")
+        self.info_label.setText(
+            f"Contents of the currently selected {output_widget} in the next tab:"
+        )
         self.target_label.setText(
             "Datasets listed above will be sent to the <b>Plot Holder</b> tab.<br>"
             f"They will appear in tab {self.tab_index + 1} out of {self.tab_count}.<br>"
-            f"It is a {self.plotter_type}, currently containing {self.dataset_count} datasets."
+            f"It is a {output_widget}, "
+            f"currently containing {self.dataset_count} datasets."
         )
+        self._plotting_button_reference.setText(f"Send data to {output_widget}")
         for col_num in range(4, 10):
             self.preview_table.hideColumn(col_num)
         self.preview_table.resizeColumnsToContents()
