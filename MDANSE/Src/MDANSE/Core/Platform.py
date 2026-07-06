@@ -31,8 +31,7 @@ def version_summary(show_backend: bool = True, show_gui: bool = True) -> str:
     else:
         GUI_VERSION = MDANSE_GUI.__version__
     BACKEND_VERSION = MDANSE.__version__
-    sys_info = platform.uname()
-    version = f"Platform: {sys_info.system} {sys_info.release} on {sys_info.machine}\n"
+    version = f"Platform string: {platform.platform()}\n"
     version += (
         f"Python {platform.python_version()} ({platform.python_implementation()}),"
         f" {platform.python_build()[1]}\n"
