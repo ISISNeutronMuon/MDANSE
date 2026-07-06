@@ -34,6 +34,7 @@ class RotationAutocorrelation(IJob):
     """
 
     enabled = False
+    visible = False
 
     label = "Rotation Autocorrelation"
 

@@ -15,11 +15,14 @@
 #
 from __future__ import annotations
 
-import MDAnalysis as mda
+from contextlib import suppress
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 from .MultiInputFileConfigurator import MultiInputFileConfigurator
+
+with suppress(ImportError):
+    import MDAnalysis as mda
 
 
 @IConfigurator.register("MDAnalysisCoordinateFileConfigurator")

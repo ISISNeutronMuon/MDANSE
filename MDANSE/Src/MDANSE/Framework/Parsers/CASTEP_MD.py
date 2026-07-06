@@ -22,7 +22,6 @@ from itertools import dropwhile
 from typing import Any
 
 import numpy as np
-from ase.io.trajectory import Trajectory as ASETrajectory
 from more_itertools import first, one, split_at
 
 from MDANSE.Framework.AtomMapping import AtomLabel

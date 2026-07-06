@@ -29,6 +29,7 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 class CartesianCorrelationFunction(IJob):
     enabled = False
+    visible = False
 
     category = (
         "Analysis",

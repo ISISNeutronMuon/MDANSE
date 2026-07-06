@@ -15,12 +15,16 @@
 #
 from __future__ import annotations
 
-import MDAnalysis as mda
 from qtpy.QtWidgets import QComboBox, QLineEdit, QPushButton
 
 from .InputFileWidget import InputFileWidget
 
-AVAILABLE_PARSERS = sorted(mda._PARSERS.keys())
+try:
+    import MDAnalysis as mda
+
+    AVAILABLE_PARSERS = sorted(mda._PARSERS.keys())
+except ImportError:
+    AVAILABLE_PARSERS = []
 
 
 class MDAnalysisTopologyFileWidget(InputFileWidget):

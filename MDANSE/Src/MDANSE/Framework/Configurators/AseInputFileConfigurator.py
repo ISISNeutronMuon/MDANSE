@@ -15,12 +15,15 @@
 #
 from __future__ import annotations
 
-from ase.io.formats import all_formats
-
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Configurators.InputFileConfigurator import InputFileConfigurator
 from MDANSE.MLogging import LOG
+
+try:
+    from ase.io.formats import all_formats
+except ImportError:
+    all_formats = []
 
 
 @IConfigurator.register("AseInputFileConfigurator")

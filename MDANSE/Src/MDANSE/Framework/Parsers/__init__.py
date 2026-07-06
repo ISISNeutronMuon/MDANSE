@@ -15,7 +15,11 @@
 #
 from __future__ import annotations
 
-from .ASE import ASEParser as ASEParser
+from contextlib import suppress
+
+with suppress(ImportError):
+    from .ASE import ASEParser as ASEParser
+
 from .CASTEP_MD import CASTEPMDFile as CASTEPMDFile
 from .CP2K_Cell import CP2KCellFile as CP2KCellFile
 from .DCDFile import DCDFile as DCDFile

@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import Any, ClassVar
+
 from more_itertools import value_chain
 
 from MDANSE.MLogging import LOG
@@ -40,9 +42,10 @@ class Configurable:
             #.. 2-value is the dictionary of the keywords used when initializing the configurator.
     """
 
-    enabled = True
+    enabled: ClassVar[bool] = True
+    visible: ClassVar[bool] = True
 
-    settings = {}
+    settings: ClassVar[dict[str, tuple[str, dict[str, Any]]]] = {}
 
     def __init__(self, settings=None, trajectory_input="mdanse"):
         """
