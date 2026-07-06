@@ -241,9 +241,11 @@ class Action(QWidget):
                 return
 
             if not job_instance.enabled:
-                widget = QLabel(f"""<h1>Job {job_name} not available.</h1>
+                widget = QLabel(f"""<h1>{job_name} requires an external package.</h1>
 
-                <h2>Please install MDANSE with the following extras enabled: {", ".join(job_instance.requires_extras)}.</h2>
+                <h2>Please install MDANSE with the following 
+                optional dependencies enabled: 
+                {", ".join(job_instance.requires_extras)}.</h2>
 
                 <h2>To do this, install using, e.g.:</h2>
 
