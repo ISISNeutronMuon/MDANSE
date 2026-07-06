@@ -199,7 +199,7 @@ class TrjFile(Parser):
 
     UNIT_CONV = {
         "pos": measure(1.0, "ang").toval("nm"),
-        "vel": measure(1.0, "ang/fs").toval("nm/ps"),
+        "vel": measure(1.0, "ang/ps").toval("nm/ps"),
         "force": measure(1.0, "kcal_per_mole/ang", equivalent=True).toval(
             "Da nm/ps2 mol"
         ),
