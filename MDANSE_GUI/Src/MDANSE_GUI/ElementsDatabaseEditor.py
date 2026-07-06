@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from itertools import repeat
+
 from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import (
     QBrush,
@@ -38,7 +40,8 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.Databases import AtomsDatabaseError
+from MDANSE.Chemistry.Databases import AtomsDatabase, AtomsDatabaseError
+from MDANSE.IO.IOUtils import get_next_name
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker
 from MDANSE_GUI.Widgets.GeneralWidgets import (
@@ -246,14 +249,14 @@ class ElementView(QTableView):
     def contextMenuEvent(self, event):
         menu = QMenu(self)
 
-        Action1 = menu.addAction("New Custom Atom")
-        Action2 = menu.addAction("Copy Atoms")
-        Action3 = menu.addAction("Rename Custom Atom")
-        Action4 = menu.addAction("Delete Custom Atoms")
-        Action5 = menu.addAction("New Custom Property")
-        Action6 = menu.addAction("Copy Properties")
-        Action7 = menu.addAction("Rename Custom Property")
-        Action8 = menu.addAction("Delete Custom Properties")
+        NewAtom = menu.addAction("New Custom Atom")
+        CopyAtom = menu.addAction("Copy Atoms")
+        RenameAtom = menu.addAction("Rename Custom Atom")
+        DeleteAtom = menu.addAction("Delete Custom Atoms")
+        NewProp = menu.addAction("New Custom Property")
+        CopyProp = menu.addAction("Copy Properties")
+        RenameProp = menu.addAction("Rename Custom Property")
+        DeleteProp = menu.addAction("Delete Custom Properties")
 
         data_model = self.parent().data_model
 
@@ -292,26 +295,26 @@ class ElementView(QTableView):
 
         temp_model = self.model().sourceModel()
         if temp_model is not None:
-            Action1.triggered.connect(temp_model.new_line_dialog)
-            Action2.triggered.connect(temp_model.copy_rows)
+            NewAtom.triggered.connect(temp_model.new_line_dialog)
+            CopyAtom.triggered.connect(temp_model.copy_rows)
             if self.mouse_atm in custom_atms:
-                Action3.triggered.connect(temp_model.rename_row_dialog)
+                RenameAtom.triggered.connect(temp_model.rename_row_dialog)
             else:
-                Action3.setEnabled(False)
+                RenameAtom.setEnabled(False)
             if enable_delete_atms:
-                Action4.triggered.connect(temp_model.delete_rows)
+                DeleteAtom.triggered.connect(temp_model.delete_rows)
             else:
-                Action4.setEnabled(False)
-            Action5.triggered.connect(temp_model.new_column_dialog)
-            Action6.triggered.connect(temp_model.copy_columns)
+                DeleteAtom.setEnabled(False)
+            NewProp.triggered.connect(temp_model.new_column_dialog)
+            CopyProp.triggered.connect(temp_model.copy_columns)
             if self.mouse_prop in custom_props:
-                Action7.triggered.connect(temp_model.rename_column_dialog)
+                RenameProp.triggered.connect(temp_model.rename_column_dialog)
             else:
-                Action7.setEnabled(False)
+                RenameProp.setEnabled(False)
             if enable_delete_props:
-                Action8.triggered.connect(temp_model.delete_columns)
+                DeleteProp.triggered.connect(temp_model.delete_columns)
             else:
-                Action8.setEnabled(False)
+                DeleteProp.setEnabled(False)
 
         menu.exec_(event.globalPos())
 
@@ -351,7 +354,7 @@ class ElementModel(QStandardItemModel):
     table gets sorted.
     """
 
-    def __init__(self, *args, element_database=None, **kwargs):
+    def __init__(self, *args, element_database: AtomsDatabase, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.custom_header_brush = QBrush(QColor(255, 165, 0))
@@ -623,13 +626,13 @@ class ElementModel(QStandardItemModel):
 
         for _, idx in row_idxs:
             atm_sym = self.verticalHeaderItem(idx).text()
-            atm_sym_copy = atm_sym + "(copy)"
-            while True:
-                if atm_sym_copy not in self.database.atoms:
-                    self.database.add_atom(atm_sym_copy)
-                    self.copy_row_in_database(atm_sym_copy, atm_sym)
-                    break
-                atm_sym_copy += "(copy)"
+            atm_sym_copy = get_next_name(
+                f"{atm_sym}(copy{{trial}})",
+                exists=self.database.atoms,
+                default="",
+            )
+            self.database.add_atom(atm_sym_copy)
+            self.copy_row_in_database(atm_sym_copy, atm_sym)
         self.save_changes()
 
     @Slot(dict)

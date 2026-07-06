@@ -15,15 +15,13 @@
 #
 from __future__ import annotations
 
-from itertools import count
-
-from more_itertools import first_true
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import QTextBrowser
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Framework.Units import measure
+from MDANSE.IO.IOUtils import get_next_name
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionCalculator, widget_text_map
@@ -52,10 +50,15 @@ def generate_name(
     str
         Name composed of prefix, number, suffix using the lowest positive number possible.
     """
+
     if existing_names is None:
         return f"{prefix}{suffix}"
-    name_generator = (f"{prefix}{number}{suffix}" for number in count(1))
-    return first_true(name_generator, pred=lambda x: x not in existing_names)
+
+    return get_next_name(
+        f"{prefix}{{trial}}{suffix}",
+        exists=existing_names,
+        default="",
+    )
 
 
 class SimpleInstrument:
