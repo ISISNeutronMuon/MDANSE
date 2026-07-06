@@ -46,10 +46,7 @@ class Grouped(Plotter):
         self._figure = None
         self._backup_limits: list[tuple[float, float, float, float]] = []
         self._active_curves: list[Line2D] = []
-        self._backup_curves: list[
-            tuple[FloatArray, FloatArray]
-        ] = []
-        self._plot_limit = 9
+        self._backup_curves: list[tuple[FloatArray, FloatArray]] = []
         self.height_max, self.length_max = -np.inf, -np.inf
 
     def slider_labels(self) -> list[str]:
@@ -221,7 +218,7 @@ class Grouped(Plotter):
             islice(
                 zip(
                     plotting_context.datasets().values(),
-                    plotting_context.curves(),
+                    plotting_context.curves(self._curve_limit_per_dataset),
                     strict=True,
                 ),
                 self._plot_limit,

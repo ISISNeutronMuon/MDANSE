@@ -46,25 +46,8 @@ class Single(Plotter):
         self._active_curves: list[Line2D] = []
         self._backup_curves: list[tuple[np.ndarray, np.ndarray]] = []
         self._backup_limits = []
-        self._curve_limit_per_dataset = 12
-        self._plot_limit = 60
+
         self.height_max, self.length_max = 0.0, 0.0
-
-    def clear(self, figure: Figure | None = None):
-        """Clear the figure."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            return
-        target.clear()
-
-    def get_figure(self, figure: Figure | None = None):
-        """Return the figure instance used for plotting."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            LOG.error(f"PlottingContext can't plot to {target}")
-            return None
-        target.clear()
-        return target
 
     def slider_labels(self) -> list[str]:
         """Return slider labels for single plot mode."""
@@ -173,6 +156,7 @@ class Single(Plotter):
             self._toolbar = toolbar
 
         self._figure = target
+        self._figure.set_layout_engine(None)
         self._active_curves = []
         self._backup_curves = []
         self._normalisation_errors = []
@@ -189,6 +173,7 @@ class Single(Plotter):
         self._n_curves = sum(
             ds.dataset.n_curves for ds in plotting_context.datasets().values()
         )
+        self._n_curves = min(self._n_curves, self._curve_limit_per_plot)
 
         if not self._n_curves:
             self.plot_blank()
@@ -203,12 +188,13 @@ class Single(Plotter):
             )
             x_axis_labels.append(databundle.dataset.x_axis_label(databundle.main_axis))
 
-        axes = target.add_subplot(111)
+        gs = self._figure.add_gridspec(1, 1)
+        axes = self._figure.add_subplot(gs[0])
         self._axes = [axes]
 
         for databundle, label, curve in islice(
             flatten(plotting_context.curves(self._curve_limit_per_dataset)),
-            self._plot_limit,
+            self._curve_limit_per_plot,
         ):
             self._plot_single(
                 axes,
@@ -267,10 +253,12 @@ class Single(Plotter):
             Curve colour.
         """
 
+        new_label = self.label(label, len(self._active_curves))
+
         lines: list[Line2D] = axes.plot(
             *curve,
             linestyle=databundle.line_style,
-            label=self.label(label, len(self._active_curves)),
+            label=new_label,
             color=colour,
         )
 

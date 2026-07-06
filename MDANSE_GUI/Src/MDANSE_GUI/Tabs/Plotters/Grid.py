@@ -45,7 +45,6 @@ class Grid(Plotter):
         self._backup_limits = []
         self._active_curves = []
         self._backup_curves = []
-        self._plot_limit = 9
 
     def slider_labels(self) -> list[str]:
         """Return labels to show that sliders are not used."""

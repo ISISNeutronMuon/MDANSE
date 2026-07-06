@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -34,13 +34,13 @@ if TYPE_CHECKING:
 class Vectors3D(Plotter):
     """Plots all the datasets in the same figure."""
 
+    _curve_limit_per_dataset: ClassVar[int] = 36
+
     def __init__(self) -> None:
         """Initialise all ploting parameters to default values."""
         super().__init__()
         self._figure = None
         self._backup_limits = []
-        self._curve_limit_per_dataset = 36
-        self._legend_limit_for_histogram = 6
 
     def slider_labels(self) -> list[str]:
         """Return labels to show that sliders are not used."""
@@ -49,33 +49,6 @@ class Vectors3D(Plotter):
     def slider_limits(self) -> list[tuple[float, float, float]]:
         """Return generic slider limit values."""
         return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
-
-    def clear(self, figure: Figure | None = None):
-        """Clear the figure."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            return
-        target.clear()
-
-    def get_figure(self, figure: Figure | None = None):
-        """Return the figure instance used for plotting."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            LOG.error(f"PlottingContext can't plot to {target}")
-            return None
-        target.clear()
-        return target
-
-    def change_normalisation(self, new_value: dict[str, Any]):
-        """Normalise the data based on the new parameters.
-
-        Parameters
-        ----------
-        new_value : dict[str, Any]
-            parameters as in NORMALISATION_DEFAULTS
-
-        """
-        super().change_normalisation(new_value)
 
     def plot(
         self,
@@ -120,7 +93,7 @@ class Vectors3D(Plotter):
             target.canvas.draw()
 
         gs = self._figure.add_gridspec(2, 2)
-        shared_axes = figure.add_subplot(gs[0])
+        shared_axes = self._figure.add_subplot(gs[0])
         self._axes = [shared_axes]
 
         for databundle in plotting_context.datasets().values():

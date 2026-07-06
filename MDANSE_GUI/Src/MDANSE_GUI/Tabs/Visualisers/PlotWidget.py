@@ -381,7 +381,7 @@ class PlotWidget(QWidget):
         canvas = self
         layout = QVBoxLayout(canvas)
 
-        self._figure = mpl.figure(layout="constrained")
+        self._figure = mpl.figure()
         figAgg = FigureCanvasQTAgg(self._figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()

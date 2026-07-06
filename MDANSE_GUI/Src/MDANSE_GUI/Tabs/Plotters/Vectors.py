@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 import numpy.typing as npt
@@ -45,13 +45,13 @@ def violin_plot_width(positions: FloatArray) -> float:
 class Vectors(Plotter):
     """Plots summarised Q-Vectors to one figure."""
 
+    _curve_limit_per_dataset: ClassVar[int] = 128
+
     def __init__(self) -> None:
         """Initialise all ploting parameters to default values."""
         super().__init__()
         self._figure = None
         self._backup_limits = {}
-        self._curve_limit_per_dataset = 128
-        self._legend_limit_for_histogram = 6
 
     def slider_labels(self) -> list[str]:
         """Return labels to show that sliders are not used."""
@@ -60,33 +60,6 @@ class Vectors(Plotter):
     def slider_limits(self) -> list[tuple[float, float, float]]:
         """Return generic slider limit values."""
         return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
-
-    def clear(self, figure: Figure | None = None):
-        """Clear the figure."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            return
-        target.clear()
-
-    def get_figure(self, figure: Figure | None = None):
-        """Return the figure instance used for plotting."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            LOG.error(f"PlottingContext can't plot to {target}")
-            return None
-        target.clear()
-        return target
-
-    def change_normalisation(self, new_value: dict[str, Any]):
-        """Normalise the data based on the new parameters.
-
-        Parameters
-        ----------
-        new_value : dict[str, Any]
-            Parameters as in NORMALISATION_DEFAULTS.
-
-        """
-        super().change_normalisation(new_value)
 
     def plot(
         self,
@@ -200,7 +173,7 @@ class Vectors(Plotter):
                                 label=self.label(
                                     ind=ind,
                                     n_curves=n_curves,
-                                    limit=self._legend_limit_for_histogram,
+                                    limit=self._max_labels,
                                     label=f"{plotlabel}:{label}",
                                 ),
                                 bottom=bottom,

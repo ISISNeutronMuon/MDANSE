@@ -65,14 +65,6 @@ class Heatmap(Plotter):
         self._initial_values = [0.0, 100.0]
         self._slider_values = [0.0, 100.0]
         self._slice_axis = 2
-        self._plot_limit = 9
-
-    def clear(self, figure: Figure | None = None):
-        """Clear the figure."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            return
-        target.clear()
 
     def slider_labels(self) -> list[str]:
         """Return labels for the sliders in heatmap mode."""
@@ -85,15 +77,6 @@ class Heatmap(Plotter):
     def sliders_coupled(self) -> bool:
         """Confirm that sliders are coupled in heatmap mode."""
         return True
-
-    def get_figure(self, figure: Figure | None = None) -> Figure | None:
-        """Return current figure which will be used for plotting."""
-        target = self._figure if figure is None else figure
-        if target is None:
-            LOG.error(f"PlottingContext can't plot to {target}")
-            return None
-        target.clear()
-        return target
 
     def change_normalisation(self, new_value: dict[str, Any]):
         """Normalise the data based on the new parameters.

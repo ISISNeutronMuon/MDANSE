@@ -111,8 +111,15 @@ class Plotter(RegisterFactory):
         5: (2, 3),
         6: (2, 3),
     }
+    _number_of_sliders: ClassVar[int] = 2
+
+    # Plotter Settings
     _title_length_limit: ClassVar[int] = 30
-    _max_labels = 5
+    _max_labels: ClassVar[int] = 5
+    _max_label_len: ClassVar[int] = 100
+    _plot_limit: ClassVar[int] = 9
+    _curve_limit_per_dataset: ClassVar[int] = 12
+    _curve_limit_per_plot: ClassVar[int] = 60
 
     def __init__(self) -> None:
         """Create defaults common to all plotters."""
@@ -120,7 +127,6 @@ class Plotter(RegisterFactory):
         self._axes = []
         self._initial_values = [0.0, 0.0]
         self._slider_values = [0.0, 0.0]
-        self._number_of_sliders = 2
         self._value_reset_needed = True
         self._toolbar = None
         self._slider_reference = None
@@ -520,6 +526,10 @@ class Plotter(RegisterFactory):
             return "..."
         if limit < ind < n_curves - 1:
             return None
+
+        if self._max_label_len and len(label) > self._max_label_len:
+            return "..." + label[-(self._max_label_len - 3) :]
+
         return label
 
     @property
