@@ -57,6 +57,7 @@ cli=["tqdm"]
 ase=["ase"]
 mdanalysis=["MDAnalysis"]
 mdtraj=["mdtraj"]
+all=["MDANSE[ase,mdanalysis,mdtraj]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
