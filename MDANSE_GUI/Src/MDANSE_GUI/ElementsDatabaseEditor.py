@@ -627,9 +627,8 @@ class ElementModel(QStandardItemModel):
         for _, idx in row_idxs:
             atm_sym = self.verticalHeaderItem(idx).text()
             atm_sym_copy = get_next_name(
-                f"{atm_sym}{{trial}}",
+                f"{atm_sym}(copy{{trial}})",
                 exists=self.database.atoms,
-                trial=repeat("(copy)"),
                 default="",
             )
             self.database.add_atom(atm_sym_copy)
