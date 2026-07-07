@@ -26,7 +26,6 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class QVectors3DWidget(WidgetBase):
-
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QVBoxLayout"
         super().__init__(*args, **kwargs)

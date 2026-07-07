@@ -15,22 +15,22 @@
 #
 from __future__ import annotations
 
-from functools import partial
 import itertools as it
+from functools import partial
 from typing import Any
 
 import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from .IntegerConfigurator import IntegerConfigurator
+
 from .BooleanConfigurator import BooleanConfigurator
+from .IntegerConfigurator import IntegerConfigurator
 from .RangeConfigurator import RangeConfigurator
 from .VectorConfigurator import VectorConfigurator
 
 
 @IConfigurator.register("QVectors3DConfigurator")
 class QVectors3DConfigurator(IConfigurator):
-
     _default = {
         "seed": 0,
         "n_samples": 50000,
@@ -98,7 +98,8 @@ class QVectors3DConfigurator(IConfigurator):
             *zip(
                 [value["u_range"][0], value["v_range"][0], value["w_range"][0]],
                 [value["u_range"][1], value["v_range"][1], value["w_range"][0]],
-                strict=False)
+                strict=False,
+            )
         ):
             hkl = np.dot(transform, point) / self["sc_used"]
             max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))

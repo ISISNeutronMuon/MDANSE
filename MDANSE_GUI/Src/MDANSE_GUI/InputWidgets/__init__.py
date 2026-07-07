@@ -60,8 +60,8 @@ from .OutputStructureWidget import OutputStructureWidget as OutputStructureWidge
 from .OutputTrajectoryWidget import OutputTrajectoryWidget as OutputTrajectoryWidget
 from .PartialChargeWidget import PartialChargeWidget as PartialChargeWidget
 from .ProjectionWidget import ProjectionWidget as ProjectionWidget
-from .QVectorsWidget import QVectorsWidget as QVectorsWidget
 from .QVectors3DWidget import QVectors3DWidget as QVectors3DWidget
+from .QVectorsWidget import QVectorsWidget as QVectorsWidget
 from .RangeWidget import RangeWidget as RangeWidget
 from .RunningModeWidget import RunningModeWidget as RunningModeWidget
 from .TrajectoryFilterWidget import TrajectoryFilterWidget as TrajectoryFilterWidget
