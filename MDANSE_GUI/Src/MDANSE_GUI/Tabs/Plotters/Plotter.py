@@ -27,6 +27,7 @@ from more_itertools import consumer
 from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -194,20 +195,20 @@ class Plotter(RegisterFactory):
         self._slider_values = new_value
 
     def normalise_curve(
-        self, xdata: np.ndarray, ydata: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
+        self, xdata: FloatArray, ydata: FloatArray
+    ) -> tuple[FloatArray, FloatArray]:
         """Scale a 1D curve according to the current normalisation parameters.
 
         Parameters
         ----------
-        xdata : np.ndarray
+        xdata : FloatArray
             1D array of x values of the curve
-        ydata : np.ndarray
+        ydata : FloatArray
             1D array of y values of the curve
 
         Returns
         -------
-        tuple[np.ndarray]
+        tuple[FloatArray]
             xdata and ydata with scaling applied
 
         """
@@ -234,17 +235,17 @@ class Plotter(RegisterFactory):
             return xdata, ydata
         return xdata, ydata / scale_factor
 
-    def normalise_array(self, data_array: np.ndarray) -> np.ndarray:
+    def normalise_array(self, data_array: FloatArray) -> FloatArray:
         """Normalise a 2D array according to the current normalisation parameters.
 
         Parameters
         ----------
-        data_array : np.ndarray
+        data_array : FloatArray
             2D array of data for plotting
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             the data_array with new relative intensities between rows
 
         """

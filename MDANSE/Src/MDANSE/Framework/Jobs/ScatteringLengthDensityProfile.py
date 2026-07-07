@@ -18,6 +18,7 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.util_types import FloatArray
 
 
 class ScatteringLengthDensityProfileError(Exception):
@@ -174,7 +175,7 @@ class ScatteringLengthDensityProfile(IJob):
         -------
         int
             Index calculated.
-        tuple[float, np.ndarray]
+        tuple[float, FloatArray]
             Axis length and density profile.
         """
 
@@ -202,14 +203,14 @@ class ScatteringLengthDensityProfile(IJob):
 
         return index, (slice_volume_ang3, dp_per_frame)
 
-    def combine(self, index: int, data: tuple[float, dict[str, np.ndarray]]) -> None:
+    def combine(self, index: int, data: tuple[float, dict[str, FloatArray]]) -> None:
         """Combine results together.
 
         Parameters
         ----------
         index : int
             The index of the step.
-        data : tuple[float, dict[str, np.ndarray]]
+        data : tuple[float, dict[str, FloatArray]]
             Axis length and density profile.
         """
 

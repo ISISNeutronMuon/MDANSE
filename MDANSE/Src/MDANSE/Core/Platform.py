@@ -21,6 +21,28 @@ import platform
 from pathlib import Path
 
 
+def version_summary(show_backend: bool = True, show_gui: bool = True) -> str:
+    import MDANSE
+
+    try:
+        import MDANSE_GUI
+    except ImportError:
+        GUI_VERSION = "not installed"
+    else:
+        GUI_VERSION = MDANSE_GUI.__version__
+    BACKEND_VERSION = MDANSE.__version__
+    version = f"Platform string: {platform.platform()}\n"
+    version += (
+        f"Python {platform.python_version()} ({platform.python_implementation()}),"
+        f" {platform.python_build()[1]}\n"
+    )
+    if show_backend:
+        version += f"MDANSE version: {BACKEND_VERSION}\n"
+    if show_gui:
+        version += f"MDANSE_GUI version: {GUI_VERSION}\n"
+    return version
+
+
 class PlatformError(Exception):
     """
     This class handles error related to Platform derived classes.
@@ -211,4 +233,3 @@ elif system == "Darwin":
     PLATFORM = PlatformMac()
 else:
     PLATFORM = PlatformWin()
-del platform

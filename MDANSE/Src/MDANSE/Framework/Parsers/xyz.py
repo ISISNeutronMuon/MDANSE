@@ -21,8 +21,9 @@ from itertools import islice
 from pathlib import Path
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import ilen, split_at
+
+from MDANSE.util_types import FloatArray
 
 from .Parser import Parser
 
@@ -75,7 +76,7 @@ class XYZFile(Parser):
             return ilen(file)
 
     @property
-    def frames(self) -> Iterator[npt.NDArray[float]]:
+    def frames(self) -> Iterator[FloatArray]:
         with open(self.filename, encoding="utf-8") as xyz_file:
             file = map(str.strip, xyz_file)
 
@@ -88,6 +89,6 @@ class XYZFile(Parser):
         return self.atoms
 
     @staticmethod
-    def read_step(frame: list[str]) -> npt.NDArray[float]:
+    def read_step(frame: list[str]) -> FloatArray:
         """Reads and returns an array of atom coordinates the next simulation frame."""
         return np.loadtxt(frame[1:], usecols=(1, 2, 3), dtype=np.float64)

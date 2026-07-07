@@ -17,7 +17,7 @@ from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 
 
 IJOB_SUBCLASSES = IJob.raw_dict()
-ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
+ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.visible}
 ENABLED_QVECTORS = set(IQVectors.raw_names()) - {
     "IQVectors",
     "LatticeQVectors",

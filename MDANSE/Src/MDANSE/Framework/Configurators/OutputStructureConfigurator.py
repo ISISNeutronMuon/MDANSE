@@ -17,10 +17,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ase.io.formats import ioformats
-
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
+try:
+    from ase.io.formats import ioformats
+except ImportError:
+    ioformats = []
 
 
 @IConfigurator.register("OutputStructureConfigurator")

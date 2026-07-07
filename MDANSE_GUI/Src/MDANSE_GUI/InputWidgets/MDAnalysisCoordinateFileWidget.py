@@ -15,11 +15,15 @@
 #
 from __future__ import annotations
 
-import MDAnalysis as mda
+from contextlib import suppress
+
 from qtpy.QtWidgets import QFileDialog
 
 from .MDAnalysisTopologyFileWidget import MDAnalysisTopologyFileWidget
 from .MultiInputFileWidget import MultiInputFileWidget
+
+with suppress(ImportError):
+    import MDAnalysis as mda
 
 
 class MDAnalysisCoordinateFileWidget(

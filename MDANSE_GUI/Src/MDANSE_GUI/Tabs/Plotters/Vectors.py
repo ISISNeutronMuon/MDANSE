@@ -27,10 +27,11 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
+    from MDANSE.util_types import FloatArray
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-def violin_plot_width(positions: npt.NDArray[np.floating]) -> float:
+def violin_plot_width(positions: FloatArray) -> float:
     """Return the width of the violin plot based on the spacing between points."""
     return np.mean(np.diff(positions)) if len(positions) > 1 else 0.5
 

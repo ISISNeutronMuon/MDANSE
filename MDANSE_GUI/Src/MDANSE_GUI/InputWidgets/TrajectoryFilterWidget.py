@@ -90,6 +90,7 @@ if TYPE_CHECKING:
     from MDANSE.Framework.Configurators.HDFInputFileConfigurator import (
         HDFInputFileConfigurator,
     )
+    from MDANSE.util_types import FloatArray
 
 # Default maximum value for a float spinbox
 DEFAULT_SPINBOX_MAX_FLOAT: Final[float] = 1000.0
@@ -389,7 +390,7 @@ def _build_filter_settings_block(
 
 def read_pps_from_file(
     filename: str | Path,
-) -> tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]] | tuple[None, None]:
+) -> tuple[FloatArray, FloatArray] | tuple[None, None]:
     """Reads a trajectory position power spectrum from an .mda filename,
     returning the power spectrum as a dataset consisting of the energies (meV)
     and the corresponding spectrum.
@@ -401,7 +402,7 @@ def read_pps_from_file(
 
     Returns
     -------
-    tuple[npt.NDArray[np.floating], npt.NDArray[np.floating]] | tuple[None, None]
+    tuple[FloatArray, FloatArray] | tuple[None, None]
         Energy axis and corresponding trajectory power spectrum
 
     """
@@ -421,13 +422,13 @@ def read_pps_from_file(
     return None, None
 
 
-def gaussian(x: npt.NDArray[np.floating], mu: float, sigma: float) -> float:
+def gaussian(x: FloatArray, mu: float, sigma: float) -> float:
     """Returns a centered Gaussian, paramterised by values mu and sigma, over
     a given input domain x.
 
     Parameters
     ----------
-    x : np.array
+    x : FloatArray
         Domain values (x-axis) over which the Gaussian function will be computed
     mu : float
         Parameter mu of the Gaussian
@@ -438,7 +439,7 @@ def gaussian(x: npt.NDArray[np.floating], mu: float, sigma: float) -> float:
     return np.exp(-0.5 * ((x - mu) / sigma) ** 2) / (2 * np.pi)
 
 
-def double_gaussian(x: npt.NDArray[np.floating], mu: float, sigma: float) -> float:
+def double_gaussian(x: FloatArray, mu: float, sigma: float) -> float:
     """Returns a double Gaussian, paramterised by values mu and sigma, over
     a given input domain x.
 
@@ -447,7 +448,7 @@ def double_gaussian(x: npt.NDArray[np.floating], mu: float, sigma: float) -> flo
 
     Parameters
     ----------
-    x : np.array
+    x : FloatArray
         Domain values (x-axis) over which the Gaussian function will be computed
     mu : float
         Parameter mu of the Gaussian
@@ -475,7 +476,7 @@ class FilterDesigner(QDialog):
         Title of the helper dialog window.
     _canvas_dimensions : dict
         Dimensions of the filter graph canvas.
-    _trajectory_power_spectrum :  Sequence[npt.NDArray[np.floating]] | None
+    _trajectory_power_spectrum :  Sequence[FloatArray] | None
         Trajectory power spectrum as a tuple containing the x-axis values (frequency domain) and the y-axis values (magnitudes).
 
     """
@@ -734,19 +735,19 @@ class FilterDesigner(QDialog):
             },
         }
 
-    def resample_and_normalise(self, values: npt.NDArray[np.floating], to_len: int):
+    def resample_and_normalise(self, values: FloatArray, to_len: int):
         """Resample the input signal values to a given length, with normalisation of output signal.
 
         Parameters
         ----------
-        values : np.ndarray
+        values : FloatArray
             Values of the signal.
         to_len : int
             New length of the signal after resampling.
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             Resampled and normalised signal.
 
         """
@@ -754,12 +755,7 @@ class FilterDesigner(QDialog):
 
     def get_attenuation_function(
         self, tr_filter: Filter, source: str
-    ) -> tuple[
-        npt.NDArray[np.floating],
-        npt.NDArray[np.floating],
-        npt.NDArray[np.floating],
-        npt.NDArray[np.floating],
-    ]:
+    ) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
         """Put curves on the same scale for the plot.
 
         Generate an attenuation function to display alongside the filter frequency response,
@@ -775,13 +771,13 @@ class FilterDesigner(QDialog):
 
         Returns
         -------
-        raw_power_spectrum_freqs : npt.NDArray[np.floating]
+        raw_power_spectrum_freqs : FloatArray
             Frequency axis of the original PPS result.
-        power_spectrum : npt.NDArray[np.floating]
+        power_spectrum : FloatArray
             Trajectory power spectrum.
-        attenuated_power_spectrum : npt.NDArray[np.floating]
+        attenuated_power_spectrum : FloatArray
             Attenuated power spectrum due to the designed filter response.
-        normalised_response : npt.NDArray[np.floating]
+        normalised_response : FloatArray
             Normalised response.
         """
         freqs = tr_filter.freq_response.frequencies
@@ -822,12 +818,7 @@ class FilterDesigner(QDialog):
         self,
         tr_filter: Filter,
         pps_filename: str,
-    ) -> tuple[
-        npt.NDArray[np.floating],
-        npt.NDArray[np.floating],
-        npt.NDArray[np.floating],
-        npt.NDArray[np.floating],
-    ]:
+    ) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
         """Put curves on the same scale for the plot.
 
         Generate an appropriately resampled power spectrum for the input trajectory,
@@ -842,13 +833,13 @@ class FilterDesigner(QDialog):
 
         Returns
         -------
-        raw_power_spectrum_freqs : npt.NDArray[np.floating]
+        raw_power_spectrum_freqs : FloatArray
             Frequency axis of the original PPS result.
-        power_spectrum : npt.NDArray[np.floating]
+        power_spectrum : FloatArray
             Trajectory power spectrum.
-        attenuated_power_spectrum : npt.NDArray[np.floating]
+        attenuated_power_spectrum : FloatArray
             Attenuated power spectrum due to the designed filter response.
-        normalised_response : npt.NDArray[np.floating]
+        normalised_response : FloatArray
             Normalised response.
         """
         freqs, _ = tr_filter.freq_response
@@ -885,18 +876,18 @@ class FilterDesigner(QDialog):
 
     @staticmethod
     def to_dB(
-        x: float | npt.NDArray[np.floating],
-    ) -> np.floating | npt.NDArray[np.floating]:
+        x: float | FloatArray,
+    ) -> np.floating | FloatArray:
         """Value on decibel (dB) scale.
 
         Parameters
         ----------
-        x : float or ~np.ndarray
+        x : float or ~FloatArray
             Value to convert.
 
         Returns
         -------
-        float-like or ~np.ndarray
+        float-like or ~FloatArray
             Value as dB.
 
         Examples
@@ -914,12 +905,12 @@ class FilterDesigner(QDialog):
 
         Parameters
         ----------
-        x : float or ~np.ndarray
+        x : float or ~FloatArray
             Value to convert.
 
         Returns
         -------
-        float or ~np.ndarray
+        float or ~FloatArray
             Original value.
         """
         return x
@@ -930,7 +921,7 @@ class FilterDesigner(QDialog):
         *,
         db_response: bool = False,
         energies: bool = False,
-        trajectory_power_spectrum: Sequence[npt.NDArray[np.floating]] | None = None,
+        trajectory_power_spectrum: Sequence[FloatArray] | None = None,
     ) -> None:
         """Render the graph of the designed filter frequency response.
 
@@ -942,7 +933,7 @@ class FilterDesigner(QDialog):
             Display response (y-axis) in decibels, else magnitude.
         energies : bool
             Display response domain (x-axis) in meV, else frequency in terahertz.
-        trajectory_power_spectrum : Sequence[npt.NDArray[np.floating]]
+        trajectory_power_spectrum : Sequence[FloatArray]
             Tuple containing trajectory power spectrum and attenuation due to filter.
 
         """

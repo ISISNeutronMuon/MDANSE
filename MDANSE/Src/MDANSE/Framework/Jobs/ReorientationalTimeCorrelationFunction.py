@@ -21,16 +21,17 @@ from scipy.special import legendre
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass, moment_of_inertia
+from MDANSE.util_types import FloatArray
 
 
 def correlate_legendre(
-    signal: np.ndarray, corr_window: int, poly_order: int
-) -> np.ndarray:
+    signal: FloatArray, corr_window: int, poly_order: int
+) -> FloatArray:
     """Calculate the
 
     Parameters
     ----------
-    signal : np.ndarray
+    signal : FloatArray
         An (N,3) array of orientation vectors
     corr_window : int
         Size of the moving correlation window
@@ -39,7 +40,7 @@ def correlate_legendre(
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         An (N - corr_window + 1,) array of correlation results
 
     """
@@ -197,7 +198,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
     def legendre_orders(self):
         return range(1, self.legendre_order + 1)
 
-    def run_step(self, index: int) -> tuple[int, list[np.ndarray]]:
+    def run_step(self, index: int) -> tuple[int, list[FloatArray]]:
         """Run the analysis for a single molecule.
 
         Parameters
@@ -207,7 +208,7 @@ class ReorientationalTimeCorrelationFunction(IJob):
 
         Returns
         -------
-        tuple[int, list[np.ndarray]]
+        tuple[int, list[FloatArray]]
             Molecule index and the correlation arrays.
 
         """
@@ -262,14 +263,14 @@ class ReorientationalTimeCorrelationFunction(IJob):
                 results.append(ac)
         return index, results
 
-    def combine(self, index: int, x: list[np.ndarray]):
+    def combine(self, index: int, x: list[FloatArray]):
         """Add the partial result to the results.
 
         Parameters
         ----------
         index : int
             index of the molecule
-        x : list[np.ndarray]
+        x : list[FloatArray]
             list of arrays of the correlation results
 
         """

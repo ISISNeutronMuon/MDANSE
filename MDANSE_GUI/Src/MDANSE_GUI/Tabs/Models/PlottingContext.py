@@ -37,9 +37,12 @@ from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import ComplexArray, FloatArray
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Iterator
+
+    import h5py
 
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
@@ -49,7 +52,7 @@ SCALE_FACTOR_FORMAT = "3.3f"
 class PlotArgs(NamedTuple):
     """Arguments for plotting data."""
 
-    dataset: np.ndarray
+    dataset: FloatArray | ComplexArray
     colour: str
     line_style: str
     marker: str
@@ -92,24 +95,24 @@ class SingleDataset:
     ):
         self._name = name
         self._use_scaling = True
-        self._curves = {}
-        self._curve_labels = {}
+        self._curves: dict[tuple[int, ...], FloatArray] = {}
+        self._curve_labels: dict[tuple[int, ...], str] = {}
         self._linestyle = linestyle
         self._marker = marker
-        self._planes = {}
-        self._plane_labels = {}
-        self._data_limits = None
+        self._planes: dict[int, FloatArray] = {}
+        self._plane_labels: dict[int, str] = {}
+        self._data_limits: list[int] | None = None
         self._imaginary_data = None
         self._valid = True
         self._scaling_factor = 1.0
         self._main_axis = None
-        self._axes = {}
-        self._axes_units = {}
-        self._current_units = {}
-        self._axes_scaling = {}
-        self._axes_order = []
-        self._xerror = None
-        self._yerror = None
+        self._axes: dict[str, FloatArray] = {}
+        self._axes_units: dict[str, str] = {}
+        self._current_units: dict[str, str] = {}
+        self._axes_scaling: dict[str, float] = {}
+        self._axes_order: list[str] = []
+        self._xerror: FloatArray | None = None
+        self._yerror: FloatArray | None = None
 
         self.configure(source, **kwargs)
 
@@ -168,14 +171,14 @@ class SingleDataset:
     def _(
         self,
         _source: None,
-        data: npt.NDArray[np.floating],
+        data: FloatArray,
         *,
         data_unit: str = "none",
         scaling_factor: float = 1.0,
-        plot_axes: dict[str, npt.NDArray[np.floating]] | None = None,
+        plot_axes: dict[str, FloatArray] | None = None,
         axes_units: dict[str, str] | None = None,
-        yerror: npt.NDArray[np.floating] | None = None,
-        xerror: npt.NDArray[np.floating] | None = None,
+        yerror: FloatArray | None = None,
+        xerror: FloatArray | None = None,
         optional_filename: str = "no file",
         uneven_array: bool = False,
     ) -> None:
@@ -185,19 +188,19 @@ class SingleDataset:
 
         Parameters
         ----------
-        data : npt.NDArray[np.floating]
+        data : FloatArray
             The data to be plotted. An N-dimensional array, N<=3
         data_unit : str, optional
             Physical unit of the values in the data array
         scaling_factor : float, optional
             Data will be scaled by this factor if requested, by default 1.0
-        plot_axes : dict[str, npt.NDArray[np.floating]] | None, optional
+        plot_axes : dict[str, FloatArray] | None, optional
             Dictionary of axis_name: axis_array pairs, by default None
         axes_units : dict[str, str] | None, optional
             Dictionary of axis_name: axis_unit pairs, by default None
-        yerror: npt.NDArray[np.floating] | None = None
+        yerror: FloatArray | None = None
             Vertical error bars associated with the data points.
-        xerror: npt.NDArray[np.floating] | None = None
+        xerror: FloatArray | None = None
             Horizontal error bars associated with the data points.
         optional_filename: str = "no file"
             File name to be displayed as the origin of this data set.
@@ -280,7 +283,7 @@ class SingleDataset:
             self._axes_scaling[axis_key] = 1.0
             self._current_units[axis_key] = self._axes_units[axis_key]
 
-    def x_axis(self, axis_key: str) -> np.ndarray:
+    def x_axis(self, axis_key: str) -> FloatArray:
         """Get the plotting axis in the current physical units.
 
         Parameters
@@ -290,7 +293,7 @@ class SingleDataset:
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             An axis for plotting the dataset, after unit conversion
 
         """
@@ -421,7 +424,7 @@ class SingleDataset:
             self._data_limits = None
             return
 
-        complete_subset = {}
+        complete_subset: dict[int, None] = {}
 
         self._main_axis = main_axis
         axes = map(len, self.dep_axes.values())
@@ -475,7 +478,7 @@ class SingleDataset:
         return best_unit, best_axis
 
     @property
-    def dep_axes(self) -> dict[str, npt.NDArray]:
+    def dep_axes(self) -> dict[str, FloatArray]:
         """Axes which are likely to be dependent."""
         la = self.longest_axis()[1] if not self._main_axis else self._main_axis
         return {aname: axis for aname, axis in self._axes.items() if aname != la}
@@ -486,7 +489,7 @@ class SingleDataset:
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             The plot data, scaled if set.
 
         """
@@ -558,7 +561,7 @@ class SingleDataset:
         max_limit: int = 1,
         *,
         skip_label_text: bool = False,
-    ) -> dict[int, np.ndarray]:
+    ) -> dict[int, FloatArray]:
         """Prepare a set of curves for plotting.
 
         Parameters
@@ -572,7 +575,7 @@ class SingleDataset:
 
         Returns
         -------
-        dict[int, np.ndarray]
+        dict[int, FloatArray]
             List of data arrays ready for plotting
 
         """
@@ -629,7 +632,7 @@ class SingleDataset:
 
         return self._curves
 
-    def curve_ind(self, limits: int, /):
+    def curve_ind(self, limits: int, /) -> Iterator[int]:
         """Return a generator of indices indexing only the curves within the limits."""
         return (
             islice(self._data_limits, limits)
@@ -641,7 +644,7 @@ class SingleDataset:
         self,
         axis_number: int,
         max_limit: int = 1,
-    ) -> list[np.ndarray] | np.ndarray | None:
+    ) -> list[FloatArray] | FloatArray | None:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
@@ -653,7 +656,7 @@ class SingleDataset:
 
         Returns
         -------
-        list[np.ndarray]
+        list[FloatArray]
             List of 2D arrays for heatmap plots
 
         """

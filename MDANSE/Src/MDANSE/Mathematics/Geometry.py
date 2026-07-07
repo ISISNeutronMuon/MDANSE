@@ -18,10 +18,10 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import numpy as np
-import numpy.typing as npt
 from scipy.spatial.transform import Rotation
 
 from MDANSE.Mathematics.LinearAlgebra import Vector
+from MDANSE.util_types import FloatArray
 
 
 class GeometryError(Exception):
@@ -72,10 +72,10 @@ center = center_of_mass
 
 
 def moment_of_inertia(
-    coords: np.ndarray,
-    com: np.ndarray,
-    mass: np.ndarray,
-) -> np.ndarray:
+    coords: FloatArray,
+    com: FloatArray,
+    mass: FloatArray,
+) -> FloatArray:
     """Return the moment of inertia of a set of atoms.
 
     The moment of inertia if given as a 3x3 array, and can be diagonalised
@@ -83,16 +83,16 @@ def moment_of_inertia(
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         Coordinates of the atoms.
-    com : np.ndarray
+    com : FloatArray
         Centre of mass of the molecule.
-    mass : np.ndarray
+    mass : FloatArray
         Masses of the atoms.
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         3x3 array of the moment of inertia
     """
     x, y, z = (coords - com).T
@@ -113,7 +113,7 @@ def moment_of_inertia(
     return moi
 
 
-def generate_sphere_points(n_samples: int) -> np.ndarray:
+def generate_sphere_points(n_samples: int) -> FloatArray:
     """Returns list of 3d coordinates of points on a sphere using the
     Golden Section Spiral algorithm.
 
@@ -126,7 +126,7 @@ def generate_sphere_points(n_samples: int) -> np.ndarray:
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         (n_samples, 3) array of point coordinates on a sphere
     """
 

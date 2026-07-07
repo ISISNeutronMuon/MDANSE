@@ -23,7 +23,6 @@ from typing import NamedTuple, TextIO
 import numpy as np
 from more_itertools import consume as drop
 from more_itertools import first, first_true, ilen, split_at, split_before, take
-from numpy.typing import NDArray
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import AtomLabel, get_element_from_mapping
@@ -31,6 +30,7 @@ from MDANSE.Framework.Units import measure
 from MDANSE.IO.IOUtils import strip_comments
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import FloatArray
 
 from .Parser import Parser
 
@@ -39,9 +39,9 @@ class Molecule(NamedTuple):
     name: str
     n_mols: int
     n_atoms: int
-    species: NDArray[float]
-    masses: NDArray[float]
-    charges: NDArray[float]
+    species: FloatArray
+    masses: FloatArray
+    charges: FloatArray
     bonds: list[tuple[int, int]]
 
 
@@ -261,12 +261,12 @@ class FieldFile:
             for atm_label, mass in zip(molecule.species, molecule.masses, strict=True):
                 yield AtomLabel(atm_label, molecule=molecule.name, mass=mass)
 
-    def get_atom_charges(self) -> np.ndarray:
+    def get_atom_charges(self) -> FloatArray:
         """Returns an array of partial electric charges
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             array of floats, one value per atom
         """
         charge_groups = [

@@ -18,6 +18,8 @@ from __future__ import annotations
 import itertools
 from typing import TYPE_CHECKING
 
+from MDANSE.util_types import FloatArray
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -135,7 +137,7 @@ def adjust_weights(
 
 
 def assign_weights(
-    values: dict[str, np.ndarray],
+    values: dict[str, FloatArray],
     weights: dict[str, float | complex],
     match_key: str,
     match_labels: Iterable[tuple[str, tuple[str, ...]]],
@@ -146,7 +148,7 @@ def assign_weights(
 
     Parameters
     ----------
-    values : Dict[str, np.ndarray]
+    values : Dict[str, FloatArray]
         Dictionary of data arrays containing analysis results.
     weights : Dict[str, float]
         Dictionary of scaling factors per dataset
@@ -159,7 +161,7 @@ def assign_weights(
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         total sum of all the component arrays scaled by their weights
     """
     matches = {match_key % label: k for label, k in match_labels}
@@ -174,14 +176,14 @@ def assign_weights(
         values[k].scaling_factor *= w
 
 
-def weighted_sum(values: dict[str, np.ndarray], match_key: str, match_labels: Iterable):
+def weighted_sum(values: dict[str, FloatArray], match_key: str, match_labels: Iterable):
     """Sums up partial datasets multiplied by their scaling factors.
     The scaling factors have to be set before, typically by calling
     the assign_weights function.
 
     Parameters
     ----------
-    values : Dict[str, np.ndarray]
+    values : Dict[str, FloatArray]
         Dictionary of data arrays containing analysis results.
     match_key: str
         A key used to generate the list of matches to sum over.
@@ -190,7 +192,7 @@ def weighted_sum(values: dict[str, np.ndarray], match_key: str, match_labels: It
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         Total sum of all the component arrays scaled by their weights
     """
     matches = {match_key % val[0] for val in match_labels}

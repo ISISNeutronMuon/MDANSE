@@ -23,29 +23,27 @@ from scipy.signal import correlate
 from MDANSE.Mathematics.Geometry import center_of_mass
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
+    from MDANSE.util_types import FloatArray
 
 
 class AnalysisError(Exception):
     pass
 
 
-def mean_square_displacement(
-    coords: NDArray[np.floating], n_configs: int
-) -> NDArray[np.float64]:
+def mean_square_displacement(coords: FloatArray, n_configs: int) -> FloatArray:
     """Computes the mean square displacement of a set of coordinates
     using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         Coordinates used to calculate MSD.
     n_configs : int
         Size of the window used to correlated positions.
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         An array of the MSD.
     """
     r2 = coords * coords
@@ -56,7 +54,7 @@ def mean_square_displacement(
     return msd
 
 
-def mean_square_fluctuation(coords: NDArray[np.floating], root: bool = False) -> float:
+def mean_square_fluctuation(coords: FloatArray, root: bool = False) -> float:
     """Computes the mean-square fluctuation, or the root-mean-square fluctuation if root is set to True. The following
     equation is used:
     .. math:: MSF = \\frac{\\sum_{i=0} ^{n} \\sum_{x=1} ^{3}(coords_{i,x} - \\frac{\\sum_{j=0} ^{n}coords_{j,x}}{n})^2}{n}
@@ -64,7 +62,7 @@ def mean_square_fluctuation(coords: NDArray[np.floating], root: bool = False) ->
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         the coordinates whose MSF is to be calculated
     root : bool
         boolean value determining whether the result should be a square root or not
@@ -84,8 +82,8 @@ def mean_square_fluctuation(coords: NDArray[np.floating], root: bool = False) ->
 
 
 def radius_of_gyration(
-    coords: NDArray[np.floating],
-    masses: NDArray[np.floating] | None = None,
+    coords: FloatArray,
+    masses: FloatArray | None = None,
     root: bool = False,
 ) -> float:
     """Computes the radius of gyration for a set of coordinates and their corresponding masses. If no masses are provided,

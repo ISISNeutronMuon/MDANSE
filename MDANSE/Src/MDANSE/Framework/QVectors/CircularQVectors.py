@@ -16,25 +16,25 @@
 from __future__ import annotations
 
 import numpy as np
-import numpy.typing as npt
 from scipy.spatial.transform import Rotation
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
+from MDANSE.util_types import FloatArray
 
 
 def circle_rotation_matrix(
-    target_circle_axis: npt.NDArray[float],
-) -> npt.NDArray[float] | None:
+    target_circle_axis: FloatArray,
+) -> FloatArray | None:
     """Return rotation matrix that transforms 001 vector into target vector.
 
     Parameters
     ----------
-    target_circle_axis : npt.NDArray[float]
+    target_circle_axis : FloatArray
         A 3D vector defining the axis of a circle.
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         a 3x3 rotation matrix
     """
     try:
@@ -48,9 +48,9 @@ def circle_of_vectors(
     q: float,
     q_width: float,
     n_vecs: int,
-    rot_mat: npt.NDArray[float] | None,
+    rot_mat: FloatArray | None,
     rng: np.random.Generator,
-) -> npt.NDArray[float]:
+) -> FloatArray:
     """Generate vectors on a circle in plane.
 
     The distribution of angles of the vectors on a circle is uniform.
@@ -64,14 +64,14 @@ def circle_of_vectors(
         Spread of |Q| of the generated vectors.
     n_vecs : int
         Number of vectors to generate.
-    rot_mat : npt.NDArray[float] | None
+    rot_mat : FloatArray | None
         Rotation matrix to be applied to the generated points.
     rng : np.random.Generator
         A numpy random number generator object.
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         Array of 3D vectors in a circle with an arbitrary orientation.
     """
     parameter_points = rng.uniform(0.0, 2 * np.pi, n_vecs)

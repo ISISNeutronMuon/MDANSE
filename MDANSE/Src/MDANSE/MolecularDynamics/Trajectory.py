@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from MDANSE.util_types import FloatArray
 
 import copy
 import html
@@ -27,7 +28,6 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import h5py
 import numpy as np
-import numpy.typing as npt
 from more_itertools import always_iterable, first
 
 from MDANSE import PLATFORM
@@ -298,7 +298,7 @@ class Trajectory:
         if self._selection:
             return set(always_iterable(self.selection_getter(self.atom_types)))
         return set(always_iterable(self.atom_types))
-    
+
     @property
     def non_dummy_elements(self) -> set[str]:
         """Set of chemical elements which are not dummy atoms."""
@@ -460,7 +460,7 @@ class Trajectory:
         """Close the trajectory."""
         self._trajectory.close()
 
-    def __getitem__(self, frame: int) -> dict[str, npt.NDArray[float]]:
+    def __getitem__(self, frame: int) -> dict[str, FloatArray]:
         """Return the configuration at a given frame.
 
         Parameters
@@ -470,7 +470,7 @@ class Trajectory:
 
         Returns
         -------
-        dict[str, npt.NDArray[float]]
+        dict[str, FloatArray]
             Configuration at frame.
         """
         return self._trajectory[frame]
@@ -496,7 +496,7 @@ class Trajectory:
         self,
         frame: int,
         atom_indices: slice | int = SLICE_ALL,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Return the electrical charge of atoms at a given frame.
 
         Parameters
@@ -516,7 +516,7 @@ class Trajectory:
         self,
         frame: slice | int,
         atom_indices: slice | int = SLICE_ALL,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Return the coordinates at a given frame.
 
         Parameters
@@ -554,7 +554,7 @@ class Trajectory:
         """Load all the unit cells."""
         self._trajectory._load_unit_cells()
 
-    def time(self) -> npt.NDArray[float]:
+    def time(self) -> FloatArray:
         """Time timesteps from file."""
         return self._trajectory.time()
 
@@ -602,11 +602,11 @@ class Trajectory:
 
     def to_real_coordinates(
         self,
-        box_coordinates: npt.NDArray[float],
+        box_coordinates: FloatArray,
         first: int = 0,
         last: int | None = None,
         step: int | None = None,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Convert box coordinates to real coordinates for a set of frames.
 
         Parameters
@@ -636,7 +636,7 @@ class Trajectory:
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
         Parameters
@@ -674,7 +674,7 @@ class Trajectory:
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
         Parameters
@@ -711,7 +711,7 @@ class Trajectory:
         last: int | None = None,
         step: int = 1,
         variable: str = "velocities",
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Return trajectory values for one atom for a subset of frames.
 
         Parameters
@@ -1266,12 +1266,12 @@ class TrajectoryWriter:
             time_dataset.resize((self._current_index,))
         self._h5_file.close()
 
-    def write_charges(self, charges: np.ndarray, index: int):
+    def write_charges(self, charges: FloatArray, index: int):
         """Writes atom charges into their dataset at the specified index.
 
         Parameters
         ----------
-        charges : np.ndarray
+        charges : FloatArray
             array of float values: atomic charges in proton charge units
         index : int
             number of the simulation frame

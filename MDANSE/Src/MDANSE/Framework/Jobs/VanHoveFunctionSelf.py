@@ -26,12 +26,13 @@ from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     DETAILED_CELL_MESSAGE,
 )
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.util_types import FloatArray
 
 
 def van_hove_self(
-    xyz: np.ndarray,
-    histograms: np.ndarray,
-    cell_vols: np.ndarray,
+    xyz: FloatArray,
+    histograms: FloatArray,
+    cell_vols: FloatArray,
     rmin: float,
     dr: float,
     n_configs: int,
@@ -45,11 +46,11 @@ def van_hove_self(
 
     Parameters
     ----------
-    xyz : np.ndarray
+    xyz : FloatArray
         The trajectory of an atom.
-    histograms : np.ndarray
+    histograms : FloatArray
         The histograms to be updated.
-    cell_vols : np.ndarray
+    cell_vols : FloatArray
         The cell volumes.
     rmin : float
         The minimum distance of the histogram.
@@ -236,7 +237,7 @@ class VanHoveFunctionSelf(IJob):
             )
         self.shell_volumes = (4 / 3) * np.pi * np.array(self.shell_volumes)
 
-    def run_step(self, index: int) -> tuple[int, tuple[np.ndarray, np.ndarray]]:
+    def run_step(self, index: int) -> tuple[int, tuple[FloatArray, FloatArray]]:
         """Run the analysis for a single atom.
 
         Calculates a distance histograms of an atoms displacement.
@@ -286,14 +287,14 @@ class VanHoveFunctionSelf(IJob):
 
         return index, histograms
 
-    def combine(self, index: int, histogram: np.ndarray):
+    def combine(self, index: int, histogram: FloatArray):
         """Add the results into the histograms for the input time difference.
 
         Parameters
         ----------
         index : int
             The atom index.
-        histogram : np.ndarray
+        histogram : FloatArray
             A histogram of the distances between an atom at
             time t0 and t0 + t.
 

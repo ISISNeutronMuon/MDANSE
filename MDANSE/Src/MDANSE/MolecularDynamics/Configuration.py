@@ -24,6 +24,7 @@ import networkx as nx
 import numpy as np
 
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import FloatArray, IntArray
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
@@ -32,19 +33,19 @@ if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
-def remove_jumps(input_coords: np.ndarray) -> np.ndarray:
+def remove_jumps(input_coords: FloatArray) -> FloatArray:
     """Takes a series of particle positions in time
     and makes the motion continuous by removing any jumps across
     the simulation box boundary.
 
     Parameters
     ----------
-    input_coords : np.ndarray
+    input_coords : FloatArray
         An (n_time_steps, 3) array of FRACTIONAL atom coordinates
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         The same array of atom positions, corrected for jumps by 1
         full box length
     """
@@ -62,23 +63,23 @@ def remove_jumps(input_coords: np.ndarray) -> np.ndarray:
 
 
 def contiguous_coordinates_real(
-    coords: np.ndarray,
-    cell: np.ndarray,
-    rcell: np.ndarray,
+    coords: FloatArray,
+    cell: FloatArray,
+    rcell: FloatArray,
     indices: list[tuple[int, ...]],
     bring_to_centre: bool = False,
-):
+) -> FloatArray:
     """Translates atoms by a lattice vector. Returns a coordinate array
     in which atoms in each segment are separated from the first atom
     by less than half the simulation box length.
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         Array of atom coordinates
-    cell : np.ndarray
+    cell : FloatArray
         3x3 unit cell array
-    rcell : np.ndarray
+    rcell : FloatArray
         3x3 reciprocal cell array
     indices : List[Tuple[int]]
         a list of index group, as in [[1,2,3], [7,8]]
@@ -89,7 +90,7 @@ def contiguous_coordinates_real(
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         new coordinate array with the translations applied
     """
 
@@ -118,19 +119,19 @@ def contiguous_coordinates_real(
 
 
 def contiguous_coordinates_box(
-    frac_coords: np.ndarray,
+    frac_coords: FloatArray,
     indices: list[tuple[int, ...]],
     bring_to_centre: bool = False,
-):
+) -> FloatArray:
     """Translates atoms by a lattice vector. Returns a FRACTIONAL coordinate array
     in which atoms in each segment are separated from the first atom
     by less than half the simulation box length.
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         Array of fractional coordinates
-    cell : np.ndarray
+    cell : FloatArray
         3x3 unit cell array
     indices : List[Tuple[int]]
         a list of index group, as in [[1,2,3], [7,8]]
@@ -141,7 +142,7 @@ def contiguous_coordinates_box(
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         array of atom coordinates with the translations applied
     """
 
@@ -166,9 +167,9 @@ def contiguous_coordinates_box(
 
 
 def continuous_coordinates(
-    coords: np.ndarray,
-    cell: np.ndarray,
-    rcell: np.ndarray,
+    coords: FloatArray,
+    cell: FloatArray,
+    rcell: FloatArray,
     bond_list: list[tuple[int, ...]],
 ):
     """Translates atoms by lattice vectors to ensure that
@@ -177,18 +178,18 @@ def continuous_coordinates(
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         Array of atom coordinates
-    cell : np.ndarray
+    cell : FloatArray
         3x3 unit cell array
-    rcell : np.ndarray
+    rcell : FloatArray
         3x3 reciprocal cell array
     bond_list : List[Tuple[int]]
         List of bonds in the system
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         new array of atom coordinates with translations applied
     """
     atom_pool = list(range(len(coords)))
@@ -208,11 +209,11 @@ def continuous_coordinates(
 
 
 def padded_coordinates(
-    coords: np.ndarray,
-    unit_cell: UnitCell,
+    coords: FloatArray,
+    unit_cell: UnitCell | None,
     thickness: float,
     fold_into_box: bool = True,
-) -> np.ndarray:
+) -> tuple[FloatArray, IntArray]:
     """Repeats coordinates in copies of the unit cell, and removes
     the atoms that are now within the specified distance from the cell wall.
     The returned coordinate array contains all the original atoms,
@@ -221,7 +222,7 @@ def padded_coordinates(
 
     Parameters
     ----------
-    coords : np.ndarray
+    coords : FloatArray
         Array of all the atoms in the unit cell
     unit_cell : UnitCell
         an instance of the UnitCell class, defining the simulation box
@@ -232,7 +233,7 @@ def padded_coordinates(
 
     Returns
     -------
-    np.ndarray
+    tuple[FloatArray, IntArray]
         Array of atom coordinates, together with their copies
 
     Raises
@@ -327,7 +328,7 @@ class _Configuration(metaclass=abc.ABCMeta):
         """
         return item in self._variables
 
-    def __getitem__(self, item: str) -> np.ndarray:
+    def __getitem__(self, item: str) -> FloatArray:
         """
         Returns the configuration value for a given item.
 
@@ -391,7 +392,7 @@ class _Configuration(metaclass=abc.ABCMeta):
         pass
 
     @property
-    def coordinates(self) -> np.ndarray:
+    def coordinates(self) -> FloatArray:
         """
         Returns the coordinates.
 
@@ -411,7 +412,7 @@ class _Configuration(metaclass=abc.ABCMeta):
         pass
 
     @property
-    def variables(self) -> dict[str, np.ndarray]:
+    def variables(self) -> dict[str, FloatArray]:
         """
         Returns the configuration variable dictionary.
 
@@ -522,7 +523,7 @@ class _PeriodicConfiguration(_Configuration):
 class PeriodicBoxConfiguration(_PeriodicConfiguration):
     is_periodic = True
 
-    def to_box_coordinates(self) -> np.ndarray:
+    def to_box_coordinates(self) -> FloatArray:
         """
         Return this configuration converted to box coordinates.
 
@@ -531,7 +532,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
         """
         return self._variables["coordinates"]
 
-    def to_real_coordinates(self) -> np.ndarray:
+    def to_real_coordinates(self) -> FloatArray:
         """
         Return the coordinates of this configuration converted to real coordinates.
 
@@ -587,7 +588,7 @@ class PeriodicBoxConfiguration(_PeriodicConfiguration):
 class PeriodicRealConfiguration(_PeriodicConfiguration):
     is_periodic = True
 
-    def to_box_coordinates(self) -> np.ndarray:
+    def to_box_coordinates(self) -> FloatArray:
         """
         Returns the (real) coordinates stored in this configuration converted into box coordinates.
 
@@ -616,7 +617,7 @@ class PeriodicRealConfiguration(_PeriodicConfiguration):
 
         return box_conf
 
-    def to_real_coordinates(self) -> np.ndarray:
+    def to_real_coordinates(self) -> FloatArray:
         """
         Return the coordinates of this configuration converted to real coordinates, i.e. the coordinates registered with
         this configuration.
@@ -704,7 +705,7 @@ class RealConfiguration(_Configuration):
         """Does nothing since coordinates can only be folded if the configuration has a unit cell."""
         return
 
-    def to_real_coordinates(self) -> np.ndarray:
+    def to_real_coordinates(self) -> FloatArray:
         """
         Return the coordinates of this configuration converted to real coordinates.
 

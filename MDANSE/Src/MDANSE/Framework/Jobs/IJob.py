@@ -200,11 +200,13 @@ class IJob(Configurable, RegisterFactory, ABC):
     """
 
     registry: ClassVar[UCDict[str, type[IJob]]] = UCDict()
+    requires_extras: ClassVar[tuple[str, ...]] = ()
 
     section = "job"
     key_gen = key_generator(6)
     ancestor: ClassVar[list[str]] = []
     PREDICTORS: ClassVar[tuple[str, ...]] = ()
+
     runscript_import_line = "from MDANSE.Framework.Jobs.IJob import IJob"
 
     def __init__(self, trajectory_input="mdanse"):

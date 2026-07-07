@@ -21,6 +21,7 @@ from scipy.signal import correlate
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
+from MDANSE.util_types import FloatArray
 
 
 @IJob.register("Infrared")
@@ -155,7 +156,7 @@ class Infrared(IJob):
                 axis="ir/axes/romega",
             )
 
-    def run_step(self, index: int) -> tuple[int, np.ndarray]:
+    def run_step(self, index: int) -> tuple[int, FloatArray]:
         """Runs a single step of the job.
 
         Parameters
@@ -165,7 +166,7 @@ class Infrared(IJob):
 
         Returns
         -------
-        tuple[int, np.ndarray]
+        tuple[int, FloatArray]
             The index of the step and the calculated d/dt dipole
             auto-correlation function for a molecule.
         """
@@ -214,7 +215,7 @@ class Infrared(IJob):
         )
         return index, mol_ddacf.T[0]
 
-    def combine(self, index: int, x: np.ndarray):
+    def combine(self, index: int, x: FloatArray):
         """Add the d/dt dipole auto-correlation function of molecule
         to the results.
 
@@ -222,7 +223,7 @@ class Infrared(IJob):
         ----------
         index : int
             The index of the molecule.
-        x : np.ndarray
+        x : FloatArray
             d/dt dipole auto-correlation function for a molecule
         """
         self._outputData["ddacf/ddacf"] += x

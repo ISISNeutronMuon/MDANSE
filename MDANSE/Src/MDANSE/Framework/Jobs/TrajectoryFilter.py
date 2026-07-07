@@ -36,6 +36,7 @@ from MDANSE.MolecularDynamics.Configuration import (
     _Configuration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+from MDANSE.util_types import FloatArray
 
 
 @IJob.register("TrajectoryFilter")
@@ -253,14 +254,14 @@ class TrajectoryFilter(IJob):
         super().finalize()
 
 
-def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.ndarray:
+def apply(filter: Filter, trajectories: FloatArray, apply_offsets: bool) -> FloatArray:
     """Apply the filter to the atomic trajectories.
 
     Parameter
     ---------
     filter : Filter
         The filter object to be applied.
-    trajectories : np.ndarray
+    trajectories : FloatArray
         Atomic trajectories array with shape (num atoms, 3, num timesteps).
     apply_offsets : bool
         If true, we apply an offset to the atomic positions post-filter, representing
@@ -268,7 +269,7 @@ def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.n
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         Filtered atomic trajectories.
 
     """
@@ -289,7 +290,7 @@ def apply(filter: Filter, trajectories: np.ndarray, apply_offsets: bool) -> np.n
 def write_filtered_trajectory(
     parent_configuration: _Configuration,
     nsteps: int,
-    filtered_coordinates: np.ndarray,
+    filtered_coordinates: FloatArray,
     output_trajectory: TrajectoryWriter,
 ) -> None:
     """Write the filtered trajectory object.
@@ -300,7 +301,7 @@ def write_filtered_trajectory(
         Parent configuration.
     nsteps : int
         Number of simulation steps.
-    filtered_coordinates : np.ndarray
+    filtered_coordinates : FloatArray
         Coordinates of the filtered atomic trajectories.
     output_trajectory : TrajectoryWriter
         Trajectory writer object to write the output trajectory.
@@ -336,7 +337,7 @@ def write_filtered_trajectory(
 def get_output_configuration(
     parent: _Configuration,
     output_chemical_system: ChemicalSystem,
-    output_coordinates: np.ndarray,
+    output_coordinates: FloatArray,
 ):
     """Return a configuration for filtered trajectory writer.
 
@@ -348,7 +349,7 @@ def get_output_configuration(
         Parent configuration.
     output_chemical_system : ChemicalSystem
         Chemical system of the output trajectory.
-    output_coordinates : np.ndarray
+    output_coordinates : FloatArray
         Output atomic coordinates.
 
     Returns

@@ -196,7 +196,7 @@ class DatasetFormatter:
         -------
         list[str]
             Header lines.
-        np.ndarray
+        FloatArray
             A data table with 2 columns.
 
         """

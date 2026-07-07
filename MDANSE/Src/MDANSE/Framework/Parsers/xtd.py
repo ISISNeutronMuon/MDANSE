@@ -21,12 +21,12 @@ from typing import NamedTuple, NoReturn
 from xml.etree import ElementTree
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import first
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import FloatArray
 
 from .Parser import Parser
 
@@ -37,7 +37,7 @@ class Atom(NamedTuple):
     xtd_index: int
     bonded_to: set[int]
     element: str
-    xyz: npt.NDArray[float]
+    xyz: FloatArray
     charge: float
 
 

@@ -16,14 +16,14 @@
 from __future__ import annotations
 
 import numpy as np
-import numpy.typing as npt
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors, truncated_normal_distribution
+from MDANSE.util_types import FloatArray
 
 
 def spherical_vectors(
     q: float, q_width: float, n_vecs: int, rng: np.random.Generator
-) -> npt.NDArray[float]:
+) -> FloatArray:
     """Generate vectors on a sphere.
 
     The distribution should be uniform in angles, and normal in the
@@ -42,7 +42,7 @@ def spherical_vectors(
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         A (3,N) array of vectors.
     """
     qmin = max(0.01 * abs(q), q - q_width / 2)

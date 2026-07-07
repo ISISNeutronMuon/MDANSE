@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Literal
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import chunked, one
 
 from MDANSE.Framework.Parsers.FortranUnformat import binary_file_reader
@@ -31,6 +30,7 @@ from MDANSE.Framework.Parsers.Parser import Parser
 from MDANSE.Framework.Units import measure
 from MDANSE.Mathematics.Geometry import get_basis_vectors_from_cell_parameters
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import FloatArray
 
 PI_2 = 0.5 * np.pi
 
@@ -125,7 +125,7 @@ class DCDFile(Parser):
         # Read the number of atoms.
         self._n_atoms = one(struct.unpack(self._byte_order + "i", data))
 
-    def read_step(self, reader) -> tuple[UnitCell | None, npt.NDArray[float]]:
+    def read_step(self, reader) -> tuple[UnitCell | None, FloatArray]:
         """
         Reads a frame of the DCD file.
         """

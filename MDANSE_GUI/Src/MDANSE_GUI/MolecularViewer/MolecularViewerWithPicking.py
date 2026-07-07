@@ -20,6 +20,7 @@ import vtk
 from qtpy.QtCore import Signal
 from vtk.util import numpy_support
 
+from MDANSE.util_types import ByteArray, FloatArray
 from MDANSE_GUI.MolecularViewer.AtomProperties import ndarray_to_vtkarray
 
 from .MolecularViewer import BondCalc, MolecularViewer
@@ -283,23 +284,23 @@ class MolecularViewerWithPicking(MolecularViewer):
         self.create_picked_bonds()
         self.update_renderer()
 
-    def set_atm_polydata_scalars(self, data: tuple[np.ndarray, np.ndarray]):
+    def set_atm_polydata_scalars(self, data: tuple[ByteArray, FloatArray]):
         """Sets the atom and picked atom polydata scalar and array data.
 
         Parameters
         ----------
-        data : tuple[np.ndarray, np.ndarray]
+        data : tuple[ByteArray, FloatArray]
             A tuple of arrays of atom colours, and radii.
         """
         super().set_atm_polydata_scalars(data)
         self.set_picked_polydata_scalars(data)
 
-    def set_picked_polydata_scalars(self, data: tuple[np.ndarray, np.ndarray]):
+    def set_picked_polydata_scalars(self, data: tuple[ByteArray, FloatArray]):
         """Sets the picked polydata scalar and array data.
 
         Parameters
         ----------
-        data : tuple[np.ndarray, np.ndarray]
+        data : tuple[ByteArray, FloatArray]
             A tuple of arrays of atom colours and radii.
         """
         colours, radii = data

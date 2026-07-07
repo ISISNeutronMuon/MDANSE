@@ -30,6 +30,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.util_types import FloatArray, IntArray
 
 CELL_SIZE_LIMIT = 1e-9
 DETAILED_CELL_MESSAGE = (
@@ -42,9 +43,9 @@ DETAILED_CELL_MESSAGE = (
 
 
 def distance_array_2D(
-    ref_atoms: npt.NDArray[float],
-    other_atoms: npt.NDArray[float],
-    cell_array: npt.NDArray[float],
+    ref_atoms: FloatArray,
+    other_atoms: FloatArray,
+    cell_array: FloatArray,
 ):
     """Given two input arrays of atomic positions sized
     (N,3) and (M,3), returns an (M, N) array of distances
@@ -52,16 +53,16 @@ def distance_array_2D(
 
     Parameters
     ----------
-    ref_atoms : np.ndarray
+    ref_atoms : FloatArray
         (N, 3)-shaped array of atom positions
-    other_atoms : np.ndarray
+    other_atoms : FloatArray
         (M, 3)-shaped array of atom positions
-    cell_array : np.ndarray
+    cell_array : FloatArray
         direct matrix of the unit cell of the system
 
     Returns
     -------
-    np.ndarray
+    FloatArray
         (N, M)-shaped array of distances between atoms from the two arrays
     """
     diff_frac = other_atoms.reshape((len(other_atoms), 1, 3)) - ref_atoms.reshape(
@@ -75,17 +76,17 @@ def distance_array_2D(
 
 
 def van_hove_distinct(
-    cell: npt.NDArray[float],
-    indices_intra: npt.NDArray[int],
+    cell: FloatArray,
+    indices_intra: IntArray,
     symbolindex: list[int],
-    intra: npt.NDArray[float],
-    total: npt.NDArray[float],
-    coords_t0: npt.NDArray[float],
-    coords_t1: npt.NDArray[float],
+    intra: FloatArray,
+    total: FloatArray,
+    coords_t0: FloatArray,
+    coords_t1: FloatArray,
     rmin: float,
     dr: float,
     size_limit: int = 1024,
-):
+) -> tuple[FloatArray, FloatArray]:
     """Return the histogram of interatomic distances.
 
     Calculates the distance histogram between the configurations at
@@ -99,19 +100,19 @@ def van_hove_distinct(
 
     Parameters
     ----------
-    cell : np.ndarray
+    cell : FloatArray
         direct matrix of the unit cell of the system
-    indices_intra : np.ndarray[int]
+    indices_intra : IntArray
         array indices of the distance matrix elements for each molecule in the system
     symbolindex : list[int]
         list of int values of atom types in the system
-    intra : np.ndarray
+    intra : FloatArray
         the array of distance counts between atoms in the same molecule
-    total : np.ndarray
+    total : FloatArray
         the array of distance counts between atoms in different molecules
-    coords_t0 : np.ndarray
+    coords_t0 : FloatArray
         array of atom positions at time t0
-    coords_t1 : np.ndarray
+    coords_t1 : FloatArray
         array of atom positions at time t1
     rmin : float
         lowest distance allowed in the binning of the results
@@ -122,7 +123,7 @@ def van_hove_distinct(
 
     Returns
     -------
-    Tuple[np.ndarray]
+    tuple[FloatArray, FloatArray]
         intra and total input arrays modified by adding new counts
 
     """
@@ -191,17 +192,17 @@ def van_hove_distinct(
 
 
 def van_hove_distinct_all_inter(
-    cell: npt.NDArray[float],
+    cell: FloatArray,
     _indices_intra: None,
     symbolindex: list[int],
     intra: None,
-    total: npt.NDArray[float],
-    coords_t0: npt.NDArray[float],
-    coords_t1: npt.NDArray[float],
+    total: FloatArray,
+    coords_t0: FloatArray,
+    coords_t1: FloatArray,
     rmin: float,
     dr: float,
     size_limit: int = 1024,
-) -> tuple[None, npt.NDArray[float]]:
+) -> tuple[None, FloatArray]:
     """Return the histogram of interatomic distances.
 
     Calculates the distance histogram between the configurations at
@@ -215,7 +216,7 @@ def van_hove_distinct_all_inter(
 
     Parameters
     ----------
-    cell : np.ndarray
+    cell : FloatArray
         direct matrix of the unit cell of the system
     indices_intra : None
         added for compatibility but omitted in the calculations
@@ -223,11 +224,11 @@ def van_hove_distinct_all_inter(
         list of int values of atom types in the system
     intra : None
         added for compatibility but omitted in the calculations
-    total : np.ndarray
+    total : FloatArray
         the array of distance counts between atoms in different molecules
-    coords_t0 : np.ndarray
+    coords_t0 : FloatArray
         array of atom positions at time t0
-    coords_t1 : np.ndarray
+    coords_t1 : FloatArray
         array of atom positions at time t1
     rmin : float
         lowest distance allowed in the binning of the results
@@ -238,7 +239,7 @@ def van_hove_distinct_all_inter(
 
     Returns
     -------
-    Tuple[None, np.ndarray]
+    Tuple[None, FloatArray]
         intra and total input arrays modified by adding new counts
 
     """
@@ -291,7 +292,7 @@ def van_hove_distinct_all_inter(
 
 def intramolecular_lookup_dict(
     chemical_system: ChemicalSystem.ChemicalSystem,
-) -> npt.NDArray[int]:
+) -> IntArray:
     """Build a lookup dictionary of atom indices in the same molecule.
 
     Two atoms belonging to the same molecule will return the same value
@@ -531,9 +532,7 @@ class VanHoveFunctionDistinct(IJob):
             (self.nElements, self.nElements, self.n_mid_points, self.numberOfSteps),
         )
 
-    def run_step(
-        self, time: int
-    ) -> tuple[int, tuple[npt.NDArray[float], npt.NDArray[float]]]:
+    def run_step(self, time: int) -> tuple[int, tuple[FloatArray, FloatArray]]:
         """Calculate results for a single time step.
 
         Calculates the distance histogram between the configurations
@@ -547,7 +546,7 @@ class VanHoveFunctionDistinct(IJob):
 
         Returns
         -------
-        tuple[int, tuple[np.ndarray]]
+        tuple[int, tuple[FloatArray, FloatArray]]
             A tuple containing the time difference and a tuple of the
             total and intramolecular distance histograms.
         """
@@ -610,16 +609,14 @@ class VanHoveFunctionDistinct(IJob):
 
         return time, (bins_intra, bins_total)
 
-    def combine(
-        self, time: int, x: tuple[npt.NDArray[float], npt.NDArray[float]]
-    ) -> None:
+    def combine(self, time: int, x: tuple[FloatArray, FloatArray]) -> None:
         """Add the results into the histograms for the input time difference.
 
         Parameters
         ----------
         time : int
             The time difference.
-        x : tuple[np.ndarray, np.ndarray]
+        x : tuple[FloatArray, FloatArray]
             A tuple containing a histogram of the distances between
             configurations at the input time difference.
 

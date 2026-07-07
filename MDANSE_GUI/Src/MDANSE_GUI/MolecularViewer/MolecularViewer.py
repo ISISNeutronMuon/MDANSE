@@ -35,6 +35,7 @@ from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Connectivity import distance_calculation
+from MDANSE.util_types import BoolArray, ByteArray, FloatArray
 from MDANSE_GUI.MolecularViewer.AtomProperties import (
     AtomProperties,
     ndarray_to_vtkarray,
@@ -48,7 +49,7 @@ if TYPE_CHECKING:
 ThreeVector: TypeAlias = tuple[float, float, float]
 
 
-def array_to_3d_imagedata(data: np.ndarray, spacing: tuple[float, float, float]):
+def array_to_3d_imagedata(data: FloatArray, spacing: tuple[float, float, float]):
     nx, ny, nz = data.shape
     image = vtk.vtkImageData()
     image.SetDimensions(nx, ny, nz)
@@ -698,9 +699,9 @@ class MolecularViewer(QtWidgets.QWidget):
     def create_bond_cell_array(
         self,
         *,
-        rs: np.ndarray,
-        covs: np.typing.NDArray[float],
-        not_du: np.typing.NDArray[bool],
+        rs: FloatArray,
+        covs: FloatArray,
+        not_du: BoolArray,
         tolerance: float = 0.04,
     ) -> vtk.vtkCellArray:
         """Finds the pairs of atoms which should be connected by bonds,
@@ -711,7 +712,7 @@ class MolecularViewer(QtWidgets.QWidget):
 
         Parameters
         ----------
-        rs : np.ndarray
+        rs : FloatArray
             an (N,3) array of atom coordinates
         covs : Iterable[float]
             an (N,) array of covalent radii
@@ -954,23 +955,23 @@ class MolecularViewer(QtWidgets.QWidget):
         self.update_renderer()
 
     @Slot(object)
-    def _new_atom_properties(self, data: tuple[np.ndarray, np.ndarray]):
+    def _new_atom_properties(self, data: tuple[ByteArray, FloatArray]):
         """Sets the atom polydata scalar and array data. Updates the renderer.
 
         Parameters
         ----------
-        data : tuple[np.ndarray, np.ndarray]
+        data : tuple[ByteArray, FloatArray]
             A tuple of arrays of atom colours and radii.
         """
         self.set_atm_polydata_scalars(data)
         self.update_renderer()
 
-    def set_atm_polydata_scalars(self, data: tuple[np.ndarray, np.ndarray]):
+    def set_atm_polydata_scalars(self, data: tuple[ByteArray, FloatArray]):
         """Sets the atom polydata scalar and array data.
 
         Parameters
         ----------
-        data : tuple[np.ndarray, np.ndarray]
+        data : tuple[ByteArray, FloatArray]
             A tuple of arrays of atom colours and radii.
         """
         colours, radii = data

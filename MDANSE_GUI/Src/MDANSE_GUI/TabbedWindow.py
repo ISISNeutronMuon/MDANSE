@@ -33,8 +33,7 @@ from qtpy.QtWidgets import (
     QToolBar,
 )
 
-import MDANSE
-import MDANSE_GUI
+from MDANSE.Core.Platform import version_summary
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -250,7 +249,7 @@ class TabbedWindow(QMainWindow):
         self.settingsAct = QAction("User Settings", parent=menubar)
         self.settingsAct.triggered.connect(self.launchSettingsEditor)
         settings_group.addAction(self.settingsAct)
-        self.aboutAct = QAction("About MDANSE", parent=menubar)
+        self.aboutAct = QAction("Version information", parent=menubar)
         self.aboutAct.triggered.connect(self.version_information)
         self.website_actions = []
         for label, function in [
@@ -354,10 +353,7 @@ class TabbedWindow(QMainWindow):
         self.signal_recent_plot_selection_file.emit(file)
 
     def version_information(self):
-        version = ""
-        version += f"MDANSE version: {MDANSE.__version__}\n"
-        version += f"MDANSE_GUI version: {MDANSE_GUI.__version__}\n"
-        _popup = QMessageBox.about(self, "MDANSE Version Information", version)
+        _popup = QMessageBox.about(self, "Version Summary", version_summary())
 
     def show_website_code(self):
         QDesktopServices.openUrl(MDANSE_CODE_WEBSITE)

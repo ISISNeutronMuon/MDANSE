@@ -22,7 +22,6 @@ from pathlib import Path
 
 import h5py
 import numpy as np
-import numpy.typing as npt
 from more_itertools import first
 
 import MDANSE
@@ -42,6 +41,7 @@ from MDANSE.MolecularDynamics.UnitCell import (
     NO_CELL,
     UnitCell,
 )
+from MDANSE.util_types import FloatArray
 
 from .FileTrajBase import TrajDataArray, TrajectoryFile
 
@@ -175,7 +175,7 @@ class MdanseTrajectory(TrajectoryFile):
         """Close the trajectory."""
         self._h5_file.close()
 
-    def __getitem__(self, frame: int) -> dict[str, npt.NDArray[float]]:
+    def __getitem__(self, frame: int) -> dict[str, FloatArray]:
         """Return the atom configuration for a specific frame.
 
         Parameters
@@ -185,7 +185,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         Returns
         -------
-        dict[str, npt.NDArray[float]]
+        dict[str, FloatArray]
             Atom configuration, with unit cell (if defined)
 
         """
@@ -200,9 +200,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         return configuration
 
-    def charges(
-        self, frame: int, indices: slice | int = np.s_[:]
-    ) -> npt.NDArray[float]:
+    def charges(self, frame: int, indices: slice | int = np.s_[:]) -> FloatArray:
         """Return the electrical charge array for given time step.
 
         Parameters
@@ -212,7 +210,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             array of float values of partial charges
 
         Raises
@@ -256,7 +254,7 @@ class MdanseTrajectory(TrajectoryFile):
 
     def coordinates(
         self, frame: slice | int, indices: slice | int = np.s_[:]
-    ) -> npt.NDArray[float]:
+    ) -> FloatArray:
         """Return the atom position array for given time step.
 
         Parameters
@@ -268,7 +266,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             array of float values of atom coordinates
 
         Raises
@@ -388,7 +386,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         return grp["coordinates"].shape[0]
 
-    def masses(self) -> npt.NDArray[float]:
+    def masses(self) -> FloatArray:
         """Get masses from databases.
 
         Parameters
@@ -398,7 +396,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         Returns
         -------
-        npt.NDArray[float]
+        FloatArray
             Atomic masses.
         """
         try:

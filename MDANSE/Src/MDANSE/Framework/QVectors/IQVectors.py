@@ -19,13 +19,13 @@ import abc
 from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
-import numpy.typing as npt
 from scipy.stats import truncnorm
 
 from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.Framework.Configurable import Configurable
 from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import LOG
+from MDANSE.util_types import BoolArray, FloatArray
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
@@ -43,7 +43,7 @@ def truncated_normal_distribution(
     centre: float,
     rng: np.random.Generator,
     zero_width_limit: float = 0.1,
-) -> npt.NDArray[float]:
+) -> FloatArray:
     """Generate a normal distribution of values within the specified limits.
 
     Parameters
@@ -65,7 +65,7 @@ def truncated_normal_distribution(
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         A truncated normal distribution of points within the specified limits.
     """
     if np.isclose(width, 0, atol=WIDTH_NONZERO_LIMIT):
@@ -87,7 +87,7 @@ def truncated_normal_distribution(
     )
 
 
-def calculate_average_q_per_shell(vector_config: IQVectors) -> npt.NDArray[float]:
+def calculate_average_q_per_shell(vector_config: IQVectors) -> FloatArray:
     r"""Calculates the average :math:`\mathbf{q}` per shell.
 
     The averaging uses the weights determined by sampling the reciprocal space.
@@ -99,7 +99,7 @@ def calculate_average_q_per_shell(vector_config: IQVectors) -> npt.NDArray[float
 
     Returns
     -------
-    npt.NDArray[float]
+    FloatArray
         Array of average q per shell.
     """
     results = np.empty(len(vector_config._configuration["q_vectors"]))
@@ -149,9 +149,9 @@ class IQVectors(Configurable, RegisterFactory, abc.ABC):
     @classmethod
     def qvectors_to_hkl(
         cls,
-        vector_array: np.array,
+        vector_array: FloatArray,
         unit_cell: UnitCell,
-    ) -> np.ndarray:
+    ) -> FloatArray:
         """Recalculate Q vectors to HKL Miller indices.
 
         Using a unit cell definition, recalculates an array
@@ -159,35 +159,35 @@ class IQVectors(Configurable, RegisterFactory, abc.ABC):
 
         Parameters
         ----------
-        vector_array : np.array
+        vector_array : FloatArray
             a (3,N) array of scattering vectors
         unit_cell : UnitCell
             an instance of UnitCell class describing the simulation box
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             A (3,N) array of HKL values (Miller indices)
 
         """
         return np.dot(unit_cell.direct, vector_array) / (2 * np.pi)
 
     @classmethod
-    def hkl_to_qvectors(cls, hkls: np.array, unit_cell: UnitCell) -> np.ndarray:
+    def hkl_to_qvectors(cls, hkls: FloatArray, unit_cell: UnitCell) -> FloatArray:
         """Convert an array of HKL values to scattering vectors.
 
         Uses a unit cell object to get the lattice vectors for conversion.
 
         Parameters
         ----------
-        hkls : np.array
+        hkls : FloatArray
             A (3,N) array of HKL values (Miller indices)
         unit_cell : UnitCell
             An instance of UnitCell class describing the simulation box shape
 
         Returns
         -------
-        np.ndarray
+        FloatArray
             a (3, N) array of Q vectors (scattering vectors)
 
         """
@@ -196,9 +196,9 @@ class IQVectors(Configurable, RegisterFactory, abc.ABC):
     @classmethod
     def lattice_vectors_with_weights(
         cls,
-        start_shape: npt.NDArray[float],
+        start_shape: FloatArray,
         unit_cell: UnitCell,
-    ) -> tuple[npt.NDArray[float], npt.NDArray[float]]:
+    ) -> tuple[FloatArray, FloatArray]:
         """Return HKL vectors from the input q-vector array.
 
         An arbitrary shape will be scaled by values between qmin and qmax
@@ -206,14 +206,14 @@ class IQVectors(Configurable, RegisterFactory, abc.ABC):
 
         Parameters
         ----------
-        start_shape : npt.NDArray[float]
+        start_shape : FloatArray
             Q-vector array representing a specific geometric shape.
         unit_cell : UnitCell
             The unit cell of the system, for conversion to HKL values.
 
         Returns
         -------
-        tuple[npt.NDArray[float], npt.NDArray[float]]
+        tuple[FloatArray, FloatArray]
             Unique Q-vectors as HKL values, number of times each vector appeared.
         """
         hkl_fractional = cls.qvectors_to_hkl(start_shape, unit_cell)
@@ -222,16 +222,16 @@ class IQVectors(Configurable, RegisterFactory, abc.ABC):
     @classmethod
     def vectors_within_limits(
         cls,
-        q_vectors: npt.NDArray[float],
+        q_vectors: FloatArray,
         *,
         q_min: float,
         q_max: float,
-    ) -> npt.NDArray[bool]:
+    ) -> BoolArray:
         """Check which vectors in the input array have the length within the limits.
 
         Parameters
         ----------
-        q_vectors : npt.NDArray[float]
+        q_vectors : FloatArray
             Array containing vectors to be checked.
         q_min : float
             Lower limit of |q|
@@ -240,7 +240,7 @@ class IQVectors(Configurable, RegisterFactory, abc.ABC):
 
         Returns
         -------
-        npt.NDArray[bool]
+        BoolArray
             Boolean mask array, True for vectors within limits.
         """
         lengths = np.linalg.norm(q_vectors, axis=0)

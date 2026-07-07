@@ -19,9 +19,9 @@ from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
 
 CONVERTER_SUBCLASSES = Converter.raw_dict()
-ENABLED_CONVERTERS = {key: val for key, val in CONVERTER_SUBCLASSES.items() if val.enabled}
+ENABLED_CONVERTERS = {key: val for key, val in CONVERTER_SUBCLASSES.items() if val.visible}
 IJOB_SUBCLASSES = IJob.raw_dict()
-ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.enabled}
+ENABLED_JOBS = {key: val for key, val in IJOB_SUBCLASSES.items() if val.visible}
 
 
 DATA_DIR = Path(__file__).parents[3] / "MDANSE/Tests/UnitTests/Converted"

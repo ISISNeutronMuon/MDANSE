@@ -16,16 +16,16 @@
 from __future__ import annotations
 
 import numpy as np
-import numpy.typing as npt
 
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.util_types import FloatArray
 
 
 def dispersion_vectors(
-    q_start: npt.NDArray[float],
-    q_end: npt.NDArray[float],
+    q_start: FloatArray,
+    q_end: FloatArray,
     q_step: float,
-) -> tuple[npt.NDArray[float], npt.NDArray[float]]:
+) -> tuple[FloatArray, FloatArray]:
     """Generate vectors in a straight line.
 
     Vectors are generated on a line from q_start to q_end in steps of q_step.
@@ -35,16 +35,16 @@ def dispersion_vectors(
 
     Parameters
     ----------
-    q_start : npt.NDArray[float]
+    q_start : FloatArray
         Starting point in reciprocal space.
-    q_end : npt.NDArray[float]
+    q_end : FloatArray
         End point in reciprocal space.
     q_step : float
         Interval of |q| used for generating vectors.
 
     Returns
     -------
-    tuple[npt.NDArray[float], npt.NDArray[float]]
+    tuple[FloatArray, FloatArray]
         Q_vector array, array of dictionary keys to use in the generator.
     """
     distance = np.linalg.norm(q_end - q_start)

@@ -29,6 +29,7 @@ import h5py
 
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Core.Platform import version_summary
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.IO.AtomInfo import atom_info
@@ -442,7 +443,10 @@ def build_parsers() -> ArgumentParser:
         epilog="Please report any problems with MDANSE as issues on https://github.com/ISISNeutronMuon/MDANSE",
     )
     parser.add_argument(
-        "-V", "--version", action="version", version=f"%(prog)s v{MDANSE.__version__}"
+        "-V",
+        "--version",
+        action="version",
+        version=f"{version_summary(show_backend=False)}",
     )
     subparsers = parser.add_subparsers(
         title="MDANSE CLI Commands",
@@ -462,8 +466,8 @@ def build_parsers() -> ArgumentParser:
 
 def main():
     LOG.setLevel("INFO")
+    print(f"MDANSE {MDANSE.__version__}")  # noqa: T201
     parser = build_parsers()
-
     args: Namespace = parser.parse_args()
     if not vars(args):
         parser.print_help()

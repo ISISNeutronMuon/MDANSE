@@ -20,15 +20,12 @@ from contextlib import suppress
 from math import sqrt
 
 import numpy as np
-from ase import Atoms
-from ase.io.trajectory import Trajectory as ASETrajectory
 from more_itertools import ilen
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Parsers import ASEParser
 from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
@@ -37,6 +34,17 @@ from MDANSE.MolecularDynamics.Configuration import (
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+try:
+    from ase import Atoms
+    from ase.io.trajectory import Trajectory as ASETrajectory
+
+    from MDANSE.Framework.Parsers import ASEParser
+
+    ase_available = True
+except ImportError:
+    ASEParser = object()
+    ase_available = False
 
 
 class ASETrajectoryFileError(Exception):
@@ -56,6 +64,8 @@ class ASE(Converter):
     standard input file names.
     """
 
+    enabled = ase_available
+    requires_extras = ("ase",)
     category = ("Converters", "General")
     label = "ASE"
 

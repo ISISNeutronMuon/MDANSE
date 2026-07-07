@@ -19,7 +19,6 @@ import itertools as it
 from typing import TYPE_CHECKING
 
 import numpy as np
-import numpy.typing as npt
 
 from MDANSE.Framework.AtomGrouping.grouping import pair_labels, update_pair_results
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
@@ -27,6 +26,8 @@ from MDANSE.Framework.Jobs.IJob import IJob
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+
+    from MDANSE.util_types import FloatArray
 
 
 @IJob.register("CoordinationNumber")
@@ -169,7 +170,7 @@ class CoordinationNumber(DistanceHistogram):
 
         def calc_func(
             label_i: str, label_j: str
-        ) -> Iterator[tuple[str, bool, npt.NDArray]]:
+        ) -> Iterator[tuple[str, bool, FloatArray]]:
             """Calculates the coordination number for a given pair of
             element labels.
 
@@ -186,7 +187,7 @@ class CoordinationNumber(DistanceHistogram):
                 The results name.
             inter : bool
                 Whether results are for intermolecular atom pairs.
-            results : npt.NDArray
+            results : FloatArray
                 The results.
             """
             ni = nAtomsPerElement[label_i]

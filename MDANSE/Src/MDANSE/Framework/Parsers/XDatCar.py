@@ -21,12 +21,12 @@ from pathlib import Path
 from typing import NamedTuple
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import run_length
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.util_types import IntArray
 
 from .Parser import Parser
 
@@ -34,7 +34,7 @@ from .Parser import Parser
 class HeaderInfo(NamedTuple):
     unit_cell: UnitCell
     atoms: list[str]
-    atom_counts: npt.NDArray[int]
+    atom_counts: IntArray
     system_name: str
 
 
