@@ -107,6 +107,7 @@ from .PartialChargeConfigurator import (
 )
 from .ProjectionConfigurator import ProjectionConfigurator as ProjectionConfigurator
 from .QRangeConfigurator import QRangeConfigurator as QRangeConfigurator
+from .QVectors3DConfigurator import QVectors3DConfigurator as QVectors3DConfigurator
 from .QVectorsConfigurator import QVectorsConfigurator as QVectorsConfigurator
 from .RangeConfigurator import RangeConfigurator as RangeConfigurator
 from .RunningModeConfigurator import RunningModeConfigurator as RunningModeConfigurator
