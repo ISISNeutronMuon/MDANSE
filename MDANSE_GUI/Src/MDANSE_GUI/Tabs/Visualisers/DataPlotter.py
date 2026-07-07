@@ -179,45 +179,11 @@ class DataPlotter(QWidget):
     def new_plot(self):
         """Trigger the creation of a new plot in the plotting tab."""
         self.create_new_plot.emit("")
-        group = self._settings.group("dialogs")
-        try:
-            show_it = group.get("new_plot")
-        except KeyError:
-            show_it = group.get_default("dialogs", "new_plot")
-        if show_it != "False":
-            plot_added_box = QMessageBox.information(
-                self,
-                "Plot created",
-                "A new plot has been created in the next tab (called 'Plot Holder').\n"
-                "Should this message be shown every time this happens?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.Yes,
-            )
-            if plot_added_box == QMessageBox.StandardButton.No:
-                group = self._settings.group("dialogs")
-                group.set("new_plot", "False")
 
     @Slot()
     def new_text(self):
         """Trigger the creation of a new text view in the plotting tab."""
         self.create_new_text.emit("Text view")
-        group = self._settings.group("dialogs")
-        try:
-            show_it = group.get("new_text")
-        except KeyError:
-            show_it = group.get_default("dialogs", "new_text")
-        if show_it != "False":
-            plot_added_box = QMessageBox.information(
-                self,
-                "Plot created",
-                "A new text view has been created in the next tab (called 'Plot Holder').\n"
-                "Should this message be shown every time this happens?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.Yes,
-            )
-            if plot_added_box == QMessageBox.StandardButton.No:
-                group = self._settings.group("dialogs")
-                group.set("new_text", "False")
 
     @Slot()
     def plot_data(self):
@@ -225,23 +191,6 @@ class DataPlotter(QWidget):
         if len(self._model.datasets()) == 0:
             return
         self.data_for_plotting.emit(self._model)
-        group = self._settings.group("dialogs")
-        try:
-            show_it = group.get("data_plotted")
-        except KeyError:
-            show_it = group.get_default("dialogs", "data_plotted")
-        if show_it != "False":
-            data_plotted_box = QMessageBox.information(
-                self,
-                "Datasets plotted!",
-                "Your results have been plotted in the currently active plot in the next tab (called 'Plot Holder').\n"
-                "Should this message be shown every time this happens?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.Yes,
-            )
-            if data_plotted_box == QMessageBox.StandardButton.No:
-                group = self._settings.group("dialogs")
-                group.set("data_plotted", "False")
 
     @Slot(object)
     def accept_data(self, data_set):
