@@ -37,7 +37,6 @@ class StaticStructureFactor3D(IJob):
         "Analysis",
         "Scattering",
     )
-    PREDICTORS = ("q_shells",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -53,9 +52,9 @@ class StaticStructureFactor3D(IJob):
             "dependencies": {"trajectory": "trajectory"},
         },
     )
-    settings["q_shells"] = (
-        "QRangeConfigurator",
-        {"default": [-10, 10, 1], "valueType": float, "includeLast": True},
+    settings["q_vectors"] = (
+        "QVectors3DConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["grouping_level"] = (
         "GroupingLevelConfigurator",
