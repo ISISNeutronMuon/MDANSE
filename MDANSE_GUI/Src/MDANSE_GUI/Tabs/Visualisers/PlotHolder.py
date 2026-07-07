@@ -35,6 +35,7 @@ class PlotHolder(QTabWidget):
     error = Signal(str)
     new_entry = Signal()
     current_tab_index = Signal(int)
+    current_tab_name = Signal(str)
     current_tab_count = Signal(int)
     datasets_in_plot = Signal(int)
     plot_widget_type = Signal(str)
@@ -65,7 +66,7 @@ class PlotHolder(QTabWidget):
     @Slot(str)
     def new_plot(self, tab_name: str) -> int:
         if not tab_name:
-            tab_name = f"New plot {self._last_number}"
+            tab_name = f"Plot {self._last_number}"
             self._last_number += 1
         plotting_context = PlottingContext(
             unit_lookup=self._unit_lookup,
@@ -83,8 +84,8 @@ class PlotHolder(QTabWidget):
         return tab_id
 
     @Slot(str)
-    def new_text(self, ignored_name: str) -> int:
-        tab_name = f"New text view {self._last_number}"
+    def new_text(self, _: str) -> int:
+        tab_name = f"Text view {self._last_number}"
         self._last_number += 1
         plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
         plotting_context.needs_an_update.connect(self.update_plot)
@@ -177,5 +178,6 @@ class PlotHolder(QTabWidget):
     def send_plot_info(self):
         self.current_tab_count.emit(len(self._plotter))
         self.current_tab_index.emit(self.currentIndex())
+        self.current_tab_name.emit(self.tabBar().tabText(self.currentIndex()))
         self.datasets_in_plot.emit(self.model.rowCount())
         self.plot_widget_type.emit(type(self.plotter).__name__)

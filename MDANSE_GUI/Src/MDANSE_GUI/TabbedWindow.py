@@ -164,6 +164,9 @@ class TabbedWindow(QMainWindow):
         self._tabs["Plot Holder"]._visualiser.current_tab_index.connect(
             self._tabs["Plot Creator"]._visualiser.new_target_plot_index
         )
+        self._tabs["Plot Holder"]._visualiser.current_tab_name.connect(
+            self._tabs["Plot Creator"]._visualiser.new_target_plot_name
+        )
         self._tabs["Plot Holder"]._visualiser.current_tab_count.connect(
             self._tabs["Plot Creator"]._visualiser.new_target_plot_count
         )

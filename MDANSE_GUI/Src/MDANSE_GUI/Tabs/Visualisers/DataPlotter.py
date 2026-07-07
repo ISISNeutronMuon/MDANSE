@@ -33,7 +33,7 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import (
     SingleDataset,
 )
 
-WIDGET_DESCRIPTIONS = {"DataWidget": "text viewer", "PlotWidget": "plotter"}
+WIDGET_DESCRIPTIONS = {"DataWidget": "text view", "PlotWidget": "plot view"}
 
 
 class DataPlotter(QWidget):
@@ -52,19 +52,24 @@ class DataPlotter(QWidget):
     def __init__(self, *args, unit_lookup=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.tab_index, self.tab_count = 0, 1
+        self.tab_name = "Preview"
         self.dataset_count = 0
         self.plotter_type = "PlotWidget"
         self._unit_lookup = unit_lookup
         layout = QVBoxLayout(self)
         control_bar = QWidget(self)
-        bar_layout = QHBoxLayout(control_bar)
+        lower_bar_layout = QHBoxLayout(control_bar)
+        selection_bar = QWidget(self)
+        upper_bar_layout = QHBoxLayout(selection_bar)
         self._selection_viewer = QTableView(self)
-        layout.addWidget(self._selection_viewer)
-        layout.addWidget(control_bar)
-        button_bar = self.create_buttons()
-        bar_layout.addWidget(button_bar)
+        button_bar1, button_bar2 = self.create_buttons()
         plotter_preview = self.create_preview()
-        bar_layout.addWidget(plotter_preview)
+        layout.addWidget(selection_bar)
+        layout.addWidget(control_bar)
+        upper_bar_layout.addWidget(button_bar2)
+        upper_bar_layout.addWidget(self._selection_viewer)
+        lower_bar_layout.addWidget(button_bar1)
+        lower_bar_layout.addWidget(plotter_preview)
         self._model = PlottingContext(
             unit_lookup=self._unit_lookup,
         )
@@ -73,8 +78,6 @@ class DataPlotter(QWidget):
 
     def create_buttons(self) -> QWidget:
         self._plotting_button_reference = None
-        button_bar = QWidget(self)
-        button_layout = QVBoxLayout(button_bar)
         button_groups = {
             "Empty plot creation": [
                 ("New empty plot", self.new_plot),
@@ -85,7 +88,10 @@ class DataPlotter(QWidget):
                 ("Clear data selection", self.clear),
             ],
         }
+        bars = []
         for group_name, buttons in button_groups.items():
+            button_bar = QWidget(self)
+            button_layout = QVBoxLayout(button_bar)
             subgroup = QGroupBox(group_name, button_bar)
             sublayout = QVBoxLayout(subgroup)
             for name, function in buttons:
@@ -96,7 +102,8 @@ class DataPlotter(QWidget):
                 if name == "Send data to plotter":
                     self._plotting_button_reference = button
             button_layout.addWidget(subgroup)
-        return button_bar
+            bars.append(button_bar)
+        return bars
 
     def create_preview(self) -> QWidget:
         previewer = QWidget(self)
@@ -120,8 +127,8 @@ class DataPlotter(QWidget):
         )
         self.target_label.setText(
             "Datasets listed above will be sent to the <b>Plot Holder</b> tab.<br>"
-            f"They will appear in tab {self.tab_index + 1} out of {self.tab_count}.<br>"
-            f"It is a {output_widget}, "
+            f"They will appear in '{self.tab_name}' in the Plot Holder tab.<br>"
+            f"'{self.tab_name}' is a {output_widget}, "
             f"currently containing {self.dataset_count} datasets."
         )
         self._plotting_button_reference.setText(f"Send data to {output_widget}")
@@ -132,6 +139,11 @@ class DataPlotter(QWidget):
     @Slot(int)
     def new_target_plot_index(self, new_index: int):
         self.tab_index = new_index
+        self.update_target_plot_label()
+
+    @Slot(str)
+    def new_target_plot_name(self, new_name: str):
+        self.tab_name = new_name
         self.update_target_plot_label()
 
     @Slot(int)
