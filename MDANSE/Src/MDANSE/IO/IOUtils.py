@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from collections import UserDict
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from enum import Enum
@@ -508,3 +509,39 @@ def unused_standard_output_filename(
     )
 
     return Path(name) if name else None
+
+
+def sec_fmt(time: float) -> str:
+    """Format a time in seconds sensibly."""
+    if not isinstance(time, float):
+        return "N/A"
+
+    hr, min = divmod(time, 3600)
+    min, sec = divmod(min, 60)
+
+    if hr:
+        return f"{hr:.0f}hr {min:.0f}m {sec:.0f}s"
+    if min:
+        return f"{min:.0f}m {sec:.0f}s"
+
+    return f"{sec:.0f}s"
+
+
+def job_status_text_summary(job) -> str:
+    try:
+        comp_time = (job.n_steps - job.current_step) / job.rate
+    except (TypeError, ZeroDivisionError):
+        comp_time = "N/A"
+
+    elapsed_time = job.end - job.start if job.end else time.time() - job.start
+
+    return f"""
+Status:
+  Current state: {job.state.name.title()}
+  Percent complete: {job.progress}
+  Percent rate: {job.pct_rate} %/s
+  Steps: {job.current_step}/{job.n_steps}
+  Step rate: {job.rate} steps/s
+  Elapsed time: {sec_fmt(elapsed_time)}
+  Estimated remaining time: {sec_fmt(comp_time)}
+"""

@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import suppress
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -23,7 +24,9 @@ import h5py
 
 import MDANSE
 from MDANSE import PLATFORM
+from MDANSE.Core.Platform import version_summary
 from MDANSE.Framework.Formats.IFormat import IFormat
+from MDANSE.IO.IOUtils import job_status_text_summary
 from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
@@ -96,6 +99,39 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
     return meta_dict
 
 
+def create_metadata_datasets(job: IJob, meta: h5py.Group):
+    string_dt = h5py.special_dtype(vlen=str)
+    meta.create_dataset("task_name", (1,), data=type(job).__name__, dtype=string_dt)
+    meta.create_dataset(
+        "MDANSE_version",
+        (1,),
+        data=MDANSE.__version__,
+        dtype=string_dt,
+    )
+    meta.create_dataset(
+        "version_summary",
+        (1,),
+        data=version_summary(),
+        dtype=string_dt,
+    )
+
+    inputs = job.output_configuration()
+
+    if inputs is not None:
+        LOG.info(inputs)
+        dgroup = meta.create_group("inputs")
+        for key, value in inputs.items():
+            dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
+
+    with suppress(AttributeError):
+        meta.create_dataset(
+            "job_state",
+            (1,),
+            dtype=string_dt,
+            data=job_status_text_summary(job._status._state),
+        )
+
+
 def write_metadata(job: IJob, output_file: h5py.File):
     """Save parameters of IJob in the output file.
 
@@ -107,23 +143,8 @@ def write_metadata(job: IJob, output_file: h5py.File):
         an open HDF5 file, typically .mdt
 
     """
-    string_dt = h5py.special_dtype(vlen=str)
     meta = output_file.create_group("metadata")
-    meta.create_dataset("task_name", (1,), data=type(job).__name__, dtype=string_dt)
-    meta.create_dataset(
-        "MDANSE_version",
-        (1,),
-        data=MDANSE.__version__,
-        dtype=string_dt,
-    )
-
-    inputs = job.output_configuration()
-
-    if inputs is not None:
-        LOG.info(inputs)
-        dgroup = meta.create_group("inputs")
-        for key, value in inputs.items():
-            dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
+    create_metadata_datasets(job, meta)
 
 
 @IFormat.register("HDFFormat")
@@ -201,25 +222,7 @@ class HDFFormat(IFormat):
             outputFile.attrs["header"] = header
 
         meta = outputFile.create_group("metadata")
-        if run_instance is not None:
-            meta.create_dataset(
-                "task_name",
-                (1,),
-                data=type(run_instance).__name__,
-                dtype=string_dt,
-            )
-            meta.create_dataset(
-                "MDANSE_version",
-                (1,),
-                data=MDANSE.__version__,
-                dtype=string_dt,
-            )
-
-            if inputs := run_instance.output_configuration():
-                LOG.info(inputs)
-                dgroup = meta.create_group("inputs")
-                for key, value in inputs.items():
-                    dgroup.create_dataset(key, (1,), data=value, dtype=string_dt)
+        create_metadata_datasets(run_instance, meta)
 
         # Loop over the OutputVariable instances to write.
 
