@@ -15,12 +15,17 @@
 #
 from __future__ import annotations
 
+from functools import partial
 import itertools as it
 from typing import Any
 
 import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from .IntegerConfigurator import IntegerConfigurator
+from .BooleanConfigurator import BooleanConfigurator
+from .RangeConfigurator import RangeConfigurator
+from .VectorConfigurator import VectorConfigurator
 
 
 @IConfigurator.register("QVectors3DConfigurator")
@@ -31,11 +36,26 @@ class QVectors3DConfigurator(IConfigurator):
         "n_samples": 50000,
         "force_equal_weights": False,
         "supercell_used": (1, 1, 1),
-        # "u": order, q_x, q_y, q_z, q_min, q_max, width
-        "u": (1.0, 0.0, 0.0, -5.0, 5.0, 1.0),
-        "v": (0.0, 1.0, 0.0, -5.0, 5.0, 1.0),
-        "w": (0.0, 0.0, 1.0, -5.0, 5.0, 1.0),
+        "u": (1.0, 0.0, 0.0),
+        "v": (0.0, 1.0, 0.0),
+        "w": (0.0, 0.0, 1.0),
+        "u_range": (-5.0, 5.0, 1.0),
+        "v_range": (-5.0, 5.0, 1.0),
+        "w_range": (-5.0, 5.0, 1.0),
     }
+    _configurators_classes = {
+        "seed": partial(IntegerConfigurator, mini=0),
+        "n_samples": partial(IntegerConfigurator, mini=1),
+        "force_equal_weights": BooleanConfigurator,
+        "supercell_used": partial(VectorConfigurator, valueType=int, notNull=True),
+        "u": partial(VectorConfigurator, valueType=float, notNull=True),
+        "v": partial(VectorConfigurator, valueType=float, notNull=True),
+        "w": partial(VectorConfigurator, valueType=float, notNull=True),
+        "u_range": partial(RangeConfigurator, valueType=float, includeLast=False),
+        "v_range": partial(RangeConfigurator, valueType=float, includeLast=False),
+        "w_range": partial(RangeConfigurator, valueType=float, includeLast=False),
+    }
+
     label = "3D Q vector generator"
     tooltip = "Generates Q vectors in a slice with a finite thickness"
 
@@ -53,37 +73,35 @@ class QVectors3DConfigurator(IConfigurator):
 
         self._original_input = value
 
-        self["u"] = value["u"]
-        self["v"] = value["v"]
-        self["w"] = value["w"]
-        self["u_vec"] = np.array([value["u"][0], value["u"][1], value["u"][2]])
-        self["u_min"] = value["u"][3]
-        self["u_max"] = value["u"][3]
-        self["u_step"] = value["u"][3]
-        self["v_vec"] = np.array([value["v"][0], value["v"][1], value["v"][2]])
-        self["v_min"] = value["v"][3]
-        self["v_max"] = value["v"][3]
-        self["v_step"] = value["v"][3]
-        self["w_vec"] = np.array([value["w"][0], value["w"][1], value["w"][2]])
-        self["w_min"] = value["w"][3]
-        self["w_max"] = value["w"][3]
-        self["w_step"] = value["w"][3]
+        # use the configurators to do all the error checking for us
+        self["configurators"] = {}
+        error_statuses = {}
+        for key, val in self._configurators_classes.items():
+            configurator = val(key)
+            configurator.configure(value[key])
+            if configurator.error_status != "OK":
+                error_statuses[key] = configurator.error_status
+            self["configurators"][key] = configurator
 
-        transform = np.array([self["u_vec"], self["v_vec"], self["w_vec"]]).T
+        if error_statuses:
+            self.error_status = f"Errors configuring settings: {error_statuses}"
+            return
 
-        self["n_samples"] = value["n_samples"]
-        self["seed"] = value["seed"]
-        self["force_equal_weights"] = value["force_equal_weights"]
+        self["u"] = np.array(value["u"])
+        self["v"] = np.array(value["v"])
+        self["w"] = np.array(value["w"])
+        transform = np.array([self["u"], self["v"], self["w"]]).T
         self["sc_used"] = np.array(value["supercell_used"])
 
         max_hkl = np.zeros(3, dtype=int)
         for point in it.product(
             *zip(
-                [self["u_min"], self["v_min"], self["w_min"]],
-                [self["u_max"], self["v_max"], self["w_max"]],
+                [value["u_range"][0], value["v_range"][0], value["w_range"][0]],
+                [value["u_range"][1], value["v_range"][1], value["w_range"][0]],
                 strict=False)
         ):
             hkl = np.dot(transform, point) / self["sc_used"]
             max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))
-
         self["max_hkl"] = max_hkl
+
+        self.error_status = "OK"
