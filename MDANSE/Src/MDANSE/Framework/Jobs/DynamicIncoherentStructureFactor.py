@@ -120,9 +120,9 @@ class DynamicIncoherentStructureFactor(IJob):
 
         self.grouped_indices = group_atom_indices(
             self.trajectory,
-            self._nFrames,
+            self.configuration["frames"]["number"],
             n_proc=n_proc,
-            memory_scale_factor=8 * vectors_per_shell,
+            memory_scale_factor=6 * vectors_per_shell,
         )
         self.numberOfSteps = len(self.grouped_indices)
 
