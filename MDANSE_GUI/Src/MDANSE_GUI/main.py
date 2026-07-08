@@ -21,14 +21,16 @@ import sys
 import textwrap
 import time
 from argparse import ArgumentParser
+from pathlib import Path
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
 from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory, QSystemTrayIcon
 
 import MDANSE_GUI
+from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import FMT, LOG
-from MDANSE_GUI.TabbedWindow import TabbedWindow
+from MDANSE_GUI.TabbedWindow import MDANSEMainWindow
 
 
 # an additonal section which will pass exception information to the logger
@@ -76,6 +78,29 @@ def build_parser():
         "will ask you to confirm if you try to close the GUI before all the tasks "
         "have finished running.",
     )
+    parser.add_argument(
+        "--settings",
+        help="Settings folder to use.",
+        default=None,
+    )
+    parser.add_argument(
+        "--local",
+        help="Use local settings.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-save-settings",
+        action="store_true",
+        help="Do not save settings.",
+    )
+    parser.add_argument(
+        "-L",
+        "--loglevel",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Set log level.",
+    )
+
     return parser
 
 
@@ -114,7 +139,7 @@ def startGUI(some_args):
     args = pars.parse_args(some_args)
 
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel("INFO")
+    stream_handler.setLevel(args.loglevel)
     stream_handler.setFormatter(FMT)
     LOG.addHandler(stream_handler)
 
@@ -122,8 +147,11 @@ def startGUI(some_args):
     app.setStyle(QStyleFactory.create("Fusion"))
     check_qt_environment_vars(app)
 
-    path = os.path.dirname(os.path.abspath(__file__))
-    app.setWindowIcon(QIcon(os.path.join(path, "Icons/MDANSE.ico")))
+    mdanse_root = PLATFORM.base_directory
+
+    icon = QIcon(str(mdanse_root / "Icons/MDANSE.ico"))
+
+    app.setWindowIcon(icon)
     fixed_locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedKingdom)
     fixed_locale.setNumberOptions(
         QLocale.NumberOption.RejectGroupSeparator
@@ -131,14 +159,12 @@ def startGUI(some_args):
     )
     QLocale.setDefault(fixed_locale)
 
-    settings = QSettings(
+    qt_settings = QSettings(
         "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
     )
 
-    path = os.path.dirname(os.path.abspath(__file__))
-
     if not args.no_splash:
-        splash_img = QPixmap(os.path.join(path, "Resources/splash.png"))
+        splash_img = QPixmap(str(mdanse_root / "Resources/splash.png"))
         splash_img.setDevicePixelRatio(2)
         splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
         splash.show()
@@ -150,14 +176,19 @@ def startGUI(some_args):
         else:
             LOG.error("System Tray Icon is not supported by your OS.")
 
-    root = TabbedWindow(
+    # Override settings directories.
+    if args.local:
+        PLATFORM._application_directory = Path.cwd()
+    if args.settings:
+        PLATFORM._application_directory = Path(args.settings)
+
+    root = MDANSEMainWindow(
         parent=None,
         title="MDANSE for Python 3",
-        settings=settings,
+        qt_settings=qt_settings,
         app_instance=app,
-        systray_icon=None
-        if args.no_systray
-        else QIcon(os.path.join(path, "Icons/MDANSE.ico")),
+        systray_icon=None if args.no_systray else icon,
+        save_settings=not args.no_save_settings,
     )
     root.show()
 

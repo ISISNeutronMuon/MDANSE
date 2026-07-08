@@ -18,6 +18,8 @@ from __future__ import annotations
 from functools import partial
 from typing import TYPE_CHECKING
 
+from qtpy.QtCore import QMessageLogger, QSettings
+
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
@@ -46,24 +48,22 @@ Jobs which have finished (successfully or not) can be deleted from this table.
 class RunTab(GeneralTab):
     """The tab for tracking the progress of running jobs."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     @classmethod
     def gui_instance(
         cls,
         parent: QWidget,
+        *,
         name: str,
         session: Session,
-        settings,
-        logger,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
         **kwargs,
     ):
         the_tab = cls(
             parent,
             name=name,
             session=session,
-            settings=settings,
+            qt_settings=qt_settings,
             logger=logger,
             model=kwargs.get("model", JobHolder()),
             view=RunTable(),

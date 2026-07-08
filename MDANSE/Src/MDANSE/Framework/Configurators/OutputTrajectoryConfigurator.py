@@ -60,7 +60,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self.format = "MDTFormat"
         self._dtype = np.float64
         self._compression = "none"
-        self.forbidden_files = []
+        self.forbidden_files = set()
         self._chunk_limit = (1, 128)
 
     def configure(self, value: tuple):
