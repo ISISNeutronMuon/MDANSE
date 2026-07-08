@@ -289,3 +289,23 @@ def balance_index_groups(
         if len(index_sets) < min_count:
             max_size = max(3 * max_size // 4, 1)
     return index_sets
+
+
+def group_cluster_indices(chemical_system: ChemicalSystem) -> list[list[int]]:
+    """Return a list of index list, one for each molecule in the system.
+
+    This function is meant to show which atoms belong to the same structural unit,
+    independent of what that unit may be. This is typically used by Configuration
+    classes in the contiguous_coordinates function.
+
+    Parameters
+    ----------
+    chemical_system : ChemicalSystem
+        ChemicalSystem instance containing the _clusters attribute.
+
+    Returns
+    -------
+    list[list[int]]
+        A list of atom index lists, one per molecule instance.
+    """
+    return list(flatten(chemical_system.clusters.values()))
