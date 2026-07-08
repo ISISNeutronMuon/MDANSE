@@ -34,6 +34,7 @@ from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import (
 from MDANSE.IO.IOUtils import unused_standard_output_filename
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Session.Session import Session
 
 dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
 
@@ -79,7 +80,7 @@ class OutputTrajectoryWidget(WidgetBase):
             self.default_path = Path(".").absolute()
             LOG.error("%s in OutputTrajectoryWidget - can't get default path.", str(e))
         else:
-            self._session = self._parent._parent_tab._session
+            self._session: Session = self._parent._parent_tab._session
         try:
             self._parent = kwargs.get("parent")
             jobname = str(self._parent._job_instance.label).replace(" ", "")
@@ -190,7 +191,7 @@ class OutputTrajectoryWidget(WidgetBase):
             self.updateValue()
 
     def get_widget_value(self):
-        self._configurator.forbidden_files = self._session.reserved_filenames()
+        self._configurator.forbidden_files = self._session.reserved_filenames
         filename = self._field.text()
         if len(filename) < 1:
             filename = self._default_value[0]

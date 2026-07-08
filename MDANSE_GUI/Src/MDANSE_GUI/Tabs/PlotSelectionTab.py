@@ -20,7 +20,7 @@ from functools import partial
 from pathlib import PurePath
 from typing import TYPE_CHECKING
 
-from qtpy.QtCore import Slot
+from qtpy.QtCore import QMessageLogger, QSettings, Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
@@ -97,17 +97,18 @@ class PlotSelectionTab(GeneralTab):
     def gui_instance(
         cls,
         parent: QWidget,
+        *,
         name: str,
         session: Session,
-        settings,
-        logger,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
         **kwargs,
     ):
         the_tab = cls(
             parent,
             name=name,
             session=session,
-            settings=settings,
+            qt_settings=qt_settings,
             logger=logger,
             model=kwargs.get("model", PlotDataModel()),
             view=PlotDataView(),

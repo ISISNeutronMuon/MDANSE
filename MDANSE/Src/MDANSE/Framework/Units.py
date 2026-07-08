@@ -1008,11 +1008,9 @@ class UnitsManager(metaclass=Singleton):
 
     _UNITS: ClassVar[dict[str, _Unit]] = {}
 
-    _DEFAULT_DATABASE = (
-        PLATFORM.base_directory() / "MDANSE" / "Framework" / "units.json"
-    )
+    _DEFAULT_DATABASE = PLATFORM.base_directory / "MDANSE" / "Framework" / "units.json"
 
-    _USER_DATABASE = PLATFORM.application_directory() / "units.json"
+    _USER_DATABASE = PLATFORM.application_directory / "units.json"
 
     def __init__(self):
         self.load()

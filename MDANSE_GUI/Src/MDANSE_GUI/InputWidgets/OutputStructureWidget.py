@@ -25,6 +25,7 @@ from MDANSE.Framework.Configurators.OutputStructureConfigurator import (
 )
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.Session.Session import Session
 
 
 class OutputStructureWidget(WidgetBase):
@@ -44,7 +45,7 @@ class OutputStructureWidget(WidgetBase):
             guess_name = self.default_path / default_value
             LOG.error("It was not possible to get the job name from the parent")
         else:
-            self._session = parent._parent_tab._session
+            self._session: Session = parent._parent_tab._session
         self.file_association = "Output file name (*)"
         self._value = default_value
         self._field = QLineEdit(str(guess_name), self._base)
@@ -110,7 +111,7 @@ class OutputStructureWidget(WidgetBase):
             self.updateValue()
 
     def get_widget_value(self):
-        self._configurator.forbidden_files = self._session.reserved_filenames()
+        self._configurator.forbidden_files = self._session.reserved_filenames
         filename = self._field.text()
         if len(filename) < 1:
             filename = self._default_value[0]
