@@ -128,7 +128,7 @@ def create_metadata_datasets(job: IJob, meta: h5py.Group):
             "job_state",
             (1,),
             dtype=string_dt,
-            data=job_status_text_summary(job._status._state),
+            data=job_status_text_summary(job._status._state, for_output_file=True),
         )
 
 
@@ -196,8 +196,6 @@ class HDFFormat(IFormat):
         """
         if extension is None:
             extension = cls.extensions[0]
-
-        string_dt = h5py.special_dtype(vlen=str)
 
         if in_memory:
             outputFile = h5py.File.in_memory()

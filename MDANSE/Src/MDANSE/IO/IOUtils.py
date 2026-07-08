@@ -527,15 +527,24 @@ def sec_fmt(time: float) -> str:
     return f"{sec:.0f}s"
 
 
-def job_status_text_summary(job) -> str:
+def job_status_text_summary(job, *, for_output_file: bool = False) -> str:
     try:
         comp_time = (job.n_steps - job.current_step) / job.rate
     except (TypeError, ZeroDivisionError):
         comp_time = "N/A"
 
     elapsed_time = job.end - job.start if job.end else time.time() - job.start
-
-    return f"""
+    if for_output_file:
+        return f"""
+Status:
+  Percent complete: {job.progress}
+  Percent rate: {job.pct_rate} %/s
+  Steps: {job.current_step}/{job.n_steps}
+  Step rate: {job.rate} steps/s
+  Elapsed time: {sec_fmt(elapsed_time)}
+"""
+    else:
+        return f"""
 Status:
   Current state: {job.state.name.title()}
   Percent complete: {job.progress}
