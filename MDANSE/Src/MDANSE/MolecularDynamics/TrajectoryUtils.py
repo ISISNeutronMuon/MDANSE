@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import os
 from itertools import pairwise
 from typing import TYPE_CHECKING
 
@@ -24,7 +25,10 @@ from more_itertools import chunked_even
 if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
-CHUNK_SIZE_LIMIT = 2**29  # 512 MB memory limit per process for now
+mb_ram_per_process = os.environ.get("MDANSE_MAX_RAM_PER_PROCESS", "512")
+CHUNK_SIZE_LIMIT = (
+    int(mb_ram_per_process) * 2**20
+)  # 512 MB memory limit per process for now
 
 from MDANSE.util_types import FloatArray
 
@@ -108,8 +112,88 @@ def atomic_trajectory_many(
     return trajectory
 
 
+def get_natoms_per_step(
+    chunk_size: int,
+    trajectory_size: tuple[int, int],
+    scale_factor: float,
+    upper_limit: int,
+) -> int:
+    """Determine how many atom indices should be used in a single analysis run step.
+
+    This considers trajectory size, trajectory chunking, and expected memory requirements.
+
+    Parameters
+    ----------
+    chunk_size : int
+        Number of atoms per chunk in the trajectory file.
+    trajectory_size : tuple[int, int]
+        Total trajectory dimensions in the form of (n_frames, n_atoms).
+    scale_factor : float
+        A job-dependent scaling factor estimating the memory needs per atom.
+    upper_limit : int
+        Total allowed memory per process.
+
+    Returns
+    -------
+    int
+        Number of atom indices in a single group used by an analysis step.
+    """
+    if chunk_size < 0:
+        max_chunk_size = upper_limit // (trajectory_size[0] * 3 * 8 * scale_factor)
+    else:
+        predicted_memory = trajectory_size[0] * chunk_size * 3 * 8 * scale_factor
+        downscale_factor = np.ceil(predicted_memory / upper_limit)
+        max_chunk_size = chunk_size // downscale_factor
+    return max(max_chunk_size, 1)
+
+
+def split_selected_atoms(
+    selected_atoms: set[int],
+    traj_chunk_size: int,
+    traj_size: tuple[int, int],
+    max_atoms_per_group: int,
+    min_group_count: int,
+) -> list[set[int]]:
+    """Group atom indices into sets, each set contained in a single trajectory chunk.
+
+    Parameters
+    ----------
+    selected_atoms : set[int]
+        All atom indices included in the current selection.
+    traj_chunk_size : int
+        Number of atoms per chunk in the trajectory.
+    traj_size : tuple[int, int]
+        Total trajectory size as (n_frames, n_atoms).
+    max_atoms_per_group : int
+        Limit on number of atoms per group, based on memory requirements.
+    min_group_count : int
+        Minimum number of index groups, based on number of processes.
+
+    Returns
+    -------
+    list[set[int]]
+        List of atom index sets, grouped to belong to a single chunk.
+    """
+    if traj_chunk_size < 0:
+        chunk_limits = np.array([0, traj_size[1]])
+    else:
+        chunk_limits = np.concatenate(
+            [np.arange(0, traj_size[1], traj_chunk_size), [traj_size[1]]]
+        )
+    initial_sets = [
+        sorted(selected_atoms.intersection(range(*chunk_block)))
+        for chunk_block in pairwise(chunk_limits)
+    ]
+    initial_sets = [index_set for index_set in initial_sets if len(index_set)]
+    return balance_index_groups(
+        initial_sets, max_size=int(max_atoms_per_group), min_count=min_group_count
+    )
+
+
 def group_atom_indices(
     traj_instance: Trajectory,
+    n_frames: int,
+    *,
     n_proc: int = 1,
     memory_scale_factor: int = 10,
     size_limit: int = CHUNK_SIZE_LIMIT,
@@ -144,30 +228,14 @@ def group_atom_indices(
         List of atom index set, each set containing indices from a single HDF5 chunk
     """
     selected_indices = set(traj_instance.atom_indices)
-    total_dimensions = traj_instance.variable("position").shape
+    total_dimensions = (n_frames, traj_instance.variable("position").shape[1])
     chunk_size = traj_instance.chunk_size(array_name="position")
-    if chunk_size < 0:
-        max_chunk_size = size_limit // (
-            total_dimensions[0] * 3 * 8 * memory_scale_factor
-        )
-        chunk_limits = np.array([0, total_dimensions[1]])
-    else:
-        predicted_memory = (
-            total_dimensions[0] * chunk_size * 3 * 8 * memory_scale_factor
-        )
-        downscale_factor = np.ceil(predicted_memory / size_limit)
-        max_chunk_size = chunk_size // downscale_factor
-        chunk_limits = np.concatenate(
-            [np.arange(0, total_dimensions[1], chunk_size), [total_dimensions[1]]]
-        )
-    min_chunk_count = n_proc
-    initial_sets = [
-        sorted(selected_indices.intersection(range(*chunk_block)))
-        for chunk_block in pairwise(chunk_limits)
-    ]
-    initial_sets = [index_set for index_set in initial_sets if len(index_set)]
-    return balance_index_groups(
-        initial_sets, max_size=int(max_chunk_size), min_count=min_chunk_count
+    max_group_size = get_natoms_per_step(
+        chunk_size, total_dimensions, memory_scale_factor, size_limit
+    )
+    min_group_count = min(n_proc, len(selected_indices))
+    return split_selected_atoms(
+        selected_indices, chunk_size, total_dimensions, max_group_size, min_group_count
     )
 
 
@@ -210,8 +278,13 @@ def balance_index_groups(
     list[set[int]]
         List of index sets after splitting into smaller sets.
     """
-    while any(len(ind_set) > max_size for ind_set in index_sets):
+    while (
+        any(len(ind_set) > max_size for ind_set in index_sets)
+        or len(index_sets) < min_count
+    ):
         index_sets = split_index_sets(index_sets, max_size)
+        if max_size == 1:
+            break
         if len(index_sets) < min_count:
-            max_size = 3 * max_size // 4
+            max_size = max(3 * max_size // 4, 1)
     return index_sets
