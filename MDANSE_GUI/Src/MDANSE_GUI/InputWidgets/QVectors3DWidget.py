@@ -15,7 +15,10 @@
 #
 from __future__ import annotations
 
-from qtpy.QtGui import QStandardItemModel
+import ast
+
+from qtpy.QtCore import Qt
+from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
     QAbstractScrollArea,
     QSizePolicy,
@@ -31,10 +34,23 @@ class QVectors3DWidget(WidgetBase):
         super().__init__(*args, **kwargs)
         self._relative_size = 3
 
-        default = self._configurator.default
+        default = self._configurator._default
+        self.configurators = self._configurator._configurators_classes
 
         self._view = QTableView(self._base)
+
         self._model = QStandardItemModel(10, 3)
+        for i, (key, val) in enumerate(default.items()):
+            item = QStandardItem(key)
+            item.setEditable(False)
+            self._model.setItem(i, 0, item)
+
+            self._model.setItem(i, 1, QStandardItem(str(val)))
+
+            item = QStandardItem(self.configurators[key].func.__name__)
+            item.setEditable(False)
+            self._model.setItem(i, 2, item)
+
         self._view.setModel(self._model)
         self._layout.addWidget(self._view)
 
@@ -45,3 +61,39 @@ class QVectors3DWidget(WidgetBase):
         self._view.setSizeAdjustPolicy(
             QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
         )
+
+        self._model.itemChanged.connect(self.updateValue)
+
+    def get_widget_value(self):
+        """Collect the results from the input widgets and return the value."""
+        settings = {}
+        for row in range(self._model.rowCount()):
+            key = self._model.item(row, 0).text()
+            val_item = self._model.item(row, 1)
+            val = val_item.text()
+            configurator_name = self._model.item(row, 2).text()
+
+            if configurator_name in ("RangeConfigurator", "VectorConfigurator"):
+                settings[key] = val
+                try:
+                    val = ast.literal_eval(val)
+                except (SyntaxError, ValueError):
+                    val_item.setData(
+                        QBrush(Qt.GlobalColor.red),
+                        role=Qt.ItemDataRole.BackgroundRole,
+                    )
+                    continue
+
+            configurator = self.configurators[key](key)
+            configurator.configure(val)
+            if configurator.error_status == "OK":
+                val_item.setData(0, role=Qt.ItemDataRole.BackgroundRole)
+            else:
+                val_item.setData(
+                    QBrush(Qt.GlobalColor.red),
+                    role=Qt.ItemDataRole.BackgroundRole,
+                )
+
+            settings[key] = val
+
+        return settings

@@ -28,21 +28,35 @@ class VectorConfigurator(IConfigurator):
     _default = [1.0, 0.0, 0.0]
 
     def __init__(
-        self, name, valueType=int, normalize=False, notNull=False, dimension=3, **kwargs
+        self,
+        name: str,
+        valueType: type = int,
+        normalize: bool = False,
+        notNull: bool = False,
+        dimension: int = 3,
+        mini: int | float | None = None,
+        maxi: int | float | None = None,
+        **kwargs,
     ):
         """
         Initializes the configurator.
 
-        :param name: the name of the configurator as it will appear in the configuration.
-        :type name: str
-        :param valueType: the numeric type for the vector.
-        :type valueType: int or float
-        :param normalize: if True the vector will be normalized.
-        :type normalize: bool
-        :param notNull: if True, the vector must be non-null.
-        :type notNull: bool
-        :param dimension: the dimension of the vector.
-        :type dimension: int
+        Parameters
+        ----------
+        name : str
+            The name of the configurator as it will appear in the configuration.
+        valueType : type
+            The numeric type for the vector, `int` or `float`.
+        normalize : bool
+            if True the vector will be normalized.
+        notNull : bool
+            If True, the vector must be non-null.
+        dimension : int
+            The dimension of the vector.
+        mini : int or float or None
+            The minimum value of the vectors values.
+        maxi : int or float or None
+            The maximum value of the vectors values.
         """
 
         # The base class constructor.
@@ -56,12 +70,18 @@ class VectorConfigurator(IConfigurator):
 
         self.dimension = dimension
 
-    def configure(self, value):
+        self.mini = mini
+
+        self.maxi = maxi
+
+    def configure(self, value: list | tuple):  # noqa: PLR0911
         """
         Configure a vector.
 
-        :param value: the vector components.
-        :type value: sequence-like object
+        Parameters
+        ----------
+        value : list or tuple
+            The vector components.
         """
         if not self.update_needed(value):
             return
@@ -69,11 +89,27 @@ class VectorConfigurator(IConfigurator):
         self._original_input = value
 
         if not isinstance(value, list | tuple):
-            self.error_status = "Invalid input type."
+            self.error_status = "Invalid input type should be list or tuple."
+            return
+
+        if self.valueType is int and any(i % 1 != 0 for i in value):
+            self.error_status = "Input values are not integer valued."
             return
 
         if len(value) != self.dimension:
             self.error_status = f"This vector should have {self.dimension} components."
+            return
+
+        if self.mini is not None and any(i < self.mini for i in value):
+            self.error_status = (
+                f"Value in vector smaller than the minimum value of {self.mini}."
+            )
+            return
+
+        if self.maxi is not None and any(i > self.maxi for i in value):
+            self.error_status = (
+                f"Value in vector larger than the maximum value of {self.maxi}."
+            )
             return
 
         vector = Vector(np.array(value, dtype=self.valueType))
