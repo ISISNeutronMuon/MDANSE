@@ -32,6 +32,7 @@ class PositionCorrelationFunction(CartesianCorrelationFunction):
     """
 
     enabled = True
+    visible = True
     label = "Position Correlation Function"
     CF_NAME = "pcf"
     CF_UNITS = "nm2"
