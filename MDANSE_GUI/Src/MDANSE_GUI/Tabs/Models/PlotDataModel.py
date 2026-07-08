@@ -166,7 +166,7 @@ class PlotDataModel(QStandardItemModel):
     """
 
     DEFAULT_JSON_PATH = (
-        PLATFORM.application_directory() / "recent_plot_selection_file.json"
+        PLATFORM.application_directory / "recent_plot_selection_file.json"
     )
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
     PLACEHOLDER_STRING = "Recently used result files (.mda)"

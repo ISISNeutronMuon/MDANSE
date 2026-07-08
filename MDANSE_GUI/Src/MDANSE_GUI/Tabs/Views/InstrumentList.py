@@ -236,7 +236,7 @@ class InstrumentList(QListView):
             return
         if filename is None:
             filename = os.path.join(
-                PLATFORM.application_directory(), "InstrumentDefinitions.toml"
+                PLATFORM.application_directory, "InstrumentDefinitions.toml"
             )
         LOG.debug(f"save to file: {filename}")
         target_file = TOMLFile(filename)
