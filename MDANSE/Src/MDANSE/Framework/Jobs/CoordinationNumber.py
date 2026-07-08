@@ -46,6 +46,7 @@ class CoordinationNumber(DistanceHistogram):
     label = "Coordination Number"
 
     enabled = True
+    visible = True
     PREDICTORS = ("r_values",)
 
     category = (

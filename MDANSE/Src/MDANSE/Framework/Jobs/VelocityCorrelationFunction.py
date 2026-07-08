@@ -33,6 +33,7 @@ class VelocityCorrelationFunction(CartesianCorrelationFunction):
     """
 
     enabled = True
+    visible = True
     label = "Velocity Correlation Function"
     CF_NAME = "vcf"
     CF_UNITS = "nm2/ps2"
