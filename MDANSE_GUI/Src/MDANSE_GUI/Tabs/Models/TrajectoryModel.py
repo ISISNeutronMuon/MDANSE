@@ -96,7 +96,7 @@ class TrajectoryModel(QStandardItemModel):
     """Like GeneralModel, but should implement trajectory
     loading in the background."""
 
-    DEFAULT_JSON_PATH = PLATFORM.application_directory() / "recent_trajectory_file.json"
+    DEFAULT_JSON_PATH = PLATFORM.application_directory / "recent_trajectory_file.json"
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
     PLACEHOLDER_STRING = "Recently used trajectory files (.mdt, .h5)"
     recent_files = RecentFiles(

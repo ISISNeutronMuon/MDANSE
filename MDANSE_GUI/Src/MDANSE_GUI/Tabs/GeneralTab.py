@@ -16,15 +16,17 @@
 from __future__ import annotations
 
 import os
-from pathlib import PurePath
+from abc import abstractmethod
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
-from qtpy.QtCore import QMessageLogger, QObject, Signal, Slot
-from qtpy.QtWidgets import QListView
+from qtpy.QtCore import QMessageLogger, QObject, QSettings, Signal, Slot
+from qtpy.QtWidgets import QListView, QWidget
 
+from MDANSE.Core.Settings import Option, Settings
 from MDANSE.Framework.Units import measure, unit_lookup
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Session.Session import LocalSession, Session
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
@@ -55,24 +57,19 @@ class GeneralTab(QObject):
         *args,
         name: str = "Unnamed GUI part",
         session: Session | None = None,
-        settings: None = None,
+        qt_settings: QSettings | None = None,
         model: QObject | None = None,
-        visualiser=None,
+        visualiser: QWidget | None = None,
         view: QAbstractItemView | None = None,
-        logger=None,
-        layout: SinglePanel | DoublePanel | MultiPanel = DoublePanel,
+        logger: QMessageLogger | None = None,
+        layout: type[SinglePanel | DoublePanel | MultiPanel] = DoublePanel,
         label_text: str = "An abstract GUI element",
         **kwargs,
     ):
         self._my_tab_id = -1
         self._name = name
-        self._session = session if session is not None else LocalSession()
-        self._settings = self._session.obtain_settings(self)
-
-        try:
-            self._global_settings = self._session.main_settings()
-        except AttributeError:
-            self._global_settings = None
+        self._session = session if session is not None else Session()
+        self._settings = self._session._settings
 
         self._model = model
         self._visualiser = visualiser if visualiser is not None else TextInfo()
@@ -97,45 +94,6 @@ class GeneralTab(QObject):
     @Slot()
     def tab_notification(self):
         self.notify_user.emit(self._my_tab_id)
-
-    def grouped_settings(self) -> dict[str, tuple[dict[str, str], dict[str, str]]]:
-        """This method tells the Session object what settings
-        this Tab will store in its settings file,
-        and what each of the settings means.
-
-        This way each GUI component can have its own settings
-        without interfering with the others, and the user
-        does not risk breaking all the settings by
-        mangling a single file.
-
-        Returns
-        -------
-        dict[str, tuple[dict[str, str], dict[str, str]]]
-        """
-
-        return {
-            "Generic settings": (
-                {"path": os.path.abspath(".")},  # a dictionary of settings
-                {
-                    "path": "The path last used by this GUI element."
-                },  # a dictionary of comments
-            ),
-            "units":  # name of the group of settings
-            (
-                {
-                    "energy": "meV",
-                    "time": "fs",
-                    "distance": "ang",
-                    "reciprocal": "1/ang",
-                },
-                {
-                    "energy": "The unit of energy preferred by the user.",
-                    "time": "The unit of time preferred by the user.",
-                    "distance": "The unit of distance preferred by the user",
-                    "reciprocal": "The momentum (transfer) unit preferred by the user",
-                },
-            ),
-        }
 
     def connect_units(self):
         if self._visualiser is not None and self._visualiser._unit_lookup is None:
@@ -162,49 +120,31 @@ class GeneralTab(QObject):
             function, following the formula:
             converted_value = F * input_value
         """
-        conversion_factor = 1.0
-        target_unit = input_unit
         property = unit_lookup.get(input_unit, "unknown")
-        unit_group = self._settings.group("units").as_dict()
-        backup_group = self._global_settings.group("units").as_dict()
-        if property not in unit_group:
-            if property not in backup_group:
-                return conversion_factor, target_unit
-            else:
-                target_unit = backup_group[property]
-        else:
-            target_unit = unit_group[property]
+        target_unit = Settings.get_opt("units", property)
+
         try:
             conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
                 target_unit
             )
         except Exception:
-            target_unit = self._settings.default_value("units", property)
+            target_unit = Settings.get_default("units", property)
             conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
                 target_unit
             )
         return conversion_factor, target_unit
 
     def get_path(self, path_key: str):
-        paths_group = self._settings.group("paths")
-        try:
-            path = paths_group.get(path_key)
-        except KeyError:
-            paths_group.add(
-                path_key,
-                os.path.abspath("."),
-                f"Filesystem path recently used by {path_key}",
-            )
-            path = os.path.abspath(".")
-        return str(PurePath(path))
+        return Settings.get_opt_w_default(
+            f"{type(self).__name__}.paths",
+            path_key,
+            str(Path.cwd()),
+            f"Last path used by {path_key}",
+        )
 
     def set_path(self, path_key: str, path_value: str):
-        paths_group = self._settings.group("paths")
-        if not paths_group.set(path_key, path_value):
-            paths_group.add(
-                path_key, path_value, f"Filesystem path recently used by {path_key}"
-            )
-        self._session.save()
+        Settings.set_opt(f"{type(self).__name__}.paths", path_key, path_value)
+        Settings.save()
 
     @Slot()
     def save_state(self):
@@ -217,3 +157,16 @@ class GeneralTab(QObject):
         for target in [self._model, self._visualiser, self._view, self._logger]:
             if target is not None:
                 target._session = self._session
+
+    @classmethod
+    @abstractmethod
+    def gui_instance(
+        cls,
+        parent: QWidget,
+        *,
+        name: str,
+        session: Session,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
+        **kwargs,
+    ): ...

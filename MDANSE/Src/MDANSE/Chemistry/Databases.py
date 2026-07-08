@@ -211,9 +211,9 @@ class AtomsDatabase(_Database):
     _DEFAULT_DATABASE = Path(__file__).parent / "atoms.json"
 
     # The user path
-    _OLD_USER_DATABASE = PLATFORM.application_directory() / "atoms.json"
+    _OLD_USER_DATABASE = PLATFORM.application_directory / "atoms.json"
 
-    _USER_DATABASE = PLATFORM.application_directory() / "atoms_extended.json"
+    _USER_DATABASE = PLATFORM.application_directory / "atoms_extended.json"
 
     # The python types supported by the database
     _TYPES = {
