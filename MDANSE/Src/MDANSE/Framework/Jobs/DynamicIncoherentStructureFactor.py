@@ -27,6 +27,22 @@ from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 
+def disf_memory_per_atom(mem_conf, n_atoms: int = 1) -> int:
+    """Calculate RAM (in bytes) needed by a single process.
+
+    """
+    trajectory = mem_conf.configurable[mem_conf.dependencies["trajectory"]]["instance"]
+    frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
+    vector_config = mem_conf.configurable[mem_conf.dependencies["q_vectors"]]
+    n_dimensions = 3
+    n_frames = frame_config["number"]
+    n_vectors = vector_config["parameters"].get(
+        "n_vectors", 1
+    )
+    data_size = trajectory.bytes_per_num(array_name="position")
+    return 8 * n_frames * n_atoms * n_vectors * n_dimensions * data_size
+
+
 @IJob.register("DynamicIncoherentStructureFactor")
 class DynamicIncoherentStructureFactor(IJob):
     r"""Computes the dynamic incoherent structure factor :math:`S_{\text{inc}}(\mathbf{q},\omega)` for a set of atoms.
@@ -104,6 +120,27 @@ class DynamicIncoherentStructureFactor(IJob):
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
+    settings["memory"] = ("MemoryConfigurator", {
+                     "dependencies": {
+                "trajectory": "trajectory",
+                "frames": "frames",
+                "q_vectors": "q_vectors",
+            },
+            "mem_function": disf_memory_per_atom
+    })
+
+    def predict_memory(self, n_atoms: int = 1) -> int:
+        """Calculate RAM (in bytes) needed by a single process.
+
+        """
+        4000 * 64 * 3 * 100 * 8 * 4
+        n_dimensions = 3
+        n_frames = self.configuration["frames"]["number"]
+        n_vectors = self.configuration["q_vectors"]["parameters"].get(
+            "n_vectors", 1
+        )
+        data_size = self.trajectory.bytes_per_num(array_name="position")
+        return 8 * n_frames * n_atoms * n_vectors * n_dimensions * data_size
 
     def initialize(self):
         """
