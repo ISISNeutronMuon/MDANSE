@@ -31,6 +31,9 @@ from more_itertools import first_true, last, take, value_chain
 
 from MDANSE.MLogging import LOG
 
+if TYPE_CHECKING:
+    from MDANSE.Framework.Jobs.JobStatus import JobInfo
+
 K = TypeVar("K", str, bytes)
 V = TypeVar("V")
 
@@ -527,30 +530,37 @@ def sec_fmt(time: float) -> str:
     return f"{sec:.0f}s"
 
 
-def job_status_text_summary(job, *, for_output_file: bool = False) -> str:
+def job_status_text_summary(jobinf: JobInfo, *, for_output_file: bool = False) -> str:
+    """Return run details as a formatted string.
+
+    When writing the run information into an output file, the for_output_file
+    can be used to skip the parts of the output that are not relevant
+    to a completed task (e.g. estimated remaining time.)"""
     try:
-        comp_time = (job.n_steps - job.current_step) / job.rate
+        comp_time = (jobinf.n_steps - jobinf.current_step) / jobinf.rate
     except (TypeError, ZeroDivisionError):
         comp_time = "N/A"
 
-    elapsed_time = job.end - job.start if job.end else time.time() - job.start
+    elapsed_time = (
+        jobinf.end - jobinf.start if jobinf.end else time.time() - jobinf.start
+    )
     if for_output_file:
         return f"""
 Status:
-  Percent complete: {job.progress}
-  Percent rate: {job.pct_rate} %/s
-  Steps: {job.current_step}/{job.n_steps}
-  Step rate: {job.rate} steps/s
+  Percent complete: {jobinf.progress}
+  Percent rate: {jobinf.pct_rate} %/s
+  Steps: {jobinf.current_step}/{jobinf.n_steps}
+  Step rate: {jobinf.rate} steps/s
   Elapsed time: {sec_fmt(elapsed_time)}
 """
     else:
         return f"""
 Status:
-  Current state: {job.state.name.title()}
-  Percent complete: {job.progress}
-  Percent rate: {job.pct_rate} %/s
-  Steps: {job.current_step}/{job.n_steps}
-  Step rate: {job.rate} steps/s
+  Current state: {jobinf.state.name.title()}
+  Percent complete: {jobinf.progress}
+  Percent rate: {jobinf.pct_rate} %/s
+  Steps: {jobinf.current_step}/{jobinf.n_steps}
+  Step rate: {jobinf.rate} steps/s
   Elapsed time: {sec_fmt(elapsed_time)}
   Estimated remaining time: {sec_fmt(comp_time)}
 """

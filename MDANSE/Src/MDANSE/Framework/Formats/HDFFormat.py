@@ -100,6 +100,17 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
 
 
 def create_metadata_datasets(job: IJob, meta: h5py.Group):
+    """Put information from the input job into the input HDF5 data group.
+
+    This function is used both by converters and analysis tasks.
+
+    Parameters
+    ----------
+    job : IJob
+        An instance of an MDANSE analysis job or converter.
+    meta : h5py.Group
+        The HDF5 data group where the datasets will be created.
+    """
     string_dt = h5py.special_dtype(vlen=str)
     meta.create_dataset("task_name", (1,), data=type(job).__name__, dtype=string_dt)
     meta.create_dataset(
