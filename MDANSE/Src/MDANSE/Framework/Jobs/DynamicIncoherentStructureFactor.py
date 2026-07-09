@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 from scipy import fft
 
@@ -26,21 +28,41 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 from MDANSE.Mathematics.Signal import get_spectrum
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurators.MemoryConfigurator import MemoryConfigurator
 
-def disf_memory_per_atom(mem_conf, n_atoms: int = 1) -> int:
-    """Calculate RAM (in bytes) needed by a single process.
 
+def disf_memory_per_atom(
+    mem_conf: MemoryConfigurator, n_atoms: int = 1
+) -> tuple[int, int, int]:
+    """Calculate the memory requirements of a DISF calculation.
+
+    The data size is fixed as 8 bytes per number, since the arrays allocated
+    by numpy in this analysis are most likely going to be float64, even
+    if the coordinates in the input trajectory are float32.
+
+    Parameters
+    ----------
+    mem_conf : MemoryConfigurator
+        The configurator instance which contains the needed inputs
+    n_atoms : int, optional
+        Use a specific number of atoms in the calculation, by default 1
+
+    Returns
+    -------
+    tuple[int, int int]
+        Bytes per atom, per chunk and per n_atoms from input, respectively
     """
     trajectory = mem_conf.configurable[mem_conf.dependencies["trajectory"]]["instance"]
     frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
     vector_config = mem_conf.configurable[mem_conf.dependencies["q_vectors"]]
     n_dimensions = 3
     n_frames = frame_config["number"]
-    n_vectors = vector_config["parameters"].get(
-        "n_vectors", 1
-    )
-    data_size = trajectory.bytes_per_num(array_name="position")
-    return 8 * n_frames * n_atoms * n_vectors * n_dimensions * data_size
+    n_vectors = vector_config["parameters"].get("n_vectors", 1)
+    data_size = 8
+    chunk_size = trajectory.chunk_size(array_name="position")
+    prefactor = 4 * n_frames * n_vectors * n_dimensions * data_size
+    return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 
 @IJob.register("DynamicIncoherentStructureFactor")
@@ -63,7 +85,7 @@ class DynamicIncoherentStructureFactor(IJob):
         "Analysis",
         "Scattering",
     )
-    PREDICTORS = ("instrument_resolution", "q_vectors")
+    PREDICTORS = ("instrument_resolution", "q_vectors", "memory")
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -120,27 +142,17 @@ class DynamicIncoherentStructureFactor(IJob):
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
-    settings["memory"] = ("MemoryConfigurator", {
-                     "dependencies": {
+    settings["memory"] = (
+        "MemoryConfigurator",
+        {
+            "dependencies": {
                 "trajectory": "trajectory",
                 "frames": "frames",
                 "q_vectors": "q_vectors",
             },
-            "mem_function": disf_memory_per_atom
-    })
-
-    def predict_memory(self, n_atoms: int = 1) -> int:
-        """Calculate RAM (in bytes) needed by a single process.
-
-        """
-        4000 * 64 * 3 * 100 * 8 * 4
-        n_dimensions = 3
-        n_frames = self.configuration["frames"]["number"]
-        n_vectors = self.configuration["q_vectors"]["parameters"].get(
-            "n_vectors", 1
-        )
-        data_size = self.trajectory.bytes_per_num(array_name="position")
-        return 8 * n_frames * n_atoms * n_vectors * n_dimensions * data_size
+            "mem_function": disf_memory_per_atom,
+        },
+    )
 
     def initialize(self):
         """
