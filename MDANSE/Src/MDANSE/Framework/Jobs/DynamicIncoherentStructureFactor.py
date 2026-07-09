@@ -51,7 +51,7 @@ def disf_memory_per_atom(
     Returns
     -------
     tuple[int, int int]
-        Bytes per atom, per chunk and per n_atoms from input, respectively
+        MB per atom, per chunk and per n_atoms from input, respectively
     """
     trajectory = mem_conf.configurable[mem_conf.dependencies["trajectory"]]["instance"]
     frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
@@ -61,7 +61,7 @@ def disf_memory_per_atom(
     n_vectors = vector_config["parameters"].get("n_vectors", 1)
     data_size = 8
     chunk_size = trajectory.chunk_size(array_name="position")
-    prefactor = 4 * n_frames * n_vectors * n_dimensions * data_size
+    prefactor = 4 * n_frames * n_vectors * n_dimensions * data_size / 2**20
     return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 

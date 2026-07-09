@@ -334,6 +334,14 @@ class IConfigurator(dict, RegisterFactory, abc.ABC):
         if hasattr(self, "prediction_keys"):
             for key in self.prediction_keys:
                 yield (key, self[key], self.prediction.unit)
+        elif hasattr(self, "prediction_list"):
+            for prediction in self.prediction_list:
+                if prediction.key in self:
+                    yield (
+                        prediction.label,
+                        self[prediction.key],
+                        prediction.unit,
+                    )
         elif self.prediction.key in self:
             yield (
                 self.prediction.label,

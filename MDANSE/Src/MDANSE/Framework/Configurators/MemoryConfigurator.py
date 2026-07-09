@@ -48,9 +48,15 @@ class MemoryConfigurator(IntegerConfigurator):
     def __init__(self, name, **kwargs):
         self.memory_function = kwargs.pop("mem_function", None)
         super().__init__(name, **kwargs)
-        self.prediction = PredictionSettings(
-            key="memory_per_process", label="RAM per process (MB)"
-        )
+        self.prediction_list = [
+            PredictionSettings(
+                key="memory_per_process",
+                label="RAM per process (MB)",
+            ),
+            PredictionSettings(
+                key="atoms_per_step", label="Atoms processed in a single step"
+            ),
+        ]
         self["memory_per_process"] = [1]
 
     def find_group_size(self) -> int:
@@ -81,13 +87,19 @@ class MemoryConfigurator(IntegerConfigurator):
             )
             return
 
+        atoms_per_chunk = self.configurable[self.dependencies["trajectory"]][
+            "instance"
+        ].chunk_size(array_name="position")
+
         if self.memory_function is not None:
             predicted_memory = self.memory_function(self)
-            self["memory_per_atom"] = predicted_memory[0] / 2**20
-            self["memory_per_chunk"] = predicted_memory[1] / 2**20
-            self["memory_per_step"] = (
-                num_value // predicted_memory[0]
-            ) * predicted_memory[0]
+            self["memory_per_atom"] = predicted_memory[0]
+            self["memory_per_chunk"] = predicted_memory[1]
+            atoms_per_step = max(
+                1, min(num_value // predicted_memory[0], atoms_per_chunk)
+            )
+            self["memory_per_step"] = atoms_per_step * predicted_memory[0]
+            self["atoms_per_step"] = [atoms_per_step]
             if self["memory_per_step"] > num_value:
                 self.warning_status = (
                     f"Expected memory per step ({self['memory_per_step']} MB) "
