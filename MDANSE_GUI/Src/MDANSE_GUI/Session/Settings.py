@@ -66,6 +66,8 @@ class GUISettings(QStandardItemModel):
         Settings.save(filename)
 
     def populate_model(self):
+        self.clear()
+
         for section, settings in self.settings.items():
             section_item = QStandardItem(section)
             section_item.setData(section)
