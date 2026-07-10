@@ -103,13 +103,13 @@ class StaticStructureFactor3D(IJob):
             "origin",
             "LineOutputVariable",
             self.configuration["q_vectors"]["min_uvw"],
-            units="a.u."
+            units="a.u.",
         )
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
             self.configuration["q_vectors"]["step_uvw"],
-            units="a.u."
+            units="a.u.",
         )
 
         u = self.configuration["q_vectors"]["u"]
@@ -119,7 +119,7 @@ class StaticStructureFactor3D(IJob):
         self.axes_labels = [
             f"[{u[0]}X, {u[1]}X, {u[2]}X]   X",
             f"[{v[0]}Y, {v[1]}Y, {v[2]}Y]   Y",
-            f"[{w[0]}Z, {w[1]}Z, {w[2]}Z]   Z"
+            f"[{w[0]}Z, {w[1]}Z, {w[2]}Z]   Z",
         ]
         for naxis, axis in enumerate(["u", "v", "w"]):
             self._outputData.add(
@@ -181,13 +181,19 @@ class StaticStructureFactor3D(IJob):
             indexing="ij",
         )
         uvw = np.stack([us.ravel(), vs.ravel(), ws.ravel()])
-        idxs_hkl = np.rint(
-            (self.configuration["q_vectors"]["transform"] @ uvw) * self.configuration["q_vectors"]["sc_used"][:, None]
-        ).astype(int) + self.max_hkl[:, None]
+        idxs_hkl = (
+            np.rint(
+                (self.configuration["q_vectors"]["transform"] @ uvw)
+                * self.configuration["q_vectors"]["sc_used"][:, None]
+            ).astype(int)
+            + self.max_hkl[:, None]
+        )
 
         for pair_str, (label_i, label_j) in self.labels:
             s_q = (rho[label_i] * rho[label_j].conj()).real / self.numberOfSteps
-            self._outputData[f"ssf3d/{pair_str}"] += s_q[tuple(idxs_hkl)].reshape(self.gdim_uvw)
+            self._outputData[f"ssf3d/{pair_str}"] += s_q[tuple(idxs_hkl)].reshape(
+                self.gdim_uvw
+            )
 
     def finalize(self):
         nAtomsPerElement = self.trajectory.get_natoms()

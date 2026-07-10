@@ -122,26 +122,22 @@ class QVectors3DConfigurator(IConfigurator):
         self["u_range"] = self["configurators"]["u_range"]["value"]
         self["v_range"] = self["configurators"]["v_range"]["value"]
         self["w_range"] = self["configurators"]["w_range"]["value"]
-        self["min_uvw"] = np.array([
-            value["u_range"][0],
-            value["v_range"][0],
-            value["w_range"][0]
-        ])
-        self["max_uvw"] = np.array([
-            value["u_range"][1],
-            value["v_range"][1],
-            value["w_range"][1]
-        ])
-        self["step_uvw"] = np.array([
-            value["u_range"][2],
-            value["v_range"][2],
-            value["w_range"][2]
-        ])
-        self["gdim_uvw"] = np.array([
-            self["u_range"].shape[0],
-            self["v_range"].shape[0],
-            self["w_range"].shape[0]
-        ])
+        self["min_uvw"] = np.array(
+            [value["u_range"][0], value["v_range"][0], value["w_range"][0]]
+        )
+        self["max_uvw"] = np.array(
+            [value["u_range"][1], value["v_range"][1], value["w_range"][1]]
+        )
+        self["step_uvw"] = np.array(
+            [value["u_range"][2], value["v_range"][2], value["w_range"][2]]
+        )
+        self["gdim_uvw"] = np.array(
+            [
+                self["u_range"].shape[0],
+                self["v_range"].shape[0],
+                self["w_range"].shape[0],
+            ]
+        )
 
         self["grid_uvw"] = np.zeros(self["gdim_uvw"], dtype=complex)
 
