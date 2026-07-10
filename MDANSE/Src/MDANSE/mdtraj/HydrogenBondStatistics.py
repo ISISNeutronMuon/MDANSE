@@ -16,15 +16,18 @@
 from __future__ import annotations
 
 from collections import Counter
+from contextlib import suppress
 from operator import itemgetter
 from typing import TYPE_CHECKING
 
 import numpy as np
-from mdtraj import wernet_nilsson
+
+with suppress(ImportError):
+    from mdtraj import wernet_nilsson
 
 from MDANSE.Framework.AtomGrouping.grouping import pair_labels
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.mdtraj.MDTrajAnalysis import MDTrajAnalysis
+from MDANSE.mdtraj.MDTrajAnalysis import MDTrajAnalysis, mdtraj_available
 
 if TYPE_CHECKING:
     from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
@@ -157,7 +160,7 @@ class HydrogenBondStatistics(MDTrajAnalysis):
     )
     settings["mdtraj_analysis"] = (
         "MDTrajAnalysisConfigurator",
-        {"mdtraj_function": wernet_nilsson},
+        {"mdtraj_function": wernet_nilsson if mdtraj_available else None},
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
 

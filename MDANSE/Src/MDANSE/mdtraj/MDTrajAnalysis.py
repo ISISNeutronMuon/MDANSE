@@ -18,6 +18,13 @@ from __future__ import annotations
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.mdtraj.trajectory import build_mdtraj_trajectory
 
+try:
+    import mdtraj
+
+    mdtraj_available = True
+except ImportError:
+    mdtraj_available = False
+
 
 class MDTrajAnalysis(IJob):
     """Run an MDTraj analysis on an MDANSE trajectory.
@@ -32,6 +39,8 @@ class MDTrajAnalysis(IJob):
     """
 
     label = "MDTraj Analysis"
+    enabled = mdtraj_available
+    requires_extras = ("mdtraj",)
 
     category = ("External", "MDTrajAnalysis")
     PREDICTORS = ()

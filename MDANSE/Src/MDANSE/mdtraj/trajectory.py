@@ -15,11 +15,13 @@
 #
 from __future__ import annotations
 
+from contextlib import suppress
 from typing import TYPE_CHECKING
 
-from mdtraj import Topology as mdtraj_topology
-from mdtraj import Trajectory as mdtraj_trajectory
-from mdtraj.core.element import Element
+with suppress(ImportError):
+    from mdtraj import Topology as mdtraj_topology
+    from mdtraj import Trajectory as mdtraj_trajectory
+    from mdtraj.core.element import Element
 
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 
