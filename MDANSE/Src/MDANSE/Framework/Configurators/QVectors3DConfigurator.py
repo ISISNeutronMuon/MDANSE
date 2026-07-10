@@ -102,8 +102,16 @@ class QVectors3DConfigurator(IConfigurator):
         max_hkl = np.zeros(3, dtype=int)
         for point in it.product(
             *zip(
-                [value["u_range"][0], value["v_range"][0], value["w_range"][0]],
-                [value["u_range"][1], value["v_range"][1], value["w_range"][0]],
+                [
+                    value["u_range"][0] - value["u_range"][2],
+                    value["v_range"][0] - value["v_range"][2],
+                    value["w_range"][0] - value["w_range"][2],
+                ],
+                [
+                    value["u_range"][1] + value["u_range"][2],
+                    value["v_range"][1] + value["v_range"][2],
+                    value["w_range"][1] + value["w_range"][2],
+                ],
                 strict=False,
             )
         ):
