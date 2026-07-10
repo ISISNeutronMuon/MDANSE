@@ -108,8 +108,13 @@ class UserSettingsEditor(QDialog):
             self.viewer.resizeColumnToContents(ncol)
 
     @Slot()
-    def save_changes(self):
+    def save_changes(self) -> None:
         self._session.save()
+
+    def refresh(self) -> None:
+        if not self._session:
+            return
+        self._session._settings.populate_model()
 
 
 if __name__ == "__main__":

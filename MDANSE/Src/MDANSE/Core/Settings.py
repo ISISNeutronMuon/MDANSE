@@ -15,8 +15,10 @@
 #
 from __future__ import annotations
 
+import copy
 from collections import ChainMap, UserDict, defaultdict
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Generator, Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
@@ -29,6 +31,7 @@ from tomlkit.toml_file import TOMLFile
 from MDANSE.MLogging import LOG
 
 T = TypeVar("T")
+X = TypeVar("X")
 
 
 @dataclass
@@ -59,17 +62,54 @@ SettingsRaw: TypeAlias = Mapping[str, Mapping[str, Any]]
 
 
 class Settings:
-    """Singleton class storing settings."""
+    """Singleton class which settings.
+
+    It contains two paired dictionaries (_settings, _defaults), in which
+    the settings are defined.
+
+    :attr:`_defaults` is the static underlying set of definitions.
+    :attr:`_settings` is the dynamic set of user-specified definitions.
+
+    Parameters
+    ----------
+    settings : Path, optional
+        Path to initial settings/defaults.
+    save : bool
+        Whether updates should be saved by default.
+
+    Attributes
+    ----------
+    settings : The public interface; defines a Mapping[str, ChainMap(_settings, _defaults)]
+        style interface so updates to settings are
+        recorded in _settings and _defaults is left untouched.
+    _settings : dynamic and contains the custom settings which are saved
+    _defaults : should mostly be static and values in _defaults are not saved (they are assumed to be inferred).
+    """
 
     class _SettingsDict(dict[str, ChainMap[str, Option]]):
         """Settings dict to create mappings if not defined."""
 
-        def __missing__(self, key):
-            return ChainMap(Settings._settings[key], Settings._defaults[key])
+        def __missing__(self, key: str):
+            self[key] = ChainMap(Settings._settings[key], Settings._defaults[key])
+            return self[key]
+
+        def __contains__(self, key) -> bool:
+            self._reup()
+            return super().__contains__(key)
+
+        def _reup(self) -> None:
+            for key in Settings._settings.keys() | Settings._defaults.keys():
+                self[key]
+
+        def __repr__(self) -> str:
+            self._reup()
+            return super().__repr__()
 
     auto_save: ClassVar[bool] = False
     settings: ClassVar[_SettingsDict] = _SettingsDict()
     _defaults: ClassVar[SettingsDict] = defaultdict(dict)
+    _settings: ClassVar[SettingsDict] = defaultdict(dict)
+    _filename: ClassVar[Path | None] = None
 
     @classmethod
     def __call__(cls):
@@ -83,8 +123,16 @@ class Settings:
 
     @classmethod
     def init(
-        cls, settings: Path | SettingsRaw | None = None, *, save: bool = True
+        cls,
+        settings: Path | SettingsRaw | None = None,
+        *,
+        save: bool = True,
+        clear: bool = True,
     ) -> None:
+        if clear:
+            cls.clear()
+        cls.auto_save = save
+
         # Global settings
         for default in (
             Option(str(Path.home()), "path", "path", "Default path for search start."),
@@ -105,16 +153,42 @@ class Settings:
             cls.set_item(default)
 
         cls.load(settings)
-        cls.auto_save = save
+        cls._init_dicts(cls._defaults, cls._settings)
+
+    @classmethod
+    def _init_dicts(cls, defaults: SettingsDict, settings: SettingsDict):
+        cls._defaults = defaults
+        cls._settings = settings
         cls.settings = cls._SettingsDict(
             {
-                key: ChainMap(cls._settings[key], cls._defaults[key])
-                for key in cls._settings.keys() | cls._defaults.keys()
+                key: ChainMap(settings[key], defaults[key])
+                for key in settings.keys() | defaults.keys()
             },
         )
 
     @classmethod
     def save(cls, filename: Path | None = None) -> None:
+        """Save data to file.
+
+        Parameters
+        ----------
+        filename : Path, optional
+            Path to save, if not given overwrite place
+            data loaded from.
+
+        Raises
+        ------
+        ValueError
+            If invalid filename provided.
+
+        Notes
+        -----
+        If no filename given will save to place data loaded
+        from. If not auto_save, this will not save.
+
+        If a filename is given, it will always save, but not
+        reload from this path.
+        """
         if not cls.auto_save and filename is None:
             return
 
@@ -126,7 +200,14 @@ class Settings:
         cls.save_toml(filename)
 
     @classmethod
-    def save_toml(cls, filename: Path) -> None:
+    def as_toml(cls) -> tomlkit.TOMLDocument:
+        """Build a toml file and save to file.
+
+        Returns
+        -------
+        tomlkit.TOMLDocument
+            TOML document of settings.
+        """
         newdoc = tomlkit.document()
 
         LOG.debug("Building TOML")
@@ -146,11 +227,30 @@ class Settings:
 
             newdoc.add(grp_key, table)
 
+        return newdoc
+
+    @classmethod
+    def save_toml(cls, filename: Path) -> None:
+        """Save settings as TOML.
+
+        Parameters
+        ----------
+        filename : Path
+            Path to save to.
+        """
+        newdoc = cls.as_toml()
         file = TOMLFile(filename)
         file.write(newdoc)
 
     @classmethod
     def load(cls, settings: Path | SettingsRaw | None) -> None:
+        """Load data from file or dict (and assign _filename).
+
+        Parameters
+        ----------
+        settings : Path | SettingsRaw, optional
+            Place to laod data from.
+        """
         match settings:
             case None | Mapping():
                 cls._filename = None
@@ -161,59 +261,49 @@ class Settings:
 
     @classmethod
     def _process(cls, settings: Path | SettingsRaw | None) -> SettingsDict:
+        out = defaultdict(dict)
+
         match settings:
             case None:
-                return {}
+                return out
             case Path():
                 try:
-                    file = TOMLFile(settings).read()
+                    data = TOMLFile(settings).read()
                 except FileNotFoundError:
                     LOG.warning(f"File {settings} does not exist.")
-                    return defaultdict(dict)
+                    return out
                 except ParseError:
                     LOG.warning(f"File {settings} could not be parsed.")
-                    return defaultdict(dict)
-
-                return defaultdict(
-                    dict,
-                    **{
-                        grp_key: {
-                            val_key: cls._process_val(val_key, grp_key, val)
-                            for val_key, val in grp.items()
-                        }
-                        for grp_key, grp in file.items()
-                    },
-                )
+                    return out
             case Mapping():
-                return defaultdict(
-                    dict,
-                    **{
-                        grp_key: {
-                            val_key: cls._process_val(val_key, grp_key, val)
-                            for val_key, val in grp.items()
-                        }
-                        for grp_key, grp in settings.items()
-                    },
-                )
+                data = settings
             case _:
                 LOG.warning(f"Cannot parse {settings!r} as settings.")
-                return {}
+                return out
+
+        for grp_key, grp in data.items():
+            for val_key, val in grp.items():
+                LOG.debug("Init %s.%s=%s", grp_key, val_key, val)
+                out[grp_key][val_key] = cls._process_val(val_key, grp_key, val)
+
+        return out
 
     @staticmethod
-    def _process_val(key: str, targ_key: str, val: Option[T] | T) -> Option[T]:
+    def _process_val(key: str, grp_key: str, val: Option[T] | T) -> Option[T]:
+        """Return Option from either value or Option."""
         match val:
             case Option(value, name, group, comment):
                 return Option(
                     value,
                     name or key,
-                    group=group or targ_key,
+                    group=group or grp_key,
                     comment=comment,
                 )
             case _:
                 return Option(
                     val,
                     key,
-                    targ_key,
+                    grp_key,
                 )
 
     @classmethod
@@ -234,28 +324,122 @@ class Settings:
     @classmethod
     def get_opt_w_default(
         cls, grp: str, key: str, default: T, comment: str | None = None
-    ) -> T:
+    ) -> Any:
+        """Get value and if not present create one in "_defaults".
+
+        Parameters
+        ----------
+        grp : str
+            Group containing setting.
+        key : str
+            Setting key.
+        default : T
+            Default value to use.
+        comment : str, optional
+            Comment to apply to default.
+
+        Returns
+        -------
+        T
+            Value of setting.
+        """
         if key not in cls.settings[grp]:
             cls.set_item(Option(default, key, grp, comment=comment))
         return cls.get_opt(grp, key)
 
     @classmethod
     def get_opt(cls, grp: str, key: str) -> T:
+        """Get the value of a setting.
+
+        Parameters
+        ----------
+        grp : str
+            Group containing setting.
+        key : str
+            Setting key.
+
+        Returns
+        -------
+        T
+            Value of parameter.
+        """
         return cls._get_opt(None, grp, key)
 
     @classmethod
     def set_opt(cls, grp: str, key: str, value: T) -> None:
+        """Set the value of a setting, creating it if not defined.
+
+        Parameters
+        ----------
+        grp : str
+            Group containing setting.
+        key : str
+            Setting key.
+        value : T
+            Value to assign.
+        """
         cls._set_opt(None, value, grp, key)
 
     @classmethod
     def set_item(cls, item: Option[T]) -> None:
+        """Dynamically create a new default from an :ref:`Option`.
+
+        Parameters
+        ----------
+        item : Option[T]
+            Default to create.
+        """
         cls._defaults.setdefault(item.group, {})
         cls._defaults[item.group][item.name] = item
         LOG.debug("Default %s.%s=%s", item.group, item.name, item.value)
 
     @classmethod
-    def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[type], type]:
-        """Add settings to decorated class."""
+    def contains(cls, grp: str, key: str | None = None) -> bool:
+        if key is None:
+            return grp in cls.settings
+
+        return grp in cls.settings and key in cls.settings[grp]
+
+    @classmethod
+    def clear(cls) -> None:
+        """Clear all stored parameters."""
+        cls._filename = None
+        for key in cls._defaults.keys() | cls._settings.keys():
+            cls._defaults[key].clear()
+            cls._settings[key].clear()
+
+        cls._defaults.clear()
+        cls._settings.clear()
+        cls.settings.clear()
+
+    @classmethod
+    def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[type[X]], type[X]]:
+        """Add settings to decorated class.
+
+        For x = val, x will be the property on the class
+        and can be accessed directly via . notation.
+
+        Assigning to this value will update the value in Settings.
+
+        If val is an :ref:`Option`, these settings should be defined there,
+        if not provided or val is just a value they will be inferred as
+        ``(Option(value=val, group=type(class).__name__, name=x, comment=None))``.
+
+        Returns
+        -------
+        Callable[[type], type]
+            Class decorator.
+
+        Examples
+        --------
+        ..
+            @Settings.parametrise(favourite=Option("pike", group="fish"))
+            class Test:
+                def __init__(self):
+                    print(self.favourite) # => "pike"
+                    self.favourite = "trout"
+                    print(Settings.get_opt("fish", "favourite")) # "trout"
+        """
 
         def wrapped(target: type) -> type:
             targ_key = target.__name__
@@ -277,3 +461,49 @@ class Settings:
             return target
 
         return wrapped
+
+    @staticmethod
+    @contextmanager
+    def temporary(**kwargs):
+        with temp_settings(**kwargs):
+            yield
+
+    @classmethod
+    def show(cls) -> str:
+        return cls.as_toml().as_string()
+
+
+@contextmanager
+def temp_settings(**kwargs: Option[T] | T) -> Generator[None]:
+    """Context manager for temporarily configuring settings.
+
+    Upon exiting the `with` block, settings will be reverted.
+
+    Auto-saving will not take place while in the block.
+
+    Parameters
+    ----------
+
+    """
+    defaults = defaultdict(
+        dict, **{key: copy.copy(val) for key, val in Settings._defaults.items()}
+    )
+    settings = defaultdict(
+        dict, {key: copy.copy(val) for key, val in Settings._settings.items()}
+    )
+    filename = Settings._filename
+    save = Settings.auto_save
+
+    try:
+        Settings.auto_save = False
+
+        for key, val in kwargs.items():
+            itm = Settings._process_val(key, "temp", val)
+            Settings.set_item(itm)
+            Settings.set_opt(itm.group, itm.name, itm.value)
+
+        yield
+    finally:
+        Settings.auto_save = save
+        Settings._init_dicts(defaults, settings)
+        Settings._filename = filename
