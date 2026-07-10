@@ -50,11 +50,11 @@ class MemoryConfigurator(IntegerConfigurator):
         super().__init__(name, **kwargs)
         self.prediction_list = [
             PredictionSettings(
-                key="memory_per_process",
-                label="RAM per process (MB)",
+                key="memory_per_process", label="RAM per process", unit="MB"
             ),
             PredictionSettings(
-                key="atoms_per_step", label="Atoms processed in a single step"
+                key="atoms_per_step",
+                label="Atoms processed in a single step",
             ),
         ]
         self["memory_per_process"] = [1]
@@ -106,6 +106,12 @@ class MemoryConfigurator(IntegerConfigurator):
                     f"is larger than the requested upper limit ({num_value} MB)."
                 )
             self["memory_per_process"] = [self["memory_per_step"]]
+        else:
+            self.warning_status = (
+                "There is no valid function for memory use calculations"
+            )
+            self["atoms_per_step"] = [1]
+            self["memory_per_step"] = [-1]
 
         self["value"] = num_value
         self.error_status = "OK"
