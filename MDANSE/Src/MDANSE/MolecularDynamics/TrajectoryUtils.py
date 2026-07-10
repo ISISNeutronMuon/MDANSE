@@ -252,6 +252,51 @@ def group_atom_indices(
     )
 
 
+def group_atom_indices_precalculated(
+    traj_instance: Trajectory,
+    n_frames: int,
+    *,
+    n_proc: int = 1,
+    max_group_size: int = 1,
+) -> list[list[int]]:
+    """Create groups of atom indices coaligned with the chunk size in the input file.
+
+    This function is meant to group indices so that a single process loads data
+    from a single chunk per frame. Additionally, indices will be split into smaller
+    sets if a process is expected to use more memory than the specified limits, or
+    if there are less index sets than there are worker processes.
+
+    Typically, the memory requirements will be proportional to the size of the
+    input array, but larger. For example, DISF analysis allocates an array
+    of the size of N_ATOMSxN_VECTORS, which means that the worker process
+    will need significantly more memory that the size of the input coordinate
+    array.
+
+    Parameters
+    ----------
+    traj_instance : Trajectory
+        The current input trajectory.
+    n_proc : int, optional
+        Number of available CPU cores or worker processes, by default 1
+    memory_scale_factor : int, optional
+        Multiplier of the expected memory requirements of the job, by default 10
+    size_limit : int, optional
+        Limit of memory per worker process, by default CHUNK_SIZE_LIMIT
+
+    Returns
+    -------
+    list[set[int]]
+        List of atom index set, each set containing indices from a single HDF5 chunk
+    """
+    selected_indices = set(traj_instance.atom_indices)
+    total_dimensions = (n_frames, traj_instance.variable("position").shape[1])
+    chunk_size = traj_instance.chunk_size(array_name="position")
+    min_group_count = min(n_proc, len(selected_indices))
+    return split_selected_atoms(
+        selected_indices, chunk_size, total_dimensions, max_group_size, min_group_count
+    )
+
+
 def split_index_sets(index_sets: list[set[int]], max_size: int) -> list[set[int]]:
     """Check the size of each atom index set and split those exceeding the size limit.
 
