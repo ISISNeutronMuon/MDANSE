@@ -53,9 +53,9 @@ class QVectors3DConfigurator(IConfigurator):
         "u": partial(VectorConfigurator, valueType=float, notNull=True),
         "v": partial(VectorConfigurator, valueType=float, notNull=True),
         "w": partial(VectorConfigurator, valueType=float, notNull=True),
-        "u_range": partial(RangeConfigurator, valueType=float, includeLast=False),
-        "v_range": partial(RangeConfigurator, valueType=float, includeLast=False),
-        "w_range": partial(RangeConfigurator, valueType=float, includeLast=False),
+        "u_range": partial(RangeConfigurator, valueType=float, includeLast=True),
+        "v_range": partial(RangeConfigurator, valueType=float, includeLast=True),
+        "w_range": partial(RangeConfigurator, valueType=float, includeLast=True),
     }
 
     label = "3D Q vector generator"
@@ -92,7 +92,11 @@ class QVectors3DConfigurator(IConfigurator):
         self["u"] = np.array(value["u"])
         self["v"] = np.array(value["v"])
         self["w"] = np.array(value["w"])
-        transform = np.array([self["u"], self["v"], self["w"]]).T
+        self["transform"] = np.array([self["u"], self["v"], self["w"]]).T
+        if np.linalg.det(self["transform"]) == 0.0:
+            self.error_status = "The input uvw vectors are not linearly independent."
+            return
+
         self["sc_used"] = np.array(value["supercell_used"])
 
         max_hkl = np.zeros(3, dtype=int)
@@ -103,8 +107,34 @@ class QVectors3DConfigurator(IConfigurator):
                 strict=False,
             )
         ):
-            hkl = np.dot(transform, point) / self["sc_used"]
+            hkl = np.dot(self["transform"], point) * self["sc_used"]
             max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))
         self["max_hkl"] = max_hkl
+
+        self["u_range"] = self["configurators"]["u_range"]["value"]
+        self["v_range"] = self["configurators"]["v_range"]["value"]
+        self["w_range"] = self["configurators"]["w_range"]["value"]
+        self["min_uvw"] = np.array([
+            value["u_range"][0],
+            value["v_range"][0],
+            value["w_range"][0]
+        ])
+        self["max_uvw"] = np.array([
+            value["u_range"][1],
+            value["v_range"][1],
+            value["w_range"][1]
+        ])
+        self["step_uvw"] = np.array([
+            value["u_range"][2],
+            value["v_range"][2],
+            value["w_range"][2]
+        ])
+        self["gdim_uvw"] = np.array([
+            self["u_range"].shape[0],
+            self["v_range"].shape[0],
+            self["w_range"].shape[0]
+        ])
+
+        self["grid_uvw"] = np.zeros(self["gdim_uvw"], dtype=complex)
 
         self.error_status = "OK"

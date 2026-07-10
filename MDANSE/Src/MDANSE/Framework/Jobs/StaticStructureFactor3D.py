@@ -93,69 +93,61 @@ class StaticStructureFactor3D(IJob):
     def initialize(self):
         super().initialize()
 
-        # TODO add so q_x q_y q_x ranges can be changed
-        self.qxs = self.configuration["q_shells"]["value"]
-        self.qys = self.configuration["q_shells"]["value"]
-        self.qzs = self.configuration["q_shells"]["value"]
-
-        min_qx = -self.qxs[-1]
-        min_qy = -self.qys[-1]
-        min_qz = -self.qzs[-1]
-        max_qx = self.qxs[-1]
-        max_qy = self.qys[-1]
-        max_qz = self.qzs[-1]
-
         unit_cell = self.trajectory.unit_cell(0)
         self.inverse = unit_cell.inverse
 
-        self.max_hkl = np.zeros(3, dtype=int)
-        for point in it.product(
-            *zip([min_qx, min_qy, min_qz], [max_qx, max_qy, max_qz], strict=False)
-        ):
-            hkl = np.dot(unit_cell.direct, point) / (2 * np.pi)
-            self.max_hkl = np.maximum(self.max_hkl, np.floor(np.abs(hkl)).astype(int))
-
-        self.gdim = 2 * self.max_hkl + 1
+        self.max_hkl = self.configuration["q_vectors"]["max_hkl"]
         self.numberOfSteps = self.configuration["frames"]["number"]
 
-        self.min = -2 * np.pi * np.dot(unit_cell.inverse, self.max_hkl)
-        self.spacing = 2 * np.pi * np.sum(unit_cell.inverse, axis=0)
-
-        self._outputData.add("origin", "LineOutputVariable", self.min, units="1/nm")
+        self._outputData.add(
+            "origin",
+            "LineOutputVariable",
+            self.configuration["q_vectors"]["min_uvw"],
+            units="a.u."
+        )
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
-            self.spacing,
-            units="1/nm",
+            self.configuration["q_vectors"]["step_uvw"],
+            units="a.u."
         )
+
+        u = self.configuration["q_vectors"]["u"]
+        v = self.configuration["q_vectors"]["v"]
+        w = self.configuration["q_vectors"]["w"]
+
+        self.axes_labels = [
+            f"[{u[0]}X, {u[1]}X, {u[2]}X]   X",
+            f"[{v[0]}Y, {v[1]}Y, {v[2]}Y]   Y",
+            f"[{w[0]}Z, {w[1]}Z, {w[2]}Z]   Z"
+        ]
+        for naxis, axis in enumerate(["u", "v", "w"]):
+            self._outputData.add(
+                self.axes_labels[naxis],
+                "LineOutputVariable",
+                (self.configuration["q_vectors"][f"{axis}_range"]),
+                units="a.u.",
+            )
+
+        self.gdim_uvw = self.configuration["q_vectors"]["gdim_uvw"]
 
         self._indicesPerElement = self.trajectory.get_indices()
         self.labels = pair_labels(self.trajectory)
-
-        labels = ["x_position", "y_position", "z_position"]
-        for naxis in range(3):
-            self._outputData.add(
-                labels[naxis],
-                "LineOutputVariable",
-                np.arange(0, self.gdim[naxis], 1) * self.spacing[naxis]
-                + self.min[naxis],
-                units="1/nm",
-            )
 
         for label, _ in self.labels:
             self._outputData.add(
                 f"ssf3d/{label}",
                 "VolumeOutputVariable",
-                tuple(self.gdim),
-                axis="|".join(labels),
+                tuple(self.gdim_uvw),
+                axis="|".join(self.axes_labels),
                 main_result=True,
                 partial_result=True,
             )
         self._outputData.add(
             "ssf3d/total",
             "VolumeOutputVariable",
-            tuple(self.gdim),
-            axis="|".join(labels),
+            tuple(self.gdim_uvw),
+            axis="|".join(self.axes_labels),
             main_result=True,
         )
 
@@ -182,10 +174,20 @@ class StaticStructureFactor3D(IJob):
         return index, rho
 
     def combine(self, index, rho):
+        us, vs, ws = np.meshgrid(
+            self.configuration["q_vectors"]["u_range"],
+            self.configuration["q_vectors"]["v_range"],
+            self.configuration["q_vectors"]["w_range"],
+            indexing="ij",
+        )
+        uvw = np.stack([us.ravel(), vs.ravel(), ws.ravel()])
+        idxs_hkl = np.rint(
+            (self.configuration["q_vectors"]["transform"] @ uvw) * self.configuration["q_vectors"]["sc_used"][:, None]
+        ).astype(int) + self.max_hkl[:, None]
+
         for pair_str, (label_i, label_j) in self.labels:
-            self._outputData[f"ssf3d/{pair_str}"] += (
-                rho[label_i] * rho[label_j].conj()
-            ).real / self.numberOfSteps
+            s_q = (rho[label_i] * rho[label_j].conj()).real / self.numberOfSteps
+            self._outputData[f"ssf3d/{pair_str}"] += s_q[tuple(idxs_hkl)].reshape(self.gdim_uvw)
 
     def finalize(self):
         nAtomsPerElement = self.trajectory.get_natoms()
@@ -222,7 +224,7 @@ class StaticStructureFactor3D(IJob):
             "VolumeOutputVariable",
             dim=2,
             conc_exp=0.5,
-            axis="x_position|y_position|z_position",
+            axis="|".join(self.axes_labels),
         )
 
         # Write the output variables.
