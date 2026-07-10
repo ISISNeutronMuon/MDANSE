@@ -28,6 +28,7 @@ from MDANSE.Framework.Units import measure, unit_lookup
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.Layouts.DoublePanel import DoublePanel
+from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 if TYPE_CHECKING:
@@ -58,7 +59,7 @@ class GeneralTab(QObject):
         name: str = "Unnamed GUI part",
         session: Session | None = None,
         qt_settings: QSettings | None = None,
-        model: QObject | None = None,
+        model: GeneralModel | None = None,
         visualiser: QWidget | None = None,
         view: QAbstractItemView | None = None,
         logger: QMessageLogger | None = None,
@@ -143,15 +144,15 @@ class GeneralTab(QObject):
         )
 
     def set_path(self, path_key: str, path_value: str):
-        Settings.set_opt(f"{type(self).__name__}.paths", path_key, path_value)
+        self._settings[f"{type(self).__name__}.paths", path_key] = path_value
         Settings.save()
 
     @Slot()
     def save_state(self):
-        self._session.save_state(self)
+        self._session.save()
 
-    def load_state(self):
-        self._session.load_state(self)
+    # def load_state(self):
+    #     self._session.load(self)
 
     def propagate_session(self):
         for target in [self._model, self._visualiser, self._view, self._logger]:

@@ -28,6 +28,7 @@ from qtpy.QtWidgets import (
 from MDANSE.Core.Settings import Option, Settings
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Session.Settings import GUISettings
 
 
@@ -46,11 +47,12 @@ from MDANSE_GUI.Session.Settings import GUISettings
 class PlotSettings(QWidget):
     plot_settings_changed = Signal()
 
-    def __init__(self, *args, settings: GUISettings | None = None, **kwargs) -> None:
+    def __init__(self, *args, settings: Session | None = None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._settings = settings or GUISettings(save=False)
+        self._session = settings or Session()
         self._unit_fields = {}
         self.plot_settings_changed.connect(Settings.save)
+        self.plot_settings_changed.connect(self._session._settings.populate_model)
 
     @Slot(str)
     def set_style(self, style_name: str):
@@ -93,7 +95,7 @@ class PlotSettings(QWidget):
             except Exception:
                 read = Settings.get_default("units", dim)
 
-            self._settings["units", dim] = read
+            self._session._settings["units", dim] = read
 
         self.plot_settings_changed.emit()
 
@@ -171,10 +173,10 @@ class PlotSettings(QWidget):
         self._unit_fields["distance"] = distance_combo
         self._unit_fields["reciprocal"] = reciprocal_combo
 
-        current_energy = self._settings["units", "energy"]
-        current_time = self._settings["units", "time"]
-        current_distance = self._settings["units", "distance"]
-        current_reciprocal = self._settings["units", "reciprocal"]
+        current_energy = self._session._settings["units", "energy"]
+        current_time = self._session._settings["units", "time"]
+        current_distance = self._session._settings["units", "distance"]
+        current_reciprocal = self._session._settings["units", "reciprocal"]
         energy_combo.setCurrentText(current_energy)
         time_combo.setCurrentText(current_time)
         distance_combo.setCurrentText(current_distance)
