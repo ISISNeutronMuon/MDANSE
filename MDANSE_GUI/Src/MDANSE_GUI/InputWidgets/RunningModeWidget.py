@@ -67,6 +67,7 @@ class RunningModeWidget(WidgetBase):
         else:
             self._field.setEnabled(True)
             self._field.setValue(nextval)
+        self.updateValue()
 
     @Slot()
     def numproc_changed(self):
@@ -75,6 +76,7 @@ class RunningModeWidget(WidgetBase):
         if mode == "single-core":
             return
         self._last_numproc = numproc
+        self.updateValue()
 
     def get_widget_value(self):
         mode = self.mode_box.currentText()

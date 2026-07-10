@@ -26,7 +26,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import get_spectrum
-from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices_precalculated
 
 if TYPE_CHECKING:
     from MDANSE.Framework.Configurators.MemoryConfigurator import MemoryConfigurator
@@ -85,7 +85,7 @@ class DynamicIncoherentStructureFactor(IJob):
         "Analysis",
         "Scattering",
     )
-    PREDICTORS = ("instrument_resolution", "q_vectors", "memory")
+    PREDICTORS = ("instrument_resolution", "q_vectors", "memory", "running_mode")
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -140,8 +140,6 @@ class DynamicIncoherentStructureFactor(IJob):
             },
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
     settings["memory"] = (
         "MemoryConfigurator",
         {
@@ -153,6 +151,15 @@ class DynamicIncoherentStructureFactor(IJob):
             "mem_function": disf_memory_per_atom,
         },
     )
+    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["running_mode"] = (
+        "RunningModeConfigurator",
+        {
+            "dependencies": {
+                "memory": "memory",
+            }
+        },
+    )
 
     def initialize(self):
         """
@@ -160,18 +167,15 @@ class DynamicIncoherentStructureFactor(IJob):
         """
         super().initialize()
 
-        vectors_per_shell = self.configuration["q_vectors"]["parameters"].get(
-            "n_vectors", 1
-        )
         n_proc = self.configuration["running_mode"].get("slots", 1)
 
         self._nFrames = self.configuration["frames"]["n_frames"]
 
-        self.grouped_indices = group_atom_indices(
+        self.grouped_indices = group_atom_indices_precalculated(
             self.trajectory,
             self.configuration["frames"]["number"],
             n_proc=n_proc,
-            memory_scale_factor=6 * vectors_per_shell,
+            max_group_size=self.configuration["memory"]["atoms_per_step"][0],
         )
         self.numberOfSteps = len(self.grouped_indices)
 
