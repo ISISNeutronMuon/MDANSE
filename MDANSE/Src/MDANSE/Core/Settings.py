@@ -19,10 +19,9 @@ import copy
 from collections import ChainMap, UserDict, defaultdict
 from collections.abc import Callable, Generator, Mapping
 from contextlib import contextmanager
-from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Any, ClassVar, Generic, TypeAlias, TypeVar
+from typing import Any, ClassVar, Generic, NamedTuple, TypeAlias, TypeVar
 
 import tomlkit
 from tomlkit.parser import ParseError
@@ -34,8 +33,8 @@ T = TypeVar("T")
 X = TypeVar("X")
 
 
-@dataclass
-class Option(Generic[T]):
+# 3.11+, Generic[T]
+class Option(NamedTuple):
     """Tuple defining a specialised option."""
 
     value: T
@@ -43,18 +42,6 @@ class Option(Generic[T]):
     group: str = ""
     comment: str | None = None
     visible: bool = True
-
-    def __post_init__(self) -> None:
-        self._initialised = True
-
-    def __setattr__(self, key: str, val: Any) -> None:
-        if key != "value" and getattr(self, "_initialised", False):
-            raise AttributeError(f"Attribute {key} is read-only")
-
-        super().__setattr__(key, val)
-
-    def new(self, value: T) -> Option[T]:
-        return Option(value, self.name, self.group, self.comment, self.visible)
 
 
 SettingsDict: TypeAlias = dict[str, dict[str, Option]]
@@ -110,6 +97,20 @@ class Settings:
     _defaults: ClassVar[SettingsDict] = defaultdict(dict)
     _settings: ClassVar[SettingsDict] = defaultdict(dict)
     _filename: ClassVar[Path | None] = None
+    _parameters: ClassVar[set[Option]] = {
+        Option(str(Path.home()), "path", "path", "Default path for search start."),
+        Option("meV", "energy", "units", "The unit of energy preferred by the user."),
+        Option("fs", "time", "units", "The unit of time preferred by the user."),
+        Option(
+            "ang", "distance", "units", "The unit of distance preferred by the user"
+        ),
+        Option(
+            "1/ang",
+            "reciprocal",
+            "units",
+            "The momentum (transfer) unit preferred by the user",
+        ),
+    }
 
     @classmethod
     def __call__(cls):
@@ -134,22 +135,7 @@ class Settings:
         cls.auto_save = save
 
         # Global settings
-        for default in (
-            Option(str(Path.home()), "path", "path", "Default path for search start."),
-            Option(
-                "meV", "energy", "units", "The unit of energy preferred by the user."
-            ),
-            Option("fs", "time", "units", "The unit of time preferred by the user."),
-            Option(
-                "ang", "distance", "units", "The unit of distance preferred by the user"
-            ),
-            Option(
-                "1/ang",
-                "reciprocal",
-                "units",
-                "The momentum (transfer) unit preferred by the user",
-            ),
-        ):
+        for default in cls._parameters:
             cls.set_item(default)
 
         cls.load(settings)
@@ -284,27 +270,32 @@ class Settings:
         for grp_key, grp in data.items():
             for val_key, val in grp.items():
                 LOG.debug("Init %s.%s=%s", grp_key, val_key, val)
-                out[grp_key][val_key] = cls._process_val(val_key, grp_key, val)
+                if hasattr(val, "trivia"):
+                    comment = val.trivia.comment.removeprefix("# ")
+                else:
+                    comment = None
+                out[grp_key][val_key] = cls._process_val(
+                    val_key, grp_key, val, add_comment=comment
+                )
 
         return out
 
     @staticmethod
-    def _process_val(key: str, grp_key: str, val: Option[T] | T) -> Option[T]:
+    def _process_val(
+        key: str, grp_key: str, val: Option[T] | T, *, add_comment: str | None = None
+    ) -> Option[T]:
         """Return Option from either value or Option."""
         match val:
-            case Option(value, name, group, comment):
+            case Option(value, name, group, comment, visible):
                 return Option(
                     value,
                     name or key,
                     group=group or grp_key,
-                    comment=comment,
+                    comment=comment or add_comment,
+                    visible=visible,
                 )
             case _:
-                return Option(
-                    val,
-                    key,
-                    grp_key,
-                )
+                return Option(val, key, grp_key, comment=add_comment)
 
     @classmethod
     def _get_opt(cls, _, grp: str, key: str) -> T:
@@ -315,7 +306,7 @@ class Settings:
         cls.settings[grp].setdefault(key, Option(value, key, grp))
         LOG.debug("Setting %s.%s=%s", grp, key, value)
 
-        cls.settings[grp][key] = cls.settings[grp][key].new(value)
+        cls.settings[grp][key] = cls.settings[grp][key]._replace(value=value)
 
     @classmethod
     def get_default(cls, grp: str, key: str) -> T:
@@ -401,8 +392,15 @@ class Settings:
         return grp in cls.settings and key in cls.settings[grp]
 
     @classmethod
-    def clear(cls) -> None:
-        """Clear all stored parameters."""
+    def clear(cls, *, clear_all: bool = False) -> None:
+        """Clear all stored parameters.
+
+        Parameters
+        ----------
+        all : bool
+            Clear everything, including parameters.
+
+        """
         cls._filename = None
         for key in cls._defaults.keys() | cls._settings.keys():
             cls._defaults[key].clear()
@@ -411,6 +409,9 @@ class Settings:
         cls._defaults.clear()
         cls._settings.clear()
         cls.settings.clear()
+
+        if clear_all:
+            cls._parameters.clear()
 
     @classmethod
     def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[type[X]], type[X]]:
@@ -456,7 +457,7 @@ class Settings:
                         doc=value.comment,
                     ),
                 )
-                cls.set_item(value)
+                cls._parameters.add(value)
 
             return target
 
@@ -464,7 +465,7 @@ class Settings:
 
     @staticmethod
     @contextmanager
-    def temporary(**kwargs):
+    def temporary(**kwargs: Option[T] | T):
         with temp_settings(**kwargs):
             yield
 
@@ -480,10 +481,6 @@ def temp_settings(**kwargs: Option[T] | T) -> Generator[None]:
     Upon exiting the `with` block, settings will be reverted.
 
     Auto-saving will not take place while in the block.
-
-    Parameters
-    ----------
-
     """
     defaults = defaultdict(
         dict, **{key: copy.copy(val) for key, val in Settings._defaults.items()}

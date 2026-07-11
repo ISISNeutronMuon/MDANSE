@@ -48,6 +48,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Core.Platform import PLATFORM, version_summary
+from MDANSE.Core.Settings import Settings
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -123,6 +124,7 @@ class MDANSEMainWindow(QMainWindow):
         *args,
         parent=None,
         title="MDANSE",
+        mdanse_settings: GUISettings | None = None,
         qt_settings: QSettings | None = None,
         app_instance: QApplication | None = None,
         systray_icon: QIcon | None = None,
@@ -141,9 +143,7 @@ class MDANSEMainWindow(QMainWindow):
         self._actions = []
         self._tabs = {}
 
-        self._settings = GUISettings(
-            settings=PLATFORM.main_settings, save=save_settings
-        )
+        self._settings = mdanse_settings
         self._session = Session(settings=self._settings)
 
         self._logger = QMessageLogger()
