@@ -160,11 +160,30 @@ class Platform(metaclass=abc.ABCMeta):
         """
         Returns the path for MDANSE base directory.
 
-        @return: the path for MDANSE base directory.
-        @rtype: str
+        Returns
+        -------
+        Path
+            The path for MDANSE base directory.
         """
 
         return Path(__file__).parents[2]
+
+    @property
+    def gui_base_directory(self) -> Path | None:
+        """
+        Returns the path for MDANSE_GUI base directory.
+
+        Returns
+        -------
+        Path
+            The path for MDANSE_GUI base directory.
+        """
+        try:
+            import MDANSE_GUI
+        except ImportError:
+            return None
+
+        return Path(MDANSE_GUI.__file__).parent
 
 
 class PlatformPosix(Platform):

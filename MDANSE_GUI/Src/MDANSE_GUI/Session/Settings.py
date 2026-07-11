@@ -49,18 +49,27 @@ class GUISettings(QStandardItemModel):
         return Settings.get_opt(*key)
 
     def __setitem__(self, key: tuple[str, str], value: Any) -> None:
+        Settings.set_opt(*key, value)
         group = only(self.findItems(key[0]))
+
+        if group is None:  # Need to regenerate
+            self.populate_model()
+            return
+
         item = first_true(
             (group.child(i) for i in range(group.rowCount())),
             pred=lambda x: x.data() == key[1],
         )
+
+        if item is None:  # Need to regenerate
+            self.populate_model()
+            return
+
         valdata = group.child(item.row(), 1)
 
         with block_signals(self):
             valdata.setText(value)
             valdata.setData(value)
-
-        Settings.set_opt(*key, value)
 
     def save(self, filename: Path | None = None) -> None:
         Settings.save(filename)

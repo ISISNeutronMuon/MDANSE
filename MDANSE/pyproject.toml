@@ -36,6 +36,7 @@ dependencies = [
     "scipy<=1.17.1",
     "h5py>=3.13",
     "rdkit>=2025.3.3",
+    "tomlkit",
     "networkx",
     "more-itertools",
     "typing_extensions",
