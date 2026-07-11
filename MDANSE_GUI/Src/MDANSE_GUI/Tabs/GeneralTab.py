@@ -122,7 +122,10 @@ class GeneralTab(QObject):
             converted_value = F * input_value
         """
         property = unit_lookup.get(input_unit, "unknown")
-        target_unit = Settings.get_opt("units", property)
+        try:
+            target_unit = Settings.get_opt("units", property)
+        except KeyError:
+            return 1.0, input_unit
 
         try:
             conversion_factor = measure(1.0, input_unit, equivalent=True).toval(
@@ -137,14 +140,14 @@ class GeneralTab(QObject):
 
     def get_path(self, path_key: str):
         return Settings.get_opt_w_default(
-            f"{type(self).__name__}.paths",
+            "paths",
             path_key,
             str(Path.cwd()),
             f"Last path used by {path_key}",
         )
 
     def set_path(self, path_key: str, path_value: str):
-        self._settings[f"{type(self).__name__}.paths", path_key] = path_value
+        self._settings["paths", path_key] = path_value
         Settings.save()
 
     @Slot()

@@ -174,6 +174,12 @@ def test_parametrise(settings: type[Settings]):
         def update(self) -> None:
             self.favourite = "trout"
 
+    assert not settings.settings
+
+    assert Option(value="pike", name="favourite", group="fish") in settings._parameters
+    # Need to initialise to instance parameters
+    settings.init()
+
     # Sync'd on parametrise
     assert settings.contains("fish", "favourite")
     assert settings.get_opt("fish", "favourite") == "pike"

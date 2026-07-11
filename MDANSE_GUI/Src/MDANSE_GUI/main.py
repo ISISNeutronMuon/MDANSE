@@ -30,6 +30,7 @@ from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
 import MDANSE_GUI
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import FMT, LOG
+from MDANSE_GUI.Session.Settings import GUISettings
 from MDANSE_GUI.TabbedWindow import MDANSEMainWindow
 
 
@@ -137,8 +138,9 @@ def startGUI(some_args):
     app.setStyle(QStyleFactory.create("Fusion"))
     check_qt_environment_vars(app)
 
-    mdanse_root = PLATFORM.base_directory
-    app.setWindowIcon(QIcon(str(mdanse_root / "Icons/MDANSE.ico")))
+    assert PLATFORM.gui_base_directory
+
+    app.setWindowIcon(QIcon(str(PLATFORM.gui_base_directory / "Icons/MDANSE.ico")))
     fixed_locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedKingdom)
     fixed_locale.setNumberOptions(
         QLocale.NumberOption.RejectGroupSeparator
@@ -151,7 +153,7 @@ def startGUI(some_args):
     )
 
     if not args.no_splash:
-        splash_img = QPixmap(str(mdanse_root / "Resources/splash.png"))
+        splash_img = QPixmap(str(PLATFORM.gui_base_directory / "Resources/splash.png"))
         splash_img.setDevicePixelRatio(2)
         splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
         splash.show()
@@ -163,12 +165,16 @@ def startGUI(some_args):
     if args.settings:
         PLATFORM._application_directory = Path(args.settings)
 
+    settings = GUISettings(
+        settings=PLATFORM.main_settings, save=not args.no_save_settings
+    )
+
     root = MDANSEMainWindow(
         parent=None,
         title="MDANSE for Python 3",
+        mdanse_settings=settings,
         qt_settings=qt_settings,
         app_instance=app,
-        save_settings=not args.no_save_settings,
     )
     root.show()
 

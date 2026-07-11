@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+from ase.eos import plot
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
     QGroupBox,
