@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import itertools as it
 from math import sqrt
 
 import finufft
@@ -106,26 +105,26 @@ class StaticStructureFactor3D(IJob):
         self._outputData.add(
             "origin",
             "LineOutputVariable",
-            self.q_vectors["min_uvw"],
+            self.q_vectors["min_123"],
             units="a.u.",
         )
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
-            self.q_vectors["step_uvw"],
+            self.q_vectors["step_123"],
             units="a.u.",
         )
 
-        u = self.q_vectors["u"]
-        v = self.q_vectors["v"]
-        w = self.q_vectors["w"]
+        q1 = self.q_vectors["q1"]
+        q2 = self.q_vectors["q2"]
+        q3 = self.q_vectors["q3"]
 
         self.axes_labels = [
-            f"[{u[0]}X, {u[1]}X, {u[2]}X]   X",
-            f"[{v[0]}Y, {v[1]}Y, {v[2]}Y]   Y",
-            f"[{w[0]}Z, {w[1]}Z, {w[2]}Z]   Z",
+            f"[{q1[0]}X, {q1[1]}X, {q1[2]}X]   X",
+            f"[{q2[0]}Y, {q2[1]}Y, {q2[2]}Y]   Y",
+            f"[{q3[0]}Z, {q3[1]}Z, {q3[2]}Z]   Z",
         ]
-        for naxis, axis in enumerate(["u", "v", "w"]):
+        for naxis, axis in enumerate(["q1", "q2", "q3"]):
             self._outputData.add(
                 self.axes_labels[naxis],
                 "LineOutputVariable",
@@ -133,7 +132,7 @@ class StaticStructureFactor3D(IJob):
                 units="a.u.",
             )
 
-        self.gdim_uvw = self.q_vectors["gdim_uvw"]
+        self.gdim_123 = self.q_vectors["gdim_123"]
 
         self._indicesPerElement = self.trajectory.get_indices()
         self.labels = pair_labels(self.trajectory)
@@ -142,7 +141,7 @@ class StaticStructureFactor3D(IJob):
             self._outputData.add(
                 f"ssf3d/{label}",
                 "VolumeOutputVariable",
-                tuple(self.gdim_uvw),
+                tuple(self.gdim_123),
                 axis="|".join(self.axes_labels),
                 main_result=True,
                 partial_result=True,
@@ -150,38 +149,37 @@ class StaticStructureFactor3D(IJob):
         self._outputData.add(
             "ssf3d/total",
             "VolumeOutputVariable",
-            tuple(self.gdim_uvw),
+            tuple(self.gdim_123),
             axis="|".join(self.axes_labels),
             main_result=True,
         )
 
-        n_samples = self.q_vectors["n_samples"] * np.prod(
-            self.q_vectors["gdim_uvw"] + 2
-        )
+        n_samples = self.q_vectors["n_samples"] * np.prod(self.gdim_123 + 2)
 
-        # the output s_q will be a grid of dimensions gdim_uvw, first we
+        # the output s_q will be a grid of dimensions gdim_123, first we
         # generate random samples in this grid plus an extra border
         # around it
         samples_grid = (
-            self.rng.random((3, n_samples)) * (self.q_vectors["gdim_uvw"] + 1)[:, None]
+            self.rng.random((3, n_samples)) * (self.gdim_123 + 1)[:, None]
         ) - 1
         samples_grid_idxs = np.rint(samples_grid).astype(int)
 
         # now we remove the points that rounded to the border grid points
         mask = np.all(
             (samples_grid_idxs >= 0)
-            & (samples_grid_idxs <= (self.q_vectors["gdim_uvw"] - 1)[:, None]),
+            & (samples_grid_idxs <= (self.gdim_123 - 1)[:, None]),
             axis=0,
         )
         samples_grid = samples_grid[:, mask]
         samples_grid_idxs = samples_grid_idxs[:, mask]
 
-        # now convert from the grid indexes to hkl of the cell
-        samples_uvw = (
-            np.diag(self.q_vectors["step_uvw"]) @ samples_grid
-        ) + self.q_vectors["min_uvw"][:, None]
-        samples_hkl = self.q_vectors["transform"] @ samples_uvw
-        self.sampling_idxs_hkl = np.rint(samples_hkl).astype(int)
+        # now convert from the grid indexes to hkl of the reciprocal cell
+        samples_123 = (
+            np.diag(self.q_vectors["step_123"]) @ samples_grid
+        ) + self.q_vectors["min_123"][:, None]
+        self.sampling_idxs_hkl = np.rint(
+            self.q_vectors["transform"] @ samples_123
+        ).astype(int)
 
         self.uniq_grid, self.uniq_grid_inv = np.unique(
             samples_grid_idxs, axis=1, return_inverse=True
@@ -217,9 +215,9 @@ class StaticStructureFactor3D(IJob):
                 self.uniq_grid_inv, weights=s_q, minlength=self.uniq_grid.shape[0]
             )
 
-            sq_uvw = np.zeros(self.q_vectors["gdim_uvw"])
-            sq_uvw[tuple(self.uniq_grid)] = bincount / self.norm
-            s_qs[pair_str] = sq_uvw
+            sq_123 = np.zeros(self.q_vectors["gdim_123"])
+            sq_123[tuple(self.uniq_grid)] = bincount / self.norm
+            s_qs[pair_str] = sq_123
 
         return index, s_qs
 

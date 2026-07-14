@@ -36,12 +36,12 @@ class QVectors3DConfigurator(IConfigurator):
         "n_samples": 1000,
         "force_equal_weights": False,
         "supercell_used": (1, 1, 1),
-        "u": (1.0, 0.0, 0.0),
-        "v": (0.0, 1.0, 0.0),
-        "w": (0.0, 0.0, 1.0),
-        "u_range": (-5.0, 5.0, 1.0),
-        "v_range": (-5.0, 5.0, 1.0),
-        "w_range": (-5.0, 5.0, 1.0),
+        "q1": (1.0, 0.0, 0.0),
+        "q2": (0.0, 1.0, 0.0),
+        "q3": (0.0, 0.0, 1.0),
+        "q1_range": (-5.0, 5.0, 1.0),
+        "q2_range": (-5.0, 5.0, 1.0),
+        "q3_range": (-5.0, 5.0, 1.0),
     }
     _configurators_classes = {
         "seed": partial(IntegerConfigurator, mini=0),
@@ -50,12 +50,12 @@ class QVectors3DConfigurator(IConfigurator):
         "supercell_used": partial(
             VectorConfigurator, valueType=int, notNull=True, mini=1
         ),
-        "u": partial(VectorConfigurator, valueType=float, notNull=True),
-        "v": partial(VectorConfigurator, valueType=float, notNull=True),
-        "w": partial(VectorConfigurator, valueType=float, notNull=True),
-        "u_range": partial(RangeConfigurator, valueType=float, includeLast=True),
-        "v_range": partial(RangeConfigurator, valueType=float, includeLast=True),
-        "w_range": partial(RangeConfigurator, valueType=float, includeLast=True),
+        "q1": partial(VectorConfigurator, valueType=float, notNull=True),
+        "q2": partial(VectorConfigurator, valueType=float, notNull=True),
+        "q3": partial(VectorConfigurator, valueType=float, notNull=True),
+        "q1_range": partial(RangeConfigurator, valueType=float, includeLast=True),
+        "q2_range": partial(RangeConfigurator, valueType=float, includeLast=True),
+        "q3_range": partial(RangeConfigurator, valueType=float, includeLast=True),
     }
 
     label = "3D Q vector generator"
@@ -93,41 +93,44 @@ class QVectors3DConfigurator(IConfigurator):
         self["n_samples"] = self["configurators"]["n_samples"]["value"]
 
         self["sc_used"] = np.array(value["supercell_used"])
-        self["u"] = np.array(value["u"])
-        self["v"] = np.array(value["v"])
-        self["w"] = np.array(value["w"])
+        self["q1"] = np.array(value["q1"])
+        self["q2"] = np.array(value["q2"])
+        self["q3"] = np.array(value["q3"])
 
-        # transform from uvw of the subcell to hkl of the cell
-        # e.g. hkl_cell_coords = self["transform"] @ uvw_subcell_coords
+        # transform from q1, q2, q3 basis vectors of the reciprocal subcell to the
+        # basis vectors of the reciprocal cell
         self["transform"] = (
-            np.column_stack((self["u"], self["v"], self["w"])) * self["sc_used"]
+            np.column_stack((self["q1"], self["q2"], self["q3"])) * self["sc_used"]
         )
 
         if np.linalg.det(self["transform"]) == 0.0:
-            self.error_status = "The input uvw vectors are not linearly independent."
+            self.error_status = (
+                "The input basis vectors, q1, q2, and q3 are not linearly independent."
+            )
             return
 
-        self["u_range"] = self["configurators"]["u_range"]["value"]
-        self["v_range"] = self["configurators"]["v_range"]["value"]
-        self["w_range"] = self["configurators"]["w_range"]["value"]
+        self["q1_range"] = self["configurators"]["q1_range"]["value"]
+        self["q2_range"] = self["configurators"]["q2_range"]["value"]
+        self["q3_range"] = self["configurators"]["q3_range"]["value"]
 
-        self["min_uvw"] = np.array(
-            [self["u_range"][0], self["v_range"][0], self["w_range"][0]]
+        self["min_123"] = np.array(
+            [self["q1_range"][0], self["q2_range"][0], self["q3_range"][0]]
         )
-        self["max_uvw"] = np.array(
-            [self["u_range"][-1], self["v_range"][-1], self["w_range"][-1]]
+        self["max_123"] = np.array(
+            [self["q1_range"][-1], self["q2_range"][-1], self["q3_range"][-1]]
         )
-        self["step_uvw"] = np.array(
-            [value["u_range"][2], value["v_range"][2], value["w_range"][2]]
+        self["step_123"] = np.array(
+            [value["q1_range"][2], value["q2_range"][2], value["q3_range"][2]]
         )
 
-        # find the max_hkl for the fft, we want it to be larger than
-        # the padded uvw grid
+        # find the max_hkl of the reciprocal cell for the fft, we want it to
+        # be larger than the padded grid with the q1, q2, q3
+        # basis vectors
         max_hkl = np.zeros(3, dtype=int)
         for point in it.product(
             *zip(
-                self["min_uvw"] - 2 * self["step_uvw"],
-                self["max_uvw"] + 2 * self["step_uvw"],
+                self["min_123"] - 2 * self["step_123"],
+                self["max_123"] + 2 * self["step_123"],
                 strict=False,
             )
         ):
@@ -136,11 +139,11 @@ class QVectors3DConfigurator(IConfigurator):
         self["max_hkl"] = max_hkl + 1
 
         # the dimensions of the output results
-        self["gdim_uvw"] = np.array(
+        self["gdim_123"] = np.array(
             [
-                self["u_range"].shape[0],
-                self["v_range"].shape[0],
-                self["w_range"].shape[0],
+                self["q1_range"].shape[0],
+                self["q2_range"].shape[0],
+                self["q3_range"].shape[0],
             ]
         )
 
