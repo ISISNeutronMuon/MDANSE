@@ -1401,6 +1401,10 @@ class TrajectoryWriter:
                     dtype=self._dtype,
                     **kwargs)
         dset.attrs["units"] = units.get(dataset, "")
+        if frame_indices is None:
+            frame_indices = slice(None)
+        if atom_indices is None:
+            atom_indices = slice(None)
         dset[frame_indices, atom_indices, :] = data
 
     def dump_configuration(self, configuration, time, units=None):

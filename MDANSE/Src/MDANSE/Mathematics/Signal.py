@@ -387,7 +387,7 @@ class Filter(ABC):
             Output signal resulting from convolution with the filter.
 
         """
-        return signal.sosfiltfilt(self.sos, input)
+        return signal.sosfiltfilt(self.sos, input, axis=0)
 
     def to_digital_coeffs(self) -> TransferFunction:
         """Returns the filter instance digital coefficients converted from analog, by performing a bilinear transform.
