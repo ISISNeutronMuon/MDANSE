@@ -123,21 +123,6 @@ class QVectors3DConfigurator(IConfigurator):
             [value["q1_range"][2], value["q2_range"][2], value["q3_range"][2]]
         )
 
-        # find the max_hkl of the reciprocal cell for the fft, we want it to
-        # be larger than the padded grid with the q1, q2, q3
-        # basis vectors
-        max_hkl = np.zeros(3, dtype=int)
-        for point in it.product(
-            *zip(
-                self["min_123"] - 2 * self["step_123"],
-                self["max_123"] + 2 * self["step_123"],
-                strict=False,
-            )
-        ):
-            hkl = np.dot(self["transform"], point)
-            max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))
-        self["max_hkl"] = max_hkl + 1
-
         # the dimensions of the output results
         self["gdim_123"] = np.array(
             [

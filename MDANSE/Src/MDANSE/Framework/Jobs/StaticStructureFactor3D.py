@@ -98,8 +98,6 @@ class StaticStructureFactor3D(IJob):
 
         unit_cell = self.trajectory.unit_cell(0)
         self.inverse = unit_cell.inverse
-
-        self.max_hkl = self.q_vectors["max_hkl"]
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         self._outputData.add(
@@ -180,6 +178,7 @@ class StaticStructureFactor3D(IJob):
         self.sampling_idxs_hkl = np.rint(
             self.q_vectors["transform"] @ samples_123
         ).astype(int)
+        self.max_hkl = np.max(np.abs(self.sampling_idxs_hkl), axis=1)
 
         self.uniq_grid, self.uniq_grid_inv = np.unique(
             samples_grid_idxs, axis=1, return_inverse=True
