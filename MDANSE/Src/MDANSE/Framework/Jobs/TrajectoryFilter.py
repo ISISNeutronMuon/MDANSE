@@ -30,11 +30,6 @@ from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Configuration import (
-    AbsoluteConfiguration,
-    PeriodicAbsoluteConfiguration,
-    _Configuration,
-)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.util_types import FloatArray
 
@@ -115,8 +110,8 @@ class TrajectoryFilter(IJob):
         ].chemical_system
 
         chunk_size = self.configuration["output_files"]["chunk_size"]
-        atoms_per_chunk = chunk_size[0] if isinstance(chunk_size, tuple) else chunk_size
-        frames_per_chunk = chunk_size[1] if isinstance(chunk_size, tuple) else 1
+        atoms_per_chunk = chunk_size[1] if isinstance(chunk_size, tuple) else chunk_size
+        frames_per_chunk = chunk_size[0] if isinstance(chunk_size, tuple) else 1
 
         n_time_steps = np.ceil(self.number_of_frames / frames_per_chunk).astype(int)
 

@@ -115,8 +115,8 @@ class TrajectoryEditor(IJob):
         ].chemical_system
 
         chunk_size = self.configuration["output_files"]["chunk_size"]
-        atoms_per_chunk = chunk_size[0] if isinstance(chunk_size, tuple) else chunk_size
-        frames_per_chunk = chunk_size[1] if isinstance(chunk_size, tuple) else 1
+        atoms_per_chunk = chunk_size[1] if isinstance(chunk_size, tuple) else chunk_size
+        frames_per_chunk = chunk_size[0] if isinstance(chunk_size, tuple) else 1
 
         n_time_steps = np.ceil(self.number_of_frames / frames_per_chunk).astype(int)
 
