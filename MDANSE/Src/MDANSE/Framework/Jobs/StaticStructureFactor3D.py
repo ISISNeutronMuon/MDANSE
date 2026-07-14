@@ -93,28 +93,32 @@ class StaticStructureFactor3D(IJob):
     def initialize(self):
         super().initialize()
 
+        self.q_vectors = self.configuration["q_vectors"]
+
+        self.rng = np.random.default_rng(self.q_vectors["seed"] or None)
+
         unit_cell = self.trajectory.unit_cell(0)
         self.inverse = unit_cell.inverse
 
-        self.max_hkl = self.configuration["q_vectors"]["max_hkl"]
+        self.max_hkl = self.q_vectors["max_hkl"]
         self.numberOfSteps = self.configuration["frames"]["number"]
 
         self._outputData.add(
             "origin",
             "LineOutputVariable",
-            self.configuration["q_vectors"]["min_uvw"],
+            self.q_vectors["min_uvw"],
             units="a.u.",
         )
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
-            self.configuration["q_vectors"]["step_uvw"],
+            self.q_vectors["step_uvw"],
             units="a.u.",
         )
 
-        u = self.configuration["q_vectors"]["u"]
-        v = self.configuration["q_vectors"]["v"]
-        w = self.configuration["q_vectors"]["w"]
+        u = self.q_vectors["u"]
+        v = self.q_vectors["v"]
+        w = self.q_vectors["w"]
 
         self.axes_labels = [
             f"[{u[0]}X, {u[1]}X, {u[2]}X]   X",
@@ -125,11 +129,11 @@ class StaticStructureFactor3D(IJob):
             self._outputData.add(
                 self.axes_labels[naxis],
                 "LineOutputVariable",
-                (self.configuration["q_vectors"][f"{axis}_range"]),
+                (self.q_vectors[f"{axis}_range"]),
                 units="a.u.",
             )
 
-        self.gdim_uvw = self.configuration["q_vectors"]["gdim_uvw"]
+        self.gdim_uvw = self.q_vectors["gdim_uvw"]
 
         self._indicesPerElement = self.trajectory.get_indices()
         self.labels = pair_labels(self.trajectory)
@@ -151,6 +155,39 @@ class StaticStructureFactor3D(IJob):
             main_result=True,
         )
 
+        n_samples = self.q_vectors["n_samples"] * np.prod(
+            self.q_vectors["gdim_uvw"] + 2
+        )
+
+        # the output s_q will be a grid of dimensions gdim_uvw, first we
+        # generate random samples in this grid plus an extra border
+        # around it
+        samples_grid = (
+            self.rng.random((3, n_samples)) * (self.q_vectors["gdim_uvw"] + 1)[:, None]
+        ) - 1
+        samples_grid_idxs = np.rint(samples_grid).astype(int)
+
+        # now we remove the points that rounded to the border grid points
+        mask = np.all(
+            (samples_grid_idxs >= 0)
+            & (samples_grid_idxs <= (self.q_vectors["gdim_uvw"] - 1)[:, None]),
+            axis=0,
+        )
+        samples_grid = samples_grid[:, mask]
+        samples_grid_idxs = samples_grid_idxs[:, mask]
+
+        # now convert from the grid indexes to hkl of the cell
+        samples_uvw = (
+            np.diag(self.q_vectors["step_uvw"]) @ samples_grid
+        ) + self.q_vectors["min_uvw"][:, None]
+        samples_hkl = self.q_vectors["transform"] @ samples_uvw
+        self.sampling_idxs_hkl = np.rint(samples_hkl).astype(int)
+
+        self.uniq_grid, self.uniq_grid_inv = np.unique(
+            samples_grid_idxs, axis=1, return_inverse=True
+        )
+        self.norm = np.bincount(self.uniq_grid_inv, minlength=self.uniq_grid.shape[0])
+
     def run_step(self, index):
         frame = self.configuration["frames"]["value"][index]
         coords = self.trajectory.configuration(frame)["coordinates"]
@@ -171,29 +208,24 @@ class StaticStructureFactor3D(IJob):
                 eps=1e-3,
             )
 
-        return index, rho
-
-    def combine(self, index, rho):
-        us, vs, ws = np.meshgrid(
-            self.configuration["q_vectors"]["u_range"],
-            self.configuration["q_vectors"]["v_range"],
-            self.configuration["q_vectors"]["w_range"],
-            indexing="ij",
-        )
-        uvw = np.stack([us.ravel(), vs.ravel(), ws.ravel()])
-        idxs_hkl = (
-            np.rint(
-                (self.configuration["q_vectors"]["transform"] @ uvw)
-                * self.configuration["q_vectors"]["sc_used"][:, None]
-            ).astype(int)
-            + self.max_hkl[:, None]
-        )
-
+        s_qs = {}
         for pair_str, (label_i, label_j) in self.labels:
-            s_q = (rho[label_i] * rho[label_j].conj()).real / self.numberOfSteps
-            self._outputData[f"ssf3d/{pair_str}"] += s_q[tuple(idxs_hkl)].reshape(
-                self.gdim_uvw
+            s_q = (rho[label_i] * rho[label_j].conj()).real[
+                tuple(self.sampling_idxs_hkl + self.max_hkl[:, None])
+            ] / self.numberOfSteps
+            bincount = np.bincount(
+                self.uniq_grid_inv, weights=s_q, minlength=self.uniq_grid.shape[0]
             )
+
+            sq_uvw = np.zeros(self.q_vectors["gdim_uvw"])
+            sq_uvw[tuple(self.uniq_grid)] = bincount / self.norm
+            s_qs[pair_str] = sq_uvw
+
+        return index, s_qs
+
+    def combine(self, index, s_qs):
+        for pair_str, _ in self.labels:
+            self._outputData[f"ssf3d/{pair_str}"] += s_qs[pair_str]
 
     def finalize(self):
         nAtomsPerElement = self.trajectory.get_natoms()

@@ -33,7 +33,7 @@ from .VectorConfigurator import VectorConfigurator
 class QVectors3DConfigurator(IConfigurator):
     _default = {
         "seed": 0,
-        "n_samples": 50000,
+        "n_samples": 1000,
         "force_equal_weights": False,
         "supercell_used": (1, 1, 1),
         "u": (1.0, 0.0, 0.0),
@@ -89,48 +89,53 @@ class QVectors3DConfigurator(IConfigurator):
             self.error_status = f"Errors configuring settings: {error_statuses}"
             return
 
+        self["seed"] = self["configurators"]["seed"]["value"]
+        self["n_samples"] = self["configurators"]["n_samples"]["value"]
+
+        self["sc_used"] = np.array(value["supercell_used"])
         self["u"] = np.array(value["u"])
         self["v"] = np.array(value["v"])
         self["w"] = np.array(value["w"])
-        self["transform"] = np.array([self["u"], self["v"], self["w"]]).T
+
+        # transform from uvw of the subcell to hkl of the cell
+        # e.g. hkl_cell_coords = self["transform"] @ uvw_subcell_coords
+        self["transform"] = (
+            np.column_stack((self["u"], self["v"], self["w"])) * self["sc_used"]
+        )
+
         if np.linalg.det(self["transform"]) == 0.0:
             self.error_status = "The input uvw vectors are not linearly independent."
             return
 
-        self["sc_used"] = np.array(value["supercell_used"])
-
-        max_hkl = np.zeros(3, dtype=int)
-        for point in it.product(
-            *zip(
-                [
-                    value["u_range"][0] - value["u_range"][2],
-                    value["v_range"][0] - value["v_range"][2],
-                    value["w_range"][0] - value["w_range"][2],
-                ],
-                [
-                    value["u_range"][1] + value["u_range"][2],
-                    value["v_range"][1] + value["v_range"][2],
-                    value["w_range"][1] + value["w_range"][2],
-                ],
-                strict=False,
-            )
-        ):
-            hkl = np.dot(self["transform"], point) * self["sc_used"]
-            max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))
-        self["max_hkl"] = max_hkl
-
         self["u_range"] = self["configurators"]["u_range"]["value"]
         self["v_range"] = self["configurators"]["v_range"]["value"]
         self["w_range"] = self["configurators"]["w_range"]["value"]
+
         self["min_uvw"] = np.array(
-            [value["u_range"][0], value["v_range"][0], value["w_range"][0]]
+            [self["u_range"][0], self["v_range"][0], self["w_range"][0]]
         )
         self["max_uvw"] = np.array(
-            [value["u_range"][1], value["v_range"][1], value["w_range"][1]]
+            [self["u_range"][-1], self["v_range"][-1], self["w_range"][-1]]
         )
         self["step_uvw"] = np.array(
             [value["u_range"][2], value["v_range"][2], value["w_range"][2]]
         )
+
+        # find the max_hkl for the fft, we want it to be larger than
+        # the padded uvw grid
+        max_hkl = np.zeros(3, dtype=int)
+        for point in it.product(
+            *zip(
+                self["min_uvw"] - 2 * self["step_uvw"],
+                self["max_uvw"] + 2 * self["step_uvw"],
+                strict=False,
+            )
+        ):
+            hkl = np.dot(self["transform"], point)
+            max_hkl = np.maximum(max_hkl, np.ceil(np.abs(hkl)).astype(int))
+        self["max_hkl"] = max_hkl + 1
+
+        # the dimensions of the output results
         self["gdim_uvw"] = np.array(
             [
                 self["u_range"].shape[0],
@@ -138,7 +143,5 @@ class QVectors3DConfigurator(IConfigurator):
                 self["w_range"].shape[0],
             ]
         )
-
-        self["grid_uvw"] = np.zeros(self["gdim_uvw"], dtype=complex)
 
         self.error_status = "OK"
