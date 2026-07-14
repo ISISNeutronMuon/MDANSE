@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import itertools as it
 from functools import partial
 from typing import Any
 

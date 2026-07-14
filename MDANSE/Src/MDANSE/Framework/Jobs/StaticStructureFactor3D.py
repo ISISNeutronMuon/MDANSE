@@ -179,11 +179,15 @@ class StaticStructureFactor3D(IJob):
             self.q_vectors["transform"] @ samples_123
         ).astype(int)
         self.max_hkl = np.max(np.abs(self.sampling_idxs_hkl), axis=1)
-
-        self.uniq_grid, self.uniq_grid_inv = np.unique(
-            samples_grid_idxs, axis=1, return_inverse=True
+        self.hkl_grid_flat_idx = np.ravel_multi_index(
+            self.sampling_idxs_hkl + self.max_hkl[:, None], 2 * self.max_hkl + 1
         )
-        self.norm = np.bincount(self.uniq_grid_inv, minlength=self.uniq_grid.shape[0])
+
+        # using ravel_multi_index as this makes np.unique faster
+        flat_idxs = np.ravel_multi_index(samples_grid_idxs, self.gdim_123)
+        uniq_flat, self.uniq_grid_inv = np.unique(flat_idxs, return_inverse=True)
+        self.uniq_grid = np.array(np.unravel_index(uniq_flat, self.gdim_123))
+        self.norm = np.bincount(self.uniq_grid_inv, minlength=self.uniq_grid.shape[1])
 
     def run_step(self, index):
         frame = self.configuration["frames"]["value"][index]
@@ -203,15 +207,16 @@ class StaticStructureFactor3D(IJob):
                     2 * self.max_hkl[2] + 1,
                 ),
                 eps=1e-3,
-            )
+            ).reshape(-1)
 
         s_qs = {}
         for pair_str, (label_i, label_j) in self.labels:
             s_q = (rho[label_i] * rho[label_j].conj()).real[
-                tuple(self.sampling_idxs_hkl + self.max_hkl[:, None])
+                self.hkl_grid_flat_idx
             ] / self.numberOfSteps
+
             bincount = np.bincount(
-                self.uniq_grid_inv, weights=s_q, minlength=self.uniq_grid.shape[0]
+                self.uniq_grid_inv, weights=s_q, minlength=self.uniq_grid.shape[1]
             )
 
             sq_123 = np.zeros(self.q_vectors["gdim_123"])
