@@ -34,7 +34,6 @@ class QVectors3DConfigurator(IConfigurator):
     _default = {
         "seed": 0,
         "n_samples": 1000,
-        "force_equal_weights": False,
         "supercell_used": (1, 1, 1),
         "q1": (1.0, 0.0, 0.0),
         "q2": (0.0, 1.0, 0.0),
@@ -46,7 +45,6 @@ class QVectors3DConfigurator(IConfigurator):
     _configurators_classes = {
         "seed": partial(IntegerConfigurator, mini=0),
         "n_samples": partial(IntegerConfigurator, mini=1),
-        "force_equal_weights": partial(BooleanConfigurator),
         "supercell_used": partial(
             VectorConfigurator, valueType=int, notNull=True, mini=1
         ),
