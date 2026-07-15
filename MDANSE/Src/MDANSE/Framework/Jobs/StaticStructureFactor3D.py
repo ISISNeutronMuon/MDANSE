@@ -178,14 +178,13 @@ class StaticStructureFactor3D(IJob):
         s_qs = {}
         result = {}
         for pair_str, (label_i, label_j) in self.labels:
-            s_qs[pair_str] = (
-                rho[label_i] * rho[label_j].conj()
-            ).real / self.numberOfSteps
+            s_qs[pair_str] = (rho[label_i] * rho[label_j].conj()).real
             result[pair_str] = np.zeros(self.q_vectors["gdim_123"])
 
+        count = np.zeros(self.q_vectors["gdim_123"])
         for _ in range(self.n_samples):
             # the output s_q will be a grid of dimensions gdim_123, first we
-            # generate random samples in this grid plus an extra border
+            # generate random samples in this 123 grid plus an extra border
             # around it
             samples_grid = (
                 self.rng.random((3, np.prod(self.gdim_123 + 2)))
@@ -210,29 +209,34 @@ class StaticStructureFactor3D(IJob):
             sampling_idxs_hkl = np.rint(
                 self.q_vectors["transform"] @ samples_123
             ).astype(int)
-
             hkl_grid_flat_idx = np.ravel_multi_index(
                 sampling_idxs_hkl + self.max_hkl[:, None], 2 * self.max_hkl + 1
             )
 
-            # using ravel_multi_index as this makes np.unique faster
+            # count number of point going to each grid point of the 123 grid
             flat_idxs = np.ravel_multi_index(samples_grid_idxs, self.gdim_123)
-            norm = np.bincount(flat_idxs, minlength=self.grid_size)
-            nonzero = norm > 0
+            count += np.bincount(flat_idxs, minlength=self.grid_size).reshape(
+                self.gdim_123
+            )
 
+            # now we associate the sample point that went to the grid point
+            # in the hkl grid and its s_q value with the grid point in
+            # the 123 grid. we can then do a bincount of flat_idxs (which
+            # are the indexes of the 123 grid points) weighted by the s_q to
+            # get a voronoi cell overlap averaged s_q.
             for pair_str, _ in self.labels:
                 s_q = s_qs[pair_str][hkl_grid_flat_idx]
-                summed = np.bincount(flat_idxs, weights=s_q, minlength=self.grid_size)
-                sq_123 = np.divide(
-                    summed, norm, out=np.zeros(self.grid_size), where=nonzero
-                )
-                result[pair_str] += sq_123.reshape(self.gdim_123)
+                s_q = np.bincount(flat_idxs, weights=s_q, minlength=self.grid_size)
+                result[pair_str] += s_q.reshape(self.gdim_123)
+
+        for pair_str, _ in self.labels:
+            np.divide(result[pair_str], count, out=result[pair_str], where=count > 0)
 
         return index, result
 
     def combine(self, index, s_qs):
         for pair_str, _ in self.labels:
-            self._outputData[f"ssf3d/{pair_str}"] += s_qs[pair_str]
+            self._outputData[f"ssf3d/{pair_str}"] += s_qs[pair_str] / self.numberOfSteps
 
     def finalize(self):
         nAtomsPerElement = self.trajectory.get_natoms()
