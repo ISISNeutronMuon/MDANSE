@@ -104,13 +104,13 @@ class StaticStructureFactor3D(IJob):
             "origin",
             "LineOutputVariable",
             self.q_vectors["min_123"],
-            units="a.u.",
+            units="rlu",
         )
         self._outputData.add(
             "spacing",
             "LineOutputVariable",
             self.q_vectors["step_123"],
-            units="a.u.",
+            units="rlu",
         )
 
         q1 = self.q_vectors["q1"]
@@ -118,16 +118,16 @@ class StaticStructureFactor3D(IJob):
         q3 = self.q_vectors["q3"]
 
         self.axes_labels = [
-            f"[{q1[0]}X, {q1[1]}X, {q1[2]}X]   X",
-            f"[{q2[0]}Y, {q2[1]}Y, {q2[2]}Y]   Y",
-            f"[{q3[0]}Z, {q3[1]}Z, {q3[2]}Z]   Z",
+            f"q1({q1[0]}, {q1[1]}, {q1[2]})",
+            f"q2({q2[0]}, {q2[1]}, {q2[2]})",
+            f"q3({q3[0]}, {q3[1]}, {q3[2]})",
         ]
         for naxis, axis in enumerate(["q1", "q2", "q3"]):
             self._outputData.add(
                 self.axes_labels[naxis],
                 "LineOutputVariable",
                 (self.q_vectors[f"{axis}_range"]),
-                units="a.u.",
+                units="rlu",
             )
 
         self.gdim_123 = self.q_vectors["gdim_123"]
