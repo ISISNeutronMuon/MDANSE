@@ -39,7 +39,7 @@ class QVectors3DWidget(WidgetBase):
 
         self._view = QTableView(self._base)
 
-        self._model = QStandardItemModel(10, 3)
+        self._model = QStandardItemModel(9, 3)
         for i, (key, val) in enumerate(default.items()):
             item = QStandardItem(key)
             item.setEditable(False)
