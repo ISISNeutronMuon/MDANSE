@@ -178,7 +178,9 @@ class StaticStructureFactor3D(IJob):
         s_qs = {}
         result = {}
         for pair_str, (label_i, label_j) in self.labels:
-            s_qs[pair_str] = (rho[label_i] * rho[label_j].conj()).real / self.numberOfSteps
+            s_qs[pair_str] = (
+                rho[label_i] * rho[label_j].conj()
+            ).real / self.numberOfSteps
             result[pair_str] = np.zeros(self.q_vectors["gdim_123"])
 
         for _ in range(self.n_samples):
@@ -186,7 +188,8 @@ class StaticStructureFactor3D(IJob):
             # generate random samples in this grid plus an extra border
             # around it
             samples_grid = (
-                self.rng.random((3, np.prod(self.gdim_123 + 2))) * (self.gdim_123 + 1)[:, None]
+                self.rng.random((3, np.prod(self.gdim_123 + 2)))
+                * (self.gdim_123 + 1)[:, None]
             ) - 1
             samples_grid_idxs = np.rint(samples_grid).astype(int)
 
@@ -200,7 +203,10 @@ class StaticStructureFactor3D(IJob):
             samples_grid_idxs = samples_grid_idxs[:, mask]
 
             # now convert from the grid indexes to hkl of the reciprocal cell
-            samples_123 = self.q_vectors["step_123"][:, None] * samples_grid + self.q_vectors["min_123"][:, None]
+            samples_123 = (
+                self.q_vectors["step_123"][:, None] * samples_grid
+                + self.q_vectors["min_123"][:, None]
+            )
             sampling_idxs_hkl = np.rint(
                 self.q_vectors["transform"] @ samples_123
             ).astype(int)
@@ -217,7 +223,9 @@ class StaticStructureFactor3D(IJob):
             for pair_str, _ in self.labels:
                 s_q = s_qs[pair_str][hkl_grid_flat_idx]
                 summed = np.bincount(flat_idxs, weights=s_q, minlength=self.grid_size)
-                sq_123 = np.divide(summed, norm, out=np.zeros(self.grid_size), where=nonzero)
+                sq_123 = np.divide(
+                    summed, norm, out=np.zeros(self.grid_size), where=nonzero
+                )
                 result[pair_str] += sq_123.reshape(self.gdim_123)
 
         return index, result

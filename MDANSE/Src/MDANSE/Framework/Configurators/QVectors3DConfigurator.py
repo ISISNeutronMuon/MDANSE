@@ -143,6 +143,8 @@ class QVectors3DConfigurator(IConfigurator):
             )
         ):
             hkl = np.dot(self["transform"], point)
-            self["max_hkl"] = np.maximum(self["max_hkl"], np.ceil(np.abs(hkl)).astype(int))
+            self["max_hkl"] = np.maximum(
+                self["max_hkl"], np.ceil(np.abs(hkl)).astype(int)
+            )
 
         self.error_status = "OK"
