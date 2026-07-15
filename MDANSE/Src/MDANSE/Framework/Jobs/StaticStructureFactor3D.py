@@ -131,6 +131,9 @@ class StaticStructureFactor3D(IJob):
             )
 
         self.gdim_123 = self.q_vectors["gdim_123"]
+        self.grid_size = np.prod(self.gdim_123)
+        self.max_hkl = self.q_vectors["max_hkl"]
+        self.n_samples = self.q_vectors["n_samples"]
 
         self._indicesPerElement = self.trajectory.get_indices()
         self.labels = pair_labels(self.trajectory)
@@ -151,43 +154,6 @@ class StaticStructureFactor3D(IJob):
             axis="|".join(self.axes_labels),
             main_result=True,
         )
-
-        n_samples = self.q_vectors["n_samples"] * np.prod(self.gdim_123 + 2)
-
-        # the output s_q will be a grid of dimensions gdim_123, first we
-        # generate random samples in this grid plus an extra border
-        # around it
-        samples_grid = (
-            self.rng.random((3, n_samples)) * (self.gdim_123 + 1)[:, None]
-        ) - 1
-        samples_grid_idxs = np.rint(samples_grid).astype(int)
-
-        # now we remove the points that rounded to the border grid points
-        mask = np.all(
-            (samples_grid_idxs >= 0)
-            & (samples_grid_idxs <= (self.gdim_123 - 1)[:, None]),
-            axis=0,
-        )
-        samples_grid = samples_grid[:, mask]
-        samples_grid_idxs = samples_grid_idxs[:, mask]
-
-        # now convert from the grid indexes to hkl of the reciprocal cell
-        samples_123 = (
-            np.diag(self.q_vectors["step_123"]) @ samples_grid
-        ) + self.q_vectors["min_123"][:, None]
-        self.sampling_idxs_hkl = np.rint(
-            self.q_vectors["transform"] @ samples_123
-        ).astype(int)
-        self.max_hkl = np.max(np.abs(self.sampling_idxs_hkl), axis=1)
-        self.hkl_grid_flat_idx = np.ravel_multi_index(
-            self.sampling_idxs_hkl + self.max_hkl[:, None], 2 * self.max_hkl + 1
-        )
-
-        # using ravel_multi_index as this makes np.unique faster
-        flat_idxs = np.ravel_multi_index(samples_grid_idxs, self.gdim_123)
-        uniq_flat, self.uniq_grid_inv = np.unique(flat_idxs, return_inverse=True)
-        self.uniq_grid = np.array(np.unravel_index(uniq_flat, self.gdim_123))
-        self.norm = np.bincount(self.uniq_grid_inv, minlength=self.uniq_grid.shape[1])
 
     def run_step(self, index):
         frame = self.configuration["frames"]["value"][index]
@@ -210,20 +176,51 @@ class StaticStructureFactor3D(IJob):
             ).reshape(-1)
 
         s_qs = {}
+        result = {}
         for pair_str, (label_i, label_j) in self.labels:
-            s_q = (rho[label_i] * rho[label_j].conj()).real[
-                self.hkl_grid_flat_idx
-            ] / self.numberOfSteps
+            s_qs[pair_str] = (rho[label_i] * rho[label_j].conj()).real / self.numberOfSteps
+            result[pair_str] = np.zeros(self.q_vectors["gdim_123"])
 
-            bincount = np.bincount(
-                self.uniq_grid_inv, weights=s_q, minlength=self.uniq_grid.shape[1]
+        for _ in range(self.n_samples):
+            # the output s_q will be a grid of dimensions gdim_123, first we
+            # generate random samples in this grid plus an extra border
+            # around it
+            samples_grid = (
+                self.rng.random((3, np.prod(self.gdim_123 + 2))) * (self.gdim_123 + 1)[:, None]
+            ) - 1
+            samples_grid_idxs = np.rint(samples_grid).astype(int)
+
+            # now we remove the points that rounded to the border grid points
+            mask = np.all(
+                (samples_grid_idxs >= 0)
+                & (samples_grid_idxs <= (self.gdim_123 - 1)[:, None]),
+                axis=0,
+            )
+            samples_grid = samples_grid[:, mask]
+            samples_grid_idxs = samples_grid_idxs[:, mask]
+
+            # now convert from the grid indexes to hkl of the reciprocal cell
+            samples_123 = self.q_vectors["step_123"][:, None] * samples_grid + self.q_vectors["min_123"][:, None]
+            sampling_idxs_hkl = np.rint(
+                self.q_vectors["transform"] @ samples_123
+            ).astype(int)
+
+            hkl_grid_flat_idx = np.ravel_multi_index(
+                sampling_idxs_hkl + self.max_hkl[:, None], 2 * self.max_hkl + 1
             )
 
-            sq_123 = np.zeros(self.q_vectors["gdim_123"])
-            sq_123[tuple(self.uniq_grid)] = bincount / self.norm
-            s_qs[pair_str] = sq_123
+            # using ravel_multi_index as this makes np.unique faster
+            flat_idxs = np.ravel_multi_index(samples_grid_idxs, self.gdim_123)
+            norm = np.bincount(flat_idxs, minlength=self.grid_size)
+            nonzero = norm > 0
 
-        return index, s_qs
+            for pair_str, _ in self.labels:
+                s_q = s_qs[pair_str][hkl_grid_flat_idx]
+                summed = np.bincount(flat_idxs, weights=s_q, minlength=self.grid_size)
+                sq_123 = np.divide(summed, norm, out=np.zeros(self.grid_size), where=nonzero)
+                result[pair_str] += sq_123.reshape(self.gdim_123)
+
+        return index, result
 
     def combine(self, index, s_qs):
         for pair_str, _ in self.labels:

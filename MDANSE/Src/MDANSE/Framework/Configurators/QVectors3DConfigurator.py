@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import itertools as it
 from functools import partial
 from typing import Any
 
@@ -130,5 +131,18 @@ class QVectors3DConfigurator(IConfigurator):
                 self["q3_range"].shape[0],
             ]
         )
+
+        # find the max_hkl of the reciprocal cell for the fft, we want it to
+        # be larger than the padded grid with the q1, q2, q3 basis vectors
+        self["max_hkl"] = np.zeros(3, dtype=int)
+        for point in it.product(
+            *zip(
+                self["min_123"] - self["step_123"],
+                self["max_123"] + self["step_123"],
+                strict=False,
+            )
+        ):
+            hkl = np.dot(self["transform"], point)
+            self["max_hkl"] = np.maximum(self["max_hkl"], np.ceil(np.abs(hkl)).astype(int))
 
         self.error_status = "OK"
