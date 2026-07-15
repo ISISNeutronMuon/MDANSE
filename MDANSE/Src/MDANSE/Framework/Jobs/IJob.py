@@ -34,6 +34,7 @@ from multiprocessing import Queue
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
 
+import numpy as np
 from more_itertools import consumer, first_true
 
 from MDANSE import PLATFORM
@@ -290,11 +291,13 @@ class IJob(Configurable, RegisterFactory, ABC):
         if (selection := self.configuration.get("atom_selection")) is not None:
             self.trajectory.set_selection(selection["flatten_indices"])
             array_length = self.trajectory.chemical_system._total_number_of_atoms
-            valid_indices = selection["flatten_indices"]
+            valid_indices = np.asarray(selection["flatten_indices"], dtype=int)
+            selected_atoms = np.zeros(array_length, dtype=bool)
+            selected_atoms[valid_indices] = True
             self._outputData.add(
                 "selected_atoms",
                 "LineOutputVariable",
-                [index in valid_indices for index in range(array_length)],
+                selected_atoms,
             )
         if (transmutation := self.configuration.get("atom_transmutation")) is not None:
             self.trajectory.set_transmutation(transmutation.transmutation)
