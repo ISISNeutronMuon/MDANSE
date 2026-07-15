@@ -23,7 +23,6 @@ import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
-from .BooleanConfigurator import BooleanConfigurator
 from .IntegerConfigurator import IntegerConfigurator
 from .RangeConfigurator import RangeConfigurator
 from .VectorConfigurator import VectorConfigurator
@@ -33,7 +32,7 @@ from .VectorConfigurator import VectorConfigurator
 class QVectors3DConfigurator(IConfigurator):
     _default = {
         "seed": 0,
-        "n_samples": 1000,
+        "n_samples": 100,
         "supercell_used": (1, 1, 1),
         "q1": (1.0, 0.0, 0.0),
         "q2": (0.0, 1.0, 0.0),
