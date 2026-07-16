@@ -97,7 +97,8 @@ class QVectors3DConfigurator(IConfigurator):
         # transform from q1, q2, q3 basis vectors of the reciprocal subcell to the
         # basis vectors of the reciprocal cell
         self["transform"] = (
-            np.column_stack((self["q1"], self["q2"], self["q3"])) * self["sc_used"]
+            np.column_stack((self["q1"], self["q2"], self["q3"]))
+            * self["sc_used"][:, None]
         )
 
         if np.linalg.det(self["transform"]) == 0.0:

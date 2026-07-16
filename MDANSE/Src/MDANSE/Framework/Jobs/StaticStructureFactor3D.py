@@ -172,7 +172,6 @@ class StaticStructureFactor3D(IJob):
                     2 * self.max_hkl[1] + 1,
                     2 * self.max_hkl[2] + 1,
                 ),
-                eps=1e-3,
             ).reshape(-1)
 
         s_qs = {}
