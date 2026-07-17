@@ -45,12 +45,6 @@ class StaticStructureFactor3D(IJob):
         "FramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {
-            "dependencies": {"trajectory": "trajectory"},
-        },
-    )
     settings["q_vectors"] = (
         "QVectors3DConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
