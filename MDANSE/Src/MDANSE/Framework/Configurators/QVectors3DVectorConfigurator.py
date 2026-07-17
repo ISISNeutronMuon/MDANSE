@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+
 from .VectorConfigurator import VectorConfigurator
 
 

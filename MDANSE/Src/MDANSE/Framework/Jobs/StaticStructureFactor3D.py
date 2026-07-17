@@ -89,6 +89,8 @@ class StaticStructureFactor3D(IJob):
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
+    PREDICTORS = ("q_vectors",)
+
     def initialize(self):
         super().initialize()
 

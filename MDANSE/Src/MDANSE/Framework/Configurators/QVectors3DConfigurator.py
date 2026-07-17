@@ -21,8 +21,7 @@ from typing import Any
 
 import numpy as np
 
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-
+from .IConfigurator import IConfigurator, PredictionSettings
 from .IntegerConfigurator import IntegerConfigurator
 from .QVectors3DVectorConfigurator import QVectors3DVectorConfigurator
 from .RangeConfigurator import RangeConfigurator
@@ -38,9 +37,9 @@ class QVectors3DConfigurator(IConfigurator):
         "q1": (1.0, 0.0, 0.0),
         "q2": (0.0, 1.0, 0.0),
         "q3": "q1 x q2",
-        "q1_range": (-5.0, 5.0, 1.0),
-        "q2_range": (-5.0, 5.0, 1.0),
-        "q3_range": (-5.0, 5.0, 1.0),
+        "q1_range": (-3.0, 3.0, 1.0),
+        "q2_range": (-3.0, 3.0, 1.0),
+        "q3_range": (-3.0, 3.0, 1.0),
     }
     _configurators_classes = {
         "seed": partial(IntegerConfigurator, mini=0),
@@ -75,7 +74,13 @@ class QVectors3DConfigurator(IConfigurator):
     }
 
     label = "3D Q vector generator"
-    tooltip = "Generates Q vectors in a slice with a finite thickness"
+    tooltip = "Generates Q vectors in slices with a finite thickness"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction = PredictionSettings(
+            key="q", label="3D Q vector generator", unit="rlu"
+        )
 
     def configure(self, value: dict[str, Any]):
         """Create a 3D vector generator with given parameters.
@@ -108,11 +113,11 @@ class QVectors3DConfigurator(IConfigurator):
         if (
             sum(
                 self["configurators"][vec]["cross_product"]
-                for vec in {"q1", "q2", "q3"}
+                for vec in ("q1", "q2", "q3")
             )
             > 1
         ):
-            self.error_status = f"Only one basis vector can be defined as a cross product of the other two."
+            self.error_status = "Only one basis vector can be defined as a cross product of the other two."
             return
 
         self["seed"] = self["configurators"]["seed"]["value"]
@@ -120,7 +125,7 @@ class QVectors3DConfigurator(IConfigurator):
 
         self["sc_used"] = np.array(value["supercell_used"])
 
-        for q in {"q1", "q2", "q3"}:
+        for q in ("q1", "q2", "q3"):
             if not self["configurators"][q]["cross_product"]:
                 self[q] = np.array(value[q])
             else:
@@ -177,5 +182,18 @@ class QVectors3DConfigurator(IConfigurator):
             self["max_hkl"] = np.maximum(
                 self["max_hkl"], np.ceil(np.abs(hkl)).astype(int)
             )
+
+        aliases = {
+            "q1 basis vector": "q1",
+            "q2 basis vector": "q2",
+            "q3 basis vector": "q3",
+            "q1 range": "q1_range",
+            "q2 range": "q1_range",
+            "q3 range": "q1_range",
+        }
+
+        self.prediction_keys = aliases.keys()
+        for k, v in aliases.items():
+            self[k] = self[v]
 
         self.error_status = "OK"
