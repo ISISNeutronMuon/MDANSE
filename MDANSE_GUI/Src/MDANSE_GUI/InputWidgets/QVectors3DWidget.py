@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import ast
+from contextlib import suppress
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
@@ -84,11 +85,9 @@ class QVectors3DWidget(WidgetBase):
                     continue
 
             if configurator_name == "QVectors3DVectorConfigurator":
-                try:
+                with suppress(SyntaxError, ValueError):
                     # QVectors3DVectorConfigurator values can be tuple, list or string
                     val = ast.literal_eval(val)
-                except (SyntaxError, ValueError):
-                    pass
 
             configurator = self.configurators[key](key)
             configurator.configure(val)
