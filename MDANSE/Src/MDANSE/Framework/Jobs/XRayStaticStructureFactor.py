@@ -63,6 +63,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
     label = "XRay Static Structure Factor"
 
     enabled = True
+    visible = True
 
     category = (
         "Analysis",

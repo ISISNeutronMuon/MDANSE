@@ -50,6 +50,7 @@ class PairDistributionFunction(DistanceHistogram):
     label = "Pair Distribution Function"
 
     enabled = True
+    visible = True
 
     category = (
         "Analysis",
