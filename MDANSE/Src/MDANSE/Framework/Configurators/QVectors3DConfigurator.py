@@ -188,8 +188,8 @@ class QVectors3DConfigurator(IConfigurator):
             "q2 basis vector": "q2",
             "q3 basis vector": "q3",
             "q1 range": "q1_range",
-            "q2 range": "q1_range",
-            "q3 range": "q1_range",
+            "q2 range": "q2_range",
+            "q3 range": "q3_range",
         }
 
         self.prediction_keys = aliases.keys()
