@@ -114,6 +114,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "SingleChoiceConfigurator": ComboWidget,
     "QVectorsConfigurator": QVectorsWidget,
     "QVectors3DConfigurator": QVectors3DWidget,
+    "QVectors3DVectorConfigurator": VectorWidget,
     "OutputStructureConfigurator": OutputStructureWidget,
     "OutputTrajectoryConfigurator": OutputTrajectoryWidget,
     "ProjectionConfigurator": ProjectionWidget,

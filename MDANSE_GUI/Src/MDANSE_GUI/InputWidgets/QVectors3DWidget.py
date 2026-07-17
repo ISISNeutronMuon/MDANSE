@@ -74,7 +74,6 @@ class QVectors3DWidget(WidgetBase):
             configurator_name = self._model.item(row, 2).text()
 
             if configurator_name in ("RangeConfigurator", "VectorConfigurator"):
-                settings[key] = val
                 try:
                     val = ast.literal_eval(val)
                 except (SyntaxError, ValueError):
@@ -83,6 +82,13 @@ class QVectors3DWidget(WidgetBase):
                         role=Qt.ItemDataRole.BackgroundRole,
                     )
                     continue
+
+            if configurator_name == "QVectors3DVectorConfigurator":
+                try:
+                    # QVectors3DVectorConfigurator values can be tuple, list or string
+                    val = ast.literal_eval(val)
+                except (SyntaxError, ValueError):
+                    pass
 
             configurator = self.configurators[key](key)
             configurator.configure(val)

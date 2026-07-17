@@ -24,6 +24,7 @@ import numpy as np
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 from .IntegerConfigurator import IntegerConfigurator
+from .QVectors3DVectorConfigurator import QVectors3DVectorConfigurator
 from .RangeConfigurator import RangeConfigurator
 from .VectorConfigurator import VectorConfigurator
 
@@ -36,7 +37,7 @@ class QVectors3DConfigurator(IConfigurator):
         "supercell_used": (1, 1, 1),
         "q1": (1.0, 0.0, 0.0),
         "q2": (0.0, 1.0, 0.0),
-        "q3": (0.0, 0.0, 1.0),
+        "q3": "q1 x q2",
         "q1_range": (-5.0, 5.0, 1.0),
         "q2_range": (-5.0, 5.0, 1.0),
         "q3_range": (-5.0, 5.0, 1.0),
@@ -47,9 +48,27 @@ class QVectors3DConfigurator(IConfigurator):
         "supercell_used": partial(
             VectorConfigurator, valueType=int, notNull=True, mini=1
         ),
-        "q1": partial(VectorConfigurator, valueType=float, notNull=True),
-        "q2": partial(VectorConfigurator, valueType=float, notNull=True),
-        "q3": partial(VectorConfigurator, valueType=float, notNull=True),
+        "q1": partial(
+            QVectors3DVectorConfigurator,
+            valueType=float,
+            notNull=True,
+            other_vec_1="q2",
+            other_vec_2="q3",
+        ),
+        "q2": partial(
+            QVectors3DVectorConfigurator,
+            valueType=float,
+            notNull=True,
+            other_vec_1="q1",
+            other_vec_2="q3",
+        ),
+        "q3": partial(
+            QVectors3DVectorConfigurator,
+            valueType=float,
+            notNull=True,
+            other_vec_1="q1",
+            other_vec_2="q2",
+        ),
         "q1_range": partial(RangeConfigurator, valueType=float, includeLast=True),
         "q2_range": partial(RangeConfigurator, valueType=float, includeLast=True),
         "q3_range": partial(RangeConfigurator, valueType=float, includeLast=True),
@@ -83,16 +102,30 @@ class QVectors3DConfigurator(IConfigurator):
             self["configurators"][key] = configurator
 
         if error_statuses:
-            self.error_status = f"Errors configuring settings: {error_statuses}"
+            self.error_status = f"Errors configuring settings: {error_statuses}."
+            return
+
+        if (
+            sum(
+                self["configurators"][vec]["cross_product"]
+                for vec in {"q1", "q2", "q3"}
+            )
+            > 1
+        ):
+            self.error_status = f"Only one basis vector can be defined as a cross product of the other two."
             return
 
         self["seed"] = self["configurators"]["seed"]["value"]
         self["n_samples"] = self["configurators"]["n_samples"]["value"]
 
         self["sc_used"] = np.array(value["supercell_used"])
-        self["q1"] = np.array(value["q1"])
-        self["q2"] = np.array(value["q2"])
-        self["q3"] = np.array(value["q3"])
+
+        for q in {"q1", "q2", "q3"}:
+            if not self["configurators"][q]["cross_product"]:
+                self[q] = np.array(value[q])
+            else:
+                q_a, _, q_b = value[q].split(" ")
+                self[q] = np.cross(np.array(value[q_a]), np.array(value[q_b]))
 
         # transform from q1, q2, q3 basis vectors of the reciprocal subcell to the
         # basis vectors of the reciprocal cell
