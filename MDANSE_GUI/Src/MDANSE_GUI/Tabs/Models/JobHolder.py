@@ -27,7 +27,11 @@ from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Framework.Converters import Converter
-from MDANSE.Framework.Jobs.JobStatus import JobInfo, JobStates
+from MDANSE.Framework.Jobs.JobStatus import (
+    JobInfo,
+    JobStates,
+)
+from MDANSE.IO.IOUtils import job_status_text_summary
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
 from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
@@ -143,47 +147,14 @@ class JobEntry(QObject):
         self._prog_item.setData(100, role=ProgressDelegate.progress_role + 1)
         self.handler = JobLogHandler()
 
-    @staticmethod
-    def _sec_fmt(time: float) -> str:
-        """Format a time in seconds sensibly."""
-        if not isinstance(time, float):
-            return "N/A"
-
-        hr, min = divmod(time, 3600)
-        min, sec = divmod(min, 60)
-
-        if hr:
-            return f"{hr:.0f}hr {min:.0f}m {sec:.0f}s"
-        if min:
-            return f"{min:.0f}m {sec:.0f}s"
-
-        return f"{sec:.0f}s"
-
     def text_summary(self) -> str:
         nl = "\n"
-
-        try:
-            comp_time = (self.job.n_steps - self.job.current_step) / self.job.rate
-        except (TypeError, ZeroDivisionError):
-            comp_time = "N/A"
-
-        if self.job.end:
-            elapsed_time = self.job.end - self.job.start
-        else:
-            elapsed_time = time.time() - self.job.start
 
         return f"""\
 Job type: {self._command}
 Parameters:
 {nl.join(" - {} = {}".format(*kv) for kv in self.parameters.items())}
-Status:
-  Current state: {self.job.state.name.title()}
-  Percent complete: {self.job.progress}
-  Percent rate: {self.job.pct_rate} %/s
-  Steps: {self.job.current_step}/{self.job.n_steps}
-  Step rate: {self.job.rate} steps/s
-  Elapsed time: {self._sec_fmt(elapsed_time)}
-  Estimated remaining time: {self._sec_fmt(comp_time)}
+{job_status_text_summary(self.job)}
 """
 
     def update_fields(self):

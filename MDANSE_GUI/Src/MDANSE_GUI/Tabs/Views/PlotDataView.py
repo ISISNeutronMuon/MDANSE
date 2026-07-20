@@ -649,18 +649,16 @@ class PlotDataView(QTreeView):
         self.dataset_selected.emit(packet)
         if hasattr(mda_data_structure, "_metadata"):
             self.item_details.emit(
-                html.escape(
-                    "\n".join(
-                        f"{key}: {item}"
-                        for key, item in mda_data_structure._metadata.items()
-                    ),
+                "\n".join(
+                    f"<b>{key}</b>: " + html.escape(f"{item}")
+                    for key, item in mda_data_structure._metadata.items()
                 ),
             )
         else:
             try:
                 text += "\n"
                 for attr in mda_data_structure.attrs:
-                    text += f"{attr}: {mda_data_structure.attrs[attr]}\n"
+                    text += f"<b>{attr}</b>: {mda_data_structure.attrs[attr]}\n"
                 self.item_details.emit(html.escape(text))
             except Exception:
                 self.item_details.emit("No additional information included.")
