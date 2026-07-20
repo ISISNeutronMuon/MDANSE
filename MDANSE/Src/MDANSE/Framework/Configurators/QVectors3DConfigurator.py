@@ -192,7 +192,7 @@ class QVectors3DConfigurator(IConfigurator):
             "q3 range": "q3_range",
         }
 
-        self.prediction_keys = aliases.keys()
+        self.prediction_keys = list(aliases.keys())
         for k, v in aliases.items():
             self[k] = self[v]
 
