@@ -544,6 +544,9 @@ def job_status_text_summary(jobinf: JobInfo, *, for_output_file: bool = False) -
     elapsed_time = (
         jobinf.end - jobinf.start if jobinf.end else time.time() - jobinf.start
     )
+    start_time_str = time.asctime(time.localtime(jobinf.start))
+    end_time_str = time.asctime(time.localtime(jobinf.end or time.time()))
+
     if for_output_file:
         return f"""
 Status:
@@ -552,6 +555,8 @@ Status:
   Steps: {jobinf.current_step}/{jobinf.n_steps}
   Step rate: {jobinf.rate} steps/s
   Elapsed time: {sec_fmt(elapsed_time)}
+  Started on: {start_time_str}
+  Finished on: {end_time_str}
 """
     else:
         return f"""
@@ -562,5 +567,6 @@ Status:
   Steps: {jobinf.current_step}/{jobinf.n_steps}
   Step rate: {jobinf.rate} steps/s
   Elapsed time: {sec_fmt(elapsed_time)}
+  Started on: {start_time_str}
   Estimated remaining time: {sec_fmt(comp_time)}
 """
