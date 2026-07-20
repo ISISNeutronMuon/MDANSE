@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from collections import UserDict
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from enum import Enum
@@ -29,6 +30,9 @@ import numpy as np
 from more_itertools import first_true, last, take, value_chain
 
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Jobs.JobStatus import JobInfo
 
 K = TypeVar("K", str, bytes)
 V = TypeVar("V")
@@ -508,3 +512,61 @@ def unused_standard_output_filename(
     )
 
     return Path(name) if name else None
+
+
+def sec_fmt(time: float) -> str:
+    """Format a time in seconds sensibly."""
+    if not isinstance(time, float):
+        return "N/A"
+
+    hr, min = divmod(time, 3600)
+    min, sec = divmod(min, 60)
+
+    if hr:
+        return f"{hr:.0f}hr {min:.0f}m {sec:.0f}s"
+    if min:
+        return f"{min:.0f}m {sec:.0f}s"
+
+    return f"{sec:.0f}s"
+
+
+def job_status_text_summary(jobinf: JobInfo, *, for_output_file: bool = False) -> str:
+    """Return run details as a formatted string.
+
+    When writing the run information into an output file, the for_output_file
+    can be used to skip the parts of the output that are not relevant
+    to a completed task (e.g. estimated remaining time.)"""
+    try:
+        comp_time = (jobinf.n_steps - jobinf.current_step) / jobinf.rate
+    except (TypeError, ZeroDivisionError):
+        comp_time = "N/A"
+
+    elapsed_time = (
+        jobinf.end - jobinf.start if jobinf.end else time.time() - jobinf.start
+    )
+    start_time_str = time.asctime(time.localtime(jobinf.start))
+    end_time_str = time.asctime(time.localtime(jobinf.end or time.time()))
+
+    if for_output_file:
+        return f"""
+Status:
+  Percent complete: {jobinf.progress}
+  Percent rate: {jobinf.pct_rate} %/s
+  Steps: {jobinf.current_step}/{jobinf.n_steps}
+  Step rate: {jobinf.rate} steps/s
+  Elapsed time: {sec_fmt(elapsed_time)}
+  Started on: {start_time_str}
+  Finished on: {end_time_str}
+"""
+    else:
+        return f"""
+Status:
+  Current state: {jobinf.state.name.title()}
+  Percent complete: {jobinf.progress}
+  Percent rate: {jobinf.pct_rate} %/s
+  Steps: {jobinf.current_step}/{jobinf.n_steps}
+  Step rate: {jobinf.rate} steps/s
+  Elapsed time: {sec_fmt(elapsed_time)}
+  Started on: {start_time_str}
+  Estimated remaining time: {sec_fmt(comp_time)}
+"""
