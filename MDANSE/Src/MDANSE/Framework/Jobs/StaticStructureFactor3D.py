@@ -17,7 +17,13 @@ from __future__ import annotations
 
 from math import sqrt
 
-import finufft
+try:
+    import finufft
+
+    ssf3d_available = True
+except ImportError:
+    ssf3d_available = False
+
 import numpy as np
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -32,6 +38,8 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 class StaticStructureFactor3D(IJob):
     label = "Static Structure Factor 3D"
 
+    enabled = ssf3d_available
+    requires_extras = ("finufft",)
     category = (
         "Analysis",
         "Scattering",
