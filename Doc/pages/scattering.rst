@@ -21,6 +21,7 @@ This section contains background theory for following plugins:
 -  :ref:`neutron-dynamic-total-structure-factor`
 -  :ref:`scattering-length-density-profile`
 -  :ref:`static-structure-factor`
+-  :ref:`static-structure-factor-3D`
 -  :ref:`structure-factor-from-scattering-function`
 -  :ref:`xray-static-structure-factor`
 
@@ -541,7 +542,7 @@ reflectometry calculations.
 Static Structure Factor
 '''''''''''''''''''''''
 
-MDANSE computes the partial partial static structure factor (SSF) as the Fourier
+MDANSE computes the partial static structure factor (SSF) as the Fourier
 transform of the partial pair distribution function following the Faber-Ziman definition
 
 .. math::
@@ -557,6 +558,29 @@ calculated in MDANSE via the following expression
 
    S_{\alpha\beta}(q) = \delta_{\alpha\beta} + \sqrt{c_{\alpha}c_{\beta}} \left[ F_{\mathrm{coh},\alpha\beta}(q, 0) - 1 \right].
 
+
+.. _static-structure-factor-3D:
+
+Static Structure Factor 3D
+''''''''''''''''''''''''''
+
+Computes the partial static structure factor as a fourier transform of
+atomic positions.
+
+.. math::
+  :label: ssf3d1
+
+  S_{\alpha\beta}(\mathbf{q}') = \frac{1}{N c_{\alpha} c_{\beta}} \sum_{j \in \alpha}\sum_{k \in \beta} \langle  \exp[i \mathbf{q} \mathbf{T} (\mathbf{r}_{k} - \mathbf{r}_{j})] \rangle
+
+Where :math:`\mathbf{q}' =  \mathbf{q} \mathbf{T}` are q-vector transformed
+along a new user defined set of basis vectors and :math:`\mathbf{q}` is the
+reciprocal lattice vector of the unit cell. Unlike many other
+scattering calculations results are not spherically averaged and are
+a function of 3 dimensions. As :math:`\mathbf{q}'`
+may not land on a reciprocal lattice point, the value of :math:`S_{\alpha\beta}(\mathbf{q}')`
+is averaged over nearby reciprocal lattice point weighted by the overlap of the
+voronoi cells generated from the :math:`\mathbf{q}'` grid with the
+voronoi cells generated from the :math:`\mathbf{q}` grid.
 
 .. _structure-factor-from-scattering-function:
 
