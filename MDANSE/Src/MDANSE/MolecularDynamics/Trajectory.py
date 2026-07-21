@@ -264,10 +264,10 @@ class Trajectory:
         dataset_type = TrajDataArray[array_name.upper()]
         return self._trajectory.chunk_size(dataset_type)
 
-    def dtype_size(self, array_name: str = "position") -> int:
+    def bytes_per_num(self, array_name: str = "position") -> int:
         """Return the number of atoms in a single chunk of the HDF5 dataset."""
         dataset_type = TrajDataArray[array_name.upper()]
-        return self._trajectory.dtype_size(dataset_type)
+        return self._trajectory.bytes_per_num(dataset_type)
 
     def group_elements(self, grp_name):
         """The elements in the group with the name grp_name.
