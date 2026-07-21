@@ -73,7 +73,10 @@ class RootMeanSquareFluctuation(IJob):
         n_proc = self.configuration["running_mode"].get("slots", 1)
 
         self.grouped_indices = group_atom_indices(
-            self.trajectory, n_proc=n_proc, memory_scale_factor=2
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=n_proc,
+            memory_scale_factor=2,
         )
         self.numberOfSteps = len(self.grouped_indices)
 

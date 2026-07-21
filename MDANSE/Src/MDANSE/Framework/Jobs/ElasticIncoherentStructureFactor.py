@@ -111,7 +111,10 @@ class ElasticIncoherentStructureFactor(IJob):
         n_proc = self.configuration["running_mode"].get("slots", 1)
 
         self.grouped_indices = group_atom_indices(
-            self.trajectory, n_proc=n_proc, memory_scale_factor=self._nQShells
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=n_proc,
+            memory_scale_factor=self._nQShells,
         )
         self.numberOfSteps = len(self.grouped_indices)
 

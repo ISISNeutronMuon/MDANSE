@@ -93,7 +93,10 @@ class AverageStructure(IJob):
         super().initialize()
 
         self.grouped_indices = group_atom_indices(
-            self.trajectory, n_proc=1, memory_scale_factor=2
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=1,
+            memory_scale_factor=2,
         )
         self.numberOfSteps = len(self.grouped_indices)
 
