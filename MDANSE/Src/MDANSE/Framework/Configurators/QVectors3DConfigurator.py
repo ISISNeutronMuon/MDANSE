@@ -99,7 +99,7 @@ class QVectors3DConfigurator(IConfigurator):
         uc = self.configurable[self.dependencies["trajectory"]]["instance"].unit_cell(0)
         if uc is None:
             self.error_status = (
-                f"Cannot generate q-vectors for a system without a unit cell."
+                "Cannot generate q-vectors for a system without a unit cell."
             )
             return
 
