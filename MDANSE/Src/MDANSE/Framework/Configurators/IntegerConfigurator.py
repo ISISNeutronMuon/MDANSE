@@ -69,7 +69,7 @@ class IntegerConfigurator(IConfigurator):
         try:
             value = int(value)
         except (TypeError, ValueError) as e:
-            self.error_status = "Wrong input for an integer" + str(e)
+            self.error_status = "Wrong input for an integer: " + str(e)
             return
 
         if self.choices and value not in self.choices:
