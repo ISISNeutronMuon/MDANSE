@@ -21,6 +21,7 @@ from scipy.spatial.transform import Rotation
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
 from MDANSE.util_types import FloatArray
 
 
@@ -70,7 +71,7 @@ class RotationAutocorrelation(IJob):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
 
-        molecules = self.trajectory.chemical_system._clusters[
+        molecules = self.trajectory.chemical_system.clusters[
             self.configuration["molecule"]["value"]
         ]
 
@@ -87,6 +88,8 @@ class RotationAutocorrelation(IJob):
                 "atomic_weight",
             ),
         )
+
+        self.grouped_indices = group_cluster_indices(self.trajectory.chemical_system)
 
         self._outputData.add(
             "time",
@@ -162,7 +165,9 @@ class RotationAutocorrelation(IJob):
             configuration = self.trajectory.configuration(
                 frame_index,
             )
-            coordinates = configuration.contiguous_configuration().coordinates[molecule]
+            coordinates = configuration.contiguous_configuration(
+                self.grouped_indices
+            ).coordinates[molecule]
             current_coords = coordinates - center_of_mass(coordinates, masses)
             if i == 0:
                 ref_coords = current_coords

@@ -22,7 +22,7 @@ import numpy as np
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import PDBFile
-from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -149,6 +149,7 @@ class Gromacs(Converter):
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
+            meta_block_size=self.configuration["output_files"]["meta_block_size"],
         )
 
     def run_step(self, index):
@@ -180,8 +181,7 @@ class Gromacs(Converter):
 
         coords = np.squeeze(coords)
 
-        conf = PeriodicRealConfiguration(
-            self._trajectory.chemical_system,
+        conf = PeriodicAbsoluteConfiguration(
             coords,
             UnitCell(box[0, :, :]),
             **variables,

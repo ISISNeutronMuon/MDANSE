@@ -19,11 +19,11 @@ import copy
 import itertools as it
 from collections import defaultdict
 from collections.abc import Iterable
-from functools import reduce
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, SupportsInt
 
 import h5py
+import more_itertools
 import networkx as nx
 import numpy as np
 from more_itertools import padded
@@ -71,20 +71,25 @@ def assign_molecules_after_atom_selection(
     new_cs.add_bonds(selected_bonds)
 
     selected_clusters = defaultdict(list)
-    for key, vals in original_cs._clusters.items():
+    for key, vals in original_cs.clusters.items():
         for val in vals:
             new_cluster = set(val) & selected_idxs
             if new_cluster:
                 new_cluster = sorted(indx_map[i] for i in new_cluster)
                 selected_clusters[key].append(new_cluster)
 
-    new_cs._clusters = selected_clusters
+    new_cs.clusters = selected_clusters
 
 
 class ChemicalSystem:
     """Stores the contents and topology of a trajectory."""
 
-    def __init__(self, name: str = "", trajectory: Trajectory | None = None):
+    def __init__(
+        self,
+        name: str = "",
+        trajectory: Trajectory | None = None,
+        fast_load: bool = False,
+    ):
         """Populate the arrays with values from the trajectory.
 
         Parameters
@@ -93,9 +98,12 @@ class ChemicalSystem:
             text label of this system
         trajectory : Trajectory, optional
             instance of the Trajectory class, by default None
+        fast_load : bool, optional
+            Skip molecule detection if True, by default False
         """
         self.name = str(name)
         self._database = ATOMS_DATABASE
+        self._fast_load = fast_load
         if trajectory is not None:
             self._database = trajectory
 
@@ -107,7 +115,7 @@ class ChemicalSystem:
 
         self._bonds: list[tuple[SupportsInt, SupportsInt]] = []
 
-        self._clusters: dict[str, list[list[int]]] = {}
+        self.clusters: dict[str, list[list[int]]] = {}
 
         self.rdkit_mol = Chem.RWMol()
         # rdkit DetermineBondOrders doesn't work with dummy atoms. we
@@ -122,7 +130,7 @@ class ChemicalSystem:
     def __str__(self):
         return (
             f"ChemicalSystem {self.name} consisting of {len(self._atom_types)}"
-            f" atoms in {len(self._clusters)} molecules"
+            f" atoms in {len(self.clusters)} molecules"
         )
 
     def initialise_atoms(
@@ -201,8 +209,8 @@ class ChemicalSystem:
         # types for all others. We also need to remove dummy atom before
         # using rdDetermineBonds.DetermineBondOrders because it can't
         # deal with them.
-        for cluster_name in self._clusters:
-            for idx, cluster in enumerate(self._clusters[cluster_name]):
+        for cluster_name in self.clusters:
+            for idx, cluster in enumerate(self.clusters[cluster_name]):
                 cluster_no_dummies = [
                     i for i in cluster if i not in self._rdkit_dummy_atms
                 ]
@@ -311,10 +319,10 @@ class ChemicalSystem:
                 for atom, count in zip(unique_atoms, counts, strict=True)
             )
 
-            if name not in self._clusters:
-                self._clusters[name] = [sorted_group]
-            elif sorted_group not in self._clusters[name]:
-                self._clusters[name].append(group)
+            if name not in self.clusters:
+                self.clusters[name] = [sorted_group]
+            elif sorted_group not in self.clusters[name]:
+                self.clusters[name].append(group)
 
     def has_substructure_match(self, smarts: str) -> bool:
         """Check if there is a substructure match.
@@ -432,7 +440,7 @@ class ChemicalSystem:
         while len(atom_pool) > 0:
             last_atom = atom_pool.pop()
             temp_dict = nx.dfs_successors(total_graph, last_atom)
-            others = reduce(list.__iadd__, temp_dict.values(), [])
+            others = list(more_itertools.flatten(temp_dict.values()))
             for atom in others:
                 atom_pool.remove(atom)
             molecule = [last_atom, *others]
@@ -441,11 +449,11 @@ class ChemicalSystem:
 
     def unique_molecules(self) -> list[str]:
         """Return the list of unique names in the chemical system."""
-        return [str(x) for x in self._clusters]
+        return [str(x) for x in self.clusters]
 
     def number_of_molecules(self, molecule_name: str) -> int:
         """Return the number of molecules with the given name in the system."""
-        return len(self._clusters[molecule_name])
+        return len(self.clusters[molecule_name])
 
     @property
     def number_of_atoms(self) -> int:
@@ -486,7 +494,7 @@ class ChemicalSystem:
         for key, value in self._labels.items():
             label_group.create_dataset(key, data=value)
         clusters_group = grp.create_group("clusters")
-        for key, vals in self._clusters.items():
+        for key, vals in self.clusters.items():
             # unable to store array with inhomogeneous row lengths
             # we will pad them with -1, we will ignore these values
             # when the trajectory get loaded up see self.load
@@ -539,7 +547,7 @@ class ChemicalSystem:
         }
 
         for cluster in grp["clusters"]:
-            self._clusters[str(cluster)] = [
+            self.clusters[str(cluster)] = [
                 [int(x) for x in line if int(x) >= 0]
                 for line in grp[f"clusters/{cluster}"]
             ]

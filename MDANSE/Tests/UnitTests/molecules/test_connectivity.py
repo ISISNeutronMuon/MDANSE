@@ -41,6 +41,6 @@ def test_identify_molecules(trajectory, connectivity):
 
     molstrings = []
     assert all(len(mollist) == 20
-               for mollist in chemical_system._clusters.values())
+               for mollist in chemical_system.clusters.values())
     assert all(ms == molstrings[0] for ms in molstrings[1:])
     assert len(chemical_system.unique_molecules()) == 1

@@ -321,7 +321,7 @@ def identify_loose_atoms(
     if grouping_level == "molecule":
         for mol_name in trajectory.chemical_system.unique_molecules():
             atoms_in_molecule.setdefault(mol_name, set())
-            for mol_instance in trajectory.chemical_system._clusters[mol_name]:
+            for mol_instance in trajectory.chemical_system.clusters[mol_name]:
                 all_indices -= set(mol_instance)
                 atoms_in_molecule[mol_name].update(atom_types[mol_instance])
     loose_atoms = list(
@@ -485,7 +485,7 @@ class SolventAccessibleSurface(IJob):
         self.type_mapping, self.grouping_keys = create_type_mapping(
             atom_types,
             self.configuration["grouping_level"]["value"],
-            molecule_names=set(self.trajectory.chemical_system._clusters),
+            molecule_names=set(self.trajectory.chemical_system.clusters),
             atoms_in_molecule=atoms_in_molecule,
         )
 
@@ -514,8 +514,10 @@ class SolventAccessibleSurface(IJob):
             atom_types,
             self.type_mapping,
             self.configuration["grouping_level"]["value"],
-            self.trajectory.chemical_system._clusters,
+            self.trajectory.chemical_system.clusters,
         )
+
+        self.bonds = self.trajectory.chemical_system._bonds
 
     def run_step(self, index):
         """
@@ -532,7 +534,7 @@ class SolventAccessibleSurface(IJob):
         conf = self.trajectory.configuration(frameIndex)
 
         # The configuration is made continuous.
-        conf = conf.continuous_configuration()
+        conf = conf.continuous_configuration(self.bonds)
         unit_cell = conf._unit_cell
 
         if conf.is_periodic:

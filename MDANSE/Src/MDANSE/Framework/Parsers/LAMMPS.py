@@ -32,8 +32,8 @@ from MDANSE.Framework.Units import measure
 from MDANSE.IO.IOUtils import UCEnum
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicBoxConfiguration,
-    PeriodicRealConfiguration,
+    PeriodicAbsoluteConfiguration,
+    PeriodicFractionalConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -610,20 +610,16 @@ class LAMMPScustom(LAMMPSReader):
 
             coords -= origin_recip
 
-            conf = PeriodicBoxConfiguration(
-                self._trajectory.chemical_system, coords, unit_cell
-            )
+            conf = PeriodicFractionalConfiguration(coords, unit_cell)
 
-            real_conf = conf.to_real_configuration()
+            real_conf = conf.to_absolute_configuration()
 
         else:
             # MDANSE origin is always 0,0,0
             coords -= self._first_origin
             coords *= len_conv
 
-            real_conf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, coords, unit_cell
-            )
+            real_conf = PeriodicAbsoluteConfiguration(coords, unit_cell)
 
         if self._fold:
             # The whole configuration is folded in to the simulation box.
@@ -811,15 +807,11 @@ class LAMMPSxyz(LAMMPSReader):
         time = timestep * self._timestep * measure(1.0, self.units["time"]).toval("ps")
 
         if self._fractionalCoordinates:
-            conf = PeriodicBoxConfiguration(
-                self._trajectory.chemical_system, positions, unit_cell
-            )
-            real_conf = conf.to_real_configuration()
+            conf = PeriodicFractionalConfiguration(positions, unit_cell)
+            real_conf = conf.to_absolute_configuration()
         else:
             positions *= measure(1.0, self.units["length"]).toval("nm")
-            real_conf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, positions, unit_cell
-            )
+            real_conf = PeriodicAbsoluteConfiguration(positions, unit_cell)
 
         if self._fold:
             # The whole configuration is folded in to the simulation box.

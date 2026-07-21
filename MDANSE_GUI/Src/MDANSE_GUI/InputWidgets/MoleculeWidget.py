@@ -53,8 +53,8 @@ class MoleculeWidget(WidgetBase):
         self.atom_database = trajectory
         self.mol_dict = {}
         for mol_name in unique_molecules:
-            no_of_molecules = len(trajectory.chemical_system._clusters[mol_name])
-            atom_indices = trajectory.chemical_system._clusters[mol_name][0]
+            no_of_molecules = len(trajectory.chemical_system.clusters[mol_name])
+            atom_indices = trajectory.chemical_system.clusters[mol_name][0]
             atom_symbols = [
                 trajectory.chemical_system.atom_list[index] for index in atom_indices
             ]

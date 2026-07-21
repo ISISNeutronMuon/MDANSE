@@ -33,7 +33,7 @@ def select_molecules(
     trajectory : Trajectory
         A trajectory instance to which the selection is applied
     molecule_names : Sequence[str]
-        a list of molecule names (str) which are keys of ChemicalSystem._clusters
+        a list of molecule names (str) which are keys of ChemicalSystem.clusters
 
     Returns
     -------
@@ -45,7 +45,7 @@ def select_molecules(
     selection = {
         index
         for molecule in molecule_names
-        for cluster in system._clusters.get(molecule, ())
+        for cluster in system.clusters.get(molecule, ())
         for index in cluster
     }
     return selection

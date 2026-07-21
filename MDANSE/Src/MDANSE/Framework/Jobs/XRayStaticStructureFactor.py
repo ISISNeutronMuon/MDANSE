@@ -18,7 +18,6 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import always_iterable
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -28,6 +27,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 from MDANSE.Framework.Jobs.DistanceHistogram import DistanceHistogram
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.util_types import FloatArray
 
 
 def atomic_scattering_factor(element, qvalues, trajectory):
@@ -207,7 +207,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
 
         def calc_func(
             label_i: str, label_j: str
-        ) -> Iterator[tuple[str, bool, npt.NDArray]]:
+        ) -> Iterator[tuple[str, bool, FloatArray]]:
             """Calculates the xray static structure factor for a given
             pair of element labels.
 
@@ -224,7 +224,7 @@ class XRayStaticStructureFactor(DistanceHistogram):
                 The results name.
             inter : bool
                 Whether results are for intermolecular atom pairs.
-            results : npt.NDArray
+            results : FloatArray
                 The results.
             """
             ni = nAtomsPerElement[label_i]

@@ -15,14 +15,14 @@
 #
 from __future__ import annotations
 
-from collections import ChainMap, defaultdict
-from collections.abc import Iterable, Mapping
+from collections import ChainMap
+from collections.abc import Mapping
 from functools import cached_property
 from pathlib import Path
 
 import h5py
 import numpy as np
-from more_itertools import first
+from more_itertools import first, flatten
 
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -31,8 +31,8 @@ from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
     BAD_CELL,
@@ -65,7 +65,11 @@ class MdanseTrajectory(TrajectoryFile):
         self,
         h5_filename: Path | str,
         hdf5_driver: str | None = None,
+        *,
         rdcc_nbytes: int | None = None,
+        rdcc_nslots: int | None = None,
+        rdcc_w0: float | None = None,
+        fast_load: bool = False,
     ):
         """Open the file and build a trajectory.
 
@@ -89,8 +93,10 @@ class MdanseTrajectory(TrajectoryFile):
         self._h5_file = h5py.File(
             self._h5_filename,
             "r",
-            driver=self._h5_driver,
-            rdcc_nbytes=self._h5_cache_size,
+            driver=hdf5_driver,
+            rdcc_nbytes=rdcc_nbytes,
+            rdcc_nslots=rdcc_nslots,
+            rdcc_w0=rdcc_w0,
         )
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
@@ -99,12 +105,19 @@ class MdanseTrajectory(TrajectoryFile):
         self._load_unit_cells()
 
         # Load the chemical system
-        self._chemical_system = ChemicalSystem(self._h5_filename.stem, self)
+        self._chemical_system = ChemicalSystem(
+            self._h5_filename.stem, self, fast_load=fast_load
+        )
+        if fast_load:
+            return
         self._chemical_system.load(self._h5_file)
 
         if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
             configuration = self.configuration(0)
-            contiguous_configuration = configuration.contiguous_configuration()
+            grouped_indices = list(flatten(self._chemical_system.clusters.values()))
+            contiguous_configuration = configuration.contiguous_configuration(
+                grouped_indices
+            )
             coords = contiguous_configuration.coordinates
             self._chemical_system.set_bond_orders(coords)
 
@@ -237,21 +250,6 @@ class MdanseTrajectory(TrajectoryFile):
         n_req = len(range(*indices.indices(self.chemical_system.number_of_atoms)))
         return np.zeros(n_req, dtype=np.float64)
 
-    def chunk_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
-        data_key = self.KEYS[dataset_type.name.lower()]
-        try:
-            dataset = self._h5_file[data_key]
-        except KeyError:
-            LOG.error("Dataset %s was not in the trajectory file", data_key)
-            return -1
-        if (chunk_shape := getattr(dataset, "chunks", None)) is None:
-            LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
-            return -1
-        if len(chunk_shape) < 2:
-            LOG.warning("Dataset %s does not have enough dimensions", data_key)
-            return -1
-        return chunk_shape[1]
-
     def coordinates(
         self, frame: slice | int, indices: slice | int = np.s_[:]
     ) -> FloatArray:
@@ -284,7 +282,7 @@ class MdanseTrajectory(TrajectoryFile):
     def configuration(
         self,
         frame: int = 0,
-    ) -> RealConfiguration | PeriodicRealConfiguration:
+    ) -> AbsoluteConfiguration | PeriodicAbsoluteConfiguration:
         """Return the atom configuration for a specific frame.
 
         Parameters
@@ -294,7 +292,7 @@ class MdanseTrajectory(TrajectoryFile):
 
         Returns
         -------
-        Union[RealConfiguration, PeriodicRealConfiguration]
+        Union[AbsoluteConfiguration, PeriodicAbsoluteConfiguration]
             Atom configuration, with unit cell (if defined)
 
         """
@@ -311,10 +309,9 @@ class MdanseTrajectory(TrajectoryFile):
         coordinates = variables.pop("coordinates")
 
         if unit_cell is None:
-            conf = RealConfiguration(self._chemical_system, coordinates, **variables)
+            conf = AbsoluteConfiguration(coordinates, **variables)
         else:
-            conf = PeriodicRealConfiguration(
-                self._chemical_system,
+            conf = PeriodicAbsoluteConfiguration(
                 coordinates,
                 unit_cell,
                 **variables,

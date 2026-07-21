@@ -21,6 +21,7 @@ from scipy.signal import correlate
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Geometry import center_of_mass
 from MDANSE.Mathematics.Signal import differentiate, get_spectrum
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_cluster_indices
 from MDANSE.util_types import FloatArray
 
 
@@ -90,7 +91,7 @@ class Infrared(IJob):
             "instance"
         ].chemical_system
 
-        self.molecules = self.chemical_system._clusters[
+        self.molecules = self.chemical_system.clusters[
             self.configuration["molecule_name"]["value"]
         ]
 
@@ -101,6 +102,7 @@ class Infrared(IJob):
             self.configuration["instrument_resolution"]["kernel"].lower() != "ideal"
         )
 
+        self.grouped_indices = group_cluster_indices(self.trajectory.chemical_system)
         self._outputData.add(
             "ir/axes/time",
             "LineOutputVariable",
@@ -189,7 +191,9 @@ class Infrared(IJob):
                 for index in molecule
             ]
             charges = self.trajectory.charges(frame_index)
-            contiguous_configuration = configuration.contiguous_configuration()
+            contiguous_configuration = configuration.contiguous_configuration(
+                self.grouped_indices
+            )
             coords = contiguous_configuration.coordinates[molecule]
             com = center_of_mass(coords, masses)
 

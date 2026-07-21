@@ -271,7 +271,7 @@ class SelectionBuilder:
         operation_type: OperationType
             What set operation to perform.
         molecule_names : Sequence[str]
-            a list of molecule names (str) which are keys of ChemicalSystem._clusters
+            a list of molecule names (str) which are keys of ChemicalSystem.clusters
         """
         operation_type = OperationType(operation_type).name.lower()
         self.ops.append(

@@ -22,7 +22,7 @@ import numpy as np
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import DCDFile, PDBFile
-from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
 PI_2 = 0.5 * np.pi
@@ -104,6 +104,7 @@ class DCD(Converter):
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
+            meta_block_size=self.configuration["output_files"]["meta_block_size"],
         )
 
     def run_step(self, index):
@@ -119,9 +120,7 @@ class DCD(Converter):
         # The x, y and z values of the current frame.
         unit_cell, config = next(self.frames)
 
-        conf = PeriodicRealConfiguration(
-            self._trajectory._chemical_system, config, unit_cell
-        )
+        conf = PeriodicAbsoluteConfiguration(config, unit_cell)
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()
