@@ -48,7 +48,7 @@ dev = [
   {include-group = "lint"},
   {include-group = "external"},
 ]
-external=["MDAnalysis", "ase", "mdtraj"]
+external=["MDAnalysis", "ase", "mdtraj", "finufft"]
 test=["pytest", "pytest-timeout"]
 lint=["ruff<0.14"]
 
@@ -57,7 +57,8 @@ cli=["tqdm"]
 ase=["ase"]
 mdanalysis=["MDAnalysis"]
 mdtraj=["mdtraj"]
-all=["MDANSE[ase,mdanalysis,mdtraj]"]
+finufft=["finufft"]
+all=["MDANSE[ase,mdanalysis,mdtraj,finufft]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"

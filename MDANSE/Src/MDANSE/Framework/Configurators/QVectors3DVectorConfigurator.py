@@ -15,21 +15,23 @@
 #
 from __future__ import annotations
 
-import numpy as np
-
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Mathematics.LinearAlgebra import Vector
+
+from .VectorConfigurator import VectorConfigurator
 
 
-@IConfigurator.register("VectorConfigurator")
-class VectorConfigurator(IConfigurator):
-    """Inputs a vector given as 3 floating point numbers."""
+@IConfigurator.register("QVectors3DVectorConfigurator")
+class QVectors3DVectorConfigurator(VectorConfigurator):
+    """Inputs a vector given as 3 floating point numbers or a string to
+    specify that this vector will be a cross production of two others."""
 
     _default = [1.0, 0.0, 0.0]
 
     def __init__(
         self,
         name: str,
+        other_vec_1: str,
+        other_vec_2: str,
         valueType: type = int,
         normalize: bool = False,
         notNull: bool = False,
@@ -45,6 +47,12 @@ class VectorConfigurator(IConfigurator):
         ----------
         name : str
             The name of the configurator as it will appear in the configuration.
+        other_vec_1 : str
+            The name of one of the other vector that this vector could
+            be a cross product of.
+        other_vec_2 : str
+            The name of one of the other vector that this vector could
+            be a cross product of.
         valueType : type
             The numeric type for the vector, `int` or `float`.
         normalize : bool
@@ -58,23 +66,15 @@ class VectorConfigurator(IConfigurator):
         maxi : int or float or None
             The maximum value of the vectors values.
         """
+        super().__init__(
+            name, valueType, normalize, notNull, dimension, mini, maxi, **kwargs
+        )
 
-        # The base class constructor.
-        IConfigurator.__init__(self, name, **kwargs)
+        self.other_vec_1 = other_vec_1
+        self.other_vec_2 = other_vec_2
+        self.other_vecs = {other_vec_1, other_vec_2}
 
-        self.valueType = valueType
-
-        self.normalize = normalize
-
-        self.notNull = notNull
-
-        self.dimension = dimension
-
-        self.mini = mini
-
-        self.maxi = maxi
-
-    def configure(self, value: list | tuple):  # noqa: PLR0911
+    def configure(self, value: list | tuple | str):  # noqa: PLR0911
         """
         Configure a vector.
 
@@ -83,44 +83,47 @@ class VectorConfigurator(IConfigurator):
         value : list or tuple
             The vector components.
         """
+        if isinstance(value, list | tuple):
+            self["cross_product"] = False
+            super().configure(value)
+            return
+
+        if not isinstance(value, str):
+            self.error_status = "Invalid input type should be list, tuple, or str."
+            return
+
         if not self.update_needed(value):
             return
 
         self._original_input = value
 
-        if not isinstance(value, list | tuple):
-            self.error_status = "Invalid input type should be list or tuple."
-            return
+        cross_str = value.split(" ")
 
-        if self.valueType is int and any(i % 1 != 0 for i in value):
-            self.error_status = "Input values are not integer valued."
-            return
-
-        if len(value) != self.dimension:
-            self.error_status = f"This vector should have {self.dimension} components."
-            return
-
-        if self.mini is not None and any(i < self.mini for i in value):
+        if len(cross_str) != 3:
             self.error_status = (
-                f"Value in vector smaller than the minimum value of {self.mini}."
+                "Q vector basis option not valid should be something like 'q1 x q2'."
             )
             return
 
-        if self.maxi is not None and any(i > self.maxi for i in value):
+        q1, x, q2 = cross_str
+        if q1 not in self.other_vecs or q2 not in self.other_vecs:
             self.error_status = (
-                f"Value in vector larger than the maximum value of {self.maxi}."
+                f"Q vectors should be either {self.other_vec_1} or {self.other_vec_2}"
             )
             return
 
-        vector = Vector(np.array(value, dtype=self.valueType))
-
-        if self.normalize:
-            vector = vector.normal()
-
-        if self.notNull and vector.length() == 0.0:
-            self.error_status = "The vector is null."
+        if q1 == q2:
+            self.error_status = (
+                "Q vector basis should not be a cross product of the same basis vector."
+            )
             return
 
-        self["vector"] = vector
-        self["value"] = vector
+        if x not in {"x", "X"}:
+            self.error_status = f"Unrecognised operation: {x}"
+            return
+
+        self["vector"] = None
+        self["cross_product"] = True
+        self["value"] = value
+
         self.error_status = "OK"

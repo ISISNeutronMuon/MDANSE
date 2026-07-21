@@ -33,32 +33,34 @@ class RangeConfigurator(IConfigurator):
 
     def __init__(
         self,
-        name,
-        valueType=int,
-        includeLast=False,
-        sort=False,
-        toList=False,
-        mini=None,
-        maxi=None,
+        name: str,
+        valueType: type = int,
+        includeLast: bool = False,
+        sort: bool = False,
+        toList: bool = False,
+        mini: int | float | None = None,
+        maxi: int | float | None = None,
         **kwargs,
     ):
         """
         Initializes the configurator.
 
-        :param name: the name of the configurator as it will appear in the configuration.
-        :type name: str
-        :param valueType: the numeric type for the range.
-        :type valueType: int or float
-        :param includeLast: if True the last value of the interval will be included (closed interval) otherwise excluded (opened interval).
-        :type includeLast: bool
-        :param sort: if True, the values generated will be sorted in increasing order.
-        :type bool: if True, the values generated will be converted from a NumPy array to a python list.
-        :param toList:
-        :type toList: bool
-        :param mini: if not None, all values generated below mini will be discarded.
-        :type mini: int, float or None
-        :param maxi: if not None, all values generated over maxi will be discarded.
-        :type maxi: int, float or None
+        Parameters
+        ----------
+        name : str
+            The name of the configurator as it will appear in the configuration.
+        valueType : type
+            The numeric type for the range, `int` or `float`.
+        includeLast : bool
+            If True the last value of the interval will be included (closed interval) otherwise excluded (opened interval).
+        sort : bool
+            If True, the values generated will be sorted in increasing order.
+        toList : bool
+            If True, the values generated will be converted from a NumPy array to a python list.
+        mini : int or float or None
+            If not None, all values generated below mini will be discarded.
+        maxi : int or float or None
+            If not None, all values generated over maxi will be discarded.
         """
 
         IConfigurator.__init__(self, name, **kwargs)
@@ -85,6 +87,14 @@ class RangeConfigurator(IConfigurator):
 
         self._original_input = value
 
+        if not isinstance(value, list | tuple):
+            self.error_status = "Invalid input type."
+            return
+
+        if len(value) != 3:
+            self.error_status = "The range configurator input should have three values."
+            return
+
         first, last, step = value
 
         if step == 0:
@@ -109,10 +119,6 @@ class RangeConfigurator(IConfigurator):
 
         if self.maxi is not None:
             value = value[value < self.maxi]
-
-        if value.size == 0:
-            self.error_status = "The input range is empty."
-            return
 
         if self.sort:
             value = np.sort(value)
