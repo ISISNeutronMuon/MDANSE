@@ -105,7 +105,7 @@ for qvecs in generators:
     qvector_page.append(result)
 
 
-with open("pages/vector_generators.rst", "w") as target:
+with open("technical_references/vector_generators.rst", "w") as target:
     target.write("""\
 .. _vector-generator-list:
 
@@ -114,14 +114,14 @@ List of q-vector generators
 """)
     target.write("\n".join(qvector_page) + "\n")
 
-with open("pages/converters.rst", "w") as target:
+with open("technical_references/converters.rst", "w") as target:
     target.write(".. _converter-list:\n\n")
     target.write("List of trajectory converters\n")
     target.write("=============================\n\n")
     for entry in converter_page:
         target.write(entry + "\n")
 
-with open("pages/analysis_jobs.rst", 'w') as target:
+with open("technical_references/analysis_jobs.rst", 'w') as target:
     target.write(".. _analysis-list:\n")
     target.write("\n")
     target.write("List of analysis types\n")
@@ -129,7 +129,7 @@ with open("pages/analysis_jobs.rst", 'w') as target:
     for entry in job_page:
         target.write(entry + "\n")
 
-with open("pages/parameters.rst", 'w') as target:
+with open("technical_references/parameters.rst", 'w') as target:
     target.write('\n')
     target.write('Converter Inputs\n')
     target.write('~~~~~~~~~~~~~~~~\n')

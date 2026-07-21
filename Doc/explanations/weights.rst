@@ -51,7 +51,7 @@ The factor of two for the off-diagonal terms is included in the weight factor.
 
 .. _water-dos-weighted:
 
-.. figure:: ./Pictures/water_dos_weighted.png
+.. figure:: ./figures/water_dos_weighted.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -84,7 +84,7 @@ and :math:`F_{\text{inc},\alpha}(\mathbf{q},t)`) partial properties.
 
 .. _water-pdf-unweighted:
 
-.. figure:: ./Pictures/water_pdf_unweighted.png
+.. figure:: ./figures/water_pdf_unweighted.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm

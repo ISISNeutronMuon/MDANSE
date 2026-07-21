@@ -45,13 +45,13 @@ tarball is generated, which contains multiple files, including:
 - **DAT Files**: Each file is named after the variable it contains and
   includes the following information:
   
-    - Variable name
-    - Type of plot (representing plot dimensions)
-    - Variable's placement on the *x*-axis (if plotted on the *y*-axis in the
-      2D/3D Plotter)
-    - Units of data
-    - Length of the trajectory (indicated as ``slice:[length]``)
-    - A list of numbers representing the variable data
+  - Variable name
+  - Type of plot (representing plot dimensions)
+  - Variable's placement on the *x*-axis (if plotted on the *y*-axis in the
+    2D/3D Plotter)
+  - Units of data
+  - Length of the trajectory (indicated as ``slice:[length]``)
+  - A list of numbers representing the variable data
 
 The DAT format simplifies data sharing and analysis, providing a clear and
 human-readable representation of analysis results.

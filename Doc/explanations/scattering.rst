@@ -8,8 +8,8 @@ This section is dealing with specific types of analysis performed by
 MDANSE. If you are not sure where these fit into the general workflow
 of data analysis, please read :ref:`workflow-of-analysis`.
 
-Analysis: Scattering
-====================
+Scattering
+==========
 
 This section contains background theory for following plugins:
 
@@ -522,7 +522,7 @@ In this analysis the total incoherent, total coherent and total
    F(q,t) = F_{\mathrm{inc}}(\mathbf{q},t) + F_{\mathrm{coh}}(\mathbf{q},t).
 
 These expressions correspond to the formalism and equations given in
-[Ref47]_ - Chapter 1: “An introduction to neutron scattering” .
+[Ref50]_ - Chapter 1: “An introduction to neutron scattering” .
 
 .. _scattering-length-density-profile:
 

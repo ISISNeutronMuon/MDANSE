@@ -98,7 +98,7 @@ napoleon_use_ivar = True
 napoleon_use_param = False
 napoleon_use_admonition_for_notes = True
 
-html_logo = '_static/mdanse_logo.png'
+html_logo = '_static/frontpage_logo_mdanse.svg'
 
 inheritance_graph_attrs = {"size": '""'}
 inheritance_graph_attrs = {"rankdir": "TB", "size": '""'}
@@ -118,13 +118,26 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ---------------------------------------------------
 
-html_sidebars = {'**': ['localtoc.html','sourcelink.html', 'searchbox.html']}
-
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'
-# html_theme = "nature"
-html_theme_options = {'sidebarwidth':250}#, 'nosidebar':True}
+html_theme = 'pydata_sphinx_theme'
+html_theme_options = {
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/ISISNeutronMuon/MDANSE",
+            "icon": "fa-brands fa-github",
+        },
+        {
+            "name": "PyPI",
+            "url": "https://pypi.org/project/MDANSE/",
+            "icon": "fa-brands fa-python",
+        },
+    ],
+    "header_links_before_dropdown": 3,
+    "navbar_center": ["version-switcher", "navbar-nav"],
+    "search_as_you_type": True,
+}
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'MDANSE_doc'

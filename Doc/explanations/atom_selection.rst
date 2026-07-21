@@ -24,7 +24,7 @@ amino acids which are now selected (:numref:`atom-selection-viewer`)
 
 .. _atom-selection-simple:
 
-.. figure:: ./Pictures/atom_selection_simple.png
+.. figure:: ./figures/atom_selection_simple.png
    :align: center
 
    The selection originally contains all atoms (line 1), but is then limited
@@ -32,7 +32,7 @@ amino acids which are now selected (:numref:`atom-selection-viewer`)
 
 .. _atom-selection-viewer:
 
-.. figure:: ./Pictures/atom_selection_viewer.png
+.. figure:: ./figures/atom_selection_viewer.png
    :align: center
 
    The 3D View of the selection from :numref:`atom-selection-simple`.
@@ -47,7 +47,7 @@ belong to alanine or arginine amino acids.
 
 .. _atom-selection-deeper:
 
-.. figure:: ./Pictures/atom_selection_deeper.png
+.. figure:: ./figures/atom_selection_deeper.png
    :align: center
 
    The selection originally contains all atoms (line 1). It is then limited
