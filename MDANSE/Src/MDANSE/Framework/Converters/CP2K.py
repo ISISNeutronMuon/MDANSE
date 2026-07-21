@@ -26,7 +26,7 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
 from MDANSE.Framework.Units import measure
-from MDANSE.MolecularDynamics.Configuration import PeriodicRealConfiguration
+from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -154,6 +154,7 @@ class CP2K(Converter):
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
+            meta_block_size=self.configuration["output_files"]["meta_block_size"],
         )
 
         data_to_be_written = ["configuration", "time"]
@@ -176,8 +177,7 @@ class CP2K(Converter):
         }
         data["cell"] = UnitCell(data["cell"])
 
-        real_conf = PeriodicRealConfiguration(
-            self._trajectory.chemical_system,
+        real_conf = PeriodicAbsoluteConfiguration(
             data.pop("coordinates"),
             data.pop("cell"),
             **data,

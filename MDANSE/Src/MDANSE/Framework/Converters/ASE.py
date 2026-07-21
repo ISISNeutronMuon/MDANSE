@@ -29,8 +29,8 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -157,6 +157,7 @@ class ASE(Converter):
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
+            meta_block_size=self.configuration["output_files"]["meta_block_size"],
             initial_charges=self._initial_charges,
         )
 
@@ -224,15 +225,11 @@ class ASE(Converter):
 
         try:
             if self._isPeriodic:
-                real_conf = PeriodicRealConfiguration(
-                    self._trajectory.chemical_system, coords, unitCell, **variables
-                )
+                real_conf = PeriodicAbsoluteConfiguration(coords, unitCell, **variables)
                 if self._configuration["fold"]["value"]:
                     real_conf.fold_coordinates()
             else:
-                real_conf = RealConfiguration(
-                    self._trajectory.chemical_system, coords, **variables
-                )
+                real_conf = AbsoluteConfiguration(coords, **variables)
 
         except ValueError:
             self._keep_running = False

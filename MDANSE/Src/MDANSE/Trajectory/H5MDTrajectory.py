@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import h5py
+import more_itertools
 import numpy as np
 
 from MDANSE.Chemistry import ATOMS_DATABASE
@@ -28,8 +29,8 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
     _Configuration,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
@@ -134,7 +135,11 @@ class H5MDTrajectory(TrajectoryFile):
         self,
         h5_filename: Path | str,
         hdf5_driver: str | None = None,
+        *,
         rdcc_nbytes: int | None = None,
+        rdcc_nslots: int | None = None,
+        rdcc_w0: float | None = None,
+        fast_load: bool = False,
     ):
         """Constructor.
 
@@ -152,8 +157,10 @@ class H5MDTrajectory(TrajectoryFile):
         self._h5_file = h5py.File(
             self._h5_filename,
             "r",
-            driver=self._h5_driver,
-            rdcc_nbytes=self._h5_cache_size,
+            driver=hdf5_driver,
+            rdcc_nbytes=rdcc_nbytes,
+            rdcc_nslots=rdcc_nslots,
+            rdcc_w0=rdcc_w0,
         )
 
         particle_types = self._h5_file["/particles/all/species"]
@@ -177,7 +184,16 @@ class H5MDTrajectory(TrajectoryFile):
             chemical_elements = [
                 reverse_lookup[type_number] for type_number in particle_types
             ]
-        self._chemical_system = ChemicalSystem(self._h5_filename.stem)
+        self._chemical_system = ChemicalSystem(
+            self._h5_filename.stem, fast_load=fast_load
+        )
+
+        self._variables_to_skip = set()
+        self._load_units()
+        self._load_unit_cells()
+
+        if fast_load:
+            return
 
         try:
             self._chemical_system.initialise_atoms(chemical_elements)
@@ -187,13 +203,14 @@ class H5MDTrajectory(TrajectoryFile):
             )
             return
 
-        self._variables_to_skip = set()
-        self._load_units()
-        self._load_unit_cells()
-
         if self._chemical_system.rdkit_mol.GetNumBonds() > 0:
             configuration = self.configuration(0)
-            contiguous_configuration = configuration.contiguous_configuration()
+            grouped_indices = list(
+                more_itertools.flatten(self._chemical_system.clusters.values())
+            )
+            contiguous_configuration = configuration.contiguous_configuration(
+                grouped_indices
+            )
             coords = contiguous_configuration.coordinates
             self._chemical_system.set_bond_orders(coords)
 
@@ -325,21 +342,6 @@ class H5MDTrajectory(TrajectoryFile):
 
         return charge.astype(np.float64)
 
-    def chunk_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
-        data_key = self.KEYS[dataset_type.name.lower()]
-        try:
-            dataset = self._h5_file[data_key]
-        except KeyError:
-            LOG.error("Dataset %s was not in the trajectory file", data_key)
-            return -1
-        if (chunk_shape := getattr(dataset, "chunks", None)) is None:
-            LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
-            return -1
-        if len(chunk_shape) < 2:
-            LOG.warning("Dataset %s does not have enough dimensions", data_key)
-            return -1
-        return chunk_shape[1]
-
     def coordinates(
         self,
         frame: slice | int,
@@ -395,11 +397,9 @@ class H5MDTrajectory(TrajectoryFile):
         coordinates = self.coordinates(frame)
 
         if unit_cell is None:
-            conf = RealConfiguration(self._chemical_system, coordinates, **variables)
+            conf = AbsoluteConfiguration(coordinates, **variables)
         else:
-            conf = PeriodicRealConfiguration(
-                self._chemical_system, coordinates, unit_cell, **variables
-            )
+            conf = PeriodicAbsoluteConfiguration(coordinates, unit_cell, **variables)
 
         return conf
 

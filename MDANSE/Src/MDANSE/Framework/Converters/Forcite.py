@@ -24,8 +24,8 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import TrjFile, XTDFile
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicBoxConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicFractionalConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
@@ -110,14 +110,12 @@ class Forcite(Converter):
         self._chemical_system.find_clusters_from_bonds()
 
         if self.xtd_file.pbc:
-            boxConf = PeriodicBoxConfiguration(
-                self._chemical_system, coordinates, self.xtd_file.cell
-            )
-            real_conf = boxConf.to_real_configuration()
+            boxConf = PeriodicFractionalConfiguration(coordinates, self.xtd_file.cell)
+            real_conf = boxConf.to_absolute_configuration()
         else:
             coordinates *= measure(1.0, "ang").toval("nm")
-            real_conf = RealConfiguration(
-                self._chemical_system, coordinates, unit_cell=self.xtd_file._cell
+            real_conf = AbsoluteConfiguration(
+                coordinates, unit_cell=self.xtd_file._cell
             )
 
         real_conf.fold_coordinates()
@@ -150,6 +148,7 @@ class Forcite(Converter):
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
+            meta_block_size=self.configuration["output_files"]["meta_block_size"],
             initial_charges=charges,
         )
 

@@ -87,7 +87,7 @@ class MolecularTrace(IJob):
         for i in range(self.numberOfSteps):
             frameIndex = self.configuration["frames"]["value"][i]
             conf = self.trajectory.configuration(frameIndex)
-            conf = conf.continuous_configuration()
+            conf = conf.continuous_configuration(self.trajectory.chemical_system._bonds)
             coords = conf["coordinates"]
 
             minx_loc = coords[:, 0].min()
@@ -141,6 +141,7 @@ class MolecularTrace(IJob):
         )
 
         self._indices = self.trajectory.atom_indices
+        self.bonds = self.trajectory.chemical_system._bonds
 
     def run_step(self, index):
         """
@@ -154,7 +155,7 @@ class MolecularTrace(IJob):
         frameIndex = self.configuration["frames"]["value"][index]
 
         conf = self.trajectory.configuration(frameIndex)
-        conf = conf.continuous_configuration()
+        conf = conf.continuous_configuration(self.bonds)
 
         grid = np.zeros(self.gdim, dtype=np.int32)
 

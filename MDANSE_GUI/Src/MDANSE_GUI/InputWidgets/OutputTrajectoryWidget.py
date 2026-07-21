@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import NamedTuple
 
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
@@ -35,6 +36,36 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
+
+
+class SpinBoxDefaults(NamedTuple):
+    minimum: int = 1
+    maximum: int = 0xFFFFFF
+    step: int = 1
+    start_value: int = 1
+    tooltip: str = "Input spin box"
+
+
+SPIN_BOX_SETTINGS = {
+    "frames": SpinBoxDefaults(
+        tooltip="Specifies the number of frames in a single chunk of the HDF5 file. "
+        "Affects the performance of reading and writing the trajectory."
+    ),
+    "atoms": SpinBoxDefaults(
+        step=32,
+        start_value=128,
+        tooltip="Specifies the number of atoms in a single chunk of the HDF5 file. "
+        "Affects the performance of reading and writing the trajectory.",
+    ),
+    "meta_block": SpinBoxDefaults(
+        minimum=0,
+        maximum=0x80000,
+        step=2048,
+        start_value=4096,
+        tooltip="Size of a single metadata block in the HDF5 file. "
+        "Larger values (e.g. 32768) may work better on cloud-based virtual machines (Ada, VISA, etc.).",
+    ),
+}
 
 
 class OutputTrajectoryWidget(WidgetBase):
@@ -66,15 +97,20 @@ class OutputTrajectoryWidget(WidgetBase):
         self.dtype_box = QComboBox(self._base)
         self.dtype_box.addItems(["float16", "float32", "float64"])
         self.dtype_box.setCurrentText("float64")
-        self.chunk_box = QSpinBox(self._base)
-        self.chunk_box.setMinimum(1)
-        self.chunk_box.setMaximum(0xFFFF)
-        self.chunk_box.setValue(128)
-        self.chunk_box.setSingleStep(32)
-        self.chunk_box.setToolTip(
-            "Specifies the size of a single chunk in the HDF5 file."
-            "Affects the performance of reading and writing the trajectory."
-        )
+        self.chunk_atom_box = QSpinBox(self._base)
+        self.chunk_frame_box = QSpinBox(self._base)
+        self.meta_block_box = QSpinBox(self._base)
+        for typ, chunk_box in zip(
+            ("atoms", "frames", "meta_block"),
+            (self.chunk_atom_box, self.chunk_frame_box, self.meta_block_box),
+            strict=True,
+        ):
+            settings = SPIN_BOX_SETTINGS[typ]
+            chunk_box.setMinimum(settings.minimum)
+            chunk_box.setMaximum(settings.maximum)
+            chunk_box.setValue(settings.start_value)
+            chunk_box.setSingleStep(settings.step)
+            chunk_box.setToolTip(settings.tooltip)
         self.compression_box = QComboBox(self._base)
         self.compression_box.addItems(["none", "gzip"])
         self.compression_box.setCurrentText("gzip")
@@ -85,20 +121,27 @@ class OutputTrajectoryWidget(WidgetBase):
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         label2 = QLabel("Atoms per chunk")
         label2.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        label2.setToolTip(
-            "Specifies the size of a single chunk in the HDF5 file."
-            "Affects the performance of reading and writing the trajectory."
-        )
+        label2.setToolTip(SPIN_BOX_SETTINGS["atoms"].tooltip)
+        label3 = QLabel("Frames per chunk")
+        label3.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        label3.setToolTip(SPIN_BOX_SETTINGS["frames"].tooltip)
+        label4 = QLabel("HDF5 meta_block_size")
+        label4.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        label4.setToolTip(SPIN_BOX_SETTINGS["meta_block"].tooltip)
         self.logs_combo = QComboBox(self._base)
         self.logs_combo.addItems(OutputTrajectoryConfigurator.log_options)
         self._layout.addWidget(self._field, 0, 0)
         self._layout.addWidget(self.dtype_box, 0, 1)
         self._layout.addWidget(self.compression_box, 0, 2)
         self._layout.addWidget(browse_button, 0, 3)
-        self._layout.addWidget(label, 1, 0)
-        self._layout.addWidget(self.logs_combo, 1, 1)
-        self._layout.addWidget(label2, 1, 2)
-        self._layout.addWidget(self.chunk_box, 1, 3)
+        self._layout.addWidget(label2, 1, 0)
+        self._layout.addWidget(self.chunk_atom_box, 1, 1)
+        self._layout.addWidget(label3, 1, 2)
+        self._layout.addWidget(self.chunk_frame_box, 1, 3)
+        self._layout.addWidget(label4, 2, 0)
+        self._layout.addWidget(self.meta_block_box, 2, 1)
+        self._layout.addWidget(label, 2, 2)
+        self._layout.addWidget(self.logs_combo, 2, 3)
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
         self.default_labels()
@@ -152,7 +195,8 @@ class OutputTrajectoryWidget(WidgetBase):
         if len(filename) < 1:
             filename = self._default_value[0]
         dtype = dtype_lookup[self.dtype_box.currentText()]
-        chunk_size = self.chunk_box.value()
+        chunk_size = (self.chunk_frame_box.value(), self.chunk_atom_box.value())
         compression = self.compression_box.currentText()
         logs = self.logs_combo.currentText()
-        return (filename, dtype, chunk_size, compression, logs)
+        meta_block_size = self.meta_block_box.value()
+        return (filename, dtype, chunk_size, compression, logs, meta_block_size)

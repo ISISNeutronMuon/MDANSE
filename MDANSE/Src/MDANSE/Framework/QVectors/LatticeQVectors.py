@@ -25,7 +25,7 @@ from MDANSE.util_types import FloatArray
 
 
 def fpsampling(
-    q_vectors: np.ndarray,
+    q_vectors: FloatArray,
     n_vecs: int,
     random_vector_func: Callable[[], FloatArray],
     rng: np.random.Generator,

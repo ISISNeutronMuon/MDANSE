@@ -20,7 +20,7 @@ import os
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.MolecularDynamics.Configuration import RealConfiguration
+from MDANSE.MolecularDynamics.Configuration import AbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import Trajectory, TrajectoryWriter
 
 N_ATOMS = 4
@@ -43,8 +43,7 @@ def sample_configuration(chemical_system):
     coords[1] = [1.0, 2.0, 1.0]
     coords[2] = [10.0, 1.0, 5.11]
     coords[3] = [10.0, 2.0, 5.09]
-    temp = RealConfiguration(
-        chemical_system,
+    temp = AbsoluteConfiguration(
         coords,
         # unit_cell
     )

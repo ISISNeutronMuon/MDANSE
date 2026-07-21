@@ -22,8 +22,8 @@ from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -163,6 +163,7 @@ class MDTraj(Converter):
             "positions_dtype": self.configuration["output_files"]["dtype"],
             "chunking_limit": self.configuration["output_files"]["chunk_size"],
             "compression": self.configuration["output_files"]["compression"],
+            "meta_block_size": self.configuration["output_files"]["meta_block_size"],
         }
         self._trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
@@ -187,13 +188,11 @@ class MDTraj(Converter):
             A tuple of the job index and None.
         """
         if self.traj.unitcell_vectors is None:
-            conf = RealConfiguration(
-                self._trajectory._chemical_system,
+            conf = AbsoluteConfiguration(
                 self.traj.xyz[index],
             )
         else:
-            conf = PeriodicRealConfiguration(
-                self._trajectory._chemical_system,
+            conf = PeriodicAbsoluteConfiguration(
                 self.traj.xyz[index],
                 UnitCell(
                     self.traj.unitcell_vectors[index],

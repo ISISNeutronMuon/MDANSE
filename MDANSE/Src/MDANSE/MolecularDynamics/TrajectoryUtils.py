@@ -20,17 +20,18 @@ from itertools import pairwise
 from typing import TYPE_CHECKING
 
 import numpy as np
-from more_itertools import chunked_even
+from more_itertools import chunked_even, flatten
+
+from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 mb_ram_per_process = os.environ.get("MDANSE_MAX_RAM_PER_PROCESS", "512")
 CHUNK_SIZE_LIMIT = (
     int(mb_ram_per_process) * 2**20
 )  # 512 MB memory limit per process for now
-
-from MDANSE.util_types import FloatArray
 
 
 class MolecularDynamicsError(Exception):
@@ -288,3 +289,23 @@ def balance_index_groups(
         if len(index_sets) < min_count:
             max_size = max(3 * max_size // 4, 1)
     return index_sets
+
+
+def group_cluster_indices(chemical_system: ChemicalSystem) -> list[list[int]]:
+    """Return a list of index list, one for each molecule in the system.
+
+    This function is meant to show which atoms belong to the same structural unit,
+    independent of what that unit may be. This is typically used by Configuration
+    classes in the contiguous_coordinates function.
+
+    Parameters
+    ----------
+    chemical_system : ChemicalSystem
+        ChemicalSystem instance containing the _clusters attribute.
+
+    Returns
+    -------
+    list[list[int]]
+        A list of atom index lists, one per molecule instance.
+    """
+    return list(flatten(chemical_system.clusters.values()))

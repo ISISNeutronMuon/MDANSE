@@ -184,8 +184,8 @@ class ScatteringLengthDensityProfile(IJob):
 
         conf = self.trajectory.configuration(frame_index)
 
-        box_coords = conf.to_box_coordinates()
-        box_coords = box_coords - np.floor(box_coords)
+        box_coords = conf.to_fractional_coordinates()
+        box_coords -= np.floor(box_coords)
 
         axis_index = self.configuration["axis"]["index"]
         self._extent += np.linalg.norm(conf.unit_cell.direct[axis_index])

@@ -21,8 +21,8 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -181,6 +181,7 @@ class MDAnalysis(Converter):
             "positions_dtype": self.configuration["output_files"]["dtype"],
             "chunking_limit": self.configuration["output_files"]["chunk_size"],
             "compression": self.configuration["output_files"]["compression"],
+            "meta_block_size": self.configuration["output_files"]["meta_block_size"],
         }
         if hasattr(self.u.atoms, "charges"):
             kwargs["initial_charges"] = self.u.atoms.charges
@@ -213,13 +214,11 @@ class MDAnalysis(Converter):
         # see https://userguide.mdanalysis.org/stable/units.html for
         # default units in MDAnalysis
         if self.u.trajectory.ts.triclinic_dimensions is None:
-            conf = RealConfiguration(
-                self._trajectory._chemical_system,
+            conf = AbsoluteConfiguration(
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
             )
         else:
-            conf = PeriodicRealConfiguration(
-                self._trajectory._chemical_system,
+            conf = PeriodicAbsoluteConfiguration(
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
                 UnitCell(
                     self.u.trajectory.ts.triclinic_dimensions

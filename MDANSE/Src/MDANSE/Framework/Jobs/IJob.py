@@ -43,6 +43,7 @@ from MDANSE.Framework.Jobs.JobStatus import JobStates, JobStatus
 from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
 from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import FMT, LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -280,7 +281,16 @@ class IJob(Configurable, RegisterFactory, ABC):
         """
         if (trajectory := self.configuration.get("trajectory")) is None:
             return
-        self.trajectory = trajectory["instance"]
+        if trajectory["reopen_trajectory"]:
+            self.trajectory = Trajectory(
+                trajectory["value"],
+                hdf5_driver=trajectory["driver"],
+                rdcc_nbytes=trajectory["rdcc_nbytes"],
+                rdcc_nslots=trajectory["rdcc_nslots"],
+                rdcc_w0=trajectory["rdcc_w0"],
+            )
+        else:
+            self.trajectory = trajectory["instance"]
         if (selection := self.configuration.get("atom_selection")) is not None:
             self.trajectory.set_selection(selection["flatten_indices"])
             array_length = self.trajectory.chemical_system._total_number_of_atoms

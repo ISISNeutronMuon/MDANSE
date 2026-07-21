@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import more_itertools
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import (
@@ -24,8 +25,8 @@ from MDANSE.Chemistry.ChemicalSystem import (
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Connectivity import Connectivity
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
@@ -150,22 +151,25 @@ class TrajectoryEditor(IJob):
             )
             coords = conf.coordinates[indices]
             if conf.is_periodic:
-                com_conf = PeriodicRealConfiguration(
-                    new_chemical_system,
+                com_conf = PeriodicAbsoluteConfiguration(
                     coords,
                     conf.unit_cell,
                 )
             else:
-                com_conf = RealConfiguration(
-                    new_chemical_system,
+                com_conf = AbsoluteConfiguration(
                     coords,
                 )
-            coords = com_conf.contiguous_configuration().coordinates
+            self.grouped_indices = list(
+                more_itertools.flatten(new_chemical_system.clusters.values())
+            )
+            coords = com_conf.contiguous_configuration(self.grouped_indices).coordinates
         else:
             assign_molecules_after_atom_selection(
                 self._indices, self._input_chemical_system, new_chemical_system
             )
-
+            self.grouped_indices = list(
+                more_itertools.flatten(new_chemical_system.clusters.values())
+            )
         # The output trajectory is opened for writing.
         self._output_trajectory = TrajectoryWriter(
             self.configuration["output_files"]["file"],
@@ -174,6 +178,7 @@ class TrajectoryEditor(IJob):
             positions_dtype=self.configuration["output_files"]["dtype"],
             chunking_limit=self.configuration["output_files"]["chunk_size"],
             compression=self.configuration["output_files"]["compression"],
+            meta_block_size=self.configuration["output_files"]["meta_block_size"],
         )
 
     def run_step(self, index):
@@ -191,7 +196,7 @@ class TrajectoryEditor(IJob):
         frameIndex = self.configuration["frames"]["value"][index]
 
         conf = self.trajectory.configuration(frameIndex)
-        conf = conf.contiguous_configuration(bring_to_centre=True)
+        conf = conf.contiguous_configuration(self.grouped_indices, bring_to_centre=True)
         charges = self.trajectory.charges(frameIndex)
         coords = conf.coordinates
 
@@ -206,15 +211,13 @@ class TrajectoryEditor(IJob):
             ].astype(np.float64)
 
         if conf.is_periodic:
-            com_conf = PeriodicRealConfiguration(
-                self._output_trajectory.chemical_system,
+            com_conf = PeriodicAbsoluteConfiguration(
                 coords[self._indices],
                 conf.unit_cell,
                 **variables,
             )
         else:
-            com_conf = RealConfiguration(
-                self._output_trajectory.chemical_system,
+            com_conf = AbsoluteConfiguration(
                 coords[self._indices],
                 **variables,
             )

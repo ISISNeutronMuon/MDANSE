@@ -18,7 +18,6 @@ from MDANSE.util_types import FloatArray
 
 import copy
 import html
-import math
 import os
 from collections import Counter, defaultdict
 from enum import auto
@@ -142,7 +141,7 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
             val.append(f"{k}: {v}")
 
     val.append("\nMolecular types found:")
-    for molname, mollist in traj.chemical_system._clusters.items():
+    for molname, mollist in traj.chemical_system.clusters.items():
         val.append(f"Molecule: {molname}; Count: {len(mollist)}")
 
     val = "\n".join(val)
@@ -157,7 +156,7 @@ def chemical_system_summary(cs: ChemicalSystem) -> str:
     atoms, counts = np.unique(cs.atom_list, return_counts=True)
     for atom, count in zip(atoms, counts, strict=False):
         text += f"Element: {atom}; Count: {count}\n"
-    for molname, mollist in cs._clusters.items():
+    for molname, mollist in cs.clusters.items():
         text += f"Molecule: {molname}; Count: {len(mollist)}\n"
     text += " ===== \n"
     return html.escape(text)
@@ -173,20 +172,31 @@ class Trajectory:
     such as the atom selection, atom transmutation and grouping.
     """
 
-    def __init__(self, filename,
+    def __init__(self,
+                 filename,
                  trajectory_format: ValidFormats | None = None,
                  hdf5_driver: str | None = None,
-                 dataset_cache_size: int | None = None):
+                 *,
+                 rdcc_nbytes: int | None = None,
+                 rdcc_nslots: int | None = None,
+                 rdcc_w0: float | None = None,
+                 fast_load: bool = False):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
-        self._dataset_cache_size = dataset_cache_size
+        self._rdcc_nbytes = rdcc_nbytes
+        self._rdcc_w0 = rdcc_w0
+        self._rdcc_nslots = rdcc_nslots
         self._format = (
             trajectory_format if trajectory_format else self.guess_correct_format()
         )
 
         self._trajectory = self.open_trajectory(self._format,
-                                                self._hdf5_driver,
-                                                self._dataset_cache_size)
+                                                    self._hdf5_driver,
+                                                    rdcc_nbytes=self._rdcc_nbytes,
+                                                    rdcc_nslots=self._rdcc_nslots,
+                                                    rdcc_w0=self._rdcc_w0,
+                                                    fast_load = fast_load
+                                                    )
         self._min_span = None
         self._max_span = None
         self._grouping_level = GroupingLevels.ATOM
@@ -224,7 +234,7 @@ class Trajectory:
         mapping = {element: element for element in self.unique_elements}
         if self._grouping_level == GroupingLevels.MOLECULE:
             temp_names = {}
-            for mol_name, clusters in self.chemical_system._clusters.items():
+            for mol_name, clusters in self.chemical_system.clusters.items():
                 for cluster in clusters:
                     overlap = set(cluster).intersection(self.atom_indices)
                     for x in overlap:
@@ -242,9 +252,9 @@ class Trajectory:
         of all atoms belonging to the group.
         """
         temp_dict = {}
-        for mol_name in self.chemical_system._clusters:
+        for mol_name in self.chemical_system.clusters:
             temp_dict.setdefault(mol_name, 0)
-            for cluster in self.chemical_system._clusters[mol_name]:
+            for cluster in self.chemical_system.clusters[mol_name]:
                 overlap = set(cluster).intersection(self.atom_indices)
                 temp_dict[mol_name] += len(overlap)
         return {k: v for k, v in temp_dict.items() if v}
@@ -253,6 +263,11 @@ class Trajectory:
         """Return the number of atoms in a single chunk of the HDF5 dataset."""
         dataset_type = TrajDataArray[array_name.upper()]
         return self._trajectory.chunk_size(dataset_type)
+
+    def dtype_size(self, array_name: str = "position") -> int:
+        """Return the number of atoms in a single chunk of the HDF5 dataset."""
+        dataset_type = TrajDataArray[array_name.upper()]
+        return self._trajectory.dtype_size(dataset_type)
 
     def group_elements(self, grp_name):
         """The elements in the group with the name grp_name.
@@ -270,7 +285,7 @@ class Trajectory:
         return sorted(
             {
                 self.atom_types[x]
-                for cluster in self.chemical_system._clusters[grp_name]
+                for cluster in self.chemical_system.clusters[grp_name]
                 for x in cluster
                 if x in self.atom_indices
             }
@@ -281,7 +296,7 @@ class Trajectory:
         """Labels of ALL the atoms, after transmutation."""
         if self._grouping_level == GroupingLevels.MOLECULE:
             temp_names = {}
-            for mol_name, clusters in self.chemical_system._clusters.items():
+            for mol_name, clusters in self.chemical_system.clusters.items():
                 for cluster in clusters:
                     overlap = set(cluster).intersection(self.atom_indices)
                     for x in overlap:
@@ -451,9 +466,23 @@ class Trajectory:
 
         return "MDANSE"
 
-    def open_trajectory(self, trajectory_format, hdf5_driver, dataset_cache_size):
+    def open_trajectory(self,
+                        trajectory_format,
+                        hdf5_driver,
+                        *,
+                        rdcc_nbytes: int | None = None,
+                        rdcc_nslots: int | None = None,
+                        rdcc_w0: float | None = None,
+                        fast_load: bool = False
+                        ):
         trajectory_class = available_formats[trajectory_format]
-        trajectory = trajectory_class(self._filename, hdf5_driver=hdf5_driver, rdcc_nbytes=dataset_cache_size)
+        trajectory = trajectory_class(self._filename,
+                                      hdf5_driver=hdf5_driver,
+                                    rdcc_nbytes = rdcc_nbytes,
+                                    rdcc_w0 = rdcc_w0,
+                                    rdcc_nslots = rdcc_nslots,
+                                    fast_load = fast_load
+                                      )
         return trajectory
 
     def close(self):
@@ -482,7 +511,12 @@ class Trajectory:
 
     def __setstate__(self, state):
         self.__dict__ = state
-        self._trajectory = self.open_trajectory(self._format, self._hdf5_driver, self._dataset_cache_size)
+        self._trajectory = self.open_trajectory(self._format,
+                                                self._hdf5_driver,
+                                                rdcc_nbytes=self._rdcc_nbytes,
+                                                rdcc_nslots=self._rdcc_nslots,
+                                                rdcc_w0=self._rdcc_w0,
+                                                fast_load=True)
 
     def __len__(self):
         return len(self._trajectory)
@@ -600,7 +634,7 @@ class Trajectory:
             self.calculate_coordinate_span()
         return self._min_span
 
-    def to_real_coordinates(
+    def to_absolute_coordinates(
         self,
         box_coordinates: FloatArray,
         first: int = 0,
@@ -623,10 +657,10 @@ class Trajectory:
         Returns
         -------
         ndarray
-            2D array containing the real coordinates converted from box coordinates.
+            2D array containing the absolute coordinates converted from fractionals.
 
         """
-        return self._trajectory.to_real_coordinates(box_coordinates, first, last, step)
+        return self._trajectory.to_absolute_coordinates(box_coordinates, first, last, step)
 
     def read_atomic_trajectory(
         self,
@@ -998,10 +1032,12 @@ class TrajectoryWriter:
         chemical_system: ChemicalSystem,
         n_steps,
         selected_atoms=None,
+        *,
         positions_dtype=np.float64,
-        chunking_limit=128,
+        chunking_limit=(1,128),
         compression="none",
         initial_charges=None,
+        meta_block_size: int = 65536
     ):
         """Constructor.
 
@@ -1016,7 +1052,10 @@ class TrajectoryWriter:
         """
         self._h5_filename = Path(h5_filename)
         PLATFORM.create_directory(self._h5_filename.parent)
-        self._h5_file = h5py.File(self._h5_filename, "w")
+        self._h5_file = h5py.File(self._h5_filename,
+                                  "w",
+                                  meta_block_size=meta_block_size,
+                                  libver=('earliest', 'v114'),)
 
         self._chemical_system = chemical_system
         self._last_configuration = None
@@ -1042,16 +1081,14 @@ class TrajectoryWriter:
 
         self._dtype = positions_dtype
 
-        if self._n_atoms <= 1.5 * chunking_limit:
-            self._chunk_tuple = (1, self._n_atoms, 3)
-            self._padded_size = self._n_atoms
-            self._chunking_limit = self._n_atoms
+        if isinstance(chunking_limit, tuple):
+            frame_chunks, atom_chunks = chunking_limit
         else:
-            self._chunk_tuple = (1, chunking_limit, 3)
-            self._padded_size = (
-                math.ceil(self._n_atoms / chunking_limit) * chunking_limit
-            )
-            self._chunking_limit = chunking_limit
+            frame_chunks = 1
+            atom_chunks = chunking_limit
+        
+        self.frame_chunks = min(frame_chunks, self._n_steps)
+        self.atom_chunks = min(atom_chunks, self._n_atoms)
 
         self._compression = compression
 
@@ -1282,16 +1319,16 @@ class TrajectoryWriter:
             if self._compression in TrajectoryWriter.allowed_compression:
                 variable_charge_dset = self._h5_file.create_dataset(
                     "/configuration/charges",
-                    shape=(self._n_steps, self._padded_size),
-                    chunks=(1, self._chunking_limit),
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(self.frame_chunks, self.atom_chunks),
                     dtype=self._dtype,
                     compression=self._compression,
                 )
             else:
                 variable_charge_dset = self._h5_file.create_dataset(
                     "/configuration/charges",
-                    shape=(self._n_steps, self._padded_size),
-                    chunks=(1, self._chunking_limit),
+                    shape=(self._n_steps, self._n_atoms),
+                    chunks=(self.frame_chunks, self.atom_chunks),
                     dtype=self._dtype,
                 )
         variable_charge_dset[index, : self._n_atoms] = charges
@@ -1346,16 +1383,16 @@ class TrajectoryWriter:
                 if self._compression in TrajectoryWriter.allowed_compression:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps, self._padded_size, 3),
-                        chunks=self._chunk_tuple,
+                        shape=(self._n_steps, self._n_atoms, 3),
+                        chunks=(self.frame_chunks, self.atom_chunks, 3),
                         dtype=self._dtype,
                         compression=self._compression,
                     )
                 else:
                     dset = configuration_grp.create_dataset(
                         k,
-                        shape=(self._n_steps, self._padded_size, 3),
-                        chunks=self._chunk_tuple,
+                        shape=(self._n_steps, self._n_atoms, 3),
+                        chunks=(self.frame_chunks, self.atom_chunks, 3),
                         dtype=self._dtype,
                     )
                 dset.attrs["units"] = units.get(k, "")
@@ -1369,7 +1406,7 @@ class TrajectoryWriter:
                 unit_cell_dset = self._h5_file.create_dataset(
                     "unit_cell",
                     shape=(self._n_steps, 3, 3),
-                    chunks=(1, 3, 3),
+                    chunks=True,
                     dtype=np.float64,
                 )
                 unit_cell_dset.attrs["units"] = units.get("unit_cell", "")
@@ -1381,7 +1418,7 @@ class TrajectoryWriter:
             time_dset = self._h5_file.create_dataset(
                 "time",
                 shape=(self._n_steps,),
-                chunks=(1,),
+                chunks=True,
                 dtype=np.float64,
             )
             time_dset.attrs["units"] = units.get("time", "")

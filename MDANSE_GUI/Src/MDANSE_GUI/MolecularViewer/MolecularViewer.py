@@ -382,7 +382,7 @@ class MolecularViewer(QtWidgets.QWidget):
             case AtomLabelType.ATOM:
                 labels = self._atoms
             case AtomLabelType.MOLECULE if (
-                label_dict := self._reader._trajectory.chemical_system._clusters
+                label_dict := self._reader._trajectory.chemical_system.clusters
             ):
                 label_dict = {
                     k: list(more_itertools.collapse(v)) for k, v in label_dict.items()
