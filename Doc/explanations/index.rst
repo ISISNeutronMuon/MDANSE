@@ -25,7 +25,7 @@
 
 
 .. toctree::
-    :caption: Parameters
+    :caption: Parameterisation
 
     correlation
     weights
