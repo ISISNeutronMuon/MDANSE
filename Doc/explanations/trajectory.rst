@@ -1,8 +1,8 @@
 
 .. _trajectory-converters:
 
-Trajectory Converters
-=====================
+Converters
+==========
 
 Converters allow for the
 outputs of different MD simulation packages to be used in

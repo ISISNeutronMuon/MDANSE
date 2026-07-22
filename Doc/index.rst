@@ -40,76 +40,50 @@ J. Chem. Inf. Model. 2017, 57, 1, 1–5 <https://doi.org/10.1021/acs.jcim.6b0057
        <div class="grid-item">
            <h3>💡 Explanations</h3>
            <p>Learn the basics and core concepts of MDANSE.</p>
-           <a href="pages/introduction.html">Learn More</a>
+           <a href="explanations/index.html">Learn More</a>
        </div>
        <div class="grid-item">
            <h3>⚛️ How-To Guides</h3>
            <p>Practical step-by-step guides to help you utilize MDANSE effectively.</p>
-           <a href="pages/H_start.html">Learn More</a>
+           <a href="how_to_guides/index.html">Learn More</a>
        </div>
        <div class="grid-item">
            <h3>🧪 Tutorials</h3>
            <p>Detailed tutorials to help you get started with MDANSE.</p>
-           <a href="pages/T_external.html">Learn More</a>
+           <a href="tutorials/T_external.html">Learn More</a>
        </div>
        <div class="grid-item">
            <h3>📚 Technical References</h3>
            <p>Deep dive into the technical details of MDANSE.</p>
-           <a href="pages/R_contact.html">Learn More</a>
+           <a href="technical_references/index.html">Learn More</a>
        </div>
    </div>
 
 .. toctree::
-   :maxdepth: 5
    :hidden:
    :caption: 💡 Explanations
 
-   pages/introduction
-   pages/getting_started
-   pages/files
-   pages/workflow
-   pages/trajectory
-   pages/correlation
-   pages/weights
-   pages/grouping
-   pages/atom_selection
-   pages/qvectors
-   pages/dynamics
-   pages/scattering
-   pages/structure
-   pages/analysis
-   pages/notation
+   explanations/index
 
 .. toctree::
-   :maxdepth: 5
    :hidden:
    :caption: ⚛️ How-To Guides
 
-   pages/H_start
-   pages/H_conv
-   pages/H_Plotting
-   pages/H_cluster
+   how_to_guides/index
 
 .. toctree::
-   :maxdepth: 5
    :hidden:
    :caption: 🧪 Tutorials
 
-   pages/T_external
+   tutorials/T_external
 
 .. toctree::
-   :maxdepth: 5
    :hidden:
    :caption: 📚 Technical References
 
-   pages/R_contact
-   pages/R_traj
-   pages/R_parameters
-   pages/converters
-   pages/analysis_jobs
-   pages/vector_generators
-   pages/parameters
-   pages/R_units
-   pages/R_parallel
-   pages/R_further
-   pages/references
+   technical_references/index
+
+.. toctree::
+    :hidden:
+
+    MDANSE-Examples <https://github.com/ISISNeutronMuon/MDANSE-Examples>

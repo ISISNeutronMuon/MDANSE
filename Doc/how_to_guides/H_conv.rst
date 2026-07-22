@@ -22,7 +22,7 @@ calculate the pair distribution function for all trajectories.
 
 .. _figure-pdf:
 
-.. figure:: ./Pictures/argon_pdf.png
+.. figure:: ./figures/argon_pdf.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -53,7 +53,7 @@ instrument resolution and two different correlation frames settings.
 
 .. _figure-coh-fqt:
 
-.. figure:: ./Pictures/fqt_conv.png
+.. figure:: ./figures/fqt_conv.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -64,7 +64,7 @@ instrument resolution and two different correlation frames settings.
 
 .. _figure-coh-sqw:
 
-.. figure:: ./Pictures/sqw_conv.png
+.. figure:: ./figures/sqw_conv.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -110,7 +110,7 @@ structure factor calculations above.
 
 .. _figure-inc-fqt:
 
-.. figure:: ./Pictures/disf_fqt.png
+.. figure:: ./figures/disf_fqt.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -121,7 +121,7 @@ structure factor calculations above.
 
 .. _figure-inc-sqw:
 
-.. figure:: ./Pictures/disf_sqf.png
+.. figure:: ./figures/disf_sqf.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -148,7 +148,7 @@ setting to specify.
 
 .. _figure-ssf-conv:
 
-.. figure:: ./Pictures/ssf_conv.png
+.. figure:: ./figures/ssf_conv.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -182,7 +182,7 @@ values of :math:`q`.
 
 .. _figure-timestep-inc-fqt:
 
-.. figure:: ./Pictures/time_step_conv_disf_fqt.png
+.. figure:: ./figures/time_step_conv_disf_fqt.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -193,7 +193,7 @@ values of :math:`q`.
 
 .. _figure-timestep-inc-sqw:
 
-.. figure:: ./Pictures/time_step_conv_disf_sqw.png
+.. figure:: ./figures/time_step_conv_disf_sqw.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -238,7 +238,7 @@ of the trajectory.
 
 .. _figure-timestep-vacf:
 
-.. figure:: ./Pictures/time_step_conv_vacf.png
+.. figure:: ./figures/time_step_conv_vacf.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -250,7 +250,7 @@ of the trajectory.
 
 .. _figure-timestep-dos:
 
-.. figure:: ./Pictures/time_step_conv_dos.png
+.. figure:: ./figures/time_step_conv_dos.png
    :align: center
    :width: 11.748cm
    :height: 9.393cm
@@ -315,9 +315,9 @@ For 1D, 2D and 3D averaging (which could be relevant to calculations on layered,
 nematic and completely disordered systems, respectively), there exist three
 vector generators which apply the same approach in different numbers of dimensions:
 
-  * :ref:`qvectors-reference-LinearQVectors`,
-  * :ref:`qvectors-reference-CircularQVectors`,
-  * :ref:`qvectors-reference-SphericalQVectors`.
+* :ref:`qvectors-reference-LinearQVectors`,
+* :ref:`qvectors-reference-CircularQVectors`,
+* :ref:`qvectors-reference-SphericalQVectors`.
 
 Each of these will generate vectors randomly within "shells", following a normal distribution
 of :math:`q` around the specified mean value for each shell. The spatial distribution
@@ -363,14 +363,13 @@ be used for sampling the reciprocal space. There are two kinds of
 tests that a user may want to perform to establish if a sufficient
 number of vectors is being used.
 
-  1. Reproducibility test. The same calculation is repeated several times
-     using different random seeds. The deviation of the calculated results
-     can be used as an estimate of the uncertainty of the results.
-  2. Convergence test. The same calculation is repeated with increasing
-     number of vectors used for sampling. The difference between the
-     consecutive runs will keep decreasing.
+1. Reproducibility test. The same calculation is repeated several times
+   using different random seeds. The deviation of the calculated results
+   can be used as an estimate of the uncertainty of the results.
+2. Convergence test. The same calculation is repeated with increasing
+   number of vectors used for sampling. The difference between the
+   consecutive runs will keep decreasing.
 
 In both cases, it makes sense to use the measurement uncertainty of the
 experimental data used as reference to determine the level of accuracy
 needed in the calculation.
-
