@@ -36,9 +36,9 @@ on your local computer using the GUI. You can then upload them
 onto the cluster and modify them. The main things you will need
 to change will be:
 
-  * paths to the input files,
-  * paths to the output files,
-  * number of CPU cores in multicore runs.
+* paths to the input files,
+* paths to the output files,
+* number of CPU cores in multicore runs.
 
 Other than this, the scripts are designed to be transferable between
 platforms, so as long as you use the same input files on the

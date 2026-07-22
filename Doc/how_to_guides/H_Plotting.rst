@@ -15,7 +15,7 @@ the specific data sets to be plotted, and is shown in
 
 .. _figure-plot-empty:
 
-.. figure:: ./Pictures/plot_start_empty.png
+.. figure:: ./figures/plot_start_empty.png
    :align: center
 
    At first, the plot creator does not contain any data files.
@@ -40,7 +40,7 @@ they will appear in the tree view on the left.
 
 .. _figure-plot-loaded:
 
-.. figure:: ./Pictures/plot_start_file_loaded.png
+.. figure:: ./figures/plot_start_file_loaded.png
    :align: center
 
    Plot Holder is highlighted, since a new plot has been created.
@@ -119,7 +119,7 @@ overlapping in the plot.
 
 .. _figure-plot-dos-single:
 
-.. figure:: ./Pictures/plot_dos_single.png
+.. figure:: ./figures/plot_dos_single.png
    :align: center
 
    Density of States results as a "Single" plot.
@@ -133,7 +133,7 @@ Sliders are not used in this plotting mode.
 
 .. _figure-plot-dos-grid:
 
-.. figure:: ./Pictures/plot_dos_grid.png
+.. figure:: ./figures/plot_dos_grid.png
    :align: center
 
    Density of States results as a "Grid" plot.
@@ -148,7 +148,7 @@ colour bar.
 
 .. _figure-plot-sqf-heatmap:
 
-.. figure:: ./Pictures/plot_sqf_heatmap.png
+.. figure:: ./figures/plot_sqf_heatmap.png
    :align: center
 
    Dynamic Coherent Structure Factor of water as a "Heatmap" plot.
@@ -158,7 +158,7 @@ main axis of the plot (:numref:`figure-plot-sqf-mainaxis`).
 
 .. _figure-plot-sqf-mainaxis:
 
-.. figure:: ./Pictures/plot_change_main_axis.png
+.. figure:: ./figures/plot_change_main_axis.png
    :align: center
 
    The axis chosen here will become the x axis of the plot.
@@ -168,7 +168,7 @@ Changing the main axis will result in an updated plot
 
 .. _figure-plot-sqf-heatmap-newaxis:
 
-.. figure:: ./Pictures/plot_heatmap_new_main_axis.png
+.. figure:: ./figures/plot_heatmap_new_main_axis.png
    :align: center
 
    The same 2D array is now plotted against the energy axis.
@@ -222,7 +222,7 @@ Plot Creator tab includes a button for accessing the plot settings
 
 .. _figure-matplotlib-button:
 
-.. figure:: ./Pictures/matplotlib_settings_button.png
+.. figure:: ./figures/matplotlib_settings_button.png
    :align: center
 
    This button ("Change matplotlib settings") opens the plot settings dialog.
@@ -236,7 +236,7 @@ and the user has changed the figure DPI value from 100 to 300.
 
 .. _figure-matplotlib-settings:
 
-.. figure:: ./Pictures/matplotlib_settings.png
+.. figure:: ./figures/matplotlib_settings.png
    :align: center
 
    This change will affect only the new plots and not the existing ones.
@@ -257,7 +257,7 @@ in the Plot Holder using the part of the GUI in :numref:`figure-plot-global`.
 
 .. _figure-plot-global:
 
-.. figure:: ./Pictures/plot_global_settings.png
+.. figure:: ./figures/plot_global_settings.png
    :align: center
 
    These settings will be applied to all plots.
@@ -287,7 +287,7 @@ type would make it difficult to distinguish between specific curves.
 
 .. _figure-plot-dos-details:
 
-.. figure:: ./Pictures/plot_details.png
+.. figure:: ./figures/plot_details.png
    :align: center
 
    These settings will automatically update the plot when changed.
@@ -307,14 +307,14 @@ step, respectively.
 
 .. _figure-plot-sqf-details:
 
-.. figure:: ./Pictures/plot_sqf_one_curve.png
+.. figure:: ./figures/plot_sqf_one_curve.png
    :align: center
 
    A single 1D curve will be plotted.
 
 .. _figure-plot-sqf-details-slice:
 
-.. figure:: ./Pictures/plot_sqf_details_several.png
+.. figure:: ./figures/plot_sqf_details_several.png
    :align: center
 
    Five 1D curves will be plotted. The numbers in the "Use it?"
@@ -327,7 +327,7 @@ on the physical axes of the data set, as shown in
 
 .. _figure-plot-sqf-onecurve:
 
-.. figure:: ./Pictures/plot_sqf_single.png
+.. figure:: ./figures/plot_sqf_single.png
    :align: center
 
    The legend of the plot shows which part of the 2D data set
