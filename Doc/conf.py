@@ -135,7 +135,7 @@ html_theme_options = {
         },
     ],
     "header_links_before_dropdown": 3,
-    "navbar_center": ["version-switcher", "navbar-nav"],
+    "navbar_center": ["navbar-nav"],
     "search_as_you_type": True,
 }
 
