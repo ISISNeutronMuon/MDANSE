@@ -656,10 +656,12 @@ class PlotDataView(QTreeView):
             )
         else:
             try:
-                text += "\n"
+                text = html.escape(f"{text}\n")
                 for attr in mda_data_structure.attrs:
-                    text += f"<b>{attr}</b>: {mda_data_structure.attrs[attr]}\n"
-                self.item_details.emit(html.escape(text))
+                    text += f"<b>{attr}</b>: " + html.escape(
+                        f"{mda_data_structure.attrs[attr]}\n"
+                    )
+                self.item_details.emit(text)
             except Exception:
                 self.item_details.emit("No additional information included.")
 
@@ -748,7 +750,7 @@ class PlotDataView(QTreeView):
         Parameters
         ----------
         index : QModelIndex
-            _description_
+            Index of the selected data set in the GUI model.
 
         """
         model = self.model()
@@ -762,13 +764,17 @@ class PlotDataView(QTreeView):
                 description = f"File {mda_data._file.filename}, no further information"
         elif item_type in {"dataset", "group"}:
             dataset = model.inner_object(index)
-            description = f"{dataset}{model_item.data(role=Qt.ItemDataRole.UserRole)}\n"
+            description = html.escape(
+                f"{dataset}{model_item.data(role=Qt.ItemDataRole.UserRole)}\n"
+            )
             for key in dataset.attrs:
-                description += f"{key}: {dataset.attrs[key]}\n"
+                description += f"<b>{key}</b>: " + html.escape(
+                    f"{dataset.attrs[key]}\n"
+                )
         else:
             description = "generic item"
         self.item_details.emit(
-            html.escape(description),
+            description,
         )  # this should emit the job name
 
     def connect_to_visualiser(
