@@ -519,7 +519,7 @@ In this analysis the total incoherent, total coherent and total
 .. math::
    :label: ndtsf3
    
-   F(q,t) = F_{\mathrm{inc}}(\mathbf{q},t) + F_{\mathrm{coh}}(\mathbf{q},t).
+   F(\mathbf{q},t) = F_{\mathrm{inc}}(\mathbf{q},t) + F_{\mathrm{coh}}(\mathbf{q},t).
 
 These expressions correspond to the formalism and equations given in
 [Ref50]_ - Chapter 1: “An introduction to neutron scattering” .
