@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import traceback
+
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem
 from qtpy.QtWidgets import QTextBrowser
@@ -236,12 +238,14 @@ class InstrumentInfo(QTextBrowser):
 
     @Slot(object)
     def update_panel(self, incoming: SimpleInstrument):
-        if incoming is None:
+        if incoming is None or not incoming._qvector_type:
             return
         try:
             filtered = self.filter(incoming)
         except Exception as e:
-            LOG.error(f"Error in InstrumentInfo: {e}")
+            LOG.error(
+                f"Error in InstrumentInfo: {e}. Traceback: {traceback.format_exc()}"
+            )
             self.setHtml("")
         else:
             self.setHtml(filtered)
