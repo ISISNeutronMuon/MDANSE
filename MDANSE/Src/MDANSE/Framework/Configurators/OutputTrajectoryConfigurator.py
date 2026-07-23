@@ -61,7 +61,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self._dtype = np.float64
         self._compression = "none"
         self.forbidden_files = []
-        self._chunk_limit = 128
+        self._chunk_limit = (1, 128)
 
     def configure(self, value: tuple):
         self._original_input = value
@@ -93,7 +93,12 @@ class OutputTrajectoryConfigurator(IConfigurator):
         else:
             self._dtype = np.float64
 
-        self._chunk_limit = chunk_size
+        try:
+            len(chunk_size)
+        except TypeError:
+            self._chunk_limit = (1, int(chunk_size))
+        else:
+            self._chunk_limit = tuple(int(x) for x in chunk_size)
 
         if compression in TrajectoryWriter.allowed_compression:
             self._compression = compression
