@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 with suppress(ImportError):
-    from mdtraj import wernet_nilsson
+    from mdtraj.geometry.hbond import _compute_bounded_geometry, _get_bond_triplets
 
 from MDANSE.Framework.AtomGrouping.grouping import pair_labels
 from MDANSE.Framework.Jobs.IJob import IJob
@@ -57,6 +57,8 @@ def process_hydrogen_bonds(
     frame_selection : tuple[int, int, int]
         Frame selection given as (start, stop, step values).
     """
+    hbonds_all, dists, angs = mdtraj_results
+
     time_axis = mdanse_trajectory.time()[
         frame_selection[0] : frame_selection[1] : frame_selection[2]
     ]
@@ -93,8 +95,8 @@ def process_hydrogen_bonds(
             main_result=True,
             partial_result=True,
         )
-    if len(mdtraj_results):
-        for frame_index, hbonds in enumerate(mdtraj_results):
+    if len(hbonds_all):
+        for frame_index, hbonds in enumerate(hbonds_all):
             valid_hbonds = [
                 [ind1, ind2]
                 for ind1, _, ind2 in hbonds
@@ -110,6 +112,101 @@ def process_hydrogen_bonds(
                 pair_counter = Counter(tuple(line) for line in type_pairs)
                 for (label1, label2), counts in pair_counter.items():
                     output_data[f"hbond/count/{label1}-{label2}"][frame_index] = counts
+
+    if len(dists) and np.any(dists > 0.0):
+        dist_histo, xedges, yedges = np.histogram2d(dists)
+        xcentres = xedges[:-1] + np.mean(np.diff(xedges))
+        ycentres = yedges[:-1] + np.mean(np.diff(yedges))
+        output_data.add(
+            "hbond/axes/length",
+            "LineOutputVariable",
+            ycentres,
+            units=time_unit,
+        )
+        output_data.add(
+            "hbond/length/total",
+            "SurfaceOutputVariable",
+            dist_histo,
+            axis="hbond/axes/time|hbond/axes/length",
+            units="counts",
+            main_result=True,
+            partial_result=True,)
+
+
+
+def wernet_nilsson_ext(traj, exclude_water=True, periodic=True, sidechain_only=False):
+    """Find hydrogen bonds, their lengths and angles.
+
+    This is a copy of the MDTraj wernet_nilsson function, extended to include
+    the intermediate outputs.
+
+    Parameters
+    ----------
+    traj : md.Trajectory
+        An mdtraj trajectory. It must contain topology information.
+    exclude_water : bool, default=True
+        Exclude solvent molecules from consideration.
+    periodic : bool, default=True
+        Set to True to calculate displacements and angles across periodic box boundaries.
+    sidechain_only : bool, default=False
+        Set to True to only consider sidechain-sidechain interactions.
+
+    Returns
+    -------
+    hbonds : list[IntArray, (n_frames, 3)
+        Atom indices of the hydrogen bonds at each frame.
+    dists : FloatArray
+        Lengths of hydrogen bonds.
+    angs: FloatArray
+        Angles of hydrogen bonds.
+
+    References
+    ----------
+    .. [1] Wernet, Ph., L.G.M. Pettersson, and A. Nilsson, et al.
+       "The Structure of the First Coordination Shell in Liquid Water." (2004)
+       Science 304, 995-999.
+    """
+
+    distance_cutoff = 0.33
+    angle_const = 0.000044
+    angle_cutoff = 45
+
+    if traj.topology is None:
+        raise ValueError(
+            "wernet_nilsson requires that traj contain topology information",
+        )
+
+    # Get the possible donor-hydrogen...acceptor triplets
+    bond_triplets = _get_bond_triplets(
+        traj.topology,
+        exclude_water=exclude_water,
+        sidechain_only=sidechain_only,
+    )
+
+    # Compute geometry
+    mask, distances, angles = _compute_bounded_geometry(
+        traj,
+        bond_triplets,
+        distance_cutoff,
+        [0, 2],
+        [2, 0, 1],
+        periodic=periodic,
+    )
+
+    # Update triplets under consideration
+    bond_triplets = bond_triplets.compress(mask, axis=0)
+
+    # Calculate the true cutoffs for distances
+    cutoffs = distance_cutoff - angle_const * (angles * 180.0 / np.pi) ** 2
+
+    # Find triplets that meet the criteria
+    presence = np.logical_and(distances < cutoffs, angles < angle_cutoff)
+
+    hbonds = [bond_triplets.compress(present, axis=0) for present in presence]
+    dists = distances[presence]
+    angs = angles[presence]
+
+    return hbonds, dists, angs
 
 
 @IJob.register("HydrogenBondStatistics")
@@ -160,7 +257,7 @@ class HydrogenBondStatistics(MDTrajAnalysis):
     )
     settings["mdtraj_analysis"] = (
         "MDTrajAnalysisConfigurator",
-        {"mdtraj_function": wernet_nilsson if mdtraj_available else None},
+        {"mdtraj_function": wernet_nilsson_ext if mdtraj_available else None},
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
 
