@@ -127,7 +127,7 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
     for k in traj.variables():
         v = traj.variable(k)
         try:
-            val.append(f"\t- {k}: {v.shape}")
+            val.append(f"\t- {k}: {v.shape} in chunks of {v.chunks}")
         except AttributeError:
             try:
                 val.append(f"\t- {k}: {v['value'].shape}")
@@ -193,8 +193,8 @@ class Trajectory:
         self._trajectory = self.open_trajectory(self._format,
                                                     self._hdf5_driver,
                                                     rdcc_nbytes=self._rdcc_nbytes,
-                                                    rdcc_nslots=self._rdcc_nslots,
                                                     rdcc_w0=self._rdcc_w0,
+                                                    rdcc_nslots=self._rdcc_nslots,
                                                     fast_load = fast_load
                                                     )
         self._min_span = None
@@ -471,8 +471,8 @@ class Trajectory:
                         hdf5_driver,
                         *,
                         rdcc_nbytes: int | None = None,
-                        rdcc_nslots: int | None = None,
                         rdcc_w0: float | None = None,
+                        rdcc_nslots: int | None = None,
                         fast_load: bool = False
                         ):
         trajectory_class = available_formats[trajectory_format]
@@ -514,8 +514,8 @@ class Trajectory:
         self._trajectory = self.open_trajectory(self._format,
                                                 self._hdf5_driver,
                                                 rdcc_nbytes=self._rdcc_nbytes,
-                                                rdcc_nslots=self._rdcc_nslots,
                                                 rdcc_w0=self._rdcc_w0,
+                                                rdcc_nslots=self._rdcc_nslots,
                                                 fast_load=True)
 
     def __len__(self):
@@ -708,6 +708,7 @@ class Trajectory:
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
+        reference: FloatArray | None = None,
     ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
@@ -736,6 +737,7 @@ class Trajectory:
             last=last,
             step=step,
             box_coordinates=box_coordinates,
+            reference = reference,
         )
 
     def read_configuration_trajectory(
@@ -744,6 +746,7 @@ class Trajectory:
         first: int = 0,
         last: int | None = None,
         step: int = 1,
+        slc: slice | None = None,
         variable: str = "velocities",
     ) -> FloatArray:
         """Return trajectory values for one atom for a subset of frames.
@@ -777,6 +780,7 @@ class Trajectory:
             first=first,
             last=last,
             step=step,
+            slc=slc,
             variable=variable,
         )
 
@@ -1303,7 +1307,7 @@ class TrajectoryWriter:
             time_dataset.resize((self._current_index,))
         self._h5_file.close()
 
-    def write_charges(self, charges: FloatArray, index: int):
+    def write_charges(self, charges: FloatArray, index: int, atom_indices: list[int] | None = None):
         """Writes atom charges into their dataset at the specified index.
 
         Parameters
@@ -1315,6 +1319,8 @@ class TrajectoryWriter:
 
         """
         variable_charge_dset = self._h5_file.get("/configuration/charges", None)
+        if atom_indices is None:
+            atom_indices = slice(None)
         if variable_charge_dset is None:
             if self._compression in TrajectoryWriter.allowed_compression:
                 variable_charge_dset = self._h5_file.create_dataset(
@@ -1331,7 +1337,7 @@ class TrajectoryWriter:
                     chunks=(self.frame_chunks, self.atom_chunks),
                     dtype=self._dtype,
                 )
-        variable_charge_dset[index, : self._n_atoms] = charges
+        variable_charge_dset[index, atom_indices] = charges
 
     def validate_charges(self):
         charge_is_constant = False
@@ -1351,6 +1357,55 @@ class TrajectoryWriter:
             constant_charge_dset[:] = new_charge[: self._n_atoms]
             if variable_charge_dset is not None:
                 del self._h5_file[variable_charge_dset.name]
+    
+    def write_array_fragment(self,
+                             data: FloatArray,
+                             dataset: str,
+                             atom_indices: list[int] | None = None,
+                             frame_indices: list[int] | None = None,
+                             units = None):
+        if units is None:
+            units = {}
+        if dataset in {"coordinates", "velocities", "gradients"}:
+            self.write_configuration_data(data,
+                                          dataset,
+                                          atom_indices= atom_indices,
+                                          frame_indices=frame_indices,
+                                          units= units)
+            return
+        dset = self._h5_file.get(dataset, None)
+        if dset is None:
+            dset = self._h5_file.create_dataset(
+                    dataset,
+                    shape=(self._n_steps,) if dataset != "unit_cell" else (self._n_steps, 3, 3),
+                    chunks=True,
+                    dtype=self._dtype,)
+        dset.attrs["units"] = units.get(dataset, "")
+        dset[frame_indices] = data
+        
+    
+    def write_configuration_data(self,
+                             data: FloatArray,
+                             dataset: str,
+                             atom_indices: list[int] | None = None,
+                             frame_indices: list[int] | None = None,
+                             units = None,):
+        configuration_grp = self._h5_file["/configuration"]
+        dset = configuration_grp.get(dataset, None)
+        if dset is None:
+            kwargs = {"compression": self._compression} if self._compression in self.allowed_compression else {}
+            dset = configuration_grp.create_dataset(
+                    dataset,
+                    shape=(self._n_steps, self._n_atoms, 3),
+                    chunks=(self.frame_chunks, self.atom_chunks, 3),
+                    dtype=self._dtype,
+                    **kwargs)
+        dset.attrs["units"] = units.get(dataset, "")
+        if frame_indices is None:
+            frame_indices = slice(None)
+        if atom_indices is None:
+            atom_indices = slice(None)
+        dset[frame_indices, atom_indices, :] = data
 
     def dump_configuration(self, configuration, time, units=None):
         """Dump the chemical system configuration at a given time.

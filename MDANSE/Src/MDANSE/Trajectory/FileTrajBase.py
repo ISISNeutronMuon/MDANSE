@@ -193,6 +193,7 @@ class TrajectoryFile(ABC):
         first: int = 0,
         last: int | None = None,
         step: int = 1,
+        slc: slice | None = None,
         variable: str = "velocities",
     ) -> FloatArray:
         """Return trajectory values for one atom for a subset of frames.
@@ -221,8 +222,9 @@ class TrajectoryFile(ABC):
             If 'variable' is not in the trajectory file.
 
         """
-        slc = np.s_[first:last:step]
-        self._check_frame(slc)
+        if slc is None:
+            slc = np.s_[first:last:step]
+            self._check_frame(slc)
 
         if not self.has_variable(variable):
             raise KeyError(
@@ -320,6 +322,7 @@ class TrajectoryFile(ABC):
         step: int | None = 1,
         *,
         box_coordinates: bool = False,
+        reference: FloatArray | None = None,
     ) -> FloatArray:
         """Read an atomic trajectory. The trajectory is corrected from box jumps.
 
@@ -356,6 +359,7 @@ class TrajectoryFile(ABC):
             direct_cells,
             inverse_cells,
             box_coordinates=box_coordinates,
+            reference=reference,
         )
 
     @property

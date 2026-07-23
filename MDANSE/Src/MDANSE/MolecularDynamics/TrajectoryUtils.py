@@ -20,6 +20,7 @@ from itertools import pairwise
 from typing import TYPE_CHECKING
 
 import numpy as np
+import numpy.typing as npt
 from more_itertools import chunked_even, flatten
 
 from MDANSE.util_types import FloatArray
@@ -83,6 +84,7 @@ def atomic_trajectory_many(
     rcell: FloatArray,
     *,
     box_coordinates: bool = False,
+    reference: FloatArray | None = None,
 ) -> FloatArray:
     """For the coordinates of a specific atom, remove all unit cell jumps.
 
@@ -105,9 +107,14 @@ def atomic_trajectory_many(
     """
     # i is time, j is the XYZ coordinate
     trajectory = np.einsum("inj,ijk->ink", config, rcell)
-    sdxyz = trajectory[1:, :] - trajectory[:-1, :]
-    sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
-    trajectory[1:, :] = trajectory[:-1, :] + sdxyz
+    if reference is None:
+        sdxyz = trajectory[1:, :] - trajectory[:-1, :]
+        sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
+        trajectory[1:, :] = trajectory[:-1, :] + sdxyz
+    else:
+        sdxyz = trajectory[:, :] - reference
+        sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
+        trajectory[:, :] = reference + sdxyz
     if not box_coordinates:
         trajectory = np.einsum("inj,ijk->ink", trajectory, cell)
     return trajectory
