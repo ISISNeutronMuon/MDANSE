@@ -112,26 +112,70 @@ def process_hydrogen_bonds(
                 pair_counter = Counter(tuple(line) for line in type_pairs)
                 for (label1, label2), counts in pair_counter.items():
                     output_data[f"hbond/count/{label1}-{label2}"][frame_index] = counts
+    else:
+        return
 
-    if len(dists) and np.any(dists > 0.0):
-        dist_histo, xedges, yedges = np.histogram2d(dists)
-        xcentres = xedges[:-1] + np.mean(np.diff(xedges))
-        ycentres = yedges[:-1] + np.mean(np.diff(yedges))
+    if len(dists) and np.any(len(dist_line) for dist_line in dists):
+        d_bin_limits = np.arange(0.2, 0.3601, 0.0025)
         output_data.add(
             "hbond/axes/length",
             "LineOutputVariable",
-            ycentres,
-            units=time_unit,
+            d_bin_limits[:-1] + 0.00125,
+            units="nm",
         )
         output_data.add(
             "hbond/length/total",
             "SurfaceOutputVariable",
-            dist_histo,
+            (len(time_axis), len(d_bin_limits) - 1),
             axis="hbond/axes/time|hbond/axes/length",
             units="counts",
             main_result=True,
-            partial_result=True,)
+            partial_result=True,
+        )
+        for frame_ind, dist_row in enumerate(dists):
+            output_data["hbond/length/total"][frame_ind, :] = np.histogram(
+                dist_row, d_bin_limits
+            )[0]
+    else:
+        return
 
+    if len(angs) and np.any(len(angs_line) for angs_line in angs):
+        a_bin_limits = np.arange(0.0, 45, 3) * np.pi / 180.0
+        output_data.add(
+            "hbond/axes/angle",
+            "LineOutputVariable",
+            a_bin_limits[:-1] + 1.5 * np.pi / 180.0,
+            units="rad",
+        )
+        output_data.add(
+            "hbond/angle/total",
+            "SurfaceOutputVariable",
+            (len(time_axis), len(a_bin_limits) - 1),
+            axis="hbond/axes/time|hbond/axes/angle",
+            units="counts",
+            main_result=True,
+            partial_result=True,
+        )
+        for frame_ind, angs_row in enumerate(angs):
+            output_data["hbond/angle/total"][frame_ind, :] = np.histogram(
+                angs_row, a_bin_limits
+            )[0]
+    else:
+        return
+
+    output_data.add(
+        "hbond/length_angle/total",
+        "SurfaceOutputVariable",
+        (len(d_bin_limits) - 1, len(a_bin_limits) - 1),
+        axis="hbond/axes/length|hbond/axes/angle",
+        units="counts",
+        main_result=True,
+        partial_result=True,
+    )
+    histo, _, _ = np.histogram2d(
+        np.concatenate(dists), np.concatenate(angs), bins=(d_bin_limits, a_bin_limits)
+    )
+    output_data["hbond/length_angle/total"][:] = histo
 
 
 def wernet_nilsson_ext(traj, exclude_water=True, periodic=True, sidechain_only=False):
@@ -203,8 +247,12 @@ def wernet_nilsson_ext(traj, exclude_water=True, periodic=True, sidechain_only=F
     presence = np.logical_and(distances < cutoffs, angles < angle_cutoff)
 
     hbonds = [bond_triplets.compress(present, axis=0) for present in presence]
-    dists = distances[presence]
-    angs = angles[presence]
+    dists = [
+        distances[frame_ind, pres_line] for frame_ind, pres_line in enumerate(presence)
+    ]
+    angs = [
+        angles[frame_ind, pres_line] for frame_ind, pres_line in enumerate(presence)
+    ]
 
     return hbonds, dists, angs
 
