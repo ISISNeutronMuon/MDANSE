@@ -101,8 +101,7 @@ class MdanseTrajectory(TrajectoryFile):
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
 
-        # Load all the unit cells
-        self._load_unit_cells()
+        self._check_unit_cells()
 
         # Load the chemical system
         self._chemical_system = ChemicalSystem(
@@ -298,7 +297,7 @@ class MdanseTrajectory(TrajectoryFile):
         """
         self._check_frame(frame)
 
-        unit_cell = self._unit_cells[frame] if self._unit_cells is not None else None
+        unit_cell = self.unit_cell(frame)
 
         variables = {
             k: v[frame, :, :].astype(np.float64)
@@ -319,27 +318,23 @@ class MdanseTrajectory(TrajectoryFile):
 
         return conf
 
-    def _load_unit_cells(self):
-        """Load all the unit cells."""
-        if "unit_cell" in self._h5_file:
-            self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
-        else:
-            self._unit_cells = None
+    def _check_unit_cells(self):
+        """Check unit cells."""
+        if "unit_cell" not in self._h5_file:
             self.unit_cell_warning = NO_CELL
 
         if not self.unit_cell_warning:
-            if self._unit_cells[0].volume < CELL_SIZE_LIMIT:
+            if self.unit_cell(0).volume < CELL_SIZE_LIMIT:
                 self.unit_cell_warning = BAD_CELL
                 return
 
-            reference_array = self._unit_cells[0].direct
+            reference_array = self._h5_file["unit_cell"][0]
 
-            if any(
-                not np.allclose(reference_array, uc.direct)
-                for uc in self._unit_cells[1:]
-            ):
-                self.unit_cell_warning = CHANGING_CELL
-                return
+            if self._h5_file["unit_cell"].shape[0] > 1:
+                directs = self._h5_file["unit_cell"][1:]
+                if not np.allclose(directs, reference_array):
+                    self.unit_cell_warning = CHANGING_CELL
+                    return
 
     def time(self):
         """Return the time array for all the frames."""
@@ -364,11 +359,10 @@ class MdanseTrajectory(TrajectoryFile):
             If frame index is out of the range covered by the trajectory.
 
         """
+        if self.unit_cell_warning == NO_CELL:
+            return None
         self._check_frame(frame)
-
-        if self._unit_cells is not None:
-            return self._unit_cells[frame]
-        return None
+        return UnitCell(self._h5_file["unit_cell"][frame].astype(np.float64))
 
     def __len__(self) -> int:
         """Return the length of the trajectory.
