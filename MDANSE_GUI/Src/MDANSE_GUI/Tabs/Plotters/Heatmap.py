@@ -354,7 +354,16 @@ class Heatmap(Plotter):
         x_axis = dataset.x_axis(x_label)
         y_axis = dataset.x_axis(y_label)
 
-        limits = (x_axis[0], x_axis[-1], y_axis[0], y_axis[-1])
+        dx = (x_axis[-1] - x_axis[0]) / (len(x_axis) - 1)
+        dy = (y_axis[-1] - y_axis[0]) / (len(y_axis) - 1)
+
+        limits = (
+            x_axis[0] - dx / 2,
+            x_axis[-1] + dx / 2,
+            y_axis[0] - dy / 2,
+            y_axis[-1] + dy / 2,
+        )
+
         axes.set_xlabel(x_label)
         axes.set_ylabel(y_label)
 
