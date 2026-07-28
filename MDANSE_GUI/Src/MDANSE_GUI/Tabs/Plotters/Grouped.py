@@ -228,7 +228,8 @@ class Grouped(Plotter):
             axes = target.add_subplot(gs[ind])
             self._axes_titles.append(ds._name)
 
-            colours = self.colours(db.colour, ds.n_curves)
+            n_curves = min(self._curve_limit_per_dataset, ds.n_curves)
+            colours = self.colours(db.colour, n_curves)
 
             for curve_ind, ((databundle, label, curve), colour) in enumerate(
                 zip(dataclump, colours, strict=True)
@@ -240,6 +241,7 @@ class Grouped(Plotter):
                     ind=curve_ind,
                     label=label,
                     colour=colour,
+                    n_curves=n_curves,
                 )
 
             axes.legend()
@@ -289,6 +291,7 @@ class Grouped(Plotter):
         ind: int,
         label: str,
         colour: tuple[float, float, float] | str,
+        n_curves: int,
     ):
         """Plot a single curve to axes.
 
@@ -308,7 +311,7 @@ class Grouped(Plotter):
         lines: list[Line2D] = axes.plot(
             *curve,
             linestyle=databundle.line_style,
-            label=self.label(label, ind, n_curves=databundle.dataset.n_curves),
+            label=self.label(label, ind, n_curves=n_curves),
             color=colour,
         )
 
