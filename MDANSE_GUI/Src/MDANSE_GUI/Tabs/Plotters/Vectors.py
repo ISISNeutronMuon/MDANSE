@@ -107,7 +107,7 @@ class Vectors(Plotter):
             self.plot_blank()
             return
 
-        gs = self._figure.add_gridspec(2, 2)
+        gs = self._figure.add_gridspec(2, 2, wspace=0.1)
         labels = iter(("Used", "Found"))
 
         for databundle in plotting_context.datasets().values():
