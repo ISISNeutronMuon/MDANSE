@@ -144,6 +144,7 @@ class TrajectoryEditor(IJob):
             self._input_trajectory._trajectory.unit_cells_raw = np.tile(
                 self._new_unit_cell, (len(self._input_trajectory), 1, 1)
             )
+            self._input_trajectory._trajectory.check_unit_cells()
 
         # The collection of atoms corresponding to the atoms selected for output.
         indices = self.trajectory.atom_indices

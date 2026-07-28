@@ -33,16 +33,10 @@ from MDANSE.MolecularDynamics.Configuration import (
     PeriodicAbsoluteConfiguration,
     _Configuration,
 )
-from MDANSE.MolecularDynamics.UnitCell import (
-    BAD_CELL,
-    CELL_SIZE_LIMIT,
-    CHANGING_CELL,
-    NO_CELL,
-    UnitCell,
-)
+from MDANSE.MolecularDynamics.UnitCell import NO_CELL
 from MDANSE.util_types import FloatArray
 
-from .FileTrajBase import TrajDataArray, TrajectoryFile
+from .FileTrajBase import TrajectoryFile
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -425,18 +419,7 @@ class H5MDTrajectory(TrajectoryFile):
         else:
             raise ValueError(f"Cell array {cells} has a wrong shape {cells.shape}")
 
-        if not self.unit_cell_warning:
-            if self.unit_cell(0).volume < CELL_SIZE_LIMIT:
-                self.unit_cell_warning = BAD_CELL
-                return
-
-            reference_array = self.unit_cells_raw[0]
-
-            if self.unit_cells_raw.shape[0] > 1:
-                directs = self.unit_cells_raw[1:]
-                if not np.allclose(directs, reference_array):
-                    self.unit_cell_warning = CHANGING_CELL
-                    return
+        self.check_unit_cells()
 
     def time(self) -> FloatArray:
         """Time timesteps from file."""

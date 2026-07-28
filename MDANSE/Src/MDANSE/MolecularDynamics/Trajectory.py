@@ -1297,14 +1297,6 @@ class TrajectoryWriter:
             for k, v in self._last_configuration.variables.items():
                 dset = configuration_grp.get(k, None)
                 dset.resize((self._current_index, n_atoms, 3))
-            try:
-                unit_cell_dataset = self._h5_file["/unit_cell"]
-            except KeyError:
-                pass
-            else:
-                unit_cell_dataset.resize((self._current_index, 3, 3))
-            time_dataset = self._h5_file["/time"]
-            time_dataset.resize((self._current_index,))
         self._h5_file.close()
 
     def write_charges(self, charges: FloatArray, index: int, atom_indices: list[int] | None = None):

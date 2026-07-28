@@ -34,12 +34,6 @@ from MDANSE.MolecularDynamics.Configuration import (
     AbsoluteConfiguration,
     PeriodicAbsoluteConfiguration,
 )
-from MDANSE.MolecularDynamics.UnitCell import (
-    BAD_CELL,
-    CELL_SIZE_LIMIT,
-    CHANGING_CELL,
-    NO_CELL,
-)
 from MDANSE.util_types import FloatArray
 
 from .FileTrajBase import TrajectoryFile
@@ -318,25 +312,12 @@ class MdanseTrajectory(TrajectoryFile):
         return conf
 
     def _load_unit_cells(self):
-        """Check unit cells."""
+        """Load the unit cells."""
         if "unit_cell" in self._h5_file:
             self.unit_cells_raw = self._h5_file["unit_cell"][:]
         else:
             self.unit_cells_raw = None
-            self.unit_cell_warning = NO_CELL
-
-        if not self.unit_cell_warning:
-            if self.unit_cell(0).volume < CELL_SIZE_LIMIT:
-                self.unit_cell_warning = BAD_CELL
-                return
-
-            reference_array = self.unit_cells_raw[0]
-
-            if self.unit_cells_raw.shape[0] > 1:
-                directs = self.unit_cells_raw[1:]
-                if not np.allclose(directs, reference_array):
-                    self.unit_cell_warning = CHANGING_CELL
-                    return
+        self.check_unit_cells()
 
     def time(self):
         """Return the time array for all the frames."""

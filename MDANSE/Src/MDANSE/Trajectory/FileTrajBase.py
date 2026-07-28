@@ -30,6 +30,9 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import (
     atomic_trajectory_many,
 )
 from MDANSE.MolecularDynamics.UnitCell import (
+    BAD_CELL,
+    CELL_SIZE_LIMIT,
+    CHANGING_CELL,
     NO_CELL,
     UnitCell,
 )
@@ -188,6 +191,27 @@ class TrajectoryFile(ABC):
             return None
         self._check_frame(frame)
         return UnitCell(self.unit_cells_raw[frame].astype(np.float64))
+
+    def check_unit_cells(self):
+        """Checks the unit cells and updates the warning."""
+        self.unit_cell_warning = ""
+
+        if self.unit_cells_raw is None:
+            self.unit_cell_warning = NO_CELL
+            return
+
+        if not self.unit_cell_warning:
+            if self.unit_cell(0).volume < CELL_SIZE_LIMIT:
+                self.unit_cell_warning = BAD_CELL
+                return
+
+            reference_array = self.unit_cells_raw[0]
+
+            if self.unit_cells_raw.shape[0] > 1:
+                directs = self.unit_cells_raw[1:]
+                if not np.allclose(directs, reference_array):
+                    self.unit_cell_warning = CHANGING_CELL
+                    return
 
     @abstractmethod
     def masses(self) -> FloatArray: ...
