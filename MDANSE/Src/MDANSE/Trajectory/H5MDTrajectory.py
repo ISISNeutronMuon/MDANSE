@@ -299,11 +299,11 @@ class H5MDTrajectory(TrajectoryFile):
                 self.velocities[frame, :, :] * self.unit_conv["velocity"]
             )
 
-        if self._unit_cells is not None:
+        if self.unit_cell_warning != NO_CELL:
             try:
-                configuration["unit_cell"] = self._unit_cells[frame]
+                configuration["unit_cell"] = self.unit_cells(frame)
             except IndexError:
-                configuration["unit_cell"] = self._unit_cells[0]
+                configuration["unit_cell"] = self.unit_cells(0)
 
         return configuration
 
@@ -384,7 +384,7 @@ class H5MDTrajectory(TrajectoryFile):
         """
         self._check_frame(frame)
 
-        unit_cell = self.unit_cell(frame) if self._unit_cells is not None else None
+        unit_cell = self.unit_cell(frame)
 
         variables = {}
         for k in self.variables():
@@ -410,32 +410,31 @@ class H5MDTrajectory(TrajectoryFile):
         try:
             cells = self._h5_file[self.box_key][:] * self.unit_conv["box"]
         except KeyError:
-            self._unit_cells = None
+            self.unit_cells_raw = None
             self.unit_cell_warning = NO_CELL
             return
 
-        if cells.ndim > 1:
-            for cell in cells:
-                if cell.shape == (3, 3):
-                    temp_array = np.array(cell)
-                elif cell.shape == (3,):
-                    temp_array = np.diag(cell)
-                else:
-                    raise ValueError(
-                        f"Cell array {cell} has a wrong shape {cell.shape}"
-                    )
-                uc = UnitCell(temp_array)
-                self._unit_cells.append(uc)
-                if not self.unit_cell_warning and uc.volume < CELL_SIZE_LIMIT:
-                    self.unit_cell_warning = BAD_CELL
+        if cells.ndim == 3 and cells.shape[1:] == (3, 3):
+            self.unit_cells_raw = cells
+        elif cells.ndim == 2 and cells.shape[1:] == (3,):
+            self.unit_cells_raw = np.eye(3) * cells[:, :, None]
+        elif cells.ndim == 1 and cells.shape[0] == 3:
+            self.unit_cells_raw = np.tile(
+                np.diag(cells), (self.positions.shape[0], 1, 1)
+            )
         else:
-            temp_array = np.diag(cells)
-            self._unit_cells.append(UnitCell(temp_array))
+            raise ValueError(f"Cell array {cells} has a wrong shape {cells.shape}")
 
         if not self.unit_cell_warning:
-            reference_array = self._unit_cells[0].direct
-            for uc in self._unit_cells[1:]:
-                if not np.allclose(reference_array, uc.direct):
+            if self.unit_cell(0).volume < CELL_SIZE_LIMIT:
+                self.unit_cell_warning = BAD_CELL
+                return
+
+            reference_array = self.unit_cells_raw[0]
+
+            if self.unit_cells_raw.shape[0] > 1:
+                directs = self.unit_cells_raw[1:]
+                if not np.allclose(directs, reference_array):
                     self.unit_cell_warning = CHANGING_CELL
                     return
 
@@ -452,31 +451,6 @@ class H5MDTrajectory(TrajectoryFile):
             ) * self.unit_conv["time"]
 
         return time
-
-    def unit_cell(self, frame: int) -> UnitCell | None:
-        """Return the unit cell at a given frame. If no unit cell is defined, returns None.
-
-        Parameters
-        ----------
-        frame : int
-            The frame number.
-
-        Returns
-        -------
-        UnitCell or None
-            The unit cell or None if no unit cells found.
-
-        """
-        self._check_frame(frame)
-
-        if self._unit_cells is not None:
-            try:
-                uc = self._unit_cells[frame]
-            except IndexError:
-                uc = self._unit_cells[0]
-            return uc
-
-        return None
 
     def __len__(self) -> int:
         """Returns the length of the trajectory.

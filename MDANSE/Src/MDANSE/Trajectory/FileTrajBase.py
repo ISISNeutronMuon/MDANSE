@@ -29,6 +29,10 @@ from MDANSE.MolecularDynamics.TrajectoryUtils import (
     atomic_trajectory,
     atomic_trajectory_many,
 )
+from MDANSE.MolecularDynamics.UnitCell import (
+    NO_CELL,
+    UnitCell,
+)
 from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
@@ -39,7 +43,6 @@ if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Configuration import (
         _Configuration,
     )
-    from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 
 class TrajDataArray(Enum):
@@ -162,8 +165,29 @@ class TrajectoryFile(ABC):
             case _:
                 return 8
 
-    @abstractmethod
-    def unit_cell(self, frame: int) -> UnitCell | None: ...
+    def unit_cell(self, frame: int) -> UnitCell | None:
+        """Return the unit cell at a given frame.
+
+        Parameters
+        ----------
+        frame : int
+            Index of the selected trajectory frame.
+
+        Returns
+        -------
+        UnitCell | None
+            Unit cell definition. None if no cell is defined in the trajectory.
+
+        Raises
+        ------
+        IndexError
+            If frame index is out of the range covered by the trajectory.
+
+        """
+        if self.unit_cell_warning == NO_CELL:
+            return None
+        self._check_frame(frame)
+        return UnitCell(self.unit_cells_raw[frame].astype(np.float64))
 
     @abstractmethod
     def masses(self) -> FloatArray: ...
@@ -259,14 +283,9 @@ class TrajectoryFile(ABC):
             2D array containing the real coordinates converted from box coordinates.
 
         """
-        if self._unit_cells is not None:
-            real_coordinates = np.empty_like(box_coordinates)
-
-            for comp, cell in enumerate(self._unit_cells[first:last:step]):
-                real_coordinates[comp, :] = box_coordinates[comp, :] @ cell.direct
-            return real_coordinates
-
-        return box_coordinates
+        if self.unit_cell_warning == NO_CELL:
+            return box_coordinates
+        return box_coordinates @ self.unit_cells_raw[first:last:step]
 
     def read_atomic_trajectory(
         self,
@@ -302,11 +321,11 @@ class TrajectoryFile(ABC):
 
         coords = self.coordinates(slc, index)
 
-        if self._unit_cells is None:
+        if self.unit_cell_warning == NO_CELL:
             return coords
 
-        direct_cells = np.array([cell.direct for cell in self._unit_cells[slc]])
-        inverse_cells = np.array([cell.inverse for cell in self._unit_cells[slc]])
+        direct_cells = self.unit_cells_raw[slc]
+        inverse_cells = np.linalg.pinv(direct_cells)
         return atomic_trajectory(
             coords,
             direct_cells,
@@ -349,11 +368,11 @@ class TrajectoryFile(ABC):
 
         coords = self.coordinates(slc, index_list)
 
-        if self._unit_cells is None:
+        if self.unit_cell_warning == NO_CELL:
             return coords
 
-        direct_cells = np.array([cell.direct for cell in self._unit_cells[slc]])
-        inverse_cells = np.array([cell.inverse for cell in self._unit_cells[slc]])
+        direct_cells = self.unit_cells_raw[slc]
+        inverse_cells = np.linalg.pinv(direct_cells)
         return atomic_trajectory_many(
             coords,
             direct_cells,
