@@ -294,10 +294,7 @@ class H5MDTrajectory(TrajectoryFile):
             )
 
         if self.unit_cell_warning != NO_CELL:
-            try:
-                configuration["unit_cell"] = self.unit_cells(frame)
-            except IndexError:
-                configuration["unit_cell"] = self.unit_cells(0)
+            configuration["unit_cell"] = self.unit_cell(frame)
 
         return configuration
 
@@ -408,16 +405,17 @@ class H5MDTrajectory(TrajectoryFile):
             self.unit_cell_warning = NO_CELL
             return
 
-        if cells.ndim == 3 and cells.shape[1:] == (3, 3):
-            self.unit_cells_raw = cells
-        elif cells.ndim == 2 and cells.shape[1:] == (3,):
-            self.unit_cells_raw = np.eye(3) * cells[:, :, None]
-        elif cells.ndim == 1 and cells.shape[0] == 3:
-            self.unit_cells_raw = np.tile(
-                np.diag(cells), (self.positions.shape[0], 1, 1)
-            )
-        else:
-            raise ValueError(f"Cell array {cells} has a wrong shape {cells.shape}")
+        match cells.shape:
+            case (_, 3, 3):
+                self.unit_cells_raw = cells
+            case (_, 3):
+                self.unit_cells_raw = np.eye(3) * cells[:, :, None]
+            case (3,):
+                self.unit_cells_raw = np.tile(
+                    np.diag(cells), (self.positions.shape[0], 1, 1)
+                )
+            case _:
+                raise ValueError(f"Cell array {cells} has a wrong shape {cells.shape}")
 
         self.check_unit_cells()
 
