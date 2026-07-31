@@ -159,17 +159,6 @@ class MdanseTrajectory(TrajectoryFile):
                 "If you run into issues, consider regenerating the file with this version of MDANSE."
             )
 
-        try:
-            mdtraj = cls(filename)
-            chem = ChemicalSystem(filename.stem, mdtraj)
-            chem.load(filename)
-        except Exception:
-            LOG.warning(
-                f"Could not load ChemicalSystem from {filename}. MDANSE will try"
-                " to read it as H5MD next.",
-            )
-            return False
-
         if (
             "/composition" not in file_object
             or "name" not in file_object["/composition"].attrs
