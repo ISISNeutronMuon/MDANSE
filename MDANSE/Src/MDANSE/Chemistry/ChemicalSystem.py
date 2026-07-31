@@ -148,27 +148,36 @@ class ChemicalSystem:
             list of atom text labels from trajectory, by default None
 
         """
-        self._atom_indices = [
-            self.add_atom(self._database.get_atom_property(symbol, "atomic_number"))
-            for symbol in element_list
-        ]
+        # reduce calls to get_atom_property and create_rdkit_atom
+        # which can be expensive with a large number of atoms
+        atm_nums = {
+            elem: self._database.get_atom_property(elem, "atomic_number")
+            for elem in set(element_list)
+        }
+        rdkit_atms = {
+            elem: self.create_rdkit_atom(atm_num) for elem, atm_num in atm_nums.items()
+        }
+
+        self._atom_indices = []
+        self._rdkit_dummy_atms = set()
+        for symbol in element_list:
+            atm_num = atm_nums[symbol]
+            idx = self.rdkit_mol.AddAtom(rdkit_atms[symbol])
+            self._atom_indices.append(idx)
+            if atm_num is None or atm_num == 0:
+                self._rdkit_dummy_atms.add(idx)
+
         self._atom_types = [str(x) for x in element_list]
         self._total_number_of_atoms = len(self._atom_indices)
         self._unique_elements.update(set(element_list))
         if name_list is not None:
             self._atom_names = [str(x) for x in name_list]
 
-        self._rdkit_dummy_atms = {
-            atom.GetIdx()
-            for atom in self.rdkit_mol.GetAtoms()
-            if atom.GetAtomicNum() == 0
-        }
-
-    def add_atom(self, atm_num: int | None) -> int:
+    def create_rdkit_atom(self, atm_num: int | None) -> Chem.Atom:
         rdkit_atm = Chem.Atom(atm_num) if atm_num is not None else Chem.Atom(0)
         rdkit_atm.SetNumExplicitHs(0)
         rdkit_atm.SetNoImplicit(True)
-        return self.rdkit_mol.AddAtom(rdkit_atm)
+        return rdkit_atm
 
     def add_bonds(self, pair_list: Iterable[tuple[SupportsInt, SupportsInt]]):
         self._bonds.extend(pair_list)
