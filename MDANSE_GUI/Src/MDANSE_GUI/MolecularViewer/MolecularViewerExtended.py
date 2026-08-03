@@ -120,17 +120,17 @@ class MolecularViewerExtended(MolecularViewer):
             reader.SetFileName(filepath)
             reader.Update()
 
-            mapper = vtk.vtkPolyDataMapper()
-            mapper.SetInputConnection(reader.GetOutputPort())
-
             actor = vtk.vtkActor()
-            actor.SetMapper(mapper)
             actor.GetProperty().SetColor(colour)
-
             actor.SetPosition(position)
             actor.SetScale(scale)
+
             # make center sphere metallic and semi-transparent
             if filename == "center_sphere.stl":
+                mapper = vtk.vtkPolyDataMapper()
+                mapper.SetInputConnection(reader.GetOutputPort())
+
+                actor.SetMapper(mapper)
                 actor.GetProperty().SetOpacity(
                     0.5
                 )  # Make the center sphere semi-transparent
@@ -138,6 +138,18 @@ class MolecularViewerExtended(MolecularViewer):
                 actor.GetProperty().SetSpecularPower(100)
                 actor.GetProperty().SetMetallic(1.0)
                 actor.GetProperty().SetRoughness(0.2)
+            else:
+                normals = vtk.vtkPolyDataNormals()
+                normals.SetInputConnection(reader.GetOutputPort())
+                normals.ComputePointNormalsOn()
+                normals.ComputeCellNormalsOff()
+                normals.SplittingOff()
+
+                mapper = vtk.vtkPolyDataMapper()
+                mapper.SetInputConnection(normals.GetOutputPort())
+
+                actor.SetMapper(mapper)
+                actor.GetProperty().SetInterpolationToPhong()
 
             individual_transform = vtk.vtkTransform()
             individual_transform.Identity()
