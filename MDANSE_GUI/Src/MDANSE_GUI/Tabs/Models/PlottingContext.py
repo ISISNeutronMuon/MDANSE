@@ -805,7 +805,7 @@ class PlottingContext(QStandardItemModel):
         self, *args, unit_lookup: int | None = None, colormap: str = "viridis", **kwargs
     ):
         super().__init__(*args, **kwargs)
-        self._datasets = {}
+        self._datasets: dict[str, SingleDataset] = {}
         self._current_axis = [None, None, None]
         self._figure = None
         self._ndim_lowest = 1
@@ -938,7 +938,9 @@ class PlottingContext(QStandardItemModel):
 
         for row in range(self.rowCount()):
             row_data = {
-                key: self.item(row, ind) for key, ind in plotting_column_index.items()
+                key: dat
+                for key, ind in plotting_column_index.items()
+                if (dat := self.item(row, ind)) is not None
             }
 
             key = self.index(row, plotting_column_index["Dataset"]).data(

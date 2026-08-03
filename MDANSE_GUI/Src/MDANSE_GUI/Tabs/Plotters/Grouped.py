@@ -232,7 +232,7 @@ class Grouped(Plotter):
             colours = self.colours(db.colour, n_curves)
 
             for curve_ind, ((databundle, label, curve), colour) in enumerate(
-                zip(dataclump, colours, strict=True)
+                zip(dataclump, colours, strict=False)
             ):
                 self._plot_single(
                     axes,
