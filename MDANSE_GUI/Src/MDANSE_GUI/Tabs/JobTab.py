@@ -137,16 +137,6 @@ class JobTab(GeneralTab):
         self.action.new_thread_objects.connect(self._job_starter.startProcess)
         self.action.run_and_load.connect(self._job_starter.startProcessAndLoad)
 
-    def grouped_settings(self):
-        return super().grouped_settings() | {
-            "Execution": (
-                {"auto-load": "True"},
-                {
-                    "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
-                },
-            ),
-        }
-
     @Slot(int)
     def reload_trajectory(self, node_number: int) -> None:
         if node_number != self._current_trajectory_index:

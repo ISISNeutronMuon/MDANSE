@@ -44,6 +44,9 @@ class Option(NamedTuple):
     visible: bool = True
 
 
+NULLOPTION = Option(None)
+
+
 SettingsDict: TypeAlias = dict[str, dict[str, Option]]
 SettingsRaw: TypeAlias = Mapping[str, Mapping[str, Any]]
 
@@ -206,9 +209,10 @@ class Settings:
 
             LOG.debug("Group: %s", grp_key)
             for key, val in grp.items():
-                table[key] = tomlkit.item(val.value)
+                item = tomlkit.item(val.value)
                 if val.comment is not None:
-                    table[key].comment(val.comment)
+                    item.comment(val.comment)
+                table[key] = item
                 LOG.debug("Elem (%s) = %s  # %s", key, val.value, val.comment)
 
             newdoc.add(grp_key, table)
@@ -270,10 +274,14 @@ class Settings:
         for grp_key, grp in data.items():
             for val_key, val in grp.items():
                 LOG.debug("Init %s.%s=%s", grp_key, val_key, val)
+
                 if hasattr(val, "trivia"):
                     comment = val.trivia.comment.removeprefix("# ")
-                else:
-                    comment = None
+                else:  # Take from defaults.
+                    comment = (
+                        cls._defaults.get(grp_key, {}).get(val_key, NULLOPTION).comment
+                    )
+
                 out[grp_key][val_key] = cls._process_val(
                     val_key, grp_key, val, add_comment=comment
                 )

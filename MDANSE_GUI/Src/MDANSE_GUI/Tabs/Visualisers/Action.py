@@ -31,6 +31,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Core.Settings import Option, Settings
 from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
     HDFTrajectoryConfigurator,
 )
@@ -132,6 +133,13 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
 }
 
 
+@Settings.parametrise(
+    auto_load=Option(
+        value=True,
+        group="Execution",
+        comment="Unless manually switched off, the GUI will try to load the job results when the job is finished.",
+    )
+)
 class Action(QWidget):
     new_thread_objects = Signal(list)
     run_and_load = Signal(list)
@@ -356,16 +364,7 @@ class Action(QWidget):
             font.setBold(True)
             self.execute_button.setFont(font)
             self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
-            try:
-                default_check_status = (
-                    self._parent_tab._settings.group("Execution").get("auto-load")
-                    == "True"
-                )
-            except Exception:
-                LOG.debug("Converter tab could not load auto-load settings")
-                default_check_status = False
-            if default_check_status:
-                self.post_execute_checkbox.setChecked(True)
+            self.post_execute_checkbox.setChecked(self.auto_load)
 
             self.save_button.clicked.connect(self.save_dialog)
             self.execute_button.clicked.connect(self.execute_converter)
