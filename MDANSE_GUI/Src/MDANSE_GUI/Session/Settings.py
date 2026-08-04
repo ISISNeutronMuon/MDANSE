@@ -40,9 +40,6 @@ class GUISettings(QStandardItemModel):
 
         self.populate_model()
 
-        for i, label in enumerate(("Item", "Value", "Comment")):
-            self.setHeaderData(i, Qt.Orientation.Horizontal, label)
-
         self.itemChanged.connect(self.on_value_changed)
 
     def __getitem__(self, key: tuple[str, str]) -> Any:
@@ -67,9 +64,17 @@ class GUISettings(QStandardItemModel):
 
         valdata = group.child(item.row(), 1)
 
+        assert valdata
+
         with block_signals(self):
-            valdata.setText(value)
-            valdata.setData(value)
+            if isinstance(value, bool):
+                valdata.setCheckState(
+                    Qt.CheckState.Checked if value else Qt.CheckState.Unchecked
+                )
+                valdata.setData(value)
+            else:
+                valdata.setText(value)
+                valdata.setData(value)
 
     def save(self, filename: Path | None = None) -> None:
         Settings.save(filename)
@@ -86,26 +91,42 @@ class GUISettings(QStandardItemModel):
             self.appendRow([section_item, QStandardItem(), section_comment_item])
 
             for value in settings.values():
-                key_item, value_item = (
-                    QStandardItem(value.name),
-                    QStandardItem(value.value),
-                )
+                key_item = QStandardItem(value.name)
+
+                if isinstance(value.value, bool):
+                    value_item = QStandardItem()
+                    value_item.setCheckable(True)
+                    value_item.setCheckState(
+                        Qt.CheckState.Checked
+                        if value.value
+                        else Qt.CheckState.Unchecked
+                    )
+                    value_item.setData(value.value)
+                else:
+                    value_item = QStandardItem(value.value)
+                    value_item.setData(value.value)
+
                 key_item.setData(value.name)
                 key_item.setEditable(False)
 
-                value_item.setData(value)
                 comment_item = QStandardItem(value.comment)
                 comment_item.setData(value.comment)
 
                 comment_item.setEditable(False)
                 section_item.appendRow([key_item, value_item, comment_item])
 
+        for i, label in enumerate(("Item", "Value", "Comment")):
+            self.setHeaderData(i, Qt.Orientation.Horizontal, label)
+
     @Slot("QStandardItem*")
     def on_value_changed(self, item: QStandardItem) -> None:
         index = item.index()
         row = index.row()
 
-        new_contents = index.data(role=Qt.ItemDataRole.DisplayRole)
+        if item.isCheckable():
+            new_contents = item.checkState() is Qt.CheckState.Checked
+        else:
+            new_contents = index.data(role=Qt.ItemDataRole.DisplayRole)
         group_item = item.parent()
 
         if group_item is None:
