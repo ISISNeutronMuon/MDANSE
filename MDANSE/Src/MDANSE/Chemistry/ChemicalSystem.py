@@ -164,7 +164,7 @@ class ChemicalSystem:
             atm_num = atm_nums[symbol]
             idx = self.rdkit_mol.AddAtom(rdkit_atms[symbol])
             self._atom_indices.append(idx)
-            if atm_num is None or atm_num == 0:
+            if not atm_num:
                 self._rdkit_dummy_atms.add(idx)
 
         self._atom_types = [str(x) for x in element_list]
