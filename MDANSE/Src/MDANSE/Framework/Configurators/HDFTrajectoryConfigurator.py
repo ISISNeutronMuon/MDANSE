@@ -106,7 +106,7 @@ def next_prime(nchunks: int) -> int:
 def guess_hdf5_trajectory_parameters(
     fname: str | Path,
 ) -> tuple[int, int] | tuple[None, None]:
-    trajectory_instance = Trajectory(fname)
+    trajectory_instance = Trajectory(fname, fast_load=True)
     traj_length = len(trajectory_instance)
     chunk_size = trajectory_instance.chunk_size()
     bytes_per_num = trajectory_instance.dtype_size()
