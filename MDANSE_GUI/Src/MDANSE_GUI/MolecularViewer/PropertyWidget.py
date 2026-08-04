@@ -101,12 +101,10 @@ class PropertyWidget(QWidget):
         self._prop_type.addItems(["atoms", "trajectory"])
         self._prop_type.setCurrentIndex(0)
         self._prop_type.currentTextChanged.connect(self.get_props)
-        self._prop_type.currentTextChanged.connect(self._activate)
 
         self._prop_selection = QComboBox(self)
         self._prop_selection.setEditable(False)
         self._prop_selection.currentTextChanged.connect(self.update_table)
-        self._prop_selection.currentTextChanged.connect(self._activate)
 
         self._prop_model = QStandardItemModel()
         self._prop_table = QTableView(self)
