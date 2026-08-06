@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+from itertools import islice
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -39,7 +40,7 @@ from qtpy.QtWidgets import (
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, ValidPlotters
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
@@ -49,49 +50,40 @@ if TYPE_CHECKING:
 
 
 class SliderPack(QWidget):
-    """Widget combining several RestrictedSlider instances."""
+    """Widget combining several RestrictedSlider instances.
+
+    Parameters
+    ----------
+    n_sliders : int
+        Number of sliders to add.
+    """
 
     new_values = Signal(object)
 
-    def __init__(self, *args, n_sliders=2, **kwargs) -> None:
+    def __init__(self, *args, n_sliders: int = 2, **kwargs) -> None:
         """Create the widget with the specified number of sliders."""
         super().__init__(*args, **kwargs)
         layout = QGridLayout(self)
         self.setLayout(layout)
-        self._labels = []
-        self._sliders = []
-        self._spinboxes = []
-        self._current_values = []
-        self._minarray = np.zeros(n_sliders)
-        self._maxarray = np.ones(n_sliders)
-        self._valarray = np.ones(n_sliders) * 0.5
-        self._steparray = np.ones(n_sliders) * 0.01
-        self._clickarray = np.array(n_sliders * [101], dtype=int)
 
-        for n in range(n_sliders):
-            label = QLabel(self)
-            slider = RestrictedSlider(self)
-            slider.setOrientation(Qt.Orientation.Horizontal)
+        self._labels = [QLabel(self) for _ in range(n_sliders)]
+        self._sliders = [
+            RestrictedSlider(Qt.Orientation.Horizontal, self) for _ in range(n_sliders)
+        ]
+        self._spinboxes = [QDoubleSpinBox(self) for _ in range(n_sliders)]
 
-            box = QDoubleSpinBox(self)
-            box.setSingleStep(self._steparray[n])
-
+        for n, (label, slider, box) in enumerate(
+            zip(self._labels, self._sliders, self._spinboxes, strict=True)
+        ):
             layout.addWidget(label, n, 0)
             layout.addWidget(slider, n, 1, 1, 2)
             layout.addWidget(box, n, 3)
 
-            self._labels.append(label)
-            self._sliders.append(slider)
-            self._spinboxes.append(box)
-
-            slider.valueChanged.connect(self.slider_to_box)
+            box.setSingleStep(0.01)
             box.valueChanged.connect(self.box_to_slider)
             box.valueChanged.connect(self.collect_values)
-            self._current_values.append(0)
-        slider1 = self._sliders[0]
-        slider2 = self._sliders[1]
-        slider1.new_limit.connect(slider2.set_lower_limit)
-        slider2.new_limit.connect(slider1.set_upper_limit)
+
+            slider.valueChanged.connect(self.slider_to_box)
 
     @Slot(bool)
     def new_coupling(self, new_val: bool):
@@ -103,17 +95,17 @@ class SliderPack(QWidget):
             True for coupled sliders, false otherwise
 
         """
-        self._sliders[0]._coupled = new_val
-        self._sliders[1]._coupled = new_val
+        for slider in islice(self._sliders, 2):
+            slider._coupled = new_val
 
     @Slot(object)
     def new_slider_labels(self, input_labels: list[str]):
         """Change the text labels of the sliders to new values."""
-        for number, element in enumerate(input_labels):
-            self._labels[number].setText(element)
+        for label, element in zip(self._labels, input_labels, strict=True):
+            label.setText(element)
 
     @Slot(object)
-    def new_limits(self, input_limits: list[list[float]]):
+    def new_limits(self, input_limits: list[tuple[float, float, float]]):
         """Change the limits and step number of the sliders.
 
         Since QSlider works with integer numbers, the float
@@ -122,28 +114,23 @@ class SliderPack(QWidget):
 
         Parameters
         ----------
-        input_limits : list[list[float]]
+        input_limits : list[tuple[float, float, float]]
             For each slider, [minimum, maximum, step_size] values
 
         """
-        for number, element in enumerate(input_limits):
-            minimum, maximum, stepsize = element[0], element[1], element[2]
+        for (minimum, maximum, stepsize), box, slider in zip(
+            input_limits, self._spinboxes, self._sliders, strict=True
+        ):
             clicks = round((maximum - minimum) / stepsize)
-            self._minarray[number] = minimum
-            self._maxarray[number] = maximum
-            self._steparray[number] = stepsize
-            self._clickarray[number] = clicks
-            temp_value = self._spinboxes[number].value()
-            self._sliders[number].setMaximum(clicks)
-            self._spinboxes[number].setMinimum(minimum)
-            self._spinboxes[number].setMaximum(maximum)
-            self._spinboxes[number].setSingleStep(stepsize)
-            self._spinboxes[number].setDecimals(abs(int(np.floor(np.log10(stepsize)))))
-            temp_value = min(maximum, temp_value)
-            temp_value = max(minimum, temp_value)
-            click_value = round((temp_value - minimum) / stepsize)
-            self._sliders[number].setValue(click_value)
-            self._spinboxes[number].setValue(temp_value)
+
+            slider.setRange(0, clicks)
+
+            temp_value = np.clip(box.value(), minimum, maximum)
+            box.setRange(minimum, maximum)
+            box.setSingleStep(stepsize)
+            box.setDecimals(abs(int(np.floor(np.log10(stepsize)))))
+            box.setValue(temp_value)
+        self.box_to_slider()
 
     def set_values(self, new_values: list[float]):
         """Set both spinboxes and sliders to the new incoming values.
@@ -157,46 +144,49 @@ class SliderPack(QWidget):
             One new value per slider
 
         """
-        nv = np.array(new_values)
-        nv = np.maximum(nv, self._minarray)
-        nv = np.minimum(nv, self._maxarray)
-        clicks = np.round((nv - self._minarray) / self._steparray).astype(int)
-        for n in range(len(nv)):
-            self._spinboxes[n].setValue(nv[n])
-            self._sliders[n].setValue(clicks[n])
+        for box, val in zip(self._spinboxes, new_values, strict=True):
+            box.setValue(np.clip(val, box.minimum(), box.maximum()))
+        self.box_to_slider()
+
+    @property
+    def slider_values(self) -> list[float]:
+        """Values returned from sliders (as ints [clicks])."""
+        return [slider.value() for slider in self._sliders]
+
+    @property
+    def box_values(self) -> list[float]:
+        """Values returned from boxes (as floats)."""
+        return [box.value() for box in self._spinboxes]
 
     @Slot()
     def slider_to_box(self):
         """Update spin boxes if slider is moving."""
-        vals = np.zeros_like(self._valarray)
-        clicks = np.zeros_like(self._clickarray)
-        for ns, slider in enumerate(self._sliders):
-            clicks[ns] = slider.value()
-        vals = self._minarray + clicks * self._steparray
-        for ns, box in enumerate(self._spinboxes):
-            box.setValue(vals[ns])
+        with block_signals(self, *self._spinboxes):
+            for box, slider in zip(
+                self._spinboxes,
+                self._sliders,
+                strict=True,
+            ):
+                box.setValue(box.minimum() + (slider.value() * box.singleStep()))
+        self.box_to_slider()
 
     @Slot()
     def box_to_slider(self):
         """Update sliders if spin boxes have changed."""
-        with block_signals(self):
-            vals = np.zeros_like(self._valarray)
-            clicks = np.zeros_like(self._clickarray)
-            for ns, box in enumerate(self._spinboxes):
-                vals[ns] = box.value()
-            clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
-            for ns, slider in enumerate(self._sliders):
-                slider.setValue(clicks[ns])
-            self.slider_to_box()
+        with block_signals(self, *self._sliders):
+            for slider, box in zip(
+                self._sliders,
+                self._spinboxes,
+                strict=True,
+            ):
+                slider.setValue(round((box.value() - box.minimum()) / box.singleStep()))
+        self.collect_values()
 
     @Slot()
     def collect_values(self):
         """Get and emit current values from all sliders/spinboxes."""
-        result = []
-        for box in self._spinboxes:
-            result.append(box.value())
-        self._current_values = result
-        self.new_values.emit(result)
+        self._current_values = self.box_values
+        self.new_values.emit(self.box_values)
 
 
 class PlotWidget(QWidget):
@@ -207,9 +197,13 @@ class PlotWidget(QWidget):
     reset_slider_values = Signal(bool)
     change_slider_coupling = Signal(bool)
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        plotter_type: ValidPlotters = "Single",
+        **kwargs,
+    ) -> None:
         """Create an empty plot with the default plotter."""
-        plotter_type = kwargs.pop("plotter_type", "Single")
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
@@ -302,22 +296,22 @@ class PlotWidget(QWidget):
         )
 
     @Slot()
-    def use_legend(self, bool_flag: bool | None = None):
-        if bool_flag is None:
-            bool_flag = self._legend_box.isChecked()
+    def use_legend(self, override: bool | None = None):
+        if override is None:
+            override = self._legend_box.isChecked()
         if self._plotting_context:
-            self._plotting_context.use_legend = bool_flag
+            self._plotting_context.use_legend = override
         if self._plotter:
-            self._plotter.toggle_legend(bool_flag)
+            self._plotter.toggle_legend(override)
 
     @Slot()
-    def use_grid(self, bool_flag: bool | None = None):
-        if bool_flag is None:
-            bool_flag = self._grid_box.isChecked()
+    def use_grid(self, override: bool | None = None):
+        if override is None:
+            override = self._grid_box.isChecked()
         if self._plotting_context:
-            self._plotting_context.use_grid = bool_flag
+            self._plotting_context.use_grid = override
         if self._plotter:
-            self._plotter.toggle_grid(bool_flag)
+            self._plotter.toggle_grid(override)
 
     def plot_data(self, update_only=False):
         """Use the internal plotter instance to create a plot.
