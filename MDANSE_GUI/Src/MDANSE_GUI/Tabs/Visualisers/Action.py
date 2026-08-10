@@ -136,7 +136,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
 @Settings.parametrise(
     auto_load=Option(
         value=True,
-        group="Execution",
+        group="execution",
         comment="Unless manually switched off, the GUI will try to load the job results when the job is finished.",
     )
 )
