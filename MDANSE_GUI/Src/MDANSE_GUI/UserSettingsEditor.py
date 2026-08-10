@@ -94,6 +94,7 @@ class UserSettingsEditor(QDialog):
             self.data_model = self._session._settings
             self.proxy_model = QSortFilterProxyModel(self)
             self.proxy_model.setSourceModel(self.data_model)
+            self.proxy_model.sort(0, Qt.SortOrder.AscendingOrder)
             self.viewer.setModel(self.proxy_model)
             self.expand_columns()
 
