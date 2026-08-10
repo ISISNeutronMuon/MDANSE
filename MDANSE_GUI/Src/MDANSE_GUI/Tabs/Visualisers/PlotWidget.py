@@ -248,6 +248,7 @@ class PlotWidget(QWidget):
         except Exception:
             self._plotter = Plotter()
         self._plotter._figure = self._figure
+        self.plot_blank()
 
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())

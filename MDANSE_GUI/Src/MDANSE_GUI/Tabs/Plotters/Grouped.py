@@ -130,25 +130,26 @@ class Grouped(Plotter):
 
         """
         super().change_normalisation(new_value)
-        target = self._figure
-        if target is None or not self._active_curves:
-            return
 
-        for curve_index, curve in enumerate(self._active_curves):
-            xdata, ydata = self._backup_curves[curve_index]
-            xdata, ydata = self.normalise_curve(xdata, ydata)
-            curve.set_xdata(xdata)
-            curve.set_ydata(ydata)
+        # target = self._figure
+        # if target is None or not self._active_curves:
+        #     return
 
-        target.canvas.draw()
+        # for curve_index, curve in enumerate(self._active_curves):
+        #     xdata, ydata = self._backup_curves[curve_index]
+        #     xdata, ydata = self.normalise_curve(xdata, ydata)
+        #     curve.set_xdata(xdata)
+        #     curve.set_ydata(ydata)
 
-        for axes in self._axes:
-            axes.relim()
-            axes.autoscale()
+        # target.canvas.draw()
 
-        if self._toolbar is not None:
-            self._toolbar.update()
-            self._toolbar.push_current()
+        # for axes in self._axes:
+        #     axes.relim()
+        #     axes.autoscale()
+
+        # if self._toolbar is not None:
+        #     self._toolbar.update()
+        #     self._toolbar.push_current()
 
     def toggle_legend(self, enabled: bool) -> None:
         if self._figure is None:
