@@ -108,7 +108,6 @@ class Vectors(Plotter):
             return
 
         gs = self._figure.add_gridspec(2, 2, wspace=0.1)
-        labels = iter(("Used", "Found"))
 
         for databundle in plotting_context.datasets().values():
             dataset = databundle.dataset
@@ -119,8 +118,9 @@ class Vectors(Plotter):
             match dataset._name:
                 case "Available vectors":
                     axes = self._figure.add_subplot(gs[0, 0])
+                    labels = iter(("Found", "Used"))
 
-                    for ind, (_, curve) in enumerate(dataset.curves_vs_axis("|q|")):
+                    for ind, (_x, curve) in enumerate(dataset.curves_vs_axis("|q|")):
                         lab = plotlabel if dataset._n_dim != 2 else next(labels)
                         width = (
                             0.8 * abs(np.mean(np.diff(curve[0])))
