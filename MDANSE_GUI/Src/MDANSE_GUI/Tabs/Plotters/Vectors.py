@@ -120,11 +120,14 @@ class Vectors(Plotter):
                 case "Available vectors":
                     axes = self._figure.add_subplot(gs[0, 0])
 
-                    for ind, (_, curve) in enumerate(
-                        dataset.curves_vs_axis(databundle.main_axis)
-                    ):
+                    for ind, (_, curve) in enumerate(dataset.curves_vs_axis("|q|")):
                         lab = plotlabel if dataset._n_dim != 2 else next(labels)
-                        width = 0.8 * abs(np.mean(np.diff(curve[0])))
+                        width = (
+                            0.8 * abs(np.mean(np.diff(curve[0])))
+                            if len(curve[0]) > 1
+                            else 1
+                        )
+
                         axes.bar(
                             *curve,
                             color=(f"C{ind}", 0.75),

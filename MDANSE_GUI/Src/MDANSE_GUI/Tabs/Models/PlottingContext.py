@@ -631,7 +631,22 @@ class SingleDataset:
         axis_lengths = [len(self._axes[name]) for name in self._axes_order]
         match_unit = axis_unit is not None
 
-        if np.allclose(data_shape, axis_lengths):
+        if (
+            len(axis_lengths) == 1
+            and len(data_shape) == 2
+            and data_shape[0] == axis_lengths[0]
+        ):
+            # Assume multiple lines in block
+
+            axis_name = first(self._axes_order)
+
+            for current_dim in range(data_shape[1]):
+                yield (
+                    axis_name,
+                    (x_axis, self.data[:, current_dim]),
+                )
+
+        elif np.allclose(data_shape, axis_lengths):
             for current_dim, axis_name in enumerate(self._axes_order):
                 curr_unit = self._axes_units[axis_name]
 
@@ -667,21 +682,6 @@ class SingleDataset:
                         self._name,
                         index,
                     )
-
-        elif (
-            len(axis_lengths) == 1
-            and len(data_shape) == 2
-            and data_shape[0] == axis_lengths[0]
-        ):
-            # Assume multiple lines in block
-
-            axis_name = first(self._axes_order)
-
-            for current_dim in range(data_shape[1]):
-                yield (
-                    axis_name,
-                    (x_axis, self.data[:, current_dim]),
-                )
 
         else:
             raise ValueError("Array shape does not match the order of the axes")
