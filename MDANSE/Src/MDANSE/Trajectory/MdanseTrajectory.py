@@ -34,16 +34,9 @@ from MDANSE.MolecularDynamics.Configuration import (
     AbsoluteConfiguration,
     PeriodicAbsoluteConfiguration,
 )
-from MDANSE.MolecularDynamics.UnitCell import (
-    BAD_CELL,
-    CELL_SIZE_LIMIT,
-    CHANGING_CELL,
-    NO_CELL,
-    UnitCell,
-)
 from MDANSE.util_types import FloatArray
 
-from .FileTrajBase import TrajDataArray, TrajectoryFile
+from .FileTrajBase import TrajectoryFile
 
 SLICE_ALL = np.s_[:]
 
@@ -101,7 +94,6 @@ class MdanseTrajectory(TrajectoryFile):
         self._has_database = "atom_database" in self._h5_file
         self._has_atoms = []
 
-        # Load all the unit cells
         self._load_unit_cells()
 
         # Load the chemical system
@@ -287,7 +279,7 @@ class MdanseTrajectory(TrajectoryFile):
         """
         self._check_frame(frame)
 
-        unit_cell = self._unit_cells[frame] if self._unit_cells is not None else None
+        unit_cell = self.unit_cell(frame)
 
         variables = {
             k: v[frame, :, :].astype(np.float64)
@@ -309,55 +301,16 @@ class MdanseTrajectory(TrajectoryFile):
         return conf
 
     def _load_unit_cells(self):
-        """Load all the unit cells."""
+        """Load the unit cells."""
         if "unit_cell" in self._h5_file:
-            self._unit_cells = [UnitCell(uc) for uc in self._h5_file["unit_cell"][:]]
+            self.unit_cells_raw = self._h5_file["unit_cell"][:]
         else:
-            self._unit_cells = None
-            self.unit_cell_warning = NO_CELL
-
-        if not self.unit_cell_warning:
-            if self._unit_cells[0].volume < CELL_SIZE_LIMIT:
-                self.unit_cell_warning = BAD_CELL
-                return
-
-            reference_array = self._unit_cells[0].direct
-
-            if any(
-                not np.allclose(reference_array, uc.direct)
-                for uc in self._unit_cells[1:]
-            ):
-                self.unit_cell_warning = CHANGING_CELL
-                return
+            self.unit_cells_raw = None
+        self.check_unit_cells()
 
     def time(self):
         """Return the time array for all the frames."""
         return self._h5_file["time"][:]
-
-    def unit_cell(self, frame: int) -> UnitCell | None:
-        """Return the unit cell at a given frame.
-
-        Parameters
-        ----------
-        frame : int
-            Index of the selected trajectory frame.
-
-        Returns
-        -------
-        UnitCell | None
-            Unit cell definition. None if no cell is defined in the trajectory.
-
-        Raises
-        ------
-        IndexError
-            If frame index is out of the range covered by the trajectory.
-
-        """
-        self._check_frame(frame)
-
-        if self._unit_cells is not None:
-            return self._unit_cells[frame]
-        return None
 
     def __len__(self) -> int:
         """Return the length of the trajectory.

@@ -22,6 +22,7 @@ import numpy as np
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.UnitCell import NO_CELL
 
 from .IConfigurator import PredictionSettings
 
@@ -82,12 +83,10 @@ class GridStepConfigurator(FloatConfigurator):
         trajectory: Trajectory = self.configurable[self.dependencies["trajectory"]][
             "instance"
         ]
-        if any(trajectory.unit_cell(frame) is None for frame in frames):
+        if trajectory.unit_cell_warning == NO_CELL:
             self._avg_cell = trajectory.max_span
         else:
-            self._avg_cell = np.array(
-                [trajectory.unit_cell(frame)._unit_cell for frame in frames]
-            ).mean(axis=0)
+            self._avg_cell = trajectory.unit_cells_raw.mean(axis=0)
         return self._avg_cell
 
     def configure(self, value):

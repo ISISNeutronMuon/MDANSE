@@ -140,12 +140,11 @@ class TrajectoryEditor(IJob):
         )
 
         if self.configuration["unit_cell"]["apply"]:
-            self._new_unit_cell = UnitCell(
-                np.array(self.configuration["unit_cell"]["value"])
+            self._new_unit_cell = np.array(self.configuration["unit_cell"]["value"])
+            self._input_trajectory._trajectory.unit_cells_raw = np.tile(
+                self._new_unit_cell, (len(self._input_trajectory), 1, 1)
             )
-            self._input_trajectory._trajectory._unit_cells = [
-                self._new_unit_cell for _ in range(len(self._input_trajectory))
-            ]
+            self._input_trajectory._trajectory.check_unit_cells()
 
         # The collection of atoms corresponding to the atoms selected for output.
         indices = self.trajectory.atom_indices

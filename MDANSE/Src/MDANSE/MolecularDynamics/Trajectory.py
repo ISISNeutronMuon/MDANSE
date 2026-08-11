@@ -611,6 +611,10 @@ class Trajectory:
     def unit_cell_warning(self) -> str:
         return self._trajectory.unit_cell_warning
 
+    @property
+    def unit_cells_raw(self):
+        return self._trajectory.unit_cells_raw
+
     def calculate_coordinate_span(self) -> None:
         min_span = np.array(3 * [1e11])
         max_span = np.zeros(3)
@@ -1297,14 +1301,6 @@ class TrajectoryWriter:
             for k, v in self._last_configuration.variables.items():
                 dset = configuration_grp.get(k, None)
                 dset.resize((self._current_index, n_atoms, 3))
-            try:
-                unit_cell_dataset = self._h5_file["/unit_cell"]
-            except KeyError:
-                pass
-            else:
-                unit_cell_dataset.resize((self._current_index, 3, 3))
-            time_dataset = self._h5_file["/time"]
-            time_dataset.resize((self._current_index,))
         self._h5_file.close()
 
     def write_charges(self, charges: FloatArray, index: int, atom_indices: list[int] | None = None):
@@ -1378,7 +1374,6 @@ class TrajectoryWriter:
             dset = self._h5_file.create_dataset(
                     dataset,
                     shape=(self._n_steps,) if dataset != "unit_cell" else (self._n_steps, 3, 3),
-                    chunks=True,
                     dtype=self._dtype,)
         dset.attrs["units"] = units.get(dataset, "")
         dset[frame_indices] = data
@@ -1461,7 +1456,6 @@ class TrajectoryWriter:
                 unit_cell_dset = self._h5_file.create_dataset(
                     "unit_cell",
                     shape=(self._n_steps, 3, 3),
-                    chunks=True,
                     dtype=np.float64,
                 )
                 unit_cell_dset.attrs["units"] = units.get("unit_cell", "")
@@ -1473,7 +1467,6 @@ class TrajectoryWriter:
             time_dset = self._h5_file.create_dataset(
                 "time",
                 shape=(self._n_steps,),
-                chunks=True,
                 dtype=np.float64,
             )
             time_dset.attrs["units"] = units.get("time", "")
