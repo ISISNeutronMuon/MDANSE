@@ -75,3 +75,152 @@ jobs:
       - name: Run GUI unit tests
         working-directory: MDANSE_GUI
         run: pytest
+
+  test_tutorials:
+    name: (${{ matrix.os }}-${{ matrix.python-version }}) Build MDANSE, checkout MDANSE-Examples and run the tutorials
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install MDANSE
+        working-directory: MDANSE
+        run: python -m pip install --group test --group external .
+
+      - name: Check out MDANSE-Examples
+        uses: actions/checkout@v4
+        with:
+          repository: ISISNeutronMuon/MDANSE-Examples
+          ref: main
+          path: MDANSE-Examples
+
+      - name: Run tutorial 1 scripts
+        working-directory: MDANSE-Examples/tutorials/tutorial1-phase-transition/mdanse_inputs
+        run: |
+          set -euxo pipefail
+  
+          echo "Running tutorial 1 scripts"
+  
+          echo "Running script1_conversion.py"
+          python script1_conversion.py
+          echo "Checking converted_trajectory.mdt exists"
+          test -f ../mdanse_outputs/converted_trajectory.mdt
+  
+          echo "Running script2_temperature.py"
+          python script2_temperature.py
+          echo "Checking temperature.mda exists"
+          test -f ../mdanse_outputs/temperature.mda
+  
+          echo "Running script3_rmsd.py"
+          python script3_rmsd.py
+          echo "Checking rmsd.mda exists"
+          test -f ../mdanse_outputs/rmsd.mda
+  
+          echo "Running script4_pdf.py"
+          python script4_pdf.py
+          echo "Checking pdf.mda exists"
+          test -f ../mdanse_outputs/pdf.mda
+
+      - name: Run tutorial 2 scripts
+        working-directory: MDANSE-Examples/tutorials/tutorial2-van-hove-function/mdanse_inputs
+        run: |
+          set -euxo pipefail
+  
+          echo "Running tutorial 2 scripts"
+  
+          echo "Running script1_conversion.py"
+          python script1_conversion.py
+          echo "Checking converted_trajectory.mdt exists"
+          test -f ../mdanse_outputs/converted_trajectory.mdt
+  
+          echo "Running script2_vhfd.py"
+          python script2_vhfd.py
+          echo "Checking vanhovefunctiondistinct.mda exists"
+          test -f ../mdanse_outputs/vanhovefunctiondistinct.mda
+  
+          echo "Running script3_vhfs.py"
+          python script3_vhfs.py
+          echo "Checking vanhovefunctionself.mda exists"
+          test -f ../mdanse_outputs/vanhovefunctionself.mda
+
+      - name: Run tutorial 3 scripts
+        working-directory: MDANSE-Examples/tutorials/tutorial3-quasielastic-neutron-scattering/mdanse_inputs
+        run: |
+          set -euxo pipefail
+  
+          echo "Running tutorial 3 scripts"
+  
+          echo "Running script1_conversion.py"
+          python script1_conversion.py
+          echo "Checking converted_trajectory.mdt exists"
+          test -f ../mdanse_outputs/converted_trajectory.mdt
+  
+          echo "Running script2_disf.py"
+          python script2_disf.py
+          echo "Checking dynamicincoherentstructurefactor.mda exists"
+          test -f ../mdanse_outputs/dynamicincoherentstructurefactor.mda
+  
+          echo "Running script3_gdisf.py"
+          python script3_gdisf.py
+          echo "Checking gaussiandynamicincoherentstructurefactor.mda exists"
+          test -f ../mdanse_outputs/gaussiandynamicincoherentstructurefactor.mda
+
+      - name: Run tutorial 4 scripts
+        working-directory: MDANSE-Examples/tutorials/tutorial4-coherent-and-incoherent-scattering/mdanse_inputs
+        run: |
+          set -euxo pipefail
+  
+          echo "Running tutorial 4 scripts"
+  
+          echo "Running script1_conversion.py"
+          python script1_conversion.py
+          echo "Checking converted_trajectory.mdt exists"
+          test -f ../mdanse_outputs/converted_trajectory.mdt
+  
+          echo "Running script2_random.py"
+          python script2_random.py
+  
+          echo "Running script3_atm1_atm2.py"
+          python script3_atm1_atm2.py
+          echo "Checking converted_atm1_atm2.mdt exists"
+          test -f ../mdanse_outputs/converted_atm1_atm2.mdt
+          
+          echo "Running script4_atm1atm2.py"
+          python script4_atm1atm2.py
+          echo "Checking converted_atm1atm2.mdt exists"
+          test -f ../mdanse_outputs/converted_atm1atm2.mdt
+          
+          echo "Running script5_disf.py"
+          python script5_disf.py
+          echo "Checking disf_atm1_atm2.mda exists"
+          test -f ../mdanse_outputs/disf_atm1_atm2.mda
+          echo "Checking disf_atm1atm2.mda exists"
+          test -f ../mdanse_outputs/disf_atm1atm2.mda
+          
+          echo "Running script6_dcsf.py"
+          python script6_dcsf.py
+          echo "Checking dcsf_atm1_atm2.mda exists"
+          test -f ../mdanse_outputs/dcsf_atm1_atm2.mda
+          echo "Checking dcsf_atm1atm2.mda exists"
+          test -f ../mdanse_outputs/dcsf_atm1atm2.mda
+          
+          echo "Running script7_ndtsf.py"
+          python script7_ndtsf.py
+          echo "Checking ndtsf_atm1_atm2.mda exists"
+          test -f ../mdanse_outputs/ndtsf_atm1_atm2.mda
+          echo "Checking ndtsf_atm1atm2.mda exists"
+          test -f ../mdanse_outputs/ndtsf_atm1atm2.mda
