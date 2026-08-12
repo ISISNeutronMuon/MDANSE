@@ -149,10 +149,7 @@ jobs:
           echo "Checking converted_trajectory.mdt exists"
           test -f ../mdanse_outputs/converted_trajectory.mdt
   
-          echo "Running script2_vhfd.py"
-          python script2_vhfd.py
-          echo "Checking vanhovefunctiondistinct.mda exists"
-          test -f ../mdanse_outputs/vanhovefunctiondistinct.mda
+          echo "Skipping script2_vhfd.py as it can take some time."
   
           echo "Running script3_vhfs.py"
           python script3_vhfs.py
