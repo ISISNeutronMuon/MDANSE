@@ -127,13 +127,15 @@ jobs:
   
           echo "Running script3_rmsd.py"
           python script3_rmsd.py
-          echo "Checking rmsd.mda exists"
-          test -f ../mdanse_outputs/rmsd.mda
+          echo "Checking root_mean_square_displacement.mda exists"
+          test -f ../mdanse_outputs/root_mean_square_displacement.mda
   
           echo "Running script4_pdf.py"
           python script4_pdf.py
-          echo "Checking pdf.mda exists"
-          test -f ../mdanse_outputs/pdf.mda
+          echo "Checking pair_distribution_function_solid.mda exists"
+          test -f ../mdanse_outputs/pair_distribution_function_solid.mda
+          echo "Checking pair_distribution_function_liquid.mda exists"
+          test -f ../mdanse_outputs/pair_distribution_function_liquid.mda          
 
       - name: Run tutorial 2 scripts
         working-directory: MDANSE-Examples/tutorials/tutorial2-van-hove-function/mdanse_inputs
