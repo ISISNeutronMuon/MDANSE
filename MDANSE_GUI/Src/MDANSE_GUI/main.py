@@ -24,7 +24,7 @@ from argparse import ArgumentParser
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
+from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory, QSystemTrayIcon
 
 import MDANSE_GUI
 from MDANSE.MLogging import FMT, LOG
@@ -66,6 +66,11 @@ def build_parser():
         action="store_true",
         help="Do not display splash screen on startup.",
     )
+    parser.add_argument(
+        "--no-systray",
+        action="store_true",
+        help="Do not create a system tray icon.",
+    )
     return parser
 
 
@@ -103,8 +108,19 @@ def startGUI(some_args):
         splash.show()
         t0 = time.time()
 
+    if not args.no_systray:
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            app.setQuitOnLastWindowClosed(False)
+        else:
+            LOG.error("System Tray Icon is not supported by your OS.")
+
     root = TabbedWindow(
-        parent=None, title="MDANSE for Python 3", settings=settings, app_instance=app
+        parent=None,
+        title="MDANSE for Python 3",
+        settings=settings,
+        app_instance=app,
+        create_systray_icon=not args.no_systray,
+        systray_icon=QIcon(os.path.join(path, "Icons/MDANSE.ico")),
     )
     root.show()
 
