@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
-from qtpy.QtGui import QDesktopServices
+from qtpy.QtGui import QCloseEvent, QDesktopServices, QIcon
 from qtpy.QtWidgets import (
     QAction,
     QApplication,
@@ -30,6 +30,7 @@ from qtpy.QtWidgets import (
     QMenu,
     QMenuBar,
     QMessageBox,
+    QSystemTrayIcon,
     QToolBar,
 )
 
@@ -114,10 +115,15 @@ class TabbedWindow(QMainWindow):
         parent=None,
         title="MDANSE",
         settings=None,
-        app_instance=None,
+        app_instance: QApplication | None = None,
+        create_systray_icon: bool = True,
+        systray_icon: QIcon | None = None,
         **kwargs,
     ):
         super().__init__(parent, *args, **kwargs)
+        self.system_tray_icon = None
+        self.icon_object = systray_icon
+        self.app_instance = None
         self.tabs = NotificationTabWidget(self)
         self.setCentralWidget(self.tabs)
         self._views = defaultdict(list)
@@ -145,6 +151,7 @@ class TabbedWindow(QMainWindow):
         self.style_selector.icon_swap.connect(self.invertToolbar)
 
         if app_instance is not None:
+            self.app_instance = app_instance
             app_instance.aboutToQuit.connect(self._session.save)
         self._session.load()
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
@@ -190,6 +197,24 @@ class TabbedWindow(QMainWindow):
         self.tabs.currentChanged.connect(self.tabs.reset_current_color)
         self.check_dark_mode()
 
+        if create_systray_icon:
+            self.create_systray_icon()
+
+    def create_systray_icon(self):
+        self.system_tray_icon = QSystemTrayIcon(self.icon_object)
+        self.tray_menu = QMenu()
+        for label, func_slot in [
+            ("Show GUI window", self.showNormal),
+            (None, None),
+            ("Quit", self.app_instance.quit),
+        ]:
+            if label is None and func_slot is None:
+                self.tray_menu.addSeparator()
+            else:
+                self.tray_menu.addAction(label, func_slot)
+        self.system_tray_icon.setContextMenu(self.tray_menu)
+        self.system_tray_icon.setVisible(True)
+
     def check_dark_mode(self):
         style_hints = QApplication.styleHints()
         colour_scheme = style_hints.colorScheme()
@@ -202,6 +227,15 @@ class TabbedWindow(QMainWindow):
         if event.type() == event.PaletteChange:
             self.check_dark_mode()
         super().changeEvent(event)
+
+    def closeEvent(self, event: QCloseEvent):
+        if self.system_tray_icon is None:
+            super().closeEvent(event)
+        if not event.spontaneous or not self.isVisible():
+            return
+        if self.system_tray_icon.isVisible():
+            self.hide()
+            event.ignore()
 
     def createCommonModels(self):
         self._trajectory_model = TrajectoryModel()
