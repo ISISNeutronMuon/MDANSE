@@ -451,3 +451,60 @@ def test_sldp(generate_benchmarks, tmp_path, traj_info):
         startswith=True,
         compare_axis=True,
     )
+
+
+@pytest.mark.parametrize(
+    "traj_info",
+    [
+        ("cp2k_srtio3", CONV_DIR / "cp2k_srtio3.mdt"),
+        ("CuAu_asap_10fs-step_unfiltered", CONV_DIR / "CuAu_asap_10fs-step_unfiltered.mdt"),
+        ("nonorthogonal_cell", CONV_DIR / "nonorthogonal_cell.mdt")
+    ],
+    ids=lambda x: x[0],
+)
+def test_ssf3d(generate_benchmarks, tmp_path, traj_info):
+    temp_name = tmp_path / "output"
+    out_file = temp_name.with_suffix(".mda")
+    log_file = temp_name.with_suffix(".log")
+    text_file = tmp_path / "output_text.tar"
+    result_file = RESULTS_DIR / f"ssf3d_{traj_info[0]}.mda"
+
+    if generate_benchmarks:
+        temp_name = result_file.with_suffix("")
+
+    parameters = {
+        "atom_selection": None,
+        "atom_transmutation": None,
+        "frames": (0, 10, 1),
+        "output_files": (temp_name, ("MDAFormat", "TextFormat"), "INFO"),
+        "q_vectors": {"n_samples": '100',
+                      "q1": (1.0, 0.0, 0.0),
+                      "q1_range": (-3.0, 3.0, 1.0),
+                      "q2": (0.0, 1.0, 0.0),
+                      "q2_range": (-3.0, 3.0, 1.0),
+                      "q3": "q1 x q2",
+                      "q3_range": (-3.0, 3.0, 1.0),
+                      "seed": '0',
+                      "supercell_used": (1, 1, 1)},
+        'running_mode': ('single-core',),
+        "trajectory": traj_info[1],
+        "weights": "b_coherent",
+    }
+
+    sldp = IJob.create("StaticStructureFactor3D")
+    sldp.run(parameters, status=True)
+
+    if generate_benchmarks:
+        return
+
+    assert out_file.is_file()
+    assert log_file.is_file()
+    assert text_file.is_file()
+
+    compare_hdf5(
+        out_file,
+        result_file,
+        ("ssf3d", ),
+        startswith=True,
+        compare_axis=True,
+    )
