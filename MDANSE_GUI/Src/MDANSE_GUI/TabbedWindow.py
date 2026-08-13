@@ -231,6 +231,7 @@ class TabbedWindow(QMainWindow):
     def closeEvent(self, event: QCloseEvent):
         if self.system_tray_icon is None:
             super().closeEvent(event)
+            return
         if not event.spontaneous or not self.isVisible():
             return
         if self.system_tray_icon.isVisible():
