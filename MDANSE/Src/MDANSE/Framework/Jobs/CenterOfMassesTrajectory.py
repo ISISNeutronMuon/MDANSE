@@ -155,14 +155,15 @@ class CenterOfMassesTrajectory(IJob):
                     continue
 
                 individual_coordinates = conf.coordinates[cluster]
+                individual_masses = [self.masses[at_index] for at_index in cluster]
                 centre_of_mass = center_of_mass(
                     individual_coordinates,
-                    [self.masses[at_index] for at_index in cluster],
+                    individual_masses,
                 )
                 com_coords[mol_index] = centre_of_mass
                 average_radius = individual_coordinates - centre_of_mass.reshape(1, 3)
                 average_radius = np.linalg.norm(average_radius, axis=1)
-                average_radius = np.average(average_radius, weights=self.masses)
+                average_radius = np.average(average_radius, weights=individual_masses)
                 temp_radii[cluster_name].append(average_radius)
                 mol_index += 1
         for atom_index in self.selected_indices:
