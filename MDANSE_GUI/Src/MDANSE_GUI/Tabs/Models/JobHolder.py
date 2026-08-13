@@ -35,7 +35,7 @@ from MDANSE.IO.IOUtils import job_status_text_summary
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
 from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
-from MDANSE_GUI.Tabs.Views.Delegates import ProgressDelegate
+from MDANSE_GUI.Tabs.Views.Delegates import OSCILLATOR_STEPS, ProgressDelegate
 
 
 class JobThread(QThread):
@@ -144,8 +144,16 @@ class JobEntry(QObject):
         self._prog_item.setData(0, role=Qt.ItemDataRole.UserRole)
         self._prog_item.setData("progress", role=Qt.ItemDataRole.DisplayRole)
         self._prog_item.setData(0, role=ProgressDelegate.progress_role)
-        self._prog_item.setData(100, role=ProgressDelegate.progress_role + 1)
+        self._prog_item.setData(
+            OSCILLATOR_STEPS, role=ProgressDelegate.progress_role + 1
+        )
+        self.oscillator_timer = QTimer()
+        self.oscillator_timer.setInterval(100)
+        self.oscillator_timer.timeout.connect(self.advance_oscillator)
+        self.oscillator_pos = 0
         self.handler = JobLogHandler()
+        self.oscillator_timer.start()
+        self._stat_item.setText(self.job.state.name.title())
 
     def text_summary(self) -> str:
         nl = "\n"
@@ -157,6 +165,18 @@ Parameters:
 {job_status_text_summary(self.job)}
 """
 
+    def advance_oscillator(self):
+        if self.job.state == JobStates.STARTING:
+            self.oscillator_pos -= 1
+            if self.oscillator_pos < -2 * OSCILLATOR_STEPS:
+                self.oscillator_pos = -1
+            self._prog_item.setData(
+                self.oscillator_pos,
+                role=ProgressDelegate.progress_role,
+            )
+        else:
+            self.oscillator_timer.stop()
+
     def update_fields(self):
         self._prog_item.setText(
             f"{self.job.progress} percent complete ({self.job.pct_rate} %/s)"
@@ -165,6 +185,9 @@ Parameters:
         self._prog_item.setData(
             int(self.job.current_step),
             role=ProgressDelegate.progress_role,
+        )
+        self._prog_item.setData(
+            self.job.n_steps, role=ProgressDelegate.progress_role + 1
         )
         self._prog_item.setData(
             self.job.pct_rate,
@@ -211,11 +234,11 @@ Parameters:
     def on_started(self, target_steps: int):
         LOG.info(f"Item received on_started: {target_steps} total steps")
         self.job.n_steps = target_steps
-        self._prog_item.setData(target_steps, role=ProgressDelegate.progress_role + 1)
-        self.start_job()
+        self._stat_item.setText(self.job.state.name.title())
 
     @Slot(int)
     def on_update(self, completed_steps: int):
+        self.job.state = JobStates.RUNNING
         # print(f"completed {completed_steps} out of {self.total_steps} steps")
         self.job.elapsed = time.time() - self.job.start
         if self.job.n_steps > 0:
@@ -229,10 +252,6 @@ Parameters:
 
         self.update_fields()
         self._prog_item.emitDataChanged()
-
-    @Slot()
-    def on_oscillate(self):
-        """For jobs with unknown duration, the progress bar will bounce."""
 
     def start_job(self):
         self.job.state = JobStates.RUNNING
@@ -348,7 +367,6 @@ class JobHolder(QStandardItemModel):
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
         communicator.finished.connect(item_th.on_finished)  # bool
-        communicator.oscillate.connect(item_th.on_oscillate)  # nothing
 
         LOG.debug("Watcher thread ready to start!")
         watcher_thread.start()

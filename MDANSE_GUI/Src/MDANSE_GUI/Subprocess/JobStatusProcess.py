@@ -36,7 +36,6 @@ class JobCommunicator(QObject):
     target = Signal(int)
     progress = Signal(int)
     finished = Signal(bool)
-    oscillate = Signal()
 
     def status_update(self, state: JobInfo):
         """Update relevant status windows.
@@ -51,11 +50,8 @@ class JobCommunicator(QObject):
         NotImplementedError
             Paused is not currently supported in this interface.
         """
-        if state.state is JobStates.STARTING:
-            if state.n_steps is not None:
-                self.target.emit(state.n_steps)
-            else:
-                self.oscillate.emit()
+        if state.state is JobStates.STARTING and state.n_steps is not None:
+            self.target.emit(state.n_steps)
 
         elif state.state is JobStates.RUNNING:
             self.progress.emit(state.progress)
