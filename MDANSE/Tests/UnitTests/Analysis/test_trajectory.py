@@ -7,6 +7,7 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from test_helpers.paths import CONV_DIR
 
 short_traj = CONV_DIR / "short_trajectory_after_changes.mdt"
+molecule_traj = CONV_DIR / "named_molecules.mdt"
 
 
 ################################################################
@@ -64,6 +65,7 @@ def test_CenterOfMassesTrajectory(tmp_path, parameters):
     log_file = temp_name.with_suffix(".log")
 
     parameters["output_files"] = (temp_name, 64, 128, "gzip", "INFO")
+    parameters["trajectory"] = molecule_traj
     job = IJob.create("CenterOfMassesTrajectory")
     job.run(parameters, status=True)
 
