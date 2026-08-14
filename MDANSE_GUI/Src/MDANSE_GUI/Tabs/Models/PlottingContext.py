@@ -17,11 +17,12 @@ from __future__ import annotations
 
 import copy
 import functools
+from collections.abc import Generator
 from contextlib import suppress
 from itertools import islice
 from math import prod
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, TypeAlias
 
 import h5py
 import matplotlib.pyplot as mpl
@@ -34,10 +35,12 @@ from matplotlib.markers import MarkerStyle
 from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
+from typing_extensions import Unpack
 
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import ComplexArray, FloatArray, IntArray
+from MDANSE_GUI.Plots.ops.op import Op
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Iterator, Sequence
@@ -47,6 +50,9 @@ if TYPE_CHECKING:
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
 SCALE_FACTOR_FORMAT = "3.3f"
+
+Curve: TypeAlias = tuple[str | float | None, tuple[FloatArray, FloatArray]]
+Plane: TypeAlias = tuple[str, FloatArray, tuple[str, str]]
 
 
 class PlotArgs(NamedTuple):
@@ -109,8 +115,17 @@ class SingleDataset:
         self._axes_order: list[str] = []
         self._xerror: FloatArray | None = None
         self._yerror: FloatArray | None = None
+        self.ops: list[Op] = []
 
         self.configure(source, **kwargs)
+
+    @property
+    def op_targets(self) -> Generator[set[int]]:
+        if not self._data_limits:
+            return
+
+        for op in self.ops:
+            yield set(self.parse_token(op.target, max(self._data_limits) + 1))
 
     @functools.singledispatchmethod
     def configure(self, source: h5py.File | None, **kwargs) -> None:
@@ -528,7 +543,6 @@ class SingleDataset:
         -------
         str
             A string label for the plot legend or a number for Text plotter.
-
         """
         if self._n_dim < 2:
             return ""
@@ -574,19 +588,14 @@ class SingleDataset:
         """
         return islice(self._data_limits, limits)
 
-    def curves_vs_axis(
+    def _curves_vs_axis(
         self,
         axis_label: tuple[str, str] | str,
         max_limit: int | None = None,
         *,
         axis_unit: str | None = None,
         skip_label_text: bool = False,
-    ) -> Generator[
-        tuple[
-            str | float | None,
-            tuple[FloatArray, FloatArray],
-        ]
-    ]:
+    ) -> Generator[Curve]:
         """Prepare a set of curves for plotting.
 
         Parameters
@@ -686,17 +695,79 @@ class SingleDataset:
         else:
             raise ValueError("Array shape does not match the order of the axes")
 
-    def planes_vs_axis(
+    def _apply_ops_curve(self, curves: Iterable[Curve]) -> Generator[Curve]:
+        """Apply operations to curves."""
+        if self._data_limits is None:
+            return
+
+        for idx, (label, (xaxis, yaxis)) in zip(
+            sorted(self.curve_ind()), curves, struct=False
+        ):
+            data = yaxis
+            for op, targets in zip(self.ops, self.op_targets, strict=True):
+                if idx in targets:
+                    data = op.apply_single(data)
+
+            yield label, (xaxis, data)
+
+    def curves_vs_axis(
+        self,
+        axis_label: tuple[str, str] | str,
+        max_limit: int | None = None,
+        *,
+        axis_unit: str | None = None,
+        skip_label_text: bool = False,
+        raw: bool = False,
+    ) -> Generator[Curve]:
+        """Prepare a set of curves for plotting.
+
+        Parameters
+        ----------
+        axis_label : str
+            Name of the primary plotting axis.
+        axis_unit : str, optional
+            Unit of the primary plotting axis.
+        max_limit : int, optional
+            Maximum number of curves allowed by plotter, by default 1
+        skip_label_text : bool, optional
+            Whether to skip the axis name and unit in the curve label, by default False.
+        raw : bool, optional
+            Don't apply dataset ops to data.
+
+        Yields
+        ------
+        str
+            Plot label.
+        FloatArray
+            x-axis.
+        FloatArray
+            Curve to plot.
+        """
+        curves = self._curves_vs_axis(
+            axis_label,
+            max_limit,
+            axis_unit=axis_unit,
+            skip_label_text=skip_label_text,
+        )
+
+        if raw:
+            yield from curves
+        else:
+            yield from self._apply_ops_curve(curves)
+
+    def _planes_vs_axis(
         self,
         main_axis: str,
         max_limit: int = 9,
-    ) -> Generator[tuple[str, FloatArray, tuple[str, str]]]:
+    ) -> Generator[Plane]:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
         ----------
         main_axis : str
             Label of the axis perpendicular to the plotted array.
+        max_limit : int
+            Max plots to generate.
 
         Yields
         ------
@@ -740,6 +811,55 @@ class SingleDataset:
                 raise NotImplementedError(
                     f"Cannot handle {self._data.ndim}-dimensional data."
                 )
+
+    def _apply_ops_plane(self, planes: Iterator[Plane]) -> Generator[Plane]:
+        """Apply operations to planes."""
+        if self._data_limits is None:
+            return
+
+        for idx, (label, array, axes) in zip(
+            sorted(self.curve_ind), planes, struct=False
+        ):
+            data = array
+            for op, targets in zip(self.ops, self.op_targets, strict=True):
+                if idx in targets:
+                    data = op.apply_single(data)
+
+            yield label, data, axes
+
+    def planes_vs_axis(
+        self,
+        main_axis: str,
+        max_limit: int = 9,
+        *,
+        raw: bool = False,
+    ) -> Generator[Plane]:
+        """Prepare for plotting 2D subsets of an ND array.
+
+        Parameters
+        ----------
+        main_axis : str
+            Label of the axis perpendicular to the plotted array.
+        max_limit : int
+            Max plots to generate.
+        raw : bool, optional
+            Don't apply dataset ops to data.
+
+        Yields
+        ------
+        main_label : str
+            Grid label.
+        image_array : FloatArray
+            2D array.
+        axis_labels : tuple[str, ...]
+            Labels for each axis.
+        """
+        planes = self._planes_vs_axis(main_axis, max_limit)
+
+        if raw:
+            yield from planes
+        else:
+            yield from self._apply_ops_plane(planes)
 
     def main_axis_index(
         self, main_axis: str | None, *, default: int | None = None
@@ -1089,7 +1209,7 @@ class PlottingContext(QStandardItemModel):
 
     def planes(
         self, default_axis: int | None = None, planes_per_dataset: int | None = None
-    ) -> Generator[tuple[PlotArgs, str, FloatArray, tuple[str, str]]]:
+    ) -> Generator[tuple[PlotArgs, Unpack[Plane]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
@@ -1101,15 +1221,7 @@ class PlottingContext(QStandardItemModel):
 
     def curves(
         self, curves_per_dataset: int | None = None
-    ) -> Generator[
-        Generator[
-            tuple[
-                PlotArgs,
-                str,
-                tuple[FloatArray, FloatArray],
-            ]
-        ]
-    ]:
+    ) -> Generator[Generator[tuple[PlotArgs, Unpack[Curve]]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
