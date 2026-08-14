@@ -701,14 +701,17 @@ class SingleDataset:
             return
 
         for idx, (label, (xaxis, yaxis)) in zip(
-            sorted(self.curve_ind()), curves, struct=False
+            sorted(self.curve_ind()), curves, strict=False
         ):
             data = yaxis
             for op, targets in zip(self.ops, self.op_targets, strict=True):
                 if idx in targets:
                     data = op.apply_single(data)
 
-            yield label, (xaxis, data)
+            # Remove null data
+            filt = ~np.isnan(data)
+
+            yield label, (xaxis[filt], data[filt])
 
     def curves_vs_axis(
         self,
