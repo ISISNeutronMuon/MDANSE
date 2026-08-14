@@ -436,7 +436,9 @@ def vector_q_statistics_datasets(
             common_bins = common_bins[start_index:]
     qmod_histograms = [np.histogram(qmods, common_bins)[0] for qmods in modq_per_shell]
     stacked_histograms = np.vstack(qmod_histograms)
+
     xvals = common_bins[1:] - np.diff(common_bins) / 2
+
     nvec_per_q = SingleDataset(
         "Available vectors",
         None,

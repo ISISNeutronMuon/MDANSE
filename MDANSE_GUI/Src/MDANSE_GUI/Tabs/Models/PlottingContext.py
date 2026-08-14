@@ -31,16 +31,16 @@ from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
 from matplotlib.lines import lineStyles
 from matplotlib.markers import MarkerStyle
-from more_itertools import nth_product
+from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
-from MDANSE.util_types import ComplexArray, FloatArray
+from MDANSE.util_types import ComplexArray, FloatArray, IntArray
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Generator, Iterable, Iterator, Sequence
 
     import h5py
 
@@ -52,7 +52,7 @@ SCALE_FACTOR_FORMAT = "3.3f"
 class PlotArgs(NamedTuple):
     """Arguments for plotting data."""
 
-    dataset: FloatArray | ComplexArray
+    dataset: SingleDataset
     colour: str
     line_style: str
     marker: str
@@ -95,13 +95,9 @@ class SingleDataset:
     ):
         self._name = name
         self._use_scaling = True
-        self._curves: dict[tuple[int, ...], FloatArray] = {}
-        self._curve_labels: dict[tuple[int, ...], str] = {}
         self._linestyle = linestyle
         self._marker = marker
-        self._planes: dict[int, FloatArray] = {}
-        self._plane_labels: dict[int, str] = {}
-        self._data_limits: list[int] | None = None
+        self._data_limits = None
         self._imaginary_data = None
         self._valid = True
         self._scaling_factor = 1.0
@@ -237,11 +233,11 @@ class SingleDataset:
                 self._axes_order.append(axis_key)
                 self._axes_scaling[axis_key] = 1.0
                 self._current_units[axis_key] = self._axes_units[axis_key]
-            self._axes_tag = "|".join([str(x) for x in self._axes])
+            self._axes_tag = "|".join(str(x) for x in self._axes)
             return
 
         for axis_key, axis_array in plot_axes.items():
-            self._axes_tag = "|".join([str(x) for x in plot_axes])
+            self._axes_tag = "|".join(str(x) for x in plot_axes)
             self._axes[axis_key] = axis_array
             self._axes_units[axis_key] = (
                 "N/A" if axes_units is None else axes_units[axis_key]
@@ -266,9 +262,11 @@ class SingleDataset:
                 self._axes[f"index{dim_number}"] = np.arange(dim_length)
                 self._axes_units[f"index{dim_number}"] = "N/A"
             return
+
         self._current_units = {}
         self._axes_scaling = {}
         self._axes_order = []
+
         for ax_number, axis_name in enumerate(axes_tag.split("|")):
             aname = axis_name.strip()
             if aname == "index":
@@ -326,6 +324,7 @@ class SingleDataset:
         """Update the unit based on the unit lookup of the PlottingContext."""
         if unit_lookup is None:
             return
+
         for axis_name, axis_unit in self._axes_units.items():
             factor, new_unit = unit_lookup.conversion_factor(axis_unit)
             self._axes_scaling[axis_name] = factor
@@ -484,7 +483,7 @@ class SingleDataset:
         return {aname: axis for aname, axis in self._axes.items() if aname != la}
 
     @property
-    def data(self):
+    def data(self) -> FloatArray:
         """Data array, scaled if requested in the GUI table.
 
         Returns
@@ -497,35 +496,45 @@ class SingleDataset:
             return self._data * self._scaling_factor
         return self._data
 
+    @property
+    def n_curves(self) -> int:
+        """Number of curves in dataset."""
+        if self._data_limits is None:
+            return 0
+
+        return len(self._data_limits)
+
     def generate_curve_label(
         self,
-        index_tuple: list[int],
-        axis_lookup: list[str],
+        index_tuple: Sequence[int],
+        axis_lookup: Iterable[str],
         *,
         skip_text: bool = False,
-    ) -> str | float:
+    ) -> str:
         """Get a meaningful label for a subset of data.
 
         Used when plotting 1D arrays out of a multidimensional array.
 
         Parameters
         ----------
-        index_tuple : list[int]
+        index_tuple : Sequence[int]
             indices of the 1D data array position in the ND array.
-        axis_lookup : list[str]
+        axis_lookup : Iterable[str]
             Names of the axes to use.
         skip_text : bool, optional
             If set to true, omits the text parts of the label. By default False.
 
         Returns
         -------
-        str | float
+        str
             A string label for the plot legend or a number for Text plotter.
 
         """
         if self._n_dim < 2:
             return ""
+
         label = "at "
+
         for axis_index, axis_name in enumerate(axis_lookup):
             axis_label = self.axis_true_name(axis_name)
 
@@ -534,14 +543,14 @@ class SingleDataset:
             picked_value = axis_values[index_tuple[axis_index]]
 
             if len(axis_values) > 1:
-                significant_digit = np.floor(
-                    np.log10(abs(np.mean(axis_values[1:] - axis_values[:-1]))),
-                ).astype(int)
+                data = np.mean(np.diff(axis_values))
             elif len(axis_values) == 1:
-                significant_digit = np.floor(np.log10(abs(axis_values[0]))).astype(int)
+                data: np.floating = axis_values[0]
             else:
                 label += f"{axis_label} has no values, unit {axis_unit}"
                 continue
+
+            significant_digit: np.integer = np.floor(np.log10(np.abs(data))).astype(int)
 
             if significant_digit < -20:
                 picked_value = 0
@@ -552,149 +561,221 @@ class SingleDataset:
 
             label += f"{axis_label}={picked_value} {axis_unit}, "
             if skip_text:
-                return float(picked_value)
+                return str(float(picked_value))
         return label.rstrip(", ")
+
+    def curve_ind(self, limits: int | None = None, /):
+        """Get indices of valid axes.
+
+        Parameters
+        ----------
+        limits : int
+            Max number of curves to return.
+        """
+        return islice(self._data_limits, limits)
 
     def curves_vs_axis(
         self,
-        x_axis_details: tuple[str, str],
-        max_limit: int = 1,
+        axis_label: tuple[str, str] | str,
+        max_limit: int | None = None,
         *,
+        axis_unit: str | None = None,
         skip_label_text: bool = False,
-    ) -> dict[int, FloatArray]:
+    ) -> Generator[
+        tuple[
+            str | float | None,
+            tuple[FloatArray, FloatArray],
+        ]
+    ]:
         """Prepare a set of curves for plotting.
 
         Parameters
         ----------
-        x_axis_details : tuple[str, str]
-            Name and original unit of the primary plotting axis
+        axis_label : str
+            Name of the primary plotting axis.
+        axis_unit : str, optional
+            Unit of the primary plotting axis.
         max_limit : int, optional
             Maximum number of curves allowed by plotter, by default 1
         skip_label_text: bool, optional
             Whether to skip the axis name and unit in the curve label, by default False.
 
-        Returns
-        -------
-        dict[int, FloatArray]
-            List of data arrays ready for plotting
-
+        Yields
+        ------
+        str
+            Plot label.
+        FloatArray
+            x-axis.
+        FloatArray
+            Curve to plot.
         """
-        self._curves = {}
-        self._curve_labels = {}
+        match axis_label:
+            case (str(unit), str(label)):
+                axis_unit = unit
+                axis_label = label
+            case str():
+                pass
+            case _:
+                raise ValueError(f"Cannot handle {axis_label} as axis label")
+
+        x_axis = self.x_axis(axis_label)
 
         if self._data.ndim == 1:
-            self._curves[(0,)] = self.data
-            self._curve_labels[(0,)] = ""
-            return self.data
+            yield "", (x_axis, self.data)
+            return
 
         data_shape = self._data.shape
-        x_axis_unit, x_axis_name = x_axis_details
         slicer = []
-        indexer = []
+        indexer: list[Sequence[int]] = []
         label_lookup = []
         axis_lengths = [len(self._axes[name]) for name in self._axes_order]
+        match_unit = axis_unit is not None
 
-        if not np.allclose(data_shape, axis_lengths):
+        if (
+            len(axis_lengths) == 1
+            and len(data_shape) == 2
+            and data_shape[0] == axis_lengths[0]
+        ):
+            # Assume multiple lines in block
+
+            axis_name = first(self._axes_order)
+
+            for current_dim in range(data_shape[1]):
+                yield (
+                    axis_name,
+                    (x_axis, self.data[:, current_dim]),
+                )
+
+        elif np.allclose(data_shape, axis_lengths):
+            for current_dim, axis_name in enumerate(self._axes_order):
+                curr_unit = self._axes_units[axis_name]
+
+                if axis_name == axis_label and (
+                    not match_unit or (axis_unit == curr_unit)
+                ):
+                    slicer.append([slice(None)])
+                    continue
+
+                indices: IntArray = np.arange(data_shape[current_dim])
+                slicer.append(indices)
+                indexer.append(indices)
+                label_lookup.append(axis_name)
+
+            if not indexer:
+                LOG.warning("Empty selection for data set %s", self._name)
+                return
+
+            for index in self.curve_ind(max_limit):
+                try:
+                    index_tuple = nth_product(index, *indexer)
+                    index_slicer = nth_product(index, *slicer)
+
+                    yield (
+                        self.generate_curve_label(
+                            index_tuple, label_lookup, skip_text=skip_label_text
+                        ),
+                        (x_axis, self.data[index_slicer].squeeze()),
+                    )
+                except IndexError:
+                    LOG.warning(
+                        "Skipping: in dataset %s, index %s is out of bounds",
+                        self._name,
+                        index,
+                    )
+
+        else:
             raise ValueError("Array shape does not match the order of the axes")
-
-        for current_dim, axis_name in enumerate(self._axes_order):
-            axis_unit = self._axes_units[axis_name]
-            if axis_unit == x_axis_unit and axis_name == x_axis_name:
-                slicer.append([slice(None)])
-                continue
-
-            indices = np.arange(data_shape[current_dim])
-            slicer.append(indices)
-            indexer.append(indices)
-            label_lookup.append(axis_name)
-
-        if not indexer:
-            LOG.warning("Empty selection for data set %s", self._name)
-            return self._curves
-
-        for index in self.curve_ind(max_limit):
-            try:
-                index_tuple = nth_product(index, *indexer)
-                index_slicer = nth_product(index, *slicer)
-                self._curves[index_tuple] = self.data[index_slicer].squeeze()
-            except IndexError:
-                LOG.warning(
-                    "Skipping: in dataset %s, index %s is out of bounds",
-                    self._name,
-                    index,
-                )
-            else:
-                self._curve_labels[index_tuple] = self.generate_curve_label(
-                    index_tuple,
-                    label_lookup,
-                    skip_text=skip_label_text,
-                )
-
-        return self._curves
-
-    def curve_ind(self, limits: int, /) -> Iterator[int]:
-        """Return a generator of indices indexing only the curves within the limits."""
-        return (
-            islice(self._data_limits, limits)
-            if self._data_limits is not None
-            else range(limits)
-        )
 
     def planes_vs_axis(
         self,
-        axis_number: int,
-        max_limit: int = 1,
-    ) -> list[FloatArray] | FloatArray | None:
+        main_axis: str,
+        max_limit: int = 9,
+    ) -> Generator[tuple[str, FloatArray, tuple[str, str]]]:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
         ----------
-        axis_number : int
-            index of the axis perpendicular to the plotted array
-        max_limit : int, optional
-            maximum number of planes allowed by plotter, by default 1
+        main_axis : str
+            Label of the axis perpendicular to the plotted array.
+
+        Yields
+        ------
+        main_label : str
+            Grid label.
+        image_array : FloatArray
+            2D array.
+        axis_labels : tuple[str, ...]
+            Labels for each axis.
+        """
+        main_axis_index = self.main_axis_index(main_axis)
+        other_labels = self._axis_labels(main_axis)
+
+        match self._data.ndim:
+            case 1:
+                pass
+            case 2 if main_axis_index == 1:
+                yield self._labels["medium"], self.data.T, (main_axis, other_labels[0])
+            case 2:
+                yield self._labels["medium"], self.data, (main_axis, other_labels[0])
+            case 3:
+                perpendicular_axis_name, perpendicular_axis = nth(
+                    self._axes.items(), main_axis_index, default=(None, None)
+                )
+
+                if perpendicular_axis is None:
+                    return
+
+                reordered_view = np.moveaxis(self.data, main_axis_index, 0)
+
+                for plane_number in self.curve_ind(max_limit):
+                    if plane_number > len(reordered_view):
+                        continue
+
+                    yield (
+                        f"{self._labels['minimal']}:{perpendicular_axis_name}={perpendicular_axis[plane_number]}",
+                        reordered_view[plane_number],
+                        other_labels,
+                    )
+            case _:
+                raise NotImplementedError(
+                    f"Cannot handle {self._data.ndim}-dimensional data."
+                )
+
+    def main_axis_index(
+        self, main_axis: str | None, *, default: int | None = None
+    ) -> int:
+        """Find index of main axis.
+
+        Parameters
+        ----------
+        main_axis : str
+            Main axis name to search for.
+        default : int, optional
+            Index if ``main_axis`` not found.
 
         Returns
         -------
-        list[FloatArray]
-            List of 2D arrays for heatmap plots
+        int
+            Index of main axis.
 
+        Raises
+        ------
+        ValueError
+            Axis not found and no default.
         """
-        self._planes = {}
-        self._plane_labels = {}
-        _found = -1
-        total_ndim = self._data.ndim
-
-        if total_ndim == 1:
-            return None
-        if total_ndim == 2:
-            return self.data
-
-        data_shape = self._data.shape
-        number_of_planes = data_shape[axis_number]
-        perpendicular_axis = None
-        perpendicular_axis_name = ""
-        slice_def = []
-
-        for number, (axis_name, axis_array) in enumerate(self._axes.items()):
-            if number == axis_number:
-                slice_def.append(0)
-                perpendicular_axis = axis_array
-                perpendicular_axis_name = self.axis_true_name(axis_name)
-            else:
-                slice_def.append(slice(None))
-
-        for plane_number in self.curve_ind(max_limit):
-            if plane_number >= number_of_planes:
-                break
-            fixed_argument = perpendicular_axis[plane_number]
-            slice_def[axis_number] = plane_number
-            self._planes[plane_number] = self.data[tuple(slice_def)]
-            self._plane_labels[plane_number] = (
-                f"{perpendicular_axis_name}={fixed_argument}"
+        ind = first(locate(self._axes, pred=main_axis.__eq__), default)
+        if ind is None:
+            raise ValueError(
+                f"Cannot find axis {main_axis} in {','.join(self._axes.keys())}"
             )
+        return ind
 
-        return None
+    def _axis_labels(self, main_axis: str) -> tuple[str] | tuple[str, str]:
+        main_axis_index = self.main_axis_index(main_axis)
+
+        return tuple(
+            label for i, label in enumerate(self._axes) if i != main_axis_index
+        )
 
 
 plotting_column_labels = [
@@ -720,9 +801,11 @@ class PlottingContext(QStandardItemModel):
 
     needs_an_update = Signal("quint64")
 
-    def __init__(self, *args, unit_lookup=None, **kwargs):
+    def __init__(
+        self, *args, unit_lookup: int | None = None, colormap: str = "viridis", **kwargs
+    ):
         super().__init__(*args, **kwargs)
-        self._datasets = {}
+        self._datasets: dict[str, SingleDataset] = {}
         self._current_axis = [None, None, None]
         self._figure = None
         self._ndim_lowest = 1
@@ -731,13 +814,14 @@ class PlottingContext(QStandardItemModel):
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
         self._last_colour_list = get_mpl_colours()
-        self._colour_map = kwargs.get("colormap", "viridis")
+        self._colour_map = colormap
         self._last_colour = 0
         self._unit_lookup = unit_lookup
         self.plot_widget_id = -1
         self.use_legend = True
         self.use_grid = True
         self.setHorizontalHeaderLabels(plotting_column_labels)
+        self.itemChanged.connect(self.ask_for_update)
 
     def generate_colour(self, number: int) -> str:
         """Get the matplotlib colour string for the nth curve.
@@ -854,7 +938,9 @@ class PlottingContext(QStandardItemModel):
 
         for row in range(self.rowCount()):
             row_data = {
-                key: self.item(row, ind) for key, ind in plotting_column_index.items()
+                key: dat
+                for key, ind in plotting_column_index.items()
+                if (dat := self.item(row, ind)) is not None
             }
 
             key = self.index(row, plotting_column_index["Dataset"]).data(
@@ -872,18 +958,17 @@ class PlottingContext(QStandardItemModel):
             data_number_string = row_data["Use it?"].text()
             main_axis = row_data["Main axis"].text()
 
-            plot_args = {
-                "colour": row_data["Colour"].text(),
-                "line_style": row_data["Line style"].text(),
-                "marker": row_data["Marker"].text(),
-                "row": row,
-                "main_axis": main_axis,
-                "legend_label": row_data["Legend label"].text(),
-            }
-
             self._datasets[key].set_data_limits(data_number_string, main_axis=main_axis)
             self._datasets[key].set_current_units(self._unit_lookup)
-            result[key] = PlotArgs(self._datasets[key], **plot_args)
+            result[key] = PlotArgs(
+                dataset=self._datasets[key],
+                colour=row_data["Colour"].text(),
+                line_style=row_data["Line style"].text(),
+                marker=row_data["Marker"].text(),
+                row=row,
+                main_axis=row_data["Main axis"].text(),
+                legend_label=row_data["Legend label"].text(),
+            )
 
         return result
 
@@ -910,7 +995,7 @@ class PlottingContext(QStandardItemModel):
         self._datasets[newkey] = new_dataset
         items = [
             QStandardItem(str(x))
-            for x in [
+            for x in (
                 new_dataset._name,
                 getattr(optional_values, "legend_label", new_dataset._labels["medium"]),
                 new_dataset._data_shape,
@@ -926,7 +1011,7 @@ class PlottingContext(QStandardItemModel):
                     new_dataset._scaling_factor, show=1, arr_fmt=SCALE_FACTOR_FORMAT
                 ),
                 new_dataset._filename,
-            ]
+            )
         ]
 
         fixed = {"Dataset", "Trajectory", "Size", "Unit", "Apply scaling?"}
@@ -947,8 +1032,6 @@ class PlottingContext(QStandardItemModel):
         items[plotting_column_index["Use it?"]].setText(
             f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1",
         )
-
-        self.itemChanged.connect(self.ask_for_update)
 
         temp = items[plotting_column_index["Colour"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
@@ -1003,3 +1086,36 @@ class PlottingContext(QStandardItemModel):
         dkey = index.data(role=Qt.ItemDataRole.UserRole)
         self.removeRow(index.row())
         self._datasets.pop(dkey, None)
+
+    def planes(
+        self, default_axis: int | None = None, planes_per_dataset: int | None = None
+    ) -> Generator[tuple[PlotArgs, str, FloatArray, tuple[str, str]]]:
+        for databundle in self.datasets().values():
+            ds = databundle.dataset
+
+            for label, plane, axis_labels in islice(
+                ds.planes_vs_axis(databundle.main_axis),
+                planes_per_dataset,
+            ):
+                yield databundle, label, plane, axis_labels
+
+    def curves(
+        self, curves_per_dataset: int | None = None
+    ) -> Generator[
+        Generator[
+            tuple[
+                PlotArgs,
+                str,
+                tuple[FloatArray, FloatArray],
+            ]
+        ]
+    ]:
+        for databundle in self.datasets().values():
+            ds = databundle.dataset
+
+            yield (
+                (databundle, label, curve)
+                for label, curve in islice(
+                    ds.curves_vs_axis(databundle.main_axis), curves_per_dataset
+                )
+            )

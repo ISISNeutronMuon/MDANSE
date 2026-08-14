@@ -20,7 +20,7 @@ from itertools import product as cart_prod
 from typing import TYPE_CHECKING
 
 import numpy as np
-from more_itertools import collapse, prepend, transpose
+from more_itertools import collapse, prepend, transpose, unzip
 
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
@@ -29,6 +29,7 @@ from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from qtpy.QtWidgets import QTextBrowser
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import (
@@ -59,7 +60,7 @@ class DatasetFormatter:
         self._comment = "#"
         self._separator = ","
 
-    def take_new_input(self, pc: PlottingContext):
+    def take_new_input(self, pc: PlottingContext | None):
         """Assign the input PlottingContext to the plotter.
 
         The plotting context is passed from the GUI and
@@ -302,21 +303,15 @@ class DatasetFormatter:
                 dataset._data.shape[0] if flip_array else dataset._data.shape[1]
             )
 
-        multi_curves = np.vstack(
-            list(
-                dataset.curves_vs_axis(
-                    (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
-                ).values()
-            )
-        )
         # Add corner nil
         xaxis = prepend("_", new_axes[axis_numbers[flip_array]].flat)
 
         # Add axes to data
-        data_lines = zip(
-            dataset._curve_labels.values(),
-            multi_curves,
-            strict=True,
+        data_lines = (
+            (x[0], x[1][1])
+            for x in dataset.curves_vs_axis(
+                (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
+            )
         )
 
         # Put xaxis in
@@ -455,7 +450,7 @@ class Text(Plotter):
         self._formatter._comment = comment
         self.plot(self._pc_backup, self._figure)
 
-    def get_figure(self, figure: QTextBrowser = None):
+    def get_figure(self, figure: QTextBrowser | None = None):
         """Get the widget which will display the text.
 
         Used for both updating and getting the output widget
@@ -482,7 +477,7 @@ class Text(Plotter):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: PlottingContext, colours=None):
+    def apply_settings(self, plotting_context: PlottingContext):
         """Do nothing.
 
         Not relevant to the Text plotter, added for compatibility
@@ -500,10 +495,10 @@ class Text(Plotter):
     def plot(
         self,
         plotting_context: PlottingContext,
-        figure: QTextBrowser = None,
-        colours=None,
-        update_only=False,
-        toolbar=None,
+        figure: QTextBrowser | None = None,
+        *,
+        update_only: bool = False,
+        toolbar: Toolbar | None = None,
     ):
         """Show data as text.
 
@@ -516,12 +511,12 @@ class Text(Plotter):
             Data model containing the data sets to be shown
         figure : QTextBrowser, optional
             Target widget, an instance of QTextBrowser
-        colours : _type_, optional
-            ignored here
+        colours : None, optional
+            Ignored here
         update_only : bool, optional
-            ignored
-        toolbar : _type_, optional
-            ignored
+            Ignored
+        toolbar : Toolbar, optional
+            Ignored.
 
         """
         target = self.get_figure(figure)
@@ -529,18 +524,22 @@ class Text(Plotter):
             return
         if toolbar is not None:
             self._toolbar = toolbar
+
         self._pc_backup = plotting_context
         self._figure = target
         _xaxis_unit = None
         self._active_curves = []
         self._backup_curves = []
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         self.height_max, self.length_max = 0.0, 0.0
+
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
+
         if len(plotting_context.datasets()) == 0:
             target.clear()
             return
+
         self._formatter.take_new_input(plotting_context)
         target.setText("\n".join(self._formatter._new_text))

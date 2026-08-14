@@ -46,8 +46,8 @@ class PlotHolder(QTabWidget):
         self._settings = None
         self._last_number = 1
         layout = QVBoxLayout(self)
-        self._context = []
-        self._plotter = []
+        self._context: list[PlottingContext] = []
+        self._plotter: list[PlotWidget | DataWidget] = []
         self._unit_lookup = unit_lookup
         self._current_id = -1
         self.setLayout(layout)
@@ -55,6 +55,7 @@ class PlotHolder(QTabWidget):
         self._protected_id = int(self._current_id)
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self.clean_up_closed_tab)
+
         # remove the close button on the protected tab
         tabbar = self.tabBar()
         close_button = tabbar.tabButton(
@@ -68,14 +69,13 @@ class PlotHolder(QTabWidget):
         if not tab_name:
             tab_name = f"Plot {self._last_number}"
             self._last_number += 1
-        plotting_context = PlottingContext(
-            unit_lookup=self._unit_lookup,
-        )
+
+        plotting_context = PlottingContext(unit_lookup=self._unit_lookup)
         plotting_context.needs_an_update.connect(self.update_plot)
         plotter = PlotWidget(self)
         plotter.set_context(plotting_context)
         tab_id = self.addTab(plotter, tab_name)
-        LOG.info(f"PlotHolder created tab: {tab_id}")
+        LOG.info("PlotHolder created tab: %d", tab_id)
         self._context.append(plotting_context)
         self._plotter.append(plotter)
         self.setCurrentIndex(tab_id)
@@ -104,7 +104,9 @@ class PlotHolder(QTabWidget):
     def clean_up_closed_tab(self, tab_id: int):
         if tab_id == self._protected_id:
             return
+
         valid_id_values = [int(idnum) for idnum in range(len(self._plotter))]
+
         if tab_id in valid_id_values:
             valid_id_values.pop(valid_id_values.index(tab_id))
         if tab_id < len(self._context):
@@ -118,19 +120,20 @@ class PlotHolder(QTabWidget):
         self.send_plot_info()
 
     @property
-    def model(self) -> PlottingContext:
+    def model(self) -> PlottingContext | None:
         tab_id = self.currentIndex()
         try:
             pc = self._context[tab_id]
         except KeyError:
             LOG.error(f"Plotting context is missing for tab {tab_id}")
             LOG.error(self._context)
-        else:
-            pc._unit_lookup = self._unit_lookup
-            return pc
+            return
+
+        pc._unit_lookup = self._unit_lookup
+        return pc
 
     @property
-    def plotter(self) -> DataWidget:
+    def plotter(self) -> DataWidget | None:
         tab_id = self.currentIndex()
         try:
             return self._plotter[tab_id]

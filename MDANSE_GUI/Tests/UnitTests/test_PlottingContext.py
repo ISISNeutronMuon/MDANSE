@@ -1,12 +1,12 @@
-import pytest
-import tempfile
-import os
+from __future__ import annotations
+
 from pathlib import Path
 
 import h5py
 import numpy as np
-
-from qtpy import QtGui, QtCore, QtWidgets
+import pytest
+from more_itertools import ilen, nth, first
+from qtpy import QtCore, QtGui, QtWidgets
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
 
@@ -62,18 +62,16 @@ def test_available_x_axes_2d(file_2d):
 def test_curves_vs_axis_2d_long_axis(file_2d):
     temp = SingleDataset("f(q,t)_total", file_2d)
     temp.set_data_limits("0;1;2;3")
-    curves = temp.curves_vs_axis(("ps", "time"), max_limit=12)
-    print(len(curves))
-    assert len(curves) == 4
-    print(curves.keys())
-    assert len(curves[(0,)]) == 501
+    curves = temp.curves_vs_axis("time", max_limit=12)
+    assert ilen(curves) == 4
+    label, (x, y) = first(temp.curves_vs_axis("time", max_limit=12))
+    assert len(x) == 501
 
 
 def test_curves_vs_axis_2d_short_axis(file_2d):
     temp = SingleDataset("f(q,t)_total", file_2d)
     temp.set_data_limits("2;3;4;5")
-    curves = temp.curves_vs_axis(("1/nm", "q"), max_limit=12)
-    print(len(curves))
-    assert len(curves) == 4
-    print(curves.keys())
-    assert len(curves[(2,)]) == 10
+    curves = temp.curves_vs_axis("q", max_limit=12)
+    assert ilen(curves) == 4
+    label, (x, y) = nth(temp.curves_vs_axis("q", max_limit=12), 3)
+    assert len(x) == 10
