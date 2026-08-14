@@ -60,7 +60,7 @@ class DatasetFormatter:
         self._comment = "#"
         self._separator = ","
 
-    def take_new_input(self, pc: PlottingContext):
+    def take_new_input(self, pc: PlottingContext | None):
         """Assign the input PlottingContext to the plotter.
 
         The plotting context is passed from the GUI and
@@ -307,8 +307,9 @@ class DatasetFormatter:
         xaxis = prepend("_", new_axes[axis_numbers[flip_array]].flat)
 
         # Add axes to data
-        data_lines = list(
-            dataset.curves_vs_axis(
+        data_lines = (
+            (x[0], x[1][1])
+            for x in dataset.curves_vs_axis(
                 (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
             )
         )
