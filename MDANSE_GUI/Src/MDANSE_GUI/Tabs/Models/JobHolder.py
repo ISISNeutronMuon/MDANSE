@@ -174,6 +174,8 @@ Parameters:
                 self.oscillator_pos,
                 role=ProgressDelegate.progress_role,
             )
+        elif self.job.state == JobStates.PAUSED:
+            return
         else:
             self.oscillator_timer.stop()
 
@@ -238,7 +240,8 @@ Parameters:
 
     @Slot(int)
     def on_update(self, completed_steps: int):
-        self.job.state = JobStates.RUNNING
+        if self.job.state == JobStates.STARTING:
+            self.job.state = JobStates.RUNNING
         # print(f"completed {completed_steps} out of {self.total_steps} steps")
         self.job.elapsed = time.time() - self.job.start
         if self.job.n_steps > 0:
