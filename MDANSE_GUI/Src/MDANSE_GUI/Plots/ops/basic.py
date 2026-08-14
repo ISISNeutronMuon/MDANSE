@@ -178,10 +178,91 @@ class ScaleToRange(Op):
         return ((dataset - ds_min) / (ds_max - ds_min)) * self.range + self.min_val
 
 
-# @Op.register("trunc")
-# class Trunc(ScaleToRange):
-#     def apply_single(self, dataset: FloatArray) -> FloatArray:
-#         return dataset[(dataset > self.min_val) & (dataset < self.max_val)]
+@Op.register("truncate")
+class Truncate(Op):
+    class Truncation(UCEnum):
+        VALUE = auto()
+        PERCENT = auto()
+
+    def __init__(self, *args, min_val: float, max_val: float, mode: Truncation | str | int, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.range = min_val, max_val
+        self.mode = mode
+
+    @property
+    def mode(self) -> Truncation:
+        return self._mode
+
+    @mode.setter
+    def mode(self, value: int | str | Truncation):
+        match value:
+            case self.Truncation():
+                self._mode = value
+            case str():
+                self._mode = self.Truncation[value]
+            case int():
+                self._mode = self.Truncation(value)
+
+    @property
+    def params(self) -> dict[str, float | str]:
+        return {
+            "mode": self.mode.name,
+            "min_val": self.min_val,
+            "max_val": self.max_val,
+        }
+
+    @classmethod
+    def param_types(cls) -> dict[str, type]:
+        return {
+            "mode": cls.Truncation,
+            "min_val": float,
+            "max_val": float,
+        }
+
+    @property
+    def min_val(self) -> float:
+        return self._min_val
+
+    @min_val.setter
+    def min_val(self, value: SupportsFloat) -> None:
+        value = float(value)
+        if self.max_val is not None and value > self.max_val:
+            raise ValueError(f"Min val ({value}) greater than max val ({self.max_val})")
+        self._min_val = value
+
+    @property
+    def max_val(self) -> float:
+        return self._max_val
+
+    @max_val.setter
+    def max_val(self, value: SupportsFloat) -> None:
+        value = float(value)
+        if self.max_val is not None and value < self.min_val:
+            raise ValueError(f"Max val ({value}) less than min val ({self.min_val})")
+        self._max_val = value
+
+    @property
+    def range(self) -> float:
+        return self.max_val - self.min_val
+
+    @range.setter
+    def range(self, value: tuple[SupportsFloat, SupportsFloat]) -> None:
+        self._min_val, self._max_val = sorted(map(float, value))
+
+    def apply_single(self, dataset: FloatArray) -> FloatArray:
+
+        abs_ds = np.abs(dataset)
+        match self.mode:
+            case self.Truncation.PERCENT:
+                maxi = self.max_val * np.nanmax(abs_ds) / 100
+                mini = self.min_val * np.nanmax(abs_ds) / 100
+            case self.Truncation.VALUE:
+                maxi = self.max_val
+                mini = self.min_val
+
+        out = dataset.copy()
+        out[(abs_ds < mini) | (abs_ds > maxi)] = np.nan
+        return out
 
 
 @Op.register("normalise")
@@ -207,7 +288,7 @@ class Normalise(Op):
             case self.Normalisation():
                 self._mode = value
             case str():
-                self._mode = self.Normalisation[value.upper()]
+                self._mode = self.Normalisation[value]
             case int():
                 self._mode = self.Normalisation(value)
 
@@ -222,12 +303,12 @@ class Normalise(Op):
     def apply_single(self, dataset: FloatArray) -> FloatArray:
         match self.mode:
             case self.Normalisation.AVERAGE:
-                scale_factor = np.mean(dataset)
+                scale_factor = np.nanmean(dataset)
             case self.Normalisation.MAX:
-                scale_factor = np.max(dataset)
+                scale_factor = np.nanmax(dataset)
             case self.Normalisation.SUM:
-                scale_factor = np.sum(dataset)
+                scale_factor = np.sum(np.nan_to_num(dataset))
             case self.Normalisation.ABSMAX:
-                scale_factor = np.max(np.abs(dataset))
+                scale_factor = np.nanmax(np.abs(dataset))
 
         return dataset * (1 / scale_factor)
