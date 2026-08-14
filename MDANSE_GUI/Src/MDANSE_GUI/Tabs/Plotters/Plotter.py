@@ -18,33 +18,43 @@ from __future__ import annotations
 import copy
 import csv
 import enum
+import math
 from itertools import count
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
 
 import numpy as np
+from matplotlib import rcParams
+from matplotlib.colors import to_rgb
 from more_itertools import consumer
 
 from MDANSE.Core.RegisterFactory import RegisterFactory
-from MDANSE.IO.IOUtils import UCDict
+from MDANSE.IO.IOUtils import UCDict, UCEnum
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Generator, Iterator
 
     from matplotlib.axes import Axes
+    from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
     from matplotlib.lines import Line2D
 
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-class NormOperations(enum.Enum):
+class NormOperations(UCEnum):
     """Enum for selecting mathematical operations when calculating norms."""
 
     AVERAGE = enum.auto()
     SUM = enum.auto()
     NOT_IMPLEMENTED = enum.auto()
+
+    @classmethod
+    def _missing_(cls, value: str) -> NormOperations:
+        if res := super()._missing_(value):
+            return res
+        return cls.NOT_IMPLEMENTED
 
 
 def str_to_enum(operation: str) -> NormOperations:
@@ -53,19 +63,15 @@ def str_to_enum(operation: str) -> NormOperations:
     Parameters
     ----------
     operation : str
-        name of the mathematical operation as string.
+        Name of the mathematical operation as string.
 
     Returns
     -------
     NormOperations
-        enum value of the operation.
+        Enum value of the operation.
 
     """
-    if operation == "average":
-        return NormOperations.AVERAGE
-    if operation == "sum":
-        return NormOperations.SUM
-    return NormOperations.NOT_IMPLEMENTED
+    return NormOperations(operation)
 
 
 def enum_to_str(operation: NormOperations) -> str:
@@ -74,19 +80,15 @@ def enum_to_str(operation: NormOperations) -> str:
     Parameters
     ----------
     operation : NormOperations
-        Enum of the mathematical operation
+        Enum of the mathematical operation.
 
     Returns
     -------
     str
-        name of the operation as string
+        Name of the operation as string.
 
     """
-    if operation == NormOperations.AVERAGE:
-        return "average"
-    if NormOperations.SUM:
-        return "sum"
-    return "not implemented"
+    return operation.name.lower()
 
 
 NORMALISATION_DEFAULTS = {
@@ -96,11 +98,28 @@ NORMALISATION_DEFAULTS = {
     "operation": NormOperations.AVERAGE,
 }
 
+ValidPlotters = Literal["Single", "Vectors", "Text", "Heatmap", "Grid"]
+
 
 class Plotter(RegisterFactory):
     """Parent class to all classes used for displaying data."""
 
     registry: ClassVar[UCDict[str, type[Plotter]]] = UCDict()
+
+    GRID_SIZES = {
+        2: (2, 1),
+        5: (2, 3),
+        6: (2, 3),
+    }
+    _number_of_sliders: ClassVar[int] = 2
+
+    # Plotter Settings
+    _title_length_limit: ClassVar[int] = 30
+    _max_labels: ClassVar[int] = 5
+    _max_label_len: ClassVar[int] = 100
+    _plot_limit: ClassVar[int] = 9
+    _curve_limit_per_dataset: ClassVar[int] = 12
+    _curve_limit_per_plot: ClassVar[int] = 60
 
     def __init__(self) -> None:
         """Create defaults common to all plotters."""
@@ -108,13 +127,13 @@ class Plotter(RegisterFactory):
         self._axes = []
         self._initial_values = [0.0, 0.0]
         self._slider_values = [0.0, 0.0]
-        self._number_of_sliders = 2
         self._value_reset_needed = True
         self._toolbar = None
         self._slider_reference = None
         self.curve_length_limit = 10
         self._normalisation_values = copy.copy(NORMALISATION_DEFAULTS)
         self._normalisation_errors = []
+        self._n_curves = 0
 
     def request_slider_values(self):
         """Manually read values from sliders, if they are present."""
@@ -214,25 +233,30 @@ class Plotter(RegisterFactory):
         """
         apply = self._normalisation_values["apply"]
         operation = self._normalisation_values["operation"]
-        if not apply or operation == NormOperations.NOT_IMPLEMENTED:
+        if not apply or operation is NormOperations.NOT_IMPLEMENTED:
             return xdata, ydata
+
         min_index = self._normalisation_values["min_index"]
         max_index = self._normalisation_values["max_index"]
         ref_values = ydata[min_index:max_index]
+
         if len(ref_values) < 1:
             self._normalisation_errors.append(
                 "No points within the specified index range"
             )
             return xdata, ydata
-        if operation == NormOperations.AVERAGE:
+
+        if operation is NormOperations.AVERAGE:
             scale_factor = np.nanmean(ref_values)
-        elif operation == NormOperations.SUM:
+        elif operation is NormOperations.SUM:
             scale_factor = np.sum(np.nan_to_num(ref_values))
+
         if np.isclose(scale_factor, 0.0):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 and will not be applied."
             )
             return xdata, ydata
+
         return xdata, ydata / scale_factor
 
     def normalise_array(self, data_array: FloatArray) -> FloatArray:
@@ -258,15 +282,18 @@ class Plotter(RegisterFactory):
         ref_column = data_array[:, min_index:max_index]
         if ref_column.shape[1] < 1:
             return data_array
-        if operation == NormOperations.AVERAGE:
+
+        if operation is NormOperations.AVERAGE:
             scale_column = np.nanmean(ref_column, axis=1)
-        elif operation == NormOperations.SUM:
+        elif operation is NormOperations.SUM:
             scale_column = np.sum(np.nan_to_num(ref_column), axis=1)
+
         if np.any(np.isclose(scale_column, 0.0)):
             self._normalisation_errors.append(
                 "Normalisation factor is 0 for some rows of the 2D array."
             )
             return data_array
+
         return data_array / scale_column.reshape((len(scale_column), 1))
 
     def change_normalisation(self, new_value: dict[str, Any]):
@@ -278,21 +305,22 @@ class Plotter(RegisterFactory):
         self,
         plotting_context: PlottingContext,
         figure: Figure | None = None,
+        *,
         update_only: bool = False,
-        toolbar=None,
+        toolbar: Toolbar | None = None,
     ):
         """Plot the selected data in the figure.
 
         Parameters
         ----------
         plotting_context : PlottingContext
-            Data model storing the data to be plotted
+            Data model storing the data to be plotted.
         figure : Figure, optional
-            Matplotlib figure instance for plotting, by default None
+            Matplotlib figure instance for plotting, by default None.
         update_only : bool, optional
-            If true, try to re-use zoom settings, by default False
-        toolbar : _type_, optional
-            GUI instance of the matplotlib toolbar, by default None
+            If true, try to re-use zoom settings, by default False.
+        toolbar : Toolbar, optional
+            GUI instance of the matplotlib toolbar, by default None.
 
         """
         LOG.info(f"normalisation errors {self._normalisation_errors}, setting to []")
@@ -448,3 +476,93 @@ class Plotter(RegisterFactory):
             Each line in dataset.
         """
         yield from axis.get_lines()
+
+    @classmethod
+    def grid_size(cls, n_plots: int) -> tuple[int, int]:
+        """Get a good grid layout for plotting.
+
+        Parameters
+        ----------
+        n_plots : int
+            Number of expected plots.
+
+        Returns
+        -------
+        tuple[int, int]
+            Grid size.
+        """
+        return cls.GRID_SIZES.get(n_plots, (math.ceil(n_plots**0.5),) * 2)
+
+    def label(
+        self,
+        label: str,
+        ind: int,
+        *,
+        n_curves: int | None = None,
+        limit: int | None = None,
+    ) -> str | None:
+        """Get label for legend.
+
+        For the abbreviated legend return None for those which are
+        between ``limit`` and ``n_curves`` (skipping them), and "..."
+        when it's at the limit.
+
+        Parameters
+        ----------
+        ind : int
+            Current index.
+        n_curves : int
+            Total number of "curves" to plot.
+        limit : int
+            Max number of entries in legend.
+        label : str
+            Current label.
+        """
+        if n_curves is None:
+            n_curves = self.n_curves
+        if limit is None:
+            limit = self._max_labels
+
+        if ind == limit:
+            return "..."
+        if limit < ind < n_curves - 1:
+            return None
+
+        if self._max_label_len and len(label) > self._max_label_len:
+            return "..." + label[-(self._max_label_len - 3) :]
+
+        return label
+
+    @property
+    def n_curves(self) -> int:
+        """Number of expected/total curves."""
+        return self._n_curves
+
+    @staticmethod
+    def colours(colour: str, n_curves: int) -> Generator[tuple[float, float, float]]:
+        """Generate colours from root colour.
+
+        Parameters
+        ----------
+        colour : str
+            Root colour.
+
+        Returns
+        -------
+        Generator[tuple[float, float, float]]
+            Next colour in sequence.
+        """
+        main_colour = np.array(to_rgb(colour))
+        colour_increment = (0.5 - main_colour) / n_curves
+        for _ in range(n_curves):
+            yield tuple(main_colour)
+            main_colour += colour_increment
+
+    def title_fontsize(self, title_text: str) -> int:
+        normal_size = rcParams["font.size"]
+        new_size = (
+            normal_size
+            if len(title_text) < self._title_length_limit
+            else normal_size - round(len(title_text) / self._title_length_limit)
+        )
+        return new_size

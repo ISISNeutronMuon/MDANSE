@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from .Grid import Grid as Grid
+from .Grouped import Grouped as Grouped
 from .Heatmap import Heatmap as Heatmap
 from .Plotter import Plotter as Plotter
 from .Single import Single as Single

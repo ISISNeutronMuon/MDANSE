@@ -45,6 +45,10 @@ from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 
 if TYPE_CHECKING:
+    from matplotlib.backends.backend_qt5agg import (
+        NavigationToolbar2QT as Toolbar,
+    )
+
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
@@ -168,10 +172,10 @@ class SliderPack(QWidget):
     @Slot()
     def slider_to_box(self):
         """Update spin boxes if slider is moving."""
-        vals = np.zeros_like(self._valarray)
         clicks = np.zeros_like(self._clickarray)
         for ns, slider in enumerate(self._sliders):
             clicks[ns] = slider.value()
+
         vals = self._minarray + clicks * self._steparray
         for ns, box in enumerate(self._spinboxes):
             box.setValue(vals[ns])
@@ -181,7 +185,7 @@ class SliderPack(QWidget):
         """Update sliders if spin boxes have changed."""
         with block_signals(self):
             vals = np.zeros_like(self._valarray)
-            clicks = np.zeros_like(self._clickarray)
+
             for ns, box in enumerate(self._spinboxes):
                 vals[ns] = box.value()
             clicks = np.round((vals - self._minarray) / self._steparray).astype(int)
@@ -207,9 +211,8 @@ class PlotWidget(QWidget):
     reset_slider_values = Signal(bool)
     change_slider_coupling = Signal(bool)
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, plotter_type: str = "Single", **kwargs) -> None:
         """Create an empty plot with the default plotter."""
-        plotter_type = kwargs.pop("plotter_type", "Single")
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
@@ -245,10 +248,13 @@ class PlotWidget(QWidget):
         except Exception:
             self._plotter = Plotter()
         self._plotter._figure = self._figure
+        self.plot_blank()
+
         self.change_slider_labels.emit(self._plotter.slider_labels())
         self.change_slider_limits.emit(self._plotter.slider_limits())
         self.change_slider_coupling.emit(self._plotter.sliders_coupled())
         self.reset_slider_values.emit(self._plotter._value_reset_needed)
+
         self._plotter._slider_reference = self._sliderpack
         self._sliderpack.setEnabled(False)
         self.plot_data()
@@ -333,13 +339,16 @@ class PlotWidget(QWidget):
             return
         if self._plotting_context is None:
             return
-        self._figure.set_layout_engine("tight")
+
+        # self._figure.set_layout_engine("tight")
+
         self._plotter.plot(
             self._plotting_context,
             self._figure,
             update_only=update_only,
             toolbar=self._toolbar,
         )
+
         self._normaliser.update_spinbox_limits(self._plotter.curve_length_limit)
         self._normaliser.collect_values()
         self._sliderpack.collect_values()
@@ -373,7 +382,7 @@ class PlotWidget(QWidget):
         canvas = self
         layout = QVBoxLayout(canvas)
 
-        self._figure = mpl.figure(layout="constrained")
+        self._figure = mpl.figure()
         figAgg = FigureCanvasQTAgg(self._figure)
         figAgg.setParent(canvas)
         figAgg.updateGeometry()
