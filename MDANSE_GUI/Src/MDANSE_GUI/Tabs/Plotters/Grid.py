@@ -107,6 +107,7 @@ class Grid(Plotter):
         self,
         plotting_context: PlottingContext,
         figure: Figure | None = None,
+        *,
         update_only: bool = False,
         toolbar: Toolbar | None = None,
     ):

@@ -168,6 +168,7 @@ class Grouped(Plotter):
         self,
         plotting_context: PlottingContext,
         figure: Figure | None = None,
+        *,
         update_only: bool = False,
         toolbar: Toolbar | None = None,
     ):
@@ -249,23 +250,7 @@ class Grouped(Plotter):
             self._axes.append(axes)
             limits[ind] = (*axes.get_xlim(), *axes.get_ylim())
 
-            if update_only:
-                try:
-                    axes.set_xlim(self._backup_limits[ind][:2])
-                except ValueError:
-                    LOG.error(
-                        f"Matplotlib could not set x limits to {self._backup_limits[ind][:2]}"
-                    )
-
-                try:
-                    axes.set_ylim(self._backup_limits[ind][2:])
-                except ValueError:
-                    LOG.error(
-                        f"Matplotlib could not set y limits to {self._backup_limits[ind][2:]}"
-                    )
-
-        if not update_only:
-            self._backup_limits = limits
+        self._backup_limits = limits
 
         self.enable_slider(
             allow_slider=any(

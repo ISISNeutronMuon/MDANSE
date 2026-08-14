@@ -449,7 +449,7 @@ class Text(Plotter):
         self._formatter._comment = comment
         self.plot(self._pc_backup, self._figure)
 
-    def get_figure(self, figure: QTextBrowser = None):
+    def get_figure(self, figure: QTextBrowser | None = None):
         """Get the widget which will display the text.
 
         Used for both updating and getting the output widget
@@ -476,7 +476,7 @@ class Text(Plotter):
         target.clear()
         return target
 
-    def apply_settings(self, plotting_context: PlottingContext, colours=None):
+    def apply_settings(self, plotting_context: PlottingContext):
         """Do nothing.
 
         Not relevant to the Text plotter, added for compatibility
@@ -494,8 +494,8 @@ class Text(Plotter):
     def plot(
         self,
         plotting_context: PlottingContext,
-        figure: QTextBrowser = None,
-        colours: None = None,
+        figure: QTextBrowser | None = None,
+        *,
         update_only: bool = False,
         toolbar: Toolbar | None = None,
     ):
@@ -523,18 +523,22 @@ class Text(Plotter):
             return
         if toolbar is not None:
             self._toolbar = toolbar
+
         self._pc_backup = plotting_context
         self._figure = target
         _xaxis_unit = None
         self._active_curves = []
         self._backup_curves = []
-        self.apply_settings(plotting_context, colours)
+        self.apply_settings(plotting_context)
         self.height_max, self.length_max = 0.0, 0.0
+
         if plotting_context.set_axes() is None:
             LOG.debug("Axis check failed.")
             return
+
         if len(plotting_context.datasets()) == 0:
             target.clear()
             return
+
         self._formatter.take_new_input(plotting_context)
         target.setText("\n".join(self._formatter._new_text))
