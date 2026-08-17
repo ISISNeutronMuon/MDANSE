@@ -20,13 +20,55 @@ import json
 import math
 import numbers
 from collections import defaultdict
+from collections.abc import Generator, Mapping
 from functools import singledispatchmethod
-from typing import ClassVar
+from pathlib import Path
+from typing import ClassVar, NamedTuple
+
+from typing_extensions import Self
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 
-_UNAMES = ["kg", "m", "s", "K", "mol", "A", "cd", "rad", "sr"]
+
+class Dims(NamedTuple):
+    """Unit dimension comparison."""
+
+    mass: float = 0  # kg
+    length: float = 0  # m
+    time: float = 0  # s
+    temperature: float = 0  # K
+    mols: float = 0  # Mol
+    current: float = 0  # A
+    luminosity: float = 0  # cd
+    angle: float = 0  # rad
+    solid_angle: float = 0  # steradian
+
+    _UNAMES = ["kg", "m", "s", "K", "mol", "A", "cd", "rad", "sr"]
+
+    def __pow__(self, amt: float) -> Self:
+        if not isinstance(amt, (float, int)):
+            return NotImplemented
+
+        return type(self)(*(dim * amt for dim in self))
+
+    def __sub__(self, other) -> Self:
+        if not isinstance(other, Dims):
+            return NotImplemented
+
+        return type(self)(*(s - o for s, o in zip(self, other, strict=True)))
+
+    def __add__(self, other) -> Self:
+        if not isinstance(other, Dims):
+            return NotImplemented
+
+        return type(self)(*(s + o for s, o in zip(self, other, strict=True)))
+
+    @property
+    def with_units(self) -> Generator[tuple[str, float]]:
+        yield from zip(self._UNAMES, self, strict=True)
+
+
 _PREFIXES = {
     "y": 1e-24,  # yocto
     "z": 1e-21,  # zepto
@@ -150,6 +192,8 @@ class _Unit:
         Solid angular dimension.
     """
 
+    _EQUIVALENCES: ClassVar[Mapping[Dims, Mapping[Dims, float]]] = defaultdict(dict)
+
     def __init__(
         self,
         uname: str,
@@ -165,14 +209,14 @@ class _Unit:
         sr: int = 0,
     ):
         self._factor = factor
-        self._dimension = [kg, m, s, K, mol, A, cd, rad, sr]
+        self._dimension: Dims = Dims(kg, m, s, K, mol, A, cd, rad, sr)
         self._format = "g"
         self._uname = uname
         self._ounit = None
         self._out_factor = None
         self._equivalent = False
 
-    def __add__(self, other):
+    def __add__(self, other: _Unit) -> Self:
         """Add two _Unit instances.
 
         To be added, the units have to be analog or equivalent.
@@ -207,7 +251,7 @@ class _Unit:
 
         return u
 
-    def __sub__(self, other):
+    def __sub__(self, other: _Unit) -> Self:
         """Subtract _Unit instances.
 
         To be subtracted, the units have to be analog or equivalent.
@@ -230,7 +274,7 @@ class _Unit:
 
         return u
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
         """Divide two _Unit instances.
 
         To be divided, the units have to be analog or equivalent.
@@ -262,7 +306,7 @@ class _Unit:
 
         return u
 
-    def __floordiv__(self, other):
+    def __floordiv__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
         """Divide two _Unit instances and truncate.
 
         To be divided, the units have to be analog or equivalent.
@@ -330,8 +374,7 @@ class _Unit:
         output_unit._ounit = None
         output_unit._out_factor = None
         output_unit._factor = pow(output_unit._factor, n)
-        for i in range(len(output_unit._dimension)):
-            output_unit._dimension[i] *= n
+        output_unit._dimension = output_unit._dimension ** n
 
         return output_unit
 
@@ -363,7 +406,7 @@ class _Unit:
         """
         return int(self.toval())
 
-    def __ceil__(self):
+    def __ceil__(self) -> _Unit:
         """Ceil of a _Unit value in canonical units.
 
         Examples
@@ -387,7 +430,7 @@ class _Unit:
             r._factor = math.ceil(r._factor)
             return r
 
-    def __floor__(self):
+    def __floor__(self) -> _Unit:
         """Floor of a _Unit value in canonical units.
 
         Examples
@@ -411,7 +454,7 @@ class _Unit:
             r._factor = math.floor(r._factor)
             return r
 
-    def __round__(self, ndigits=None):
+    def __round__(self, ndigits: int | None = None) -> _Unit:
         """Round of a _Unit value in canonical units.
 
         Examples
@@ -439,7 +482,7 @@ class _Unit:
     floor = __floor__
     round = __round__
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: _Unit) -> Self:
         """Add _Unit instances.
 
         See Also
@@ -460,7 +503,7 @@ class _Unit:
         else:
             raise UnitError("Incompatible units")
 
-    def __itruediv__(self, other):
+    def __itruediv__(self, other: numbers.Number | numbers.Complex | Self):
         """Divide _Unit instances.
 
         See Also
@@ -488,7 +531,7 @@ class _Unit:
         self._factor = math.floor(self._factor)
         return self
 
-    def __imul__(self, other):
+    def __imul__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
         """
         Multiply _Unit instances.
 
@@ -506,17 +549,16 @@ class _Unit:
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
-    def __ipow__(self, n):
+    def __ipow__(self, n: float) -> Self:
         self._factor = pow(self._factor, n)
-        for i in range(len(self._dimension)):
-            self._dimension[i] *= n
+        self._dimension = self._dimension ** n
 
         self._ounit = None
         self._out_factor = None
 
         return self
 
-    def __isub__(self, other):
+    def __isub__(self, other: _Unit) -> Self:
         """Subtract _Unit instances.  See __sub__."""
 
         if self.is_analog(other):
@@ -532,7 +574,7 @@ class _Unit:
         else:
             raise UnitError("Incompatible units")
 
-    def __radd__(self, other):
+    def __radd__(self, other: _Unit) -> Self:
         """Add _Unit instances.
 
         See Also
@@ -541,7 +583,7 @@ class _Unit:
         """
         return self.__add__(other)
 
-    def __rdiv__(self, other):
+    def __rdiv__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
         u = copy.deepcopy(self)
         if isinstance(other, numbers.Number | numbers.Complex):
             u._factor /= other
@@ -552,7 +594,7 @@ class _Unit:
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
         """Multiply _Unit instances.  See __mul__."""
 
         u = copy.deepcopy(self)
@@ -565,12 +607,12 @@ class _Unit:
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: _Unit) -> _Unit:
         """Subtract _Unit instances.  See __sub__."""
 
         return other.__sub__(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         unit = copy.copy(self)
 
         if self._ounit is None:
@@ -578,7 +620,7 @@ class _Unit:
 
             positive_units = []
             negative_units = []
-            for uname, uval in zip(_UNAMES, unit._dimension, strict=True):
+            for uname, uval in unit._dimension.with_units:
                 if uval == 0:
                     continue
 
@@ -607,7 +649,7 @@ class _Unit:
 
         return s
 
-    def _div_by(self, other) -> None:
+    def _div_by(self, other: _Unit) -> None:
         """Compute divided unit including new dimensionality.
 
         Parameters
@@ -629,23 +671,22 @@ class _Unit:
         """
         if self.is_analog(other):
             self._factor /= other._factor
-            self._dimension = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+            self._dimension = Dims(0, 0, 0, 0, 0, 0, 0, 0, 0)
         elif self._equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is not None:
                 self._factor /= other._factor / equivalence_factor
-                self._dimension = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                self._dimension = Dims(0, 0, 0, 0, 0, 0, 0, 0, 0)
             else:
                 raise UnitError("The units are not equivalent")
         else:
             self._factor /= other._factor
-            for i in range(len(self._dimension)):
-                self._dimension[i] = self._dimension[i] - other._dimension[i]
+            self._dimension = self._dimension - other._dimension
 
         self._ounit = None
         self._out_factor = None
 
-    def _mult_by(self, other) -> None:
+    def _mult_by(self, other: _Unit) -> None:
         """Compute multiplied unit including new dimensionality.
 
         Parameters
@@ -667,30 +708,27 @@ class _Unit:
         """
         if self.is_analog(other):
             self._factor *= other._factor
-            for i in range(len(self._dimension)):
-                self._dimension[i] = 2.0 * self._dimension[i]
+            self._dimension = self._dimension ** 2
         elif self._equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is None:
                 raise UnitError("The units are not equivalent")
 
             self._factor *= other._factor / equivalence_factor
-            for i in range(len(self._dimension)):
-                self._dimension[i] = 2 * self._dimension[i]
+            self._dimension = self._dimension ** 2
             return
         else:
             self._factor *= other._factor
-            for i in range(len(self._dimension)):
-                self._dimension[i] = self._dimension[i] + other._dimension[i]
+            self._dimension = self._dimension + other._dimension
 
         self._ounit = None
         self._out_factor = None
 
     @property
-    def dimension(self):
+    def dimension(self) -> Dims:
         """Getter for _dimension attribute. Returns a copy."""
 
-        return copy.copy(self._dimension)
+        return self._dimension
 
     @property
     def equivalent(self) -> bool:
@@ -703,22 +741,22 @@ class _Unit:
         self._equivalent = equivalent
 
     @property
-    def factor(self):
+    def factor(self) -> float:
         """Getter for _factor attribute."""
 
         return self._factor
 
     @property
-    def format(self):
+    def format(self) -> str:
         """Getter for the output format."""
 
         return self._format
 
     @format.setter
-    def format(self, fmt):
+    def format(self, fmt: str) -> None:
         self._format = fmt
 
-    def is_analog(self, other) -> bool:
+    def is_analog(self, other: _Unit) -> bool:
         """Whether two units are analog.
 
         Analog units are units whose dimension vector exactly matches.
@@ -744,7 +782,7 @@ class _Unit:
         """
         return self._dimension == other._dimension
 
-    def get_equivalence_factor(self, other) -> float | None:
+    def get_equivalence_factor(self, other: _Unit) -> float | None:
         """Returns the equivalence factor if other unit is equivalent.
 
         Equivalent units are units whose dimension are related through a constant
@@ -792,7 +830,7 @@ class _Unit:
 
         return None
 
-    def ounit(self, ounit: str):
+    def ounit(self, ounit: str) -> Self:
         """Set the preferred unit for output.
 
         Parameters
@@ -836,7 +874,7 @@ class _Unit:
         else:
             raise UnitError(f"The units {self} and {ounit} are not compatible.")
 
-    def sqrt(self):
+    def sqrt(self) -> Self:
         """Square root of a _Unit.
 
         Returns
@@ -852,7 +890,7 @@ class _Unit:
 
         return self**0.5
 
-    def toval(self, ounit: str = "") -> float:
+    def toval(self, ounit: str | None = "") -> float:
         """Returns the numeric value of a unit.
 
         The value is given in ounit or in the default output unit.
@@ -969,36 +1007,34 @@ def _str_to_unit(s: str) -> _Unit:
     UnitError
         String is not a valid unit specification.
     """
-    if UNITS_MANAGER.has_unit(s):
-        unit = UNITS_MANAGER.get_unit(s)
+    if unit := UNITS_MANAGER.get_unit(s):
         return copy.deepcopy(unit)
 
-    else:
-        unit = _Unit("au", 1.0)
+    unit = _Unit("au", 1.0)
 
-        splitted_units = s.split("/")
+    splitted_units = s.split("/")
 
-        if len(splitted_units) == 1:
-            units = splitted_units[0].split(" ")
-            for u in units:
+    if len(splitted_units) == 1:
+        units = splitted_units[0].split(" ")
+        for u in units:
+            unit *= _parse_unit(u.strip())
+        unit._uname = s
+
+    elif len(splitted_units) == 2:
+        numerator = splitted_units[0].strip()
+        if numerator != "1":
+            numerator = numerator.split(" ")
+            for u in numerator:
                 unit *= _parse_unit(u.strip())
-            unit._uname = s
 
-        elif len(splitted_units) == 2:
-            numerator = splitted_units[0].strip()
-            if numerator != "1":
-                numerator = numerator.split(" ")
-                for u in numerator:
-                    unit *= _parse_unit(u.strip())
+        denominator = splitted_units[1].strip().split(" ")
+        for u in denominator:
+            unit /= _parse_unit(u.strip())
 
-            denominator = splitted_units[1].strip().split(" ")
-            for u in denominator:
-                unit /= _parse_unit(u.strip())
+        unit._uname = s
 
-            unit._uname = s
-
-        else:
-            raise UnitError(f"Invalid unit: {s}")
+    else:
+        raise UnitError(f"Invalid unit: {s}")
 
     return unit
 
@@ -1009,8 +1045,6 @@ class UnitsManager(metaclass=Singleton):
     _UNITS: ClassVar[dict[str, _Unit]] = {}
 
     _DEFAULT_DATABASE = PLATFORM.base_directory / "MDANSE" / "Framework" / "units.json"
-
-    _USER_DATABASE = PLATFORM.application_directory / "units.json"
 
     def __init__(self):
         self.load()
@@ -1032,20 +1066,35 @@ class UnitsManager(metaclass=Singleton):
     def has_unit(self, uname) -> bool:
         return uname in UnitsManager._UNITS
 
-    def load(self) -> None:
+    def load(
+        self,
+        user_database: Path | str | None = None,
+        default_database: Path | str | None = None,
+    ) -> None:
         """Load units from databases.
 
         Fill self with unit infomration.
         """
+        self._user_database = (
+            Path(user_database)
+            if user_database is not None
+            else PLATFORM.application_directory / "units.json"
+        )
+        default_database = (
+            Path(default_database)
+            if default_database is not None
+            else UnitsManager._DEFAULT_DATABASE
+        )
+
         UnitsManager._UNITS.clear()
 
         d = {}
 
-        with open(UnitsManager._DEFAULT_DATABASE, encoding="utf-8") as fin:
+        with open(default_database, encoding="utf-8") as fin:
             d.update(json.load(fin))
 
         try:
-            with open(UnitsManager._USER_DATABASE, encoding="utf-8") as fin:
+            with open(self._user_database, encoding="utf-8") as fin:
                 d.update(json.load(fin))
 
         except FileNotFoundError:
@@ -1059,7 +1108,7 @@ class UnitsManager(metaclass=Singleton):
 
     def save(self):
         """Write self to custom user database."""
-        with open(UnitsManager._USER_DATABASE, "w") as fout:
+        with open(self._user_database, "w") as fout:
             json.dump(UnitsManager._UNITS, fout, indent=4, cls=UnitsManagerEncoder)
 
     @property
@@ -1228,7 +1277,3 @@ add_equivalence(
 add_equivalence(
     (1, 1, -2, 0, 0, 0, 0, 0, 0), (1, 1, -2, 0, -1, 0, 0, 0, 0), 6.02214076e23
 )
-
-if __name__ == "__main__":
-    m = measure(1.0, "m")
-    m **= 3
