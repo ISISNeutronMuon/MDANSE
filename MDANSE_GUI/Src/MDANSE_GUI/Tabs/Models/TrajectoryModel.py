@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from pathlib import Path
 
 import itertools
 import traceback
@@ -96,21 +97,16 @@ class TrajectoryModel(QStandardItemModel):
     """Like GeneralModel, but should implement trajectory
     loading in the background."""
 
-    DEFAULT_JSON_PATH = PLATFORM.application_directory / "recent_trajectory_file.json"
+    DEFAULT_JSON_FILENAME = "recent_trajectory_file.json"
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
     PLACEHOLDER_STRING = "Recently used trajectory files (.mdt, .h5)"
-    recent_files = RecentFiles(
-        DEFAULT_JSON_PATH,
-        MAX_NUMBER_RECENT_FILES,
-        PLACEHOLDER_STRING,
-    )
 
     error = Signal(str)
     all_elements = Signal(object)
     finished_loading = Signal(int)
     free_name = Signal(str)
 
-    def __init__(self, parent: QObject = None):
+    def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
         self.mutex = QMutex()
         self._node_numbers = []
@@ -119,6 +115,16 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status = {}
         self._loading_threads = {}
         self._next_number = itertools.count()
+
+        self.recent_files = RecentFiles(
+            PLATFORM.application_directory / self.DEFAULT_JSON_FILENAME,
+            self.MAX_NUMBER_RECENT_FILES,
+            self.PLACEHOLDER_STRING,
+        )
+
+    @property
+    def recent_files_path(self) -> Path:
+        return self.recent_files.json_file_path
 
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:

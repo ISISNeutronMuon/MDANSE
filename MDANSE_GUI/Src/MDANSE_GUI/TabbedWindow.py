@@ -351,17 +351,13 @@ class MDANSEMainWindow(QMainWindow):
             menu.addAction(action)
 
     @Slot()
-    def populate_recent_trajectory_menu(
-        self,
-        filename=TrajectoryModel.DEFAULT_JSON_PATH,
-        placeholder=TrajectoryModel.PLACEHOLDER_STRING,
-    ):
+    def populate_recent_trajectory_menu(self):
         """Populate the recent trajectory files menu in the File menu."""
         self.populate_recent_menu(
             self.recent_trajectory_file_menu,
-            filename,
+            self._trajectory_model.recent_files_path,
             self.open_recent_trajectory_file,
-            placeholder_string=placeholder,
+            placeholder_string=self._trajectory_model.PLACEHOLDER_STRING,
         )
 
     @Slot()
@@ -370,17 +366,14 @@ class MDANSEMainWindow(QMainWindow):
         self.signal_recent_trajectory_file.emit(file)
 
     @Slot()
-    def populate_recent_plot_selection_menu(
-        self,
-        filename=PlotDataModel.DEFAULT_JSON_PATH,
-        placeholder=PlotDataModel.PLACEHOLDER_STRING,
-    ):
+    def populate_recent_plot_selection_menu(self):
         """Populate the recent plot selection files menu in the File menu."""
+        plot_data_model: PlotDataModel = self._tabs["Plot Creator"]._model
         self.populate_recent_menu(
             self.recent_plot_selection_file_menu,
-            filename,
+            plot_data_model.recent_files_path,
             self.open_recent_plot_selection_file,
-            placeholder_string=placeholder,
+            placeholder_string=plot_data_model.PLACEHOLDER_STRING,
         )
 
     @Slot()
