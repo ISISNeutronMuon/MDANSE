@@ -164,27 +164,29 @@ class PlotDataModel(QStandardItemModel):
     Meant to be used with DoublePanel, GeneralView and ItemVisualiser.
     It stores elements and emits them to the ItemVisualiser.
     """
-
-    DEFAULT_JSON_PATH = (
-        PLATFORM.application_directory / "recent_plot_selection_file.json"
-    )
+    DEFAULT_JSON_FILENAME = "recent_plot_selection_file.json"
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
     PLACEHOLDER_STRING = "Recently used result files (.mda)"
-    recent_files = RecentFiles(
-        DEFAULT_JSON_PATH,
-        MAX_NUMBER_RECENT_FILES,
-        PLACEHOLDER_STRING,
-    )
 
     error = Signal(str)
     all_elements = Signal(object)
     finished_loading = Signal(int)
 
-    def __init__(self, parent: QObject = None):
+    def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
         self.mutex = QMutex()
         self._nodes = {}
         self._next_number = 0
+
+        self.recent_files = RecentFiles(
+            PLATFORM.application_directory / self.DEFAULT_JSON_FILENAME,
+            self.MAX_NUMBER_RECENT_FILES,
+            self.PLACEHOLDER_STRING,
+        )
+
+    @property
+    def recent_files_path(self) -> Path:
+        return self.recent_files.json_file_path
 
     @Slot(str)
     def add_file(self, filename: str):
