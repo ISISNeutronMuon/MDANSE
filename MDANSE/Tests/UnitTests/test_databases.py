@@ -207,7 +207,7 @@ class TestAtomsDatabase(unittest.TestCase):
         next(lines)
         self.assertEqual(next(lines).strip(), "H")
         self.assertTrue({"property", "value", "unit"}.issubset(next(lines).split()))
-        
+
         properties = {
             tokens[0] for line in lines if len(tokens := line.split()) > 2
         }
@@ -263,7 +263,7 @@ class TestAtomsDatabase(unittest.TestCase):
             patch("json.dumps") as dump,
         ):
             ATOMS_DATABASE.save()
-            op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, "w")
+            op.assert_called_with(ATOMS_DATABASE._user_database, "w")
             dump.assert_called_with(
                 {"properties": self.properties, "units": self.units, "atoms": self.data}, indent=4, cls=MDANSEEncoder
             )

@@ -242,12 +242,12 @@ class AtomsDatabase(_Database):
                 "The old atom database %s will be ignored!",
                 self._OLD_USER_DATABASE,
             )
-        if self._USER_DATABASE.exists():
+        if self._user_database.exists():
             LOG.warning(
                 "The custom atom database %s will be used only for custom atoms. "
                 "The atom properties in %s cannot be changed by users anymore. "
                 "The only way to use non-standard atom properties is to create custom chemical elements.",
-                self._USER_DATABASE,
+                self._user_database,
                 self._DEFAULT_DATABASE,
             )
 
@@ -279,12 +279,10 @@ class AtomsDatabase(_Database):
             Name of the database entry. Here it is an atom type name.
 
         """
-        try:
-            return copy.deepcopy(self._data[item])
-        except KeyError as err:
-            raise KeyError(
-                f"The element {item} is not registered in the database."
-            ) from err
+        if item not in self._data:
+            raise KeyError(f"The element {item} is not registered in the database.")
+
+        return copy.deepcopy(self._data[item])
 
     def _load(
         self,
@@ -303,8 +301,11 @@ class AtomsDatabase(_Database):
             The path to the MDANSE atom database. If None, built-in path is used.
 
         """
-        self._properties = defaultdict(lambda: "str")
-        self._units = defaultdict(lambda: "none")
+        self._user_database = (
+            Path(user_database)
+            if user_database is not None
+            else AtomsDatabase._USER_DATABASE
+        )
 
         super()._load(user_database=user_database, default_database=default_database)
         self._properties.update(self._default_data["properties"])
@@ -675,7 +676,8 @@ class AtomsDatabase(_Database):
 
     def _reset(self) -> None:
         """Reset (clear) the atom database."""
-        self._data.clear()
+        self._properties.clear()
+        self._units.clear()
         self._properties.clear()
 
     def save(self) -> None:
@@ -690,8 +692,8 @@ class AtomsDatabase(_Database):
             "atoms": dict(self._data),
         }
 
-        with open(AtomsDatabase._USER_DATABASE, "w") as fout:
-            fout.write(json.dumps(d, indent=4, cls=MDANSEEncoder))
+        with open(self._user_database, "w") as fout:
+            json.dump(d, fout, indent=4, cls=MDANSEEncoder)
 
     def get_atom_property(
         self,
@@ -752,11 +754,8 @@ class AtomsDatabase(_Database):
         """
         try:
             del self._data[symbol]
-        except KeyError:
-            try:
-                del self._data.parents[symbol]
-            except KeyError as err:
-                raise AtomsDatabaseError(f"Atom {symbol} does not exist.") from err
+        except KeyError as err:
+            raise AtomsDatabaseError(f"Atom {symbol} does not exist.") from err
 
     def remove_property(self, label: str):
         """Remove an atom property from the database.
@@ -793,10 +792,8 @@ class AtomsDatabase(_Database):
                 f"Cannot rename atom from {old_key} to {new_key} as {new_key}"
                 " already exists.",
             )
-        try:
-            self._data[new_key] = self._data.pop(old_key)
-        except KeyError:
-            self._data[new_key] = self._data.parents.pop(old_key)
+
+        self._data[new_key] = self._data.pop(old_key)
 
     def rename_atom_property(self, old_key: str, new_key: str):
         """Rename the atom property in the atom database.
