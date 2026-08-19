@@ -305,10 +305,6 @@ class JobHolder(QStandardItemModel):
         self.job_number = count()
         self.setHorizontalHeaderLabels(["Job", "Progress", "Status"])
 
-    @Slot(str)
-    def reportError(self, err: str):
-        LOG.error(err)
-
     @Slot(list)
     def startProcess(
         self, job_vars: tuple[str, dict[str, Any]], load_afterwards: bool = False
@@ -404,6 +400,14 @@ class JobHolder(QStandardItemModel):
 
     def startProcessAndLoad(self, job_vars: list):
         self.startProcess(job_vars, load_afterwards=True)
+
+    @property
+    def jobs_still_running(self):
+        return any(
+            job.entry.job.state
+            not in {JobStates.ABORTED, JobStates.FAILED, JobStates.FINISHED}
+            for job in self.jobs.values()
+        )
 
 
 class Job(NamedTuple):

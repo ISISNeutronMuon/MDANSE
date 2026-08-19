@@ -200,13 +200,22 @@ class TabbedWindow(QMainWindow):
         if create_systray_icon:
             self.create_systray_icon()
 
+    def block_gui_shutdown(self):
+        _ = QMessageBox.warning(
+            self,
+            "Some tasks haven't finished",
+            "There are unfinished tasks present in the 'Running jobs' tab. "
+            "You will not be able to close MDANSE until they have finished, "
+            "or have been terminated by you manually (using the context menu).",
+        )
+
     def create_systray_icon(self):
         self.system_tray_icon = QSystemTrayIcon(self.icon_object)
         self.tray_menu = QMenu()
         for label, func_slot in [
             ("Show GUI window", self.showNormal),
             (None, None),
-            ("Quit", self.app_instance.quit),
+            ("Quit", self.close_only_if_finished),
         ]:
             if label is None and func_slot is None:
                 self.tray_menu.addSeparator()
@@ -228,15 +237,25 @@ class TabbedWindow(QMainWindow):
             self.check_dark_mode()
         super().changeEvent(event)
 
+    @Slot()
+    def close_only_if_finished(self):
+        if not self._job_holder.jobs_still_running:
+            self.deleteLater()
+            self.app_instance.quit()
+            self.close()
+        else:
+            self.block_gui_shutdown()
+
     def closeEvent(self, event: QCloseEvent):
+        event.ignore()
         if self.system_tray_icon is None:
-            super().closeEvent(event)
+            self.close_only_if_finished()
             return
-        if not event.spontaneous or not self.isVisible():
+        if not event.spontaneous() or not self.isVisible():
             return
         if self.system_tray_icon.isVisible():
             self.hide()
-            event.ignore()
+            return
 
     def createCommonModels(self):
         self._trajectory_model = TrajectoryModel()
@@ -297,7 +316,7 @@ class TabbedWindow(QMainWindow):
         file_group.addMenu(self.recent_plot_selection_file_menu)
         file_group.addSeparator()
         self.exitAct = QAction("Exit", parent=menubar)
-        self.exitAct.triggered.connect(self.shut_down)
+        self.exitAct.triggered.connect(self.close_only_if_finished)
         file_group.addAction(self.exitAct)
         self.settingsAct = QAction("User Settings", parent=menubar)
         self.settingsAct.triggered.connect(self.launchSettingsEditor)
@@ -317,10 +336,6 @@ class TabbedWindow(QMainWindow):
         help_group.addSeparator()
         help_group.addAction(self.aboutAct)
         self.setMenuBar(menubar)
-
-    def shut_down(self):
-        QApplication.quit()
-        self.destroy(True, True)
 
     def populate_recent_menu(
         self,
@@ -632,6 +647,3 @@ class TabbedWindow(QMainWindow):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("state", self.saveState())
         self.settings.endGroup()
-
-    def reportError(self, text: str):
-        LOG.error(text)
