@@ -39,7 +39,7 @@ def mean_square_displacement(
     Parameters
     ----------
     coords : FloatArray
-        Coordinates used to calculate MSD.
+        Coordinates used to calculate MSD, (time, atom, xyz).
     n_configs : int
         Size of the window used to correlated positions.
     n_frames : int
@@ -48,7 +48,7 @@ def mean_square_displacement(
     Returns
     -------
     FloatArray
-        An array of the MSD.
+        An array of the MSDs, (time, atom).
     """
     r2 = np.sum(coords * coords, axis=2)
     window = np.ones((n_configs, coords.shape[1]))

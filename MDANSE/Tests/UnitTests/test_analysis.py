@@ -7,7 +7,7 @@ from MDANSE.MolecularDynamics.Analysis import (AnalysisError,
 
 COORDS = [
     np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]], dtype=float),
-    np.array([[1, 1, 1], [2, 1, 1], [3, 1, 1]], dtype=float),
+    np.array([[[1, 1, 1]], [[2, 1, 1]], [[3, 1, 1]]], dtype=float),
     np.array([[1, 1, 1], [2, 1, 1], [8, 1, 1]], dtype=float),
     np.array([[1, 2, 1], [2, 1, 1], [10, 5, 5], [1, 1, 2]], dtype=float),
     np.array([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
@@ -17,11 +17,11 @@ COORDS = [
 ]
 
 
-@pytest.mark.parametrize("coords, n_configs, expected", [
-    (COORDS[1], 1, [0., 1., 4.])
+@pytest.mark.parametrize("coords, n_configs, n_frames, expected", [
+    (COORDS[1], 1, 3, [[0.], [1.], [4.]])
 ])
-def test_mean_square_displacement(coords, n_configs, expected):
-    msd = mean_square_displacement(coords, n_configs)
+def test_mean_square_displacement(coords, n_configs, n_frames, expected):
+    msd = mean_square_displacement(coords, n_configs, n_frames)
     assert np.allclose(msd, expected)
 
 @pytest.mark.parametrize("coords, root, expected", [
