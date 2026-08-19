@@ -371,7 +371,7 @@ class TrajectoryFile(ABC):
 
         Parameters
         ----------
-        index : int
+        index_list : list[int]
             The index of the atom.
         first : int
             The index of the first frame. (Default value = 0)
@@ -385,7 +385,7 @@ class TrajectoryFile(ABC):
         Returns
         -------
         ndarray
-            2D array containing the atomic trajectory for the selected frames
+            3D array containing the atomic trajectory for the selected frames
 
         """
         slc = np.s_[first:last:step]

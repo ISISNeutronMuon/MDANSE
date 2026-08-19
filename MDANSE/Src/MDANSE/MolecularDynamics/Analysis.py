@@ -18,7 +18,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
-from scipy.signal import correlate
+from scipy import fft
 
 from MDANSE.Mathematics.Geometry import center_of_mass
 
@@ -30,7 +30,9 @@ class AnalysisError(Exception):
     pass
 
 
-def mean_square_displacement(coords: FloatArray, n_configs: int) -> FloatArray:
+def mean_square_displacement(
+    coords: FloatArray, n_configs: int, n_frames: int
+) -> FloatArray:
     """Computes the mean square displacement of a set of coordinates
     using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.
 
@@ -40,16 +42,26 @@ def mean_square_displacement(coords: FloatArray, n_configs: int) -> FloatArray:
         Coordinates used to calculate MSD.
     n_configs : int
         Size of the window used to correlated positions.
+    n_frames : int
+        Number of correlation frames.
 
     Returns
     -------
     FloatArray
         An array of the MSD.
     """
-    r2 = coords * coords
-    window = np.ones((n_configs, 3))
-    r2t = correlate(r2, window, mode="valid").T[0] / n_configs
-    rtr0 = correlate(coords, coords[:n_configs], mode="valid").T[0] / n_configs
+    r2 = np.sum(coords * coords, axis=2)
+    window = np.ones((n_configs, coords.shape[1]))
+
+    fast_len = fft.next_fast_len(coords.shape[0])
+    v = fft.fft(r2, n=fast_len, axis=0)
+    w = fft.fft(window, n=fast_len, axis=0)
+    r2t = fft.ifft(v * w.conj(), axis=0).real[:n_frames] / n_configs
+
+    v = fft.fft(coords, n=fast_len, axis=0)
+    w = fft.fft(coords[:n_configs], n=fast_len, axis=0)
+    rtr0 = fft.ifft(np.sum(v * w.conj(), axis=2), axis=0).real[:n_frames] / n_configs
+
     msd = r2t[0] + r2t - 2 * rtr0
     return msd
 

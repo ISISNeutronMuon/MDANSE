@@ -718,7 +718,7 @@ class Trajectory:
 
         Parameters
         ----------
-        index : int
+        index_list : list[int]
             The index of the atom.
         first : int
             The index of the first frame. (Default value = 0)
@@ -732,7 +732,7 @@ class Trajectory:
         Returns
         -------
         ndarray
-            2D array containing the atomic trajectory for the selected frames
+            3D array containing the atomic trajectory for the selected frames
 
         """
         return self._trajectory.read_atomic_trajectory_many(

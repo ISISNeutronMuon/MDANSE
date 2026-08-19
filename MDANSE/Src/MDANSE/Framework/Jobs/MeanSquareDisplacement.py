@@ -19,8 +19,8 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.MolecularDynamics.Analysis import mean_square_displacement
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 
 @IJob.register("MeanSquareDisplacement")
@@ -100,7 +100,14 @@ class MeanSquareDisplacement(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+        n_proc = self.configuration["running_mode"].get("slots", 1)
+        self.grouped_indices = group_atom_indices(
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=n_proc,
+            memory_scale_factor=2,
+        )
+        self.numberOfSteps = len(self.grouped_indices)
 
         self.labels = [
             (element, (element,)) for element in self.trajectory.get_natoms()
@@ -146,11 +153,10 @@ class MeanSquareDisplacement(IJob):
         Returns:
             tuple: the result of the step
         """
+        atom_index_group = self.grouped_indices[index]
 
-        # get selected atom indices sublist
-        atom_index = self.trajectory.atom_indices[index]
-        series = self.configuration["trajectory"]["instance"].read_atomic_trajectory(
-            atom_index,
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -159,7 +165,9 @@ class MeanSquareDisplacement(IJob):
         series = self.configuration["projection"]["projector"](series)
 
         msd = mean_square_displacement(
-            series, self.configuration["frames"]["n_configs"]
+            series,
+            self.configuration["frames"]["n_configs"],
+            self.configuration["frames"]["n_frames"],
         )
 
         return index, msd
@@ -171,12 +179,11 @@ class MeanSquareDisplacement(IJob):
         Args:
             result (tuple): the output of run_step method
         """
-
-        # The symbol of the atom.
-        element = self._atoms[self.trajectory.atom_indices[index]]
-
-        self._outputData[f"msd/{element}"] += result
-        self._outputData["msd/total"] += result
+        at_indices = self.grouped_indices[index]
+        for rel_index, abs_index in enumerate(at_indices):
+            element = self._atoms[abs_index]
+            self._outputData[f"msd/{element}"] += result[:, rel_index]
+            self._outputData["msd/total"] += result[:, rel_index]
 
     def finalize(self):
         """
