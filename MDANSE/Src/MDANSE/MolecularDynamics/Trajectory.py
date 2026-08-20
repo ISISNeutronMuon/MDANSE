@@ -640,17 +640,17 @@ class Trajectory:
 
     def to_absolute_coordinates(
         self,
-        box_coordinates: FloatArray,
+        fractional_coordinates: FloatArray,
         first: int = 0,
         last: int | None = None,
         step: int | None = None,
     ) -> FloatArray:
-        """Convert box coordinates to real coordinates for a set of frames.
+        """Convert fractional coordinates to absolute coordinates for a set of frames.
 
         Parameters
         ----------
-        box_coordinates : ndarray
-            A 2D array containing the box coordinates.
+        fractional_coordinates : ndarray
+            A 2D array containing the fractional coordinates.
         first : int
             The index of the first frame.
         last : int or None
@@ -664,7 +664,7 @@ class Trajectory:
             2D array containing the absolute coordinates converted from fractionals.
 
         """
-        return self._trajectory.to_absolute_coordinates(box_coordinates, first, last, step)
+        return self._trajectory.to_absolute_coordinates(fractional_coordinates, first, last, step)
 
     def read_atomic_trajectory(
         self,
@@ -673,9 +673,9 @@ class Trajectory:
         last: int | None = None,
         step: int | None = 1,
         *,
-        box_coordinates: bool = False,
+        fractional_coordinates: bool = False,
     ) -> FloatArray:
-        """Read an atomic trajectory. The trajectory is corrected from box jumps.
+        """Read a continuous trajectory of a single atom.
 
         Parameters
         ----------
@@ -685,10 +685,10 @@ class Trajectory:
             The index of the first frame. (Default value = 0)
         last : int
             The index of the last frame. (Default value = None)
-        step : int
-            The step in frame. (Default value = 1)
-        box_coordinates : bool
-            If True, the coordiniates are returned in box coordinates (Default value = False).
+        step : int, default 1.
+            The step in frame.
+        fractional_coordinates : bool, default False
+            If True, the coordinates are returned in fractional coordinates.
 
         Returns
         -------
@@ -701,7 +701,7 @@ class Trajectory:
             first=first,
             last=last,
             step=step,
-            box_coordinates=box_coordinates,
+            fractional_coordinates=fractional_coordinates,
         )
 
     def read_atomic_trajectory_many(
@@ -709,25 +709,25 @@ class Trajectory:
         index_list: list[int],
         first: int = 0,
         last: int | None = None,
-        step: int | None = 1,
+        step: int = 1,
         *,
-        box_coordinates: bool = False,
+        fractional_coordinates: bool = False,
         reference: FloatArray | None = None,
     ) -> FloatArray:
-        """Read an atomic trajectory. The trajectory is corrected from box jumps.
+        """Read continuous trajectories of multiple atoms.
 
         Parameters
         ----------
-        index : int
+        index_list : list[int]
             The index of the atom.
         first : int
-            The index of the first frame. (Default value = 0)
-        last : int
-            The index of the last frame. (Default value = None)
-        step : int
-            The step in frame. (Default value = 1)
-        box_coordinates : bool
-            If True, the coordiniates are returned in box coordinates (Default value = False).
+            The index of the first frame.
+        last : int | None, default None
+            The index of the last frame.
+        step : int, default 1
+            The step in frame.
+        fractional_coordinates : bool
+            If True, the coordiniates are returned in fractional coordinates.
 
         Returns
         -------
@@ -740,33 +740,35 @@ class Trajectory:
             first=first,
             last=last,
             step=step,
-            box_coordinates=box_coordinates,
+            fractional_coordinates=fractional_coordinates,
             reference = reference,
         )
 
     def read_configuration_trajectory(
         self,
-        index: int,
+        index: int | list[int],
         first: int = 0,
         last: int | None = None,
         step: int = 1,
         slc: slice | None = None,
         variable: str = "velocities",
     ) -> FloatArray:
-        """Return trajectory values for one atom for a subset of frames.
+        """Return trajectory values for one or more atoms for a subset of frames.
 
         Parameters
         ----------
-        index : int
-            Atom index.
-        first : int, optional
-            First frame index, by default 0
-        last : int | None, optional
-            Last frame index, by default None
-        step : int, optional
-            Step in time frames, by default 1
-        variable : str, optional
-            Value to be read from trajectory, by default "velocities"
+        index : int | list[int]
+            Atom index or a list of atom indices.
+        first : int, default 0
+            First frame index.
+        last : int | None, default None
+            Last frame index.
+        step : int, default 1
+            Step in time frames.
+        slc: slice | None, default None
+            Slice defining the frame selection, optional.
+        variable : str, default "velocities"
+            Value to be read from trajectory.
 
         Returns
         -------
