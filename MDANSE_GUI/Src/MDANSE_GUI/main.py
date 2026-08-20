@@ -163,7 +163,7 @@ def startGUI(some_args):
             max([0, round(2000 - 1000 * (t1 - t0))]), lambda: splash.finish(root)
         )
 
-    app.exec()  # once this is done, the GUI has its event loop running.
+    sys.exit(app.exec())  # once this is done, the GUI has its event loop running.
     # no more Python scripting now, we are in the event loop.
 
 
