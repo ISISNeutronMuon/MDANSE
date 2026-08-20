@@ -33,7 +33,6 @@ from MDANSE.Mathematics.Signal import (
     get_spectrum,
 )
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Analysis import mean_square_displacement_many
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.util_types import ComplexArray

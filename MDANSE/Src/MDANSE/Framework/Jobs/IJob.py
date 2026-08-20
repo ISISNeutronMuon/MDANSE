@@ -35,7 +35,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
-from more_itertools import consumer, first_true
+from more_itertools import consumer
 
 from MDANSE import PLATFORM
 from MDANSE.Core.RegisterFactory import RegisterFactory

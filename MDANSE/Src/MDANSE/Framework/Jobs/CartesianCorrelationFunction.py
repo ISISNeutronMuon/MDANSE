@@ -18,16 +18,13 @@ from __future__ import annotations
 import abc
 import itertools as it
 
-import numpy as np
 from scipy import fft
-from scipy.signal import correlate
 
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-from MDANSE.MolecularDynamics.Analysis import scipy_correlate_2D
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 

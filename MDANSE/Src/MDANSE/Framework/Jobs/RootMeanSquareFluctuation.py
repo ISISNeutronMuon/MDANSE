@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-from itertools import groupby
-
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MolecularDynamics.Analysis import mean_square_fluctuation
 from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
