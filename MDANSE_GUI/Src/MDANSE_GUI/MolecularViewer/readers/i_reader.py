@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import abc
 
+import numpy as np
+
 from MDANSE.Chemistry import ATOMS_DATABASE
 
 
@@ -169,4 +171,4 @@ class IReader(abc.ABC):
         if index < 0 or index >= self._n_atoms:
             raise InvalidAtomError("Invalid atom index")
 
-        return self._trajectory.read_atomic_trajectory(index)
+        return np.squeeze(self._trajectory.read_atomic_trajectory_many([index]))

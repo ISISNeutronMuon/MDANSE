@@ -666,44 +666,6 @@ class Trajectory:
         """
         return self._trajectory.to_absolute_coordinates(fractional_coordinates, first, last, step)
 
-    def read_atomic_trajectory(
-        self,
-        index: int,
-        first: int = 0,
-        last: int | None = None,
-        step: int | None = 1,
-        *,
-        fractional_coordinates: bool = False,
-    ) -> FloatArray:
-        """Read a continuous trajectory of a single atom.
-
-        Parameters
-        ----------
-        index : int
-            The index of the atom.
-        first : int
-            The index of the first frame. (Default value = 0)
-        last : int
-            The index of the last frame. (Default value = None)
-        step : int, default 1.
-            The step in frame.
-        fractional_coordinates : bool, default False
-            If True, the coordinates are returned in fractional coordinates.
-
-        Returns
-        -------
-        ndarray
-            2D array containing the atomic trajectory for the selected frames
-
-        """
-        return self._trajectory.read_atomic_trajectory(
-            index,
-            first=first,
-            last=last,
-            step=step,
-            fractional_coordinates=fractional_coordinates,
-        )
-
     def read_atomic_trajectory_many(
         self,
         index_list: list[int],

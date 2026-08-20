@@ -313,52 +313,6 @@ class TrajectoryFile(ABC):
             return fractional_coordinates
         return fractional_coordinates @ self.unit_cells_raw[first:last:step]
 
-    def read_atomic_trajectory(
-        self,
-        index: int,
-        first: int = 0,
-        last: int | None = None,
-        step: int | None = 1,
-        *,
-        fractional_coordinates: bool = False,
-    ) -> FloatArray:
-        """Read an atomic trajectory. The trajectory is corrected from box jumps.
-
-        Parameters
-        ----------
-        index : int
-            The index of the atom.
-        first : int
-            The index of the first frame. (Default value = 0)
-        last : int
-            The index of the last frame. (Default value = None)
-        step : int
-            The step in frame. (Default value = 1)
-        fractional_coordinates : bool
-            If True, the coordiniates are returned in fractional coordinates (Default value = False).
-
-        Returns
-        -------
-        ndarray
-            2D array containing the atomic trajectory for the selected frames
-
-        """
-        slc = np.s_[first:last:step]
-
-        coords = self.coordinates(slc, index)
-
-        if self.unit_cell_warning == NO_CELL:
-            return coords
-
-        direct_cells = self.unit_cells_raw[slc]
-        inverse_cells = np.linalg.pinv(direct_cells)
-        return atomic_trajectory(
-            coords,
-            direct_cells,
-            inverse_cells,
-            fractional_coordinates=fractional_coordinates,
-        )
-
     def read_atomic_trajectory_many(
         self,
         index_list: list[int],
