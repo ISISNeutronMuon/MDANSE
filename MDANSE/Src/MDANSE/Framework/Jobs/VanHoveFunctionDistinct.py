@@ -19,7 +19,6 @@ import itertools as it
 from collections.abc import Iterator
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import always_iterable
 
 from MDANSE.Chemistry import ChemicalSystem

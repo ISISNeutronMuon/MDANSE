@@ -18,6 +18,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import numpy as np
+from scipy import fft
 from scipy.signal import correlate
 
 from MDANSE.Mathematics.Geometry import center_of_mass
@@ -30,14 +31,27 @@ class AnalysisError(Exception):
     pass
 
 
-def mean_square_displacement(coords: FloatArray, n_configs: int) -> FloatArray:
+def scipy_correlate_2D(
+    input_array_1: FloatArray,
+    input_array_2: FloatArray,
+    n_frames: int,
+    n_configs: int,
+    sum_axis: int = 1,
+):
+    fast_len = fft.next_fast_len(n_frames)
+    v = fft.fft(input_array_1, n=fast_len, axis=0)
+    w = fft.fft(input_array_2[:n_configs], n=fast_len, axis=0)
+    return fft.ifft(np.sum(v * w.conj(), axis=sum_axis), axis=0)[:n_frames] / n_configs
+
+
+def mean_square_displacement_many(coords: FloatArray, n_configs: int) -> FloatArray:
     """Computes the mean square displacement of a set of coordinates
     using the MSD algorithm described in Kneller et al., Com. Phys. Com., 1995.
 
     Parameters
     ----------
     coords : FloatArray
-        Coordinates used to calculate MSD.
+        Atom coordinate array with shape (N_FRAMES, N_ATOMS, 3)
     n_configs : int
         Size of the window used to correlated positions.
 
@@ -46,15 +60,20 @@ def mean_square_displacement(coords: FloatArray, n_configs: int) -> FloatArray:
     FloatArray
         An array of the MSD.
     """
+    n_frames = coords.shape[0]
+    n_atoms = coords.shape[1]
     r2 = coords * coords
-    window = np.ones((n_configs, 3))
-    r2t = correlate(r2, window, mode="valid").T[0] / n_configs
-    rtr0 = correlate(coords, coords[:n_configs], mode="valid").T[0] / n_configs
-    msd = r2t[0] + r2t - 2 * rtr0
-    return msd
+    window = np.ones((n_configs, n_atoms, 3))
+    # correlate the coordinates
+    rtr0 = scipy_correlate_2D(coords, coords, n_frames, n_configs, sum_axis=2)
+    # correlate the squares
+    r2t = scipy_correlate_2D(r2, window, n_frames, n_configs, sum_axis=2)
+    return (r2t[0, :] + r2t - 2 * rtr0).real
 
 
-def mean_square_fluctuation(coords: FloatArray, root: bool = False) -> float:
+def mean_square_fluctuation(
+    coords: FloatArray, root: bool = False, sum_axis: int = 1
+) -> float:
     """Computes the mean-square fluctuation, or the root-mean-square fluctuation if root is set to True. The following
     equation is used:
     .. math:: MSF = \\frac{\\sum_{i=0} ^{n} \\sum_{x=1} ^{3}(coords_{i,x} - \\frac{\\sum_{j=0} ^{n}coords_{j,x}}{n})^2}{n}
@@ -73,12 +92,14 @@ def mean_square_fluctuation(coords: FloatArray, root: bool = False) -> float:
         the mean-square fluctuation
 
     """
-    msf = np.average(np.sum((coords - np.average(coords, axis=0)) ** 2, axis=1))
+    msf = np.average(
+        np.sum((coords - np.average(coords, axis=0)) ** 2, axis=sum_axis), axis=0
+    )
 
     if root:
         msf = np.sqrt(msf)
 
-    return float(msf)
+    return msf.astype(float)
 
 
 def radius_of_gyration(

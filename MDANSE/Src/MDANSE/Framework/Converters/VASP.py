@@ -143,11 +143,11 @@ class VASP(Converter):
 
         conf = PeriodicFractionalConfiguration(coords, unitCell)
 
-        # The coordinates in VASP are in box format. Convert them into real coordinates.
+        # The coordinates in VASP are in fractional format. Convert them into absolute coordinates.
         real_conf = conf.to_absolute_configuration()
 
         if self.configuration["fold"]["value"]:
-            # The real coordinates are folded then into the simulation box (-L/2,L/2).
+            # The absolute coordinates are folded then into the simulation box (-L/2,L/2).
             real_conf.fold_coordinates()
 
         # Compute the actual time

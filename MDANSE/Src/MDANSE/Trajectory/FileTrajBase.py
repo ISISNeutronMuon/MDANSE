@@ -256,6 +256,8 @@ class TrajectoryFile(ABC):
             Last frame index, by default None
         step : int, optional
             Step in time frames, by default 1
+        slc : slice | None, default None
+            Slice of time frames to be used, optional.
         variable : str, optional
             Value to be read from trajectory, by default "velocities"
 
@@ -283,17 +285,17 @@ class TrajectoryFile(ABC):
 
     def to_absolute_coordinates(
         self,
-        box_coordinates: FloatArray,
+        fractional_coordinates: FloatArray,
         first: int = 0,
         last: int | None = None,
         step: int | None = None,
     ) -> FloatArray:
-        """Convert box coordinates to real coordinates for a set of frames.
+        """Convert fractional coordinates to absolute coordinates for a set of frames.
 
         Parameters
         ----------
-        box_coordinates : ndarray
-            A 2D array containing the box coordinates.
+        fractional_coordinates : ndarray
+            A 2D array containing the fractional coordinates.
         first : int
             The index of the first frame.
         last : int or None
@@ -304,88 +306,42 @@ class TrajectoryFile(ABC):
         Returns
         -------
         ndarray
-            2D array containing the real coordinates converted from box coordinates.
+            2D array containing the absolute coordinates converted from fractional coordinates.
 
         """
         if self.unit_cell_warning == NO_CELL:
-            return box_coordinates
-        return box_coordinates @ self.unit_cells_raw[first:last:step]
-
-    def read_atomic_trajectory(
-        self,
-        index: int,
-        first: int = 0,
-        last: int | None = None,
-        step: int | None = 1,
-        *,
-        box_coordinates: bool = False,
-    ) -> FloatArray:
-        """Read an atomic trajectory. The trajectory is corrected from box jumps.
-
-        Parameters
-        ----------
-        index : int
-            The index of the atom.
-        first : int
-            The index of the first frame. (Default value = 0)
-        last : int
-            The index of the last frame. (Default value = None)
-        step : int
-            The step in frame. (Default value = 1)
-        box_coordinates : bool
-            If True, the coordiniates are returned in box coordinates (Default value = False).
-
-        Returns
-        -------
-        ndarray
-            2D array containing the atomic trajectory for the selected frames
-
-        """
-        slc = np.s_[first:last:step]
-
-        coords = self.coordinates(slc, index)
-
-        if self.unit_cell_warning == NO_CELL:
-            return coords
-
-        direct_cells = self.unit_cells_raw[slc]
-        inverse_cells = np.linalg.pinv(direct_cells)
-        return atomic_trajectory(
-            coords,
-            direct_cells,
-            inverse_cells,
-            box_coordinates=box_coordinates,
-        )
+            return fractional_coordinates
+        return fractional_coordinates @ self.unit_cells_raw[first:last:step]
 
     def read_atomic_trajectory_many(
         self,
         index_list: list[int],
         first: int = 0,
         last: int | None = None,
-        step: int | None = 1,
+        step: int = 1,
         *,
-        box_coordinates: bool = False,
+        fractional_coordinates: bool = False,
         reference: FloatArray | None = None,
     ) -> FloatArray:
-        """Read an atomic trajectory. The trajectory is corrected from box jumps.
+        """Read continuous trajectories of multiple atoms.
 
         Parameters
         ----------
-        index : int
-            The index of the atom.
-        first : int
-            The index of the first frame. (Default value = 0)
-        last : int
-            The index of the last frame. (Default value = None)
-        step : int
-            The step in frame. (Default value = 1)
-        box_coordinates : bool
-            If True, the coordiniates are returned in box coordinates (Default value = False).
+        index : list[int]
+            Indices of atoms to be read.
+        first : int, default 0
+            The index of the first frame.
+        last : int | None, default None
+            The index of the last frame.
+        step : int, default 1
+            The step in frame.
+        fractional_coordinates : bool, default False.
+            If True, the coordinates are returned in fractional coordinates.
 
         Returns
         -------
         ndarray
-            2D array containing the atomic trajectory for the selected frames
+            (N_FRAMES, N_ATOMS, 3) array of coordinates.
 
         """
         slc = np.s_[first:last:step]
@@ -401,7 +357,7 @@ class TrajectoryFile(ABC):
             coords,
             direct_cells,
             inverse_cells,
-            box_coordinates=box_coordinates,
+            fractional_coordinates=fractional_coordinates,
             reference=reference,
         )
 

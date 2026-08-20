@@ -22,6 +22,7 @@ import numpy as np
 from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 try:
     from ase.atoms import Atom, Atoms
@@ -91,7 +92,13 @@ class AverageStructure(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = self.trajectory.get_total_natoms()
+        self.grouped_indices = group_atom_indices(
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=1,
+            memory_scale_factor=2,
+        )
+        self.numberOfSteps = len(self.grouped_indices)
 
         self._atoms = self.trajectory.atom_names
 
@@ -131,11 +138,10 @@ class AverageStructure(IJob):
         Returns:
             tuple: the result of the step
         """
-
+        atom_index_group = self.grouped_indices[index]
         # get selected atom indices sublist
-        atom_index = self.trajectory.atom_indices[index]
-        series = self.trajectory.read_atomic_trajectory(
-            atom_index,
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
@@ -143,16 +149,18 @@ class AverageStructure(IJob):
 
         return index, np.mean(series, axis=0) * self._conversion_factor
 
-    def combine(self, index, x):
+    def combine(self, step_index, x):
         # The symbol of the atom.
-        element = self._atoms[self.trajectory.atom_indices[index]]
+        atom_index_group = self.grouped_indices[step_index]
+        for arr_index, at_index in enumerate(atom_index_group):
+            element = self._atoms[at_index]
 
-        try:
-            the_atom = Atom(element, x)
-        except KeyError:
-            the_atom = Atom(str(element).strip("0123456789"), x)
+            try:
+                the_atom = Atom(element, x[arr_index])
+            except KeyError:
+                the_atom = Atom(str(element).strip("0123456789"), x[arr_index])
 
-        self._ase_atoms.append(the_atom)
+            self._ase_atoms.append(the_atom)
 
     def finalize(self):
         """

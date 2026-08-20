@@ -19,7 +19,8 @@ import numpy as np
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
-from MDANSE.Mathematics.Signal import differentiate
+from MDANSE.Mathematics.Signal import differentiate_many
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 KB = measure(1.380649e-23, "kg m2/s2 K").toval("Da nm2/ps2 K")
 
@@ -69,13 +70,22 @@ class Temperature(IJob):
         """
         super().initialize()
 
-        self.indices = [
-            index
-            for index, symbol in enumerate(self.trajectory.atom_types)
-            if symbol in self.trajectory.non_dummy_elements
-        ]
+        self.trajectory.set_selection(
+            [
+                index
+                for index, symbol in enumerate(self.trajectory.atom_types)
+                if symbol in self.trajectory.non_dummy_elements
+            ]
+        )
+        n_proc = self.configuration["running_mode"].get("slots", 1)
 
-        self.numberOfSteps = len(self.indices)
+        self.grouped_indices = group_atom_indices(
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=n_proc,
+            memory_scale_factor=2,
+        )
+        self.numberOfSteps = len(self.grouped_indices)
 
         self._nFrames = self.configuration["frames"]["number"]
 
@@ -127,39 +137,43 @@ class Temperature(IJob):
             #. index (int): The index of the step.
             #. kineticEnergy (np.array): The calculated kinetic energy
         """
+        atom_index_group = self.grouped_indices[index]
 
-        real_index = self.indices[index]
-        symbol = self._atoms[real_index]
-
-        mass = self.trajectory.get_atom_property(symbol, "atomic_weight")
+        mass = np.array(
+            [
+                self.trajectory.get_atom_property(
+                    self._atoms[at_index], "atomic_weight"
+                )
+                for at_index in atom_index_group
+            ]
+        )
 
         trajectory = self.trajectory
 
         if self.configuration["interpolation_order"]["value"] == 0:
             series = trajectory.read_configuration_trajectory(
-                real_index,
+                atom_index_group,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
                 variable="velocities",
             )
         else:
-            series = trajectory.read_atomic_trajectory(
-                real_index,
+            series = trajectory.read_atomic_trajectory_many(
+                atom_index_group,
                 first=self.configuration["frames"]["first"],
                 last=self.configuration["frames"]["last"] + 1,
                 step=self.configuration["frames"]["step"],
             )
 
             order = self.configuration["interpolation_order"]["value"]
-            for axis in range(3):
-                series[:, axis] = differentiate(
-                    series[:, axis],
-                    order=order,
-                    dt=self.configuration["frames"]["time_step"],
-                )
+            series = differentiate_many(
+                series,
+                order=order,
+                dt=self.configuration["frames"]["time_step"],
+            )
 
-        kineticEnergy = 0.5 * mass * np.sum(series**2, 1)
+        kineticEnergy = 0.5 * mass[None, :] * np.sum(series**2, axis=2)
 
         return index, kineticEnergy
 
@@ -171,14 +185,14 @@ class Temperature(IJob):
             #. x (any): The returned result(s) of run_step
         """
 
-        self._outputData["temp/kinetic_energy"] += x
+        self._outputData["temp/kinetic_energy"] += np.sum(x, axis=1)
 
     def finalize(self):
         """
         Finalizes the calculations (e.g. averaging the total term, output files creations ...).
         """
 
-        nAtoms = len(self.indices)
+        nAtoms = len(self.trajectory.atom_indices)
         self._outputData["temp/kinetic_energy"] /= nAtoms - 1
 
         norm = np.arange(1, self._outputData["temp/kinetic_energy"].shape[0] + 1)

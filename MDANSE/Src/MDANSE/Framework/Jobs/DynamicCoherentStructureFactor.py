@@ -245,6 +245,7 @@ class DynamicCoherentStructureFactor(IJob):
                     axis=0,
                 ),
             )
+        self.unique_names = self.trajectory.unique_names
 
     def run_step(self, index: int) -> tuple[int, dict[str, FloatArray] | None]:
         """Run the analysis for a single Q shell.
@@ -278,7 +279,7 @@ class DynamicCoherentStructureFactor(IJob):
         ]
 
         rho = {}
-        for element in self.trajectory.unique_names:
+        for element in self.unique_names:
             rho[element] = np.zeros(
                 (self.configuration["frames"]["number"], nQVectors),
                 dtype=np.complex64,

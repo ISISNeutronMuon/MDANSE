@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from MDANSE.MolecularDynamics.Analysis import (AnalysisError,
-                                               mean_square_displacement,
+                                               mean_square_displacement_many,
                                                mean_square_fluctuation,
                                                radius_of_gyration)
 
@@ -21,8 +21,8 @@ COORDS = [
     (COORDS[1], 1, [0., 1., 4.])
 ])
 def test_mean_square_displacement(coords, n_configs, expected):
-    msd = mean_square_displacement(coords, n_configs)
-    assert np.allclose(msd, expected)
+    msd = mean_square_displacement_many(coords.reshape((3, 1, 3)), n_configs)
+    assert np.allclose(msd.ravel(), expected)
 
 @pytest.mark.parametrize("coords, root, expected", [
     (COORDS[3], False, 19.625),
