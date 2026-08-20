@@ -112,6 +112,7 @@ class JobEntry(QObject):
 
     for_loading = Signal(str)
     free_filename = Signal(str)
+    job_finished = Signal(object)
 
     def __init__(
         self,
@@ -212,6 +213,7 @@ Parameters:
         else:
             self.fail_job()
 
+        self.job_finished.emit((self._command, self.job.state.name))
         self.free_filename.emit(file_name)
         self.update_fields()
 
@@ -297,6 +299,7 @@ class JobHolder(QStandardItemModel):
     protect_filename = Signal(str)
     unprotect_filename = Signal(str)
     new_job_started = Signal()
+    job_finished = Signal(object)
 
     def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
@@ -366,6 +369,7 @@ class JobHolder(QStandardItemModel):
         communicator.target.connect(item_th.on_started)  # int
         communicator.progress.connect(item_th.on_update)  # int
         communicator.finished.connect(item_th.on_finished)  # bool
+        item_th.job_finished.connect(self.job_finished)
 
         LOG.debug("Watcher thread ready to start!")
         watcher_thread.start()
