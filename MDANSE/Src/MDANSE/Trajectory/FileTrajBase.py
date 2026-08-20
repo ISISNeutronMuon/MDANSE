@@ -153,21 +153,6 @@ class TrajectoryFile(ABC):
             return -1
         return chunk_shape[1]
 
-    def dtype_size(self, dataset_type: TrajDataArray = TrajDataArray.POSITION) -> int:
-        data_key = self.KEYS[dataset_type.name.lower()]
-        dataset = self._h5_file[data_key]
-        match dataset.dtype:
-            case np.float16:
-                return 2
-            case np.float32:
-                return 4
-            case np.float64:
-                return 8
-            case np.float128:
-                return 16
-            case _:
-                return 8
-
     def unit_cell(self, frame: int) -> UnitCell | None:
         """Return the unit cell at a given frame.
 
