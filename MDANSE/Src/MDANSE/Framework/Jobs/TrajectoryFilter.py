@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import copy
 import json
 
 import h5py
@@ -29,7 +28,6 @@ from MDANSE.Chemistry.ChemicalSystem import (
 from MDANSE.Framework.Formats.HDFFormat import write_metadata
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Signal import FILTER_MAP, Filter
-from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.util_types import FloatArray
 

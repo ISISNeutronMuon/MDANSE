@@ -26,6 +26,7 @@ from MDANSE.Framework.Jobs.VanHoveFunctionDistinct import (
     DETAILED_CELL_MESSAGE,
 )
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 from MDANSE.util_types import FloatArray
 
 
@@ -47,7 +48,7 @@ def van_hove_self(
     Parameters
     ----------
     xyz : FloatArray
-        The trajectory of an atom.
+        The trajectories of multiple atoms.
     histograms : FloatArray
         The histograms to be updated.
     cell_vols : FloatArray
@@ -63,16 +64,20 @@ def van_hove_self(
 
     """
     nbins = histograms.shape[0]
+    n_atoms = histograms.shape[2]
 
     for i in range(n_configs):
         x0 = xyz[i]
-        r_array = xyz[i : i + n_frames] - x0.reshape((1, 3))
-        distance_array = np.sqrt((r_array**2).sum(axis=1))
+        r_array = xyz[i : i + n_frames] - x0.reshape((1, n_atoms, 3))
+        distance_array = np.sqrt((r_array**2).sum(axis=2))
         bins = ((distance_array - rmin) / dr).astype(int)
-        valid_bins = np.logical_and(bins >= 0, bins < nbins)
-        for j in range(n_frames):
-            if valid_bins[j]:
-                histograms[bins[j], j] += cell_vols[i + j]
+        valid_bins = np.logical_and(
+            bins >= 0, bins < nbins
+        )  # atom_index, corr_distance, frame_index
+        for at_ind in range(n_atoms):
+            for j in range(n_frames):
+                if valid_bins[j, at_ind]:
+                    histograms[bins[j, at_ind], j, at_ind] += cell_vols[i + j]
     return histograms
 
 
@@ -153,8 +158,15 @@ class VanHoveFunctionSelf(IJob):
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
+        n_proc = self.configuration["running_mode"].get("slots", 1)
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+        self.grouped_indices = group_atom_indices(
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=n_proc,
+            memory_scale_factor=4,
+        )
+        self.numberOfSteps = len(self.grouped_indices)
         self.n_configs = self.configuration["frames"]["n_configs"]
         self.n_frames = self.configuration["frames"]["n_frames"]
         self._atoms = self.trajectory.atom_names
@@ -256,14 +268,13 @@ class VanHoveFunctionSelf(IJob):
             A tuple containing the atom index and distance histograms.
 
         """
-        histograms = np.zeros((self.n_mid_points, self.n_frames))
         first = self.configuration["frames"]["first"]
         last = self.configuration["frames"]["last"] + 1
         step = self.configuration["frames"]["step"]
 
-        atom_index = self.trajectory.atom_indices[index]
-        series = self.trajectory.read_atomic_trajectory(
-            atom_index,
+        atom_index_group = self.grouped_indices[index]
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
             first=first,
             last=last,
             step=step,
@@ -275,6 +286,7 @@ class VanHoveFunctionSelf(IJob):
             ],
         )
 
+        histograms = np.zeros((self.n_mid_points, self.n_frames, len(atom_index_group)))
         histograms = van_hove_self(
             series,
             histograms,
@@ -287,7 +299,7 @@ class VanHoveFunctionSelf(IJob):
 
         return index, histograms
 
-    def combine(self, index: int, histogram: FloatArray):
+    def combine(self, step_index: int, histogram: FloatArray):
         """Add the results into the histograms for the input time difference.
 
         Parameters
@@ -299,9 +311,14 @@ class VanHoveFunctionSelf(IJob):
             time t0 and t0 + t.
 
         """
-        element = self._atoms[self.trajectory.atom_indices[index]]
-        self._outputData[f"vh/g(r,t)/{element}"][:] += histogram
-        self._outputData[f"vh/4_pi_r2_g(r,t)/{element}"][:] += histogram
+        atom_index_group = self.grouped_indices[step_index]
+        # The symbol of the atom.
+        for arr_index, at_index in enumerate(atom_index_group):
+            element = self._atoms[self.trajectory.atom_indices[at_index]]
+            self._outputData[f"vh/g(r,t)/{element}"][:] += histogram[:, :, arr_index]
+            self._outputData[f"vh/4_pi_r2_g(r,t)/{element}"][:] += histogram[
+                :, :, arr_index
+            ]
 
     def finalize(self):
         """Apply scaling to the summed up results.

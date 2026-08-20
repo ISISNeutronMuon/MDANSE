@@ -29,10 +29,11 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
 from MDANSE.Mathematics.Signal import (
-    differentiate,
+    differentiate_many,
     get_spectrum,
 )
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.util_types import ComplexArray
 
@@ -127,6 +128,8 @@ class CurrentCorrelationFunction(IJob):
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
         super().initialize()
+
+        self.n_proc = self.configuration["running_mode"].get("slots", 1)
 
         self.numberOfSteps = self.configuration["q_vectors"]["n_shells"]
 
@@ -417,10 +420,20 @@ class CurrentCorrelationFunction(IJob):
                 dtype=np.complex64,
             )
 
+        grouped_indices = group_atom_indices(
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=self.n_proc,
+            memory_scale_factor=4 * nQVectors,
+        )
+
         for element, idxs in list(self._indicesPerElement.items()):
-            for idx in idxs:
-                coords = trajectory.read_atomic_trajectory(
-                    idx,
+            for ind_group in grouped_indices:
+                overlap_indices = sorted(set(idxs).intersection(ind_group))
+                if not overlap_indices:
+                    continue
+                coords = trajectory.read_atomic_trajectory_many(
+                    overlap_indices,
                     first=self.configuration["frames"]["first"],
                     last=self.configuration["frames"]["last"] + 1,
                     step=self.configuration["frames"]["step"],
@@ -428,25 +441,23 @@ class CurrentCorrelationFunction(IJob):
 
                 if self.configuration["interpolation_order"]["value"] == 0:
                     veloc = trajectory.read_configuration_trajectory(
-                        idx,
+                        overlap_indices,
                         first=self.configuration["frames"]["first"],
                         last=self.configuration["frames"]["last"] + 1,
                         step=self.configuration["frames"]["step"],
                         variable="velocities",
                     )
                 else:
-                    veloc = np.zeros_like(coords)
-                    for axis in range(3):
-                        veloc[:, axis] = differentiate(
-                            coords[:, axis],
-                            order=self.configuration["interpolation_order"]["value"],
-                            dt=self.configuration["frames"]["time_step"],
-                        )
+                    veloc = differentiate_many(
+                        coords,
+                        order=self.configuration["interpolation_order"]["value"],
+                        dt=self.configuration["frames"]["time_step"],
+                    )
 
                 if qVectors.ndim > 2:
-                    temp_dotprod = np.einsum("ij,jki->ik", coords, qVectors)
+                    temp_dotprod = np.einsum("imj,jki->imk", coords, qVectors)
                     curr = np.einsum(
-                        "ik,ij,j->ikj",
+                        "imk,imj,j->ikj",
                         veloc,
                         np.exp(1j * temp_dotprod),
                         qvec_weights_sqrt,
@@ -460,7 +471,7 @@ class CurrentCorrelationFunction(IJob):
                     trans = curr - long
                 else:
                     curr = np.einsum(
-                        "ik,ij,j->ikj",
+                        "imk,imj,j->ikj",
                         veloc,
                         np.exp(1j * np.dot(coords, qVectors)),
                         qvec_weights_sqrt,

@@ -18,13 +18,14 @@ from __future__ import annotations
 import abc
 import itertools as it
 
-from scipy.signal import correlate
+from scipy import fft
 
 from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 
 class CartesianCorrelationFunction(IJob):
@@ -92,11 +93,21 @@ class CartesianCorrelationFunction(IJob):
         """
         super().initialize()
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+        n_proc = self.configuration["running_mode"].get("slots", 1)
+
+        self.grouped_indices = group_atom_indices(
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=n_proc,
+            memory_scale_factor=8,
+        )
+        self.numberOfSteps = len(self.grouped_indices)
 
         self.labels = [
             (element, (element,)) for element in self.trajectory.get_natoms()
         ]
+
+        self.n_frames = self.configuration["frames"]["n_frames"]
 
         selected_weights, all_weights = self.trajectory.get_weights(
             prop=self.configuration["weights"]["property"]
@@ -148,17 +159,21 @@ class CartesianCorrelationFunction(IJob):
     def run_step(self, index):
         series = self.get_series(index)
 
-        u_x = series[:, 0]
-        u_y = series[:, 1]
-        u_z = series[:, 2]
+        u_x = series[:, :, 0]
+        u_y = series[:, :, 1]
+        u_z = series[:, :, 2]
 
         n_configs = self.configuration["frames"]["n_configs"]
         cfs = []
         for u_i, u_j in it.combinations_with_replacement([u_x, u_y, u_z], 2):
-            cfs.append(correlate(u_i, u_j[:n_configs], mode="valid").T / n_configs)
+            fast_len = fft.next_fast_len(len(u_i))
+            v = fft.fft(u_i, n=fast_len, axis=0)
+            w = fft.fft(u_j[:n_configs], n=fast_len, axis=0)
+            single_corr = fft.ifft(v * w.conj(), axis=0)[: self.n_frames] / n_configs
+            cfs.append(single_corr.real)
         return index, cfs
 
-    def combine(self, index, cfs):
+    def combine(self, step_index, cfs):
         """
         Combines returned results of run_step.\n
         :Parameters:
@@ -166,15 +181,22 @@ class CartesianCorrelationFunction(IJob):
             #. x (any): The returned result(s) of run_step
         """
         # The symbol of the atom.
-        element = self.trajectory.atom_names[self.trajectory.atom_indices[index]]
-
+        atom_index_group = self.grouped_indices[step_index]
         isotropic = (cfs[0] + cfs[3] + cfs[5]) / 3
-        self._outputData[f"{self.CF_NAME}/isotropic/{element}"] += isotropic
+        # The symbol of the atom.
+        for arr_index, at_index in enumerate(atom_index_group):
+            element = self.trajectory.atom_names[at_index]
 
-        for i, (j, k) in enumerate(
-            it.combinations_with_replacement(["x", "y", "z"], 2)
-        ):
-            self._outputData[f"{self.CF_NAME}/{j}{k}/{element}"] += cfs[i]
+            self._outputData[f"{self.CF_NAME}/isotropic/{element}"] += isotropic[
+                :, arr_index
+            ]
+
+            for i, (j, k) in enumerate(
+                it.combinations_with_replacement(["x", "y", "z"], 2)
+            ):
+                self._outputData[f"{self.CF_NAME}/{j}{k}/{element}"] += cfs[i][
+                    :, arr_index
+                ]
 
     def weight_and_group(self):
         nAtomsPerElement = self.trajectory.get_natoms()

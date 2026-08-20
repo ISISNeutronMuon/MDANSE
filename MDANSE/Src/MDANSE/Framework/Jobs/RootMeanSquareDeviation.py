@@ -21,6 +21,7 @@ from MDANSE.Framework.AtomGrouping.grouping import (
     add_grouped_totals,
 )
 from MDANSE.Framework.Jobs.IJob import IJob
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
 
 
 @IJob.register("RootMeanSquareDeviation")
@@ -81,7 +82,15 @@ class RootMeanSquareDeviation(IJob):
     def initialize(self):
         super().initialize()
 
-        self.numberOfSteps = len(self.trajectory.atom_indices)
+        n_proc = self.configuration["running_mode"].get("slots", 1)
+
+        self.grouped_indices = group_atom_indices(
+            self.trajectory,
+            self.configuration["frames"]["number"],
+            n_proc=n_proc,
+            memory_scale_factor=2,
+        )
+        self.numberOfSteps = len(self.grouped_indices)
 
         self._referenceIndex = self.configuration["reference_frame"]["value"]
 
@@ -123,32 +132,33 @@ class RootMeanSquareDeviation(IJob):
         @type index: int.
         """
 
-        atom_index = self.trajectory.atom_indices[index]
+        atom_index_group = self.grouped_indices[index]
 
-        series = self.trajectory.read_atomic_trajectory(
-            atom_index,
+        series = self.trajectory.read_atomic_trajectory_many(
+            atom_index_group,
             first=self.configuration["frames"]["first"],
             last=self.configuration["frames"]["last"] + 1,
             step=self.configuration["frames"]["step"],
         )
 
         # Compute the squared sum of the difference between all the coordinate of atoms i and the reference ones
-        squaredDiff = np.sum((series - series[self._referenceIndex, :]) ** 2, axis=1)
+        squaredDiff = np.sum((series - series[self._referenceIndex, :, :]) ** 2, axis=2)
 
         return index, squaredDiff
 
-    def combine(self, index, x):
+    def combine(self, step_index, x):
         """
         Combines returned results of run_step.\n
         :Parameters:
             #. index (int): The index of the step.\n
             #. x (any): The returned result(s) of run_step
         """
+        atom_index_group = self.grouped_indices[step_index]
+        for arr_index, at_index in enumerate(atom_index_group):
+            element = self._atoms[at_index]
 
-        element = self._atoms[self.trajectory.atom_indices[index]]
-
-        self._outputData[f"rmsd/{element}"] += x
-        self._outputData["rmsd/total"] += x
+            self._outputData[f"rmsd/{element}"] += x[:, arr_index]
+        self._outputData["rmsd/total"] += np.sum(x, axis=1)
 
     def finalize(self):
         """

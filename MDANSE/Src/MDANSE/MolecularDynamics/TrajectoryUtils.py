@@ -34,6 +34,11 @@ CHUNK_SIZE_LIMIT = (
     int(mb_ram_per_process) * 2**20
 )  # 512 MB memory limit per process for now
 
+if TYPE_CHECKING:
+    from MDANSE.MolecularDynamics.Trajectory import Trajectory
+
+CHUNK_SIZE_LIMIT = 2**29  # 512 MB memory limit per process for now
+
 
 class MolecularDynamicsError(Exception):
     pass
@@ -48,7 +53,7 @@ def atomic_trajectory(
     cell: FloatArray,
     rcell: FloatArray,
     *,
-    box_coordinates: bool = False,
+    fractional_coordinates: bool = False,
 ) -> FloatArray:
     """For the coordinates of a specific atom, remove all unit cell jumps.
 
@@ -60,7 +65,7 @@ def atomic_trajectory(
         The direct matrices.
     rcell : FloatArray
         The inverse matrices.
-    box_coordinates : bool
+    fractional_coordinates : bool
         Returns the coordinates in fractional coordinates if true.
 
     Returns
@@ -73,7 +78,7 @@ def atomic_trajectory(
     sdxyz = trajectory[1:, :] - trajectory[:-1, :]
     sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
     trajectory[1:, :] = trajectory[:-1, :] + sdxyz
-    if not box_coordinates:
+    if not fractional_coordinates:
         trajectory = np.einsum("ij,ijk->ik", trajectory, cell)
     return trajectory
 
@@ -83,10 +88,10 @@ def atomic_trajectory_many(
     cell: FloatArray,
     rcell: FloatArray,
     *,
-    box_coordinates: bool = False,
+    fractional_coordinates: bool = False,
     reference: FloatArray | None = None,
 ) -> FloatArray:
-    """For the coordinates of a specific atom, remove all unit cell jumps.
+    """Make atom trajectories continuous by removing jumps.
 
     Parameters
     ----------
@@ -96,7 +101,7 @@ def atomic_trajectory_many(
         The direct matrices.
     rcell : FloatArray
         The inverse matrices.
-    box_coordinates : bool
+    fractional_coordinates : bool
         Returns the coordinates in fractional coordinates if true.
 
     Returns
@@ -115,7 +120,7 @@ def atomic_trajectory_many(
         sdxyz = trajectory[:, :] - reference
         sdxyz -= np.cumsum(np.round(sdxyz), axis=0)
         trajectory[:, :] = reference + sdxyz
-    if not box_coordinates:
+    if not fractional_coordinates:
         trajectory = np.einsum("inj,ijk->ink", trajectory, cell)
     return trajectory
 
