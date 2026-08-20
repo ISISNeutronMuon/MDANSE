@@ -200,6 +200,9 @@ class TabbedWindow(QMainWindow):
         if create_systray_icon:
             self.create_systray_icon()
 
+        if self.system_tray_icon is not None:
+            self._job_holder.job_finished.connect(self.systray_message_job_finished)
+
     def block_gui_shutdown(self):
         _ = QMessageBox.warning(
             self,
@@ -224,6 +227,12 @@ class TabbedWindow(QMainWindow):
         self.system_tray_icon.setContextMenu(self.tray_menu)
         self.system_tray_icon.setVisible(True)
 
+    @Slot(object)
+    def systray_message_job_finished(self, job_details: tuple[str, str]):
+        self.system_tray_icon.showMessage(
+            "MDANSE run finshed", f"{job_details[0]} {job_details[1]}"
+        )
+
     def check_dark_mode(self):
         style_hints = QApplication.styleHints()
         colour_scheme = style_hints.colorScheme()
@@ -240,9 +249,8 @@ class TabbedWindow(QMainWindow):
     @Slot()
     def close_only_if_finished(self):
         if not self._job_holder.jobs_still_running:
-            self.deleteLater()
-            self.app_instance.quit()
             self.close()
+            self.app_instance.quit()
         else:
             self.block_gui_shutdown()
 
