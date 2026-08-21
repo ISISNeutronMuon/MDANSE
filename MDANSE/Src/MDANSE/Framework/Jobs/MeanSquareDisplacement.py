@@ -55,9 +55,10 @@ def msd_memory_per_atom(
     frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
     n_dimensions = 3
     n_frames = frame_config["number"]
+    n_corr_frames = frame_config["n_frames"]
     data_size = 8
     chunk_size = trajectory.chunk_size(array_name="position")
-    prefactor = 4 * n_frames * n_dimensions * data_size / 2**20
+    prefactor = 32 * (n_frames + n_corr_frames) * n_dimensions * data_size / 2**20
     return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 
@@ -95,7 +96,11 @@ class MeanSquareDisplacement(IJob):
         "Analysis",
         "Dynamics",
     )
-    PREDICTORS = ("frames",)
+    PREDICTORS = (
+        "frames",
+        "memory",
+        "running_mode",
+    )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

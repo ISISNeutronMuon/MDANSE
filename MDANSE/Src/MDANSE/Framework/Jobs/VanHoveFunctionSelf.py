@@ -140,7 +140,12 @@ class VanHoveFunctionSelf(IJob):
         "Analysis",
         "Dynamics",
     )
-    PREDICTORS = ("frames", "r_values")
+    PREDICTORS = (
+        "frames",
+        "r_values",
+        "memory",
+        "running_mode",
+    )
 
     settings = {}
     settings["trajectory"] = ("HDFTrajectoryConfigurator", {})

@@ -75,6 +75,11 @@ class RootMeanSquareFluctuation(IJob):
         "Dynamics",
     )
 
+    PREDICTORS = (
+        "memory",
+        "running_mode",
+    )
+
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
     settings = {}

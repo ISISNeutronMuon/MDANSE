@@ -71,7 +71,11 @@ class CartesianCorrelationFunction(IJob):
         "Analysis",
         "Dynamics",
     )
-    PREDICTORS = ("frames",)
+    PREDICTORS = (
+        "frames",
+        "memory",
+        "running_mode",
+    )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
