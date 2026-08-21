@@ -83,7 +83,12 @@ class GaussianDynamicIncoherentStructureFactor(IJob):
         "Analysis",
         "Scattering",
     )
-    PREDICTORS = ("instrument_resolution", "q_shells")
+    PREDICTORS = (
+        "instrument_resolution",
+        "q_shells",
+        "memory",
+        "running_mode",
+    )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 

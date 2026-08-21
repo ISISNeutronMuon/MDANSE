@@ -97,7 +97,12 @@ class CurrentCorrelationFunction(IJob):
     enabled = True
 
     label = "Current Correlation Function"
-    PREDICTORS = ("instrument_resolution", "q_vectors")
+    PREDICTORS = (
+        "instrument_resolution",
+        "q_vectors",
+        "memory",
+        "running_mode",
+    )
 
     category = (
         "Analysis",
