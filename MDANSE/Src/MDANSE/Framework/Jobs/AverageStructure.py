@@ -91,7 +91,6 @@ class AverageStructure(IJob):
 
     PREDICTORS = (
         "memory",
-        "running_mode",
     )
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
