@@ -32,6 +32,8 @@ from qtpy.QtWidgets import (
 
 from MDANSE_GUI.Utils import block_signals
 
+OSCILLATOR_STEPS = 20
+
 
 class ColourPicker(QStyledItemDelegate):
     def __init__(self, *args, **kwargs) -> None:
@@ -154,13 +156,27 @@ class ProgressDelegate(QItemDelegate):
         except Exception:
             progress = 0
         opt = QStyleOptionProgressBar()
-        opt.rect = option.rect
-        opt.minimum = 0
-        opt.maximum = progress_max
-        opt.progress = progress
-        opt.text = f"{progress / progress_max:.2%}"
-        with suppress(Exception):
-            opt.text += f" ({round(float(rate), 2)} %/s)"
+        if progress < 0:
+            if progress < -OSCILLATOR_STEPS:
+                opt.direction = Qt.LayoutDirection.RightToLeft
+            else:
+                opt.direction = Qt.LayoutDirection.LeftToRight
+            opt.rect = option.rect
+            opt.minimum = 0
+            opt.maximum = OSCILLATOR_STEPS
+            opt.progress = abs(OSCILLATOR_STEPS + progress)
+            opt.text = "STARTING"
+            opt.textVisible = True
+        else:
+            opt.direction = Qt.LayoutDirection.LeftToRight
+            opt.rect = option.rect
+            opt.minimum = 0
+            opt.maximum = progress_max
+            opt.progress = abs(progress)
+            opt.text = f"{progress / progress_max:.2%}"
+            with suppress(Exception):
+                opt.text += f" ({round(float(rate), 2)} %/s)"
 
-        opt.textVisible = True
+            opt.textVisible = True
+
         QApplication.style().drawControl(QStyle.CE_ProgressBar, opt, painter)
