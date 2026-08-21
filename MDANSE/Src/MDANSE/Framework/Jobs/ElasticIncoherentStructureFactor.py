@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from MDANSE.Framework.AtomGrouping.grouping import (
@@ -22,7 +24,43 @@ from MDANSE.Framework.AtomGrouping.grouping import (
 )
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_sum
-from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices_precalculated
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurators.MemoryConfigurator import MemoryConfigurator
+
+
+def eisf_memory_per_atom(
+    mem_conf: MemoryConfigurator, n_atoms: int = 1
+) -> tuple[int, int, int]:
+    """Calculate the memory requirements of a DISF calculation.
+
+    The data size is fixed as 8 bytes per number, since the arrays allocated
+    by numpy in this analysis are most likely going to be float64, even
+    if the coordinates in the input trajectory are float32.
+
+    Parameters
+    ----------
+    mem_conf : MemoryConfigurator
+        The configurator instance which contains the needed inputs
+    n_atoms : int, optional
+        Use a specific number of atoms in the calculation, by default 1
+
+    Returns
+    -------
+    tuple[int, int int]
+        MB per atom, per chunk and per n_atoms from input, respectively
+    """
+    trajectory = mem_conf.configurable[mem_conf.dependencies["trajectory"]]["instance"]
+    frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
+    vector_config = mem_conf.configurable[mem_conf.dependencies["q_vectors"]]
+    n_dimensions = 3
+    n_frames = frame_config["number"]
+    n_vectors = vector_config["parameters"].get("n_vectors", 1)
+    data_size = 8
+    chunk_size = trajectory.chunk_size(array_name="position")
+    prefactor = 4 * n_frames * n_vectors * n_dimensions * data_size / 2**20
+    return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 
 @IJob.register("ElasticIncoherentStructureFactor")
@@ -95,8 +133,26 @@ class ElasticIncoherentStructureFactor(IJob):
             },
         },
     )
+    settings["memory"] = (
+        "MemoryConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "frames": "frames",
+                "q_vectors": "q_vectors",
+            },
+            "mem_function": eisf_memory_per_atom,
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    settings["running_mode"] = (
+        "RunningModeConfigurator",
+        {
+            "dependencies": {
+                "memory": "memory",
+            }
+        },
+    )
 
     def initialize(self):
         """
@@ -110,11 +166,11 @@ class ElasticIncoherentStructureFactor(IJob):
 
         n_proc = self.configuration["running_mode"].get("slots", 1)
 
-        self.grouped_indices = group_atom_indices(
+        self.grouped_indices = group_atom_indices_precalculated(
             self.trajectory,
             self.configuration["frames"]["number"],
             n_proc=n_proc,
-            memory_scale_factor=self._nQShells,
+            max_group_size=self.configuration["memory"]["atoms_per_step"][0],
         )
         self.numberOfSteps = len(self.grouped_indices)
 
