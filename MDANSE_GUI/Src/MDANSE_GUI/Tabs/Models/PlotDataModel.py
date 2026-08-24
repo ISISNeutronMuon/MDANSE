@@ -164,6 +164,7 @@ class PlotDataModel(QStandardItemModel):
     Meant to be used with DoublePanel, GeneralView and ItemVisualiser.
     It stores elements and emits them to the ItemVisualiser.
     """
+
     DEFAULT_JSON_FILENAME = "recent_plot_selection_file.json"
     MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
     PLACEHOLDER_STRING = "Recently used result files (.mda)"
