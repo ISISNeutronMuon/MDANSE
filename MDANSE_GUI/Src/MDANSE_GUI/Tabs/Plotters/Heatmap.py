@@ -78,27 +78,6 @@ class Heatmap(Plotter):
         """Confirm that sliders are coupled in heatmap mode."""
         return True
 
-    def change_normalisation(self, new_value: dict[str, Any]):
-        """Normalise the data based on the new parameters.
-
-        Parameters
-        ----------
-        new_value : dict[str, Any]
-            parameters as in NORMALISATION_DEFAULTS
-
-        """
-        super().change_normalisation(new_value)
-
-        # for backup in self._backup.values():
-        #     data = backup.array
-        #     new_data = self.normalise_array(data)
-        #     backup.image.set_data(new_data)
-        #     percentiles = np.linspace(0, 100.0, 21)
-        #     results = np.percentile(np.nan_to_num(new_data), percentiles)
-        #     backup.interp = interp1d(percentiles, results)
-
-        # self.request_slider_values()
-
     def handle_slider(self, new_value: list[float]):
         """Adjust colormap values based on slider values."""
         super().handle_slider(new_value)

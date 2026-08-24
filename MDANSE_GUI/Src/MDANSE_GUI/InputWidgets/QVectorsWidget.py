@@ -225,7 +225,6 @@ class ShellPanel(QWidget):
         self.plot_widget = PlotWidget(self, plotter_type=self.plotter_type)
         self.plot_widget._figure.set_layout_engine("constrained")
         self.plot_widget.plot_selector.setVisible(False)
-        self.plot_widget._normaliser.setVisible(False)
         self.plot_widget._sliderpack.setVisible(False)
         layout.addWidget(box_label, 0, 0)
         layout.addWidget(self.shell_selector, 0, 1)
@@ -355,7 +354,6 @@ class VectorViewer(QDialog):
         self.plot_widget = PlotWidget(self, plotter_type="Vectors")
         self.plot_widget._figure.set_layout_engine("constrained")
         self.plot_widget.plot_selector.setVisible(False)
-        self.plot_widget._normaliser.setVisible(False)
         self.plot_widget._sliderpack.setVisible(False)
         self.tab_index["statistics"] = self.main_widget.addTab(
             self.plot_widget, "Vector |q| statistics"

@@ -43,7 +43,6 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-
 ValidPlotters = Literal["Single", "Vectors", "Text", "Heatmap", "Grid"]
 
 

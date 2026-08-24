@@ -19,8 +19,9 @@ import copy
 import functools
 from collections.abc import Generator
 from contextlib import suppress
-from itertools import islice
+from itertools import compress, islice
 from math import prod
+from operator import itemgetter
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple, TypeAlias
 
@@ -40,7 +41,8 @@ from typing_extensions import Unpack
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import ComplexArray, FloatArray, IntArray
-from MDANSE_GUI.Plots.ops.op import Op
+from MDANSE_GUI.Plots.Ops.Op import Op, PreApply
+from MDANSE_GUI.Utils import parse_token
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Iterator, Sequence
@@ -118,14 +120,6 @@ class SingleDataset:
         self.ops: list[Op] = []
 
         self.configure(source, **kwargs)
-
-    @property
-    def op_targets(self) -> Generator[set[int]]:
-        if not self._data_limits:
-            return
-
-        for op in self.ops:
-            yield set(self.parse_token(op.target, max(self._data_limits) + 1))
 
     @functools.singledispatchmethod
     def configure(self, source: h5py.File | None, **kwargs) -> None:
@@ -387,44 +381,6 @@ class SingleDataset:
             setattr(new_dataset, attr, copy.deepcopy(getattr(self, attr)))
         return new_dataset
 
-    @staticmethod
-    def parse_token(token: str, max_len: int) -> Iterable[int]:
-        """Parse a token component into an appropriate value for dimension slicing.
-
-        Parameters
-        ----------
-        token : str
-            Token to parse.
-        max_len : int
-            Size of array for un-ended slices.
-
-        Returns
-        -------
-        Iterable[int]
-            Parsed values.
-
-        Examples
-        --------
-        >>> parse_token("3:5", 10)
-        range(3, 5)
-        >>> parse_token("3:60:2", 5)
-        range(3, 5, 2)
-        >>> parse_token("8", 10)
-        (8, )
-        >>> parse_token("6-8", 10)
-        range(6, 8)
-        """
-        if ":" in token:
-            slice_parts = map(int, token.split(":"))
-            slc = slice(*slice_parts).indices(max_len)
-            return range(*slc)
-
-        if "-" in token:
-            start, stop = map(int, token.split("-"))
-            return range(start, stop + 1)
-
-        return (int(token),)
-
     def set_data_limits(self, limit_string: str, main_axis: str = ""):
         """Parse the string used for selecting a subset of data.
 
@@ -450,7 +406,7 @@ class SingleDataset:
 
         for token in limit_string.split(";"):
             try:
-                add_ord(self.parse_token(token, max_len))
+                add_ord(parse_token(token, max_len))
             except Exception as err:
                 LOG.error(
                     "Ignoring invalid token (%r) in set_data_limits.\n %s", token, err
@@ -700,16 +656,34 @@ class SingleDataset:
         if self._data_limits is None:
             return
 
+        # Pre applies
+        is_pa = [isinstance(op, PreApply) for op in self.ops]
+        if any(is_pa):
+            curves = list(curves)
+
+            def getter(targets: Iterable[int]) -> list[FloatArray]:
+                return [
+                    ydata for _label, (_xdata, ydata) in itemgetter(*targets)(curves)
+                ]
+
+            for op in compress(self.ops, is_pa):
+                op.pre_calculate(getter(op.targets(max(self._data_limits))))
+
         for idx, (label, (xaxis, yaxis)) in zip(
             sorted(self.curve_ind()), curves, strict=False
         ):
             data = yaxis
-            for op, targets in zip(self.ops, self.op_targets, strict=True):
-                if idx in targets:
+            for op in self.ops:
+                if idx in op.targets(max(self._data_limits)):
                     data = op.apply_single(data)
 
             # Remove null data
             filt = ~np.isnan(data)
+
+            if not filt.any():
+                LOG.error("No data after applying operations.")
+                yield label, (xaxis, np.full_like(xaxis, np.nan))
+                continue
 
             yield label, (xaxis[filt], data[filt])
 
@@ -821,11 +795,11 @@ class SingleDataset:
             return
 
         for idx, (label, array, axes) in zip(
-            sorted(self.curve_ind), planes, struct=False
+            sorted(self.curve_ind()), planes, strict=False
         ):
             data = array
-            for op, targets in zip(self.ops, self.op_targets, strict=True):
-                if idx in targets:
+            for op in self.ops:
+                if idx in op.targets(max(self._data_limits)):
                     data = op.apply_single(data)
 
             yield label, data, axes
@@ -1211,19 +1185,26 @@ class PlottingContext(QStandardItemModel):
         self._datasets.pop(dkey, None)
 
     def planes(
-        self, default_axis: int | None = None, planes_per_dataset: int | None = None
+        self,
+        default_axis: int | None = None,
+        planes_per_dataset: int | None = None,
+        *,
+        raw: bool = False,
     ) -> Generator[tuple[PlotArgs, Unpack[Plane]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
             for label, plane, axis_labels in islice(
-                ds.planes_vs_axis(databundle.main_axis),
+                ds.planes_vs_axis(databundle.main_axis, raw=raw),
                 planes_per_dataset,
             ):
                 yield databundle, label, plane, axis_labels
 
     def curves(
-        self, curves_per_dataset: int | None = None
+        self,
+        curves_per_dataset: int | None = None,
+        *,
+        raw: bool = False,
     ) -> Generator[Generator[tuple[PlotArgs, Unpack[Curve]]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
@@ -1231,6 +1212,6 @@ class PlottingContext(QStandardItemModel):
             yield (
                 (databundle, label, curve)
                 for label, curve in islice(
-                    ds.curves_vs_axis(databundle.main_axis), curves_per_dataset
+                    ds.curves_vs_axis(databundle.main_axis, raw=raw), curves_per_dataset
                 )
             )

@@ -449,5 +449,6 @@ class PlotWidget(QWidget):
             self._transform = PlotTransformWidget(
                 self, plotting_context=self._plotting_context
             )
+            self._transform.finished.connect(self.plot_data)
 
         self._transform.show()
