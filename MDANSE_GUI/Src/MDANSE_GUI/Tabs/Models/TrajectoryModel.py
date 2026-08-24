@@ -14,11 +14,11 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
-from pathlib import Path
 
 import itertools
 import traceback
 from enum import Enum, auto
+from pathlib import Path
 
 from qtpy.QtCore import (
     QDeadlineTimer,
