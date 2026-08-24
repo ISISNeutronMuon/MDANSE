@@ -56,7 +56,7 @@ class PredictionSettings(NamedTuple):
     unit: str = "none"
 
 
-class IConfigurator(dict, RegisterFactory, abc.ABC):
+class IConfigurator(dict, RegisterFactory["IConfigurator"], abc.ABC):
     """The parent class for all the input parameter parsers.
 
     This class implements the base class for configurator objects.

@@ -193,7 +193,7 @@ def _format_params(parameters: dict) -> str:
     return param_str
 
 
-class IJob(Configurable, RegisterFactory, ABC):
+class IJob(Configurable, RegisterFactory["IJob"], ABC):
     """The parent class for any MDANSE job.
 
     Both analysis runs and converters inherit from IJob,

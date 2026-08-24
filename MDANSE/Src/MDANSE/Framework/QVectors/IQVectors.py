@@ -116,7 +116,7 @@ def calculate_average_q_per_shell(vector_config: IQVectors) -> FloatArray:
     return results
 
 
-class IQVectors(Configurable, RegisterFactory, abc.ABC):
+class IQVectors(Configurable, RegisterFactory["IQVectors"], abc.ABC):
     """Parent class of all Q vector generators."""
 
     registry: ClassVar[UCDict[str, IQVectors]] = UCDict()
