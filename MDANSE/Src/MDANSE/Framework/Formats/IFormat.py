@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
 
 
-class IFormat(RegisterFactory):
+class IFormat(RegisterFactory["IFormat"]):
     """
     This is the base class for writing MDANSE output data. In MDANSE, the output of an analysis can be written in different file format.
 

@@ -29,7 +29,9 @@ class InstrumentResolutionError(Exception):
     pass
 
 
-class IInstrumentResolution(Configurable, RegisterFactory, abc.ABC):
+class IInstrumentResolution(
+    Configurable, RegisterFactory["IInstrumentResolution"], abc.ABC
+):
     registry: ClassVar[UCDict[str, type[IInstrumentResolution]]] = UCDict()
 
     def __init__(self):

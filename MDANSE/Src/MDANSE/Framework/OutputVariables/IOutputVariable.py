@@ -48,7 +48,7 @@ class OutputData(collections.OrderedDict):
             self.data_object = temp_format.write(basename, self, header, inputs)
 
 
-class IOutputVariable(np.ndarray, RegisterFactory):
+class IOutputVariable(np.ndarray, RegisterFactory["IOutputVariable"]):
     """
     Defines a MDANSE output variable.
 

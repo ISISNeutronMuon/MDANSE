@@ -47,7 +47,7 @@ class JobTree(QStandardItemModel):
     def __init__(
         self,
         *args,
-        parent_class: IJob | Converter = IJob,
+        parent_class: type[IJob | Converter] = IJob,
         hidden_levels: int = 0,
         filter: str | None = None,
         **kwargs,
