@@ -678,7 +678,7 @@ class AtomsDatabase(_Database):
         """Reset (clear) the atom database."""
         self._properties.clear()
         self._units.clear()
-        self._properties.clear()
+        self._data.clear()
 
     def save(self) -> None:
         """Save a copy of the atom database to MDANSE application directory.
