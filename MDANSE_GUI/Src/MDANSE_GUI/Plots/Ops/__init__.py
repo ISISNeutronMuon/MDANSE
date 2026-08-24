@@ -15,5 +15,6 @@
 #
 from __future__ import annotations
 
-from .basic import Abs, Rescale, ScaleToRange, Shift
-from .op import Op
+from .Basic import Abs, Exp, Ln, Normalise, Pow, Rescale, ScaleToRange, Shift, Truncate
+from .MultiData import GlobalNormalise
+from .Op import Op, PreApply
