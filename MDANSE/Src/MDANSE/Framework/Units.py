@@ -374,7 +374,7 @@ class _Unit:
         output_unit._ounit = None
         output_unit._out_factor = None
         output_unit._factor = pow(output_unit._factor, n)
-        output_unit._dimension = output_unit._dimension ** n
+        output_unit._dimension = output_unit._dimension**n
 
         return output_unit
 
@@ -551,7 +551,7 @@ class _Unit:
 
     def __ipow__(self, n: float) -> Self:
         self._factor = pow(self._factor, n)
-        self._dimension = self._dimension ** n
+        self._dimension = self._dimension**n
 
         self._ounit = None
         self._out_factor = None
@@ -708,14 +708,14 @@ class _Unit:
         """
         if self.is_analog(other):
             self._factor *= other._factor
-            self._dimension = self._dimension ** 2
+            self._dimension = self._dimension**2
         elif self._equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is None:
                 raise UnitError("The units are not equivalent")
 
             self._factor *= other._factor / equivalence_factor
-            self._dimension = self._dimension ** 2
+            self._dimension = self._dimension**2
             return
         else:
             self._factor *= other._factor
