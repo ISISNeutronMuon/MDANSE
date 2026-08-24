@@ -22,11 +22,13 @@ import numpy as np
 
 from MDANSE.IO.IOUtils import UCEnum
 from MDANSE.util_types import FloatArray
-from MDANSE_GUI.Plots.ops.op import Op
+from MDANSE_GUI.Plots.Ops.Op import Op
 
 
 @Op.register("abs")
 class Abs(Op):
+    """Compute the absolute value at each point."""
+
     def apply_single(self, dataset: FloatArray) -> FloatArray:
         return np.abs(dataset)
 
@@ -41,6 +43,8 @@ class Abs(Op):
 
 @Op.register("ln")
 class Ln(Op):
+    """Compute the natural logarithm at each point."""
+
     def apply_single(self, dataset: FloatArray) -> FloatArray:
         return np.log(dataset)
 
@@ -55,6 +59,8 @@ class Ln(Op):
 
 @Op.register("exp")
 class Exp(Op):
+    """Compute the natural exponent at each point."""
+
     def apply_single(self, dataset: FloatArray) -> FloatArray:
         return np.exp(dataset)
 
@@ -69,6 +75,14 @@ class Exp(Op):
 
 @Op.register("shift")
 class Shift(Op):
+    """Shift ydata by a fixed amount.
+
+    Parameters
+    ----------
+    amount : float
+        Amount to shift data by.
+    """
+
     def __init__(self, *args, amount: float = 0.0, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.amount = amount
@@ -87,6 +101,14 @@ class Shift(Op):
 
 @Op.register("pow")
 class Pow(Op):
+    """Raise ydata to a fixed power.
+
+    Parameters
+    ----------
+    exponent : float
+        Power to raise by.
+    """
+
     def __init__(self, *args, exponent: float = 0.0, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.exponent = exponent
@@ -105,6 +127,14 @@ class Pow(Op):
 
 @Op.register("rescale")
 class Rescale(Op):
+    """Rescale ydata by a fixed amount.
+
+    Parameters
+    ----------
+    amount : float
+        Amount to rescale data by.
+    """
+
     def __init__(self, *args, amount: float = 0.0, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.amount = amount
@@ -123,6 +153,16 @@ class Rescale(Op):
 
 @Op.register("scaletorange")
 class ScaleToRange(Op):
+    """Rescale ydata to be within a given range.
+
+    Parameters
+    ----------
+    min_val : float
+        Minimum value of range.
+    max_val : float
+        Maximum value of range.
+    """
+
     def __init__(self, *args, min_val: float, max_val: float, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.range = min_val, max_val
@@ -172,19 +212,36 @@ class ScaleToRange(Op):
         self._min_val, self._max_val = sorted(map(float, value))
 
     def apply_single(self, dataset: FloatArray) -> FloatArray:
-        ds_max = np.max(dataset)
-        ds_min = np.min(dataset)
+        ds_max = np.nanmax(dataset)
+        ds_min = np.nanmin(dataset)
 
         return ((dataset - ds_min) / (ds_max - ds_min)) * self.range + self.min_val
 
 
 @Op.register("truncate")
 class Truncate(Op):
+    """Remove ydata outside a given range.
+
+    Parameters
+    ----------
+    min_val : float
+        Minimum value of range.
+    max_val : float
+        Maximum value of range.
+    """
+
     class Truncation(UCEnum):
         VALUE = auto()
         PERCENT = auto()
 
-    def __init__(self, *args, min_val: float, max_val: float, mode: Truncation | str | int, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        min_val: float,
+        max_val: float,
+        mode: Truncation | str | int,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.range = min_val, max_val
         self.mode = mode
@@ -250,7 +307,6 @@ class Truncate(Op):
         self._min_val, self._max_val = sorted(map(float, value))
 
     def apply_single(self, dataset: FloatArray) -> FloatArray:
-
         abs_ds = np.abs(dataset)
         match self.mode:
             case self.Truncation.PERCENT:
@@ -267,15 +323,30 @@ class Truncate(Op):
 
 @Op.register("normalise")
 class Normalise(Op):
+    """Normalise data by a given metric.
+
+    Parameters
+    ----------
+    mode : Normalisation
+        Mode to normalise by:
+
+        - MAX - Normalise s.t. the maximum value in array is 1.
+        - ABSMAX - Normalise s.t. the absolute maximum value is 1.
+        - SUM - Normalise s.t. the sum of the array is 1.
+        - AVERAGE - Normalise by the mean.
+    """
+
+    STATS = ("scale_factor",)
 
     class Normalisation(UCEnum):
-        AVERAGE = auto()
         MAX = auto()
-        SUM = auto()
         ABSMAX = auto()
+        SUM = auto()
+        AVERAGE = auto()
 
     def __init__(self, *args, mode: str, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self.scale_factor = 1.0
         self.mode = mode
 
     @property
@@ -301,14 +372,21 @@ class Normalise(Op):
         return {"mode": cls.Normalisation}
 
     def apply_single(self, dataset: FloatArray) -> FloatArray:
+        self.stats_calculate_single(dataset)
+
+        return dataset * (1 / self.scale_factor)
+
+    def stats_calculate_single(self, dataset: FloatArray) -> None:
         match self.mode:
             case self.Normalisation.AVERAGE:
-                scale_factor = np.nanmean(dataset)
+                self.scale_factor = np.nanmean(dataset)
             case self.Normalisation.MAX:
-                scale_factor = np.nanmax(dataset)
+                self.scale_factor = np.nanmax(dataset)
             case self.Normalisation.SUM:
-                scale_factor = np.sum(np.nan_to_num(dataset))
+                self.scale_factor = np.sum(np.nan_to_num(dataset))
             case self.Normalisation.ABSMAX:
-                scale_factor = np.nanmax(np.abs(dataset))
+                self.scale_factor = np.nanmax(np.abs(dataset))
 
-        return dataset * (1 / scale_factor)
+    @property
+    def stats(self) -> dict[str, str]:
+        return {"scale_factor": str(self.scale_factor)}
