@@ -25,7 +25,7 @@ class ProjectorError(Exception):
     pass
 
 
-class IProjector(RegisterFactory):
+class IProjector(RegisterFactory["IProjector"]):
     registry: ClassVar[UCDict[str, type[IProjector]]] = UCDict()
 
     def __init__(self):
