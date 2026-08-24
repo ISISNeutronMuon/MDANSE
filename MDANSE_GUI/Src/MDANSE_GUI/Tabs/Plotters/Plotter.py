@@ -101,7 +101,7 @@ NORMALISATION_DEFAULTS = {
 ValidPlotters = Literal["Single", "Vectors", "Text", "Heatmap", "Grid"]
 
 
-class Plotter(RegisterFactory):
+class Plotter(RegisterFactory["Plotter"]):
     """Parent class to all classes used for displaying data."""
 
     registry: ClassVar[UCDict[str, type[Plotter]]] = UCDict()

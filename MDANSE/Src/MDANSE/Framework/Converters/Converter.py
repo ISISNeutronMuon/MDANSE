@@ -27,7 +27,7 @@ from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import LOG
 
 
-class Converter(IJob, RegisterFactory, ABC):
+class Converter(IJob, RegisterFactory["Converter"], ABC):
     """Outputs a trajectory in the MDT format."""
 
     registry: ClassVar[UCDict[str, type[Converter]]] = UCDict()
