@@ -19,6 +19,7 @@ import json
 from collections.abc import Iterable
 from functools import partial
 
+import numpy as np
 from more_itertools import first_true
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -27,11 +28,18 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers.extxyz import ExtXYZFile
 from MDANSE.MolecularDynamics.Configuration import (
-    PeriodicRealConfiguration,
-    RealConfiguration,
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
 )
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
+
+try:
+    import extxyz
+
+    extxyz_available = True
+except ImportError:
+    extxyz_available = False
 
 
 @IJob.register("ExtXYZ")
@@ -39,7 +47,9 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 class ExtXYZ(Converter):
     """Converts a Castep Trajectory into an MDT trajectory file."""
 
+    enabled = extxyz_available
     label = "ExtXYZ"
+    requires_extras = ("extxyz",)
 
     settings = {}
     settings["xyz_file"] = (
@@ -51,11 +61,26 @@ class ExtXYZ(Converter):
             "parser": ExtXYZFile,
         },
     )
+    settings["time_step"] = (
+        "FloatConfigurator",
+        {
+            "label": "Time step if not in file (assumed fs)",
+            "default": 1.0,
+            "mini": 1.0e-9,
+        },
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
             "default": "{}",
             "label": "Atom mapping",
+            "dependencies": {"input_file": "xyz_file"},
+        },
+    )
+    settings["column_mapping"] = (
+        "ExtXYZColumnMapConfigurator",
+        {
+            "label": "Column mapping",
             "dependencies": {"input_file": "xyz_file"},
         },
     )
@@ -80,8 +105,14 @@ class ExtXYZ(Converter):
         self.atom_aliases = self.configuration["atom_aliases"]["value"]
 
         # Create a representation of md file
-        self.trajectory_file: ExtXYZFile = self.configuration["xyz_file"].instance
+        self.trajectory_file: ExtXYZFile = self.configuration[
+            "xyz_file"
+        ].parser_instance
         self.frames = self.trajectory_file.frames
+
+        self.column_mapping: dict[str, str | None] = self.configuration[
+            "column_mapping"
+        ].mapping
 
         # Save the number of steps
         self.numberOfSteps = self.trajectory_file.n_frames
@@ -121,42 +152,40 @@ class ExtXYZ(Converter):
         frame = next(self.frames)
 
         # Read the information in the frame
-        time_step = frame.info["time"]
+        time_step = frame.info.get("time", self.configuration["time_step"]["value"])
 
-        def find_array_key(*trial: str) -> str | None:
-            return first_true(trial, pred=frame.arrays.__contains__, default=None)
-
-        coord_key = find_array_key("pos", "positions", "coords", "coordinates")
-
-        if coord_key is None:
+        if "positions" not in self.column_mapping:
             raise KeyError("Cannot determine positions key.")
 
+        coord_key = self.column_mapping["positions"]
         coords = frame.arrays[coord_key]
 
         variables = {}
-        if vel_key := find_array_key("velo", "velocity", "velocities"):
+
+        if vel_key := self.column_mapping.get("velocities"):
             variables["velocities"] = frame.arrays[vel_key]
-        else:
-            mom_key = find_array_key("momenta", "moment", "momentum")
-            mass_key = find_array_key("mass", "masses")
+        elif (mom_key := self.column_mapping.get("momenta")) and (
+            mass_key := self.column_mapping.get("masses")
+        ):
+            variables["velocities"] = frame.arrays[mom_key] / frame.arrays[mass_key]
+        elif mom_key := self.column_mapping.get("momenta"):
+            variables["velocities"] = (
+                frame.arrays[mom_key]
+                / np.array(self._chemical_system.atom_property("atomic_weight"))[
+                    :, np.newaxis
+                ]
+            )
 
-            if all((mom_key, mass_key)):
-                variables["velocities"] = frame.arrays[mom_key] / frame.arrays[mass_key]
-
-        if force_key := find_array_key("force", "forces", "gradients", "grad"):
+        if force_key := self.column_mapping.get("forces"):
             variables["gradients"] = frame.arrays[force_key]
 
         if any(frame.pbc):
             unit_cell = UnitCell(frame.cell)
-            conf = PeriodicRealConfiguration(
-                self._trajectory.chemical_system, coords, unit_cell, **variables
-            )
+            conf = PeriodicAbsoluteConfiguration(coords, unit_cell, **variables)
             if self.configuration["fold"]["value"]:
                 conf.fold_coordinates()
         else:
-            conf = RealConfiguration(
-                self._trajectory.chemical_system, coords, **variables
-            )
+            conf = AbsoluteConfiguration(coords, **variables)
 
         if units := frame.info.get("units"):
             units = units.removeprefix("_JSON ")
@@ -175,7 +204,6 @@ class ExtXYZ(Converter):
             "velocities": units.get(vel_key, f"{length}/{time}"),
             "gradients": units.get(force_key, f"{energy}/{length}"),
         }
-
 
         self._trajectory.dump_configuration(
             conf,
