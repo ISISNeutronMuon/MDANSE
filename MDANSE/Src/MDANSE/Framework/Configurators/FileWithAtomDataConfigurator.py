@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import traceback
 from collections.abc import Callable, Iterable
-from typing import Any
+from typing import Any, Generic, TypeVar
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -25,9 +25,10 @@ from MDANSE.Framework.Parsers import Parser
 
 from .InputFileConfigurator import InputFileConfigurator
 
+P = TypeVar("P", bound=Parser)
 
 @IConfigurator.register("FileWithAtomDataConfigurator")
-class FileWithAtomDataConfigurator(InputFileConfigurator):
+class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
     """
     Class for handling files that contain atom information.
 
@@ -47,35 +48,35 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
     ``parser`` argument.
     """
 
-    def __init__(self, *args, parser: type[Parser] | Callable[[str], Parser], **kwargs):
+    def __init__(self, *args, parser: type[P] | Callable[[str], P], **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.instance = None
+        self.parser_instance = None
         self.parser = parser
 
-    def configure(self, filepath: str) -> None:
+    def configure(self, value: str) -> None:
         """
         Parameters
         ----------
-        filepath : str
+        value : str
             The file path.
         """
-        self._original_input = filepath
-        super().configure(filepath)
+        self._original_input = value
+        super().configure(value)
 
         if self.error_status != "OK":
             return
 
-        if self.optional and not filepath:
-            self._original_input = filepath
-            self["value"] = filepath
-            self["filename"] = filepath
-            self.instance = None
+        if self.optional and not value:
+            self._original_input = value
+            self["value"] = value
+            self["filename"] = value
+            self.parser_instance = None
             self.error_status = "OK"
             return
 
         try:
-            self.instance = self.parser(filepath)
+            self.parser_instance = self.parser(value)
         except Exception as e:
             self.error_status = f"File parsing error {e}: {traceback.format_exc()}."
             return
@@ -87,12 +88,16 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
     @property
     def frames(self) -> Iterable[Any]:
         """Yield frames."""
-        return self.instance.frames
+        if not self.parser_instance:
+            return ()
+        return self.parser_instance.frames
 
     @property
     def atom_labels(self) -> Iterable[AtomLabel]:
         """Yields atom labels"""
-        return self.instance.atom_labels
+        if not self.parser_instance:
+            return ()
+        return self.parser_instance.atom_labels
 
     @property
     def labels(self) -> list[AtomLabel]:
@@ -102,4 +107,6 @@ class FileWithAtomDataConfigurator(InputFileConfigurator):
         list[AtomLabel]
             An ordered list of atom labels.
         """
-        return self.instance.labels
+        if not self.parser_instance:
+            return []
+        return self.parser_instance.labels

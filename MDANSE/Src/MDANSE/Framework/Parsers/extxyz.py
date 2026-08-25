@@ -18,6 +18,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from functools import cached_property
 from pathlib import Path
+from typing import Any
 
 from more_itertools import ilen
 
@@ -36,9 +37,11 @@ class ExtXYZFile(Parser):
 
     def __init__(self, filename: Path | str):
         self.filename = filename
-        frame = next(self.frames)
-        print(frame.info, frame.arrays)
 
+    @cached_property
+    def columns(self) -> tuple[dict[str, Any], dict[str, Any]]:
+        frame = next(self.frames)
+        return frame.info, frame.arrays
 
     @cached_property
     def n_atoms(self) -> int:

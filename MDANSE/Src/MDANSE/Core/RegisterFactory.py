@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, KeysView, ValuesView
+from collections.abc import Callable, Iterable, KeysView, Mapping, ValuesView
 from typing import Any, ClassVar, Generic, ParamSpec, TypeVar
 
 from more_itertools import always_iterable
@@ -23,16 +23,16 @@ from more_itertools import always_iterable
 from MDANSE.IO.IOUtils import UCDict
 
 P = ParamSpec("P")
-T = TypeVar("T", bound="RegisterFactory")
+T_co = TypeVar("T_co", bound="RegisterFactory", covariant=True)
+T = TypeVar("T")
 
-
-class RegisterFactory(Generic[T]):
+class RegisterFactory(Generic[T_co]):
     """
     Factory requiring manual registration to data.
 
     Attributes
     ----------
-    registry : dict[str, type[T]]
+    registry : dict[str, type[T_co]]
         Dictionary of keys to names.
 
     See Also
@@ -43,14 +43,14 @@ class RegisterFactory(Generic[T]):
     registry: ClassVar[dict[str, type[Any]]]
 
     @classmethod
-    def instance(cls, key: str) -> type[T]:
+    def instance(cls, key: str) -> type[T_co]:
         """
         Return a callable instance to construct given class.
         """
         return cls.registry[key]
 
     @classmethod
-    def create(cls, key: str, *args: P.args, **kwargs: P.kwargs) -> T:
+    def create(cls, key: str, *args: P.args, **kwargs: P.kwargs) -> T_co:
         """
         Return an instance of given class.
         """
@@ -69,7 +69,7 @@ class RegisterFactory(Generic[T]):
         return cls.registry.keys()
 
     @classmethod
-    def raw_dict(cls) -> dict[str, type[T]]:
+    def raw_dict(cls) -> dict[str, type[T_co]]:
         """
         Get raw name dictionary.
 
@@ -82,12 +82,12 @@ class RegisterFactory(Generic[T]):
         -----
         Only available on cases where registry is UCDict.
         """
-        if not hasattr(cls.registry, "raw_dict"):
-            raise TypeError("No raw names available for class")
-        return cls.registry.raw_dict
+        if isinstance(cls.registry, UCDict):
+            return cls.registry.raw_dict
+        return cls.registry
 
     @classmethod
-    def raw_names(cls) -> ValuesView[str]:
+    def raw_names(cls) -> Iterable[str]:
         """
         Get raw names of classes.
 
@@ -100,12 +100,12 @@ class RegisterFactory(Generic[T]):
         -----
         Only available on cases where registry is UCDict.
         """
-        if not hasattr(cls.registry, "raw_mapping"):
-            raise TypeError("No raw names available for class")
-        return cls.registry.raw_mapping.values()
+        if isinstance(cls.registry, UCDict):
+            return cls.registry.raw_mapping.values()
+        return cls.registry.keys()
 
     @classmethod
-    def available_classes(cls) -> set[type[T]]:
+    def available_classes(cls) -> set[type[T_co]]:
         """
         Known classes supported by factory.
 
@@ -121,7 +121,7 @@ class RegisterFactory(Generic[T]):
         return cls.registry.copy()
 
     @classmethod
-    def register(cls, names: str | Iterable[str]) -> Callable[type[T], type[T]]:
+    def register(cls, names: str | Iterable[str]) -> Callable[[type[T]], type[T]]:
         """
         A class level decorator for registering classes.
 
