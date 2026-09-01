@@ -51,10 +51,11 @@ dev = [
 external=["pymixbox"]
 test=["pytest", "pytest-timeout", "pytest-qt"]
 lint=["ruff<0.17"]
+extras=["pyshortcuts>=1.9.11"]
 
 [project.optional-dependencies]
 pymixbox=["pymixbox"]
-all=["MDANSE[pymixbox]"]
+all=["MDANSE[pymixbox,extras]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
@@ -72,6 +73,9 @@ MDANSE_GUI = ["Icons/*.png", "Icons/*.ico", "Icons/*.stl",
 [tool.setuptools-git-versioning]
 enabled = true
 starting_version = "2.0.1"
+
+[project.scripts]
+create_mdanse_link = "MDANSE_GUI.Scripts.create_mdanse_link:main"
 
 [project.gui-scripts]
 mdanse_elements_database = "MDANSE_GUI.Scripts.mdanse_elements_database:main"
