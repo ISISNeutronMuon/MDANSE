@@ -41,8 +41,8 @@ old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
 # end of exception handling part.
 
-mdanse_gui_path = os.path.dirname(os.path.abspath(__file__))
-mdanse_icon_path = os.path.join(mdanse_gui_path, "Icons/MDANSE.ico")
+mdanse_gui_path = Path(__file__).parent
+mdanse_icon_path = mdanse_gui_path / "Icons/MDANSE.ico"
 
 
 def build_parser():
@@ -84,7 +84,7 @@ def startGUI(some_args):
     app = QApplication(some_args)
     app.setStyle(QStyleFactory.create("Fusion"))
 
-    app.setWindowIcon(QIcon(mdanse_icon_path))
+    app.setWindowIcon(QIcon(str(mdanse_icon_path)))
     fixed_locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedKingdom)
     fixed_locale.setNumberOptions(
         QLocale.NumberOption.RejectGroupSeparator

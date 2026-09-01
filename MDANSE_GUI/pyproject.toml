@@ -50,6 +50,8 @@ dev = [
 ]
 test=["pytest", "pytest-timeout", "pytest-qt"]
 lint=["ruff<0.14"]
+
+[project.optional-dependencies]
 extras=["pyshortcuts"]
 
 [project.urls]
