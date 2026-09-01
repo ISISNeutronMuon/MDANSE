@@ -20,7 +20,6 @@ import logging
 from logging import Handler, LogRecord
 from typing import TYPE_CHECKING, ClassVar
 
-from ase.gui.gui import GUI
 from qtpy.QtCore import Signal, Slot, qInstallMessageHandler
 from qtpy.QtWidgets import QComboBox, QHBoxLayout, QLabel, QWidget
 from typing_extensions import Self
@@ -72,9 +71,9 @@ class LogInfo(TextInfo):
     MESSAGE_FMT: ClassVar[str] = '<span style="color:{colour};">{message}</span>'
 
     def append_log(self, message: str, record: LogRecord) -> None:
-        message = self.MESSAGE_FMT.format(
-            colour=self.colours.get(record.levelno, "black"), message=message
-        )
+        if (colour := self.colours.get(record.levelno)) is not None:
+            message = self.MESSAGE_FMT.format(colour=colour, message=message)
+
         self.append_text(message)
         self.new_log.emit(record)
 
@@ -154,7 +153,7 @@ class LoggingTab(GeneralTab):
 
     @Slot(object)
     def handle_new_log(self, record: LogRecord) -> None:
-        if record.levelno > self._alert_level:
+        if record.levelno >= self._alert_level:
             self.tab_notification()
 
     def log_qt_handler(self, m_type, m_context, m_text):
