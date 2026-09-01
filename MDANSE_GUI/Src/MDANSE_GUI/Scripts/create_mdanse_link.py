@@ -29,15 +29,15 @@ def main():
             "To create a shortcut and menu entry for MDANSE_GUI, "
             "this script needs the 'pyshortcuts' package.\n"
             "You can install it by running\n"
-            "pip install MDANSE_GUI.[extras]"
+            "pip install MDANSE_GUI[extras]"
         )
     else:
-        script_path = os.path.dirname(os.path.abspath(__file__))
+        script_path = Path(__file__).parent
         make_shortcut(
-            os.path.join(script_path, "mdanse_gui.py"),
+            script_path / "mdanse_gui.py",
             name="MDANSE_GUI",
             working_dir=script_path,
-            description="MDANSE 2, software for molecular dynamics trajectory analysis",
+            description=f"MDANSE {MDANSE_GUI.__version__}, software for molecular dynamics trajectory analysis",
             icon=mdanse_icon_path,
         )
 
