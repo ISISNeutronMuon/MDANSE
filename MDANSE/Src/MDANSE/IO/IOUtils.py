@@ -17,9 +17,17 @@ from __future__ import annotations
 
 import json
 import re
+import string
 import time
 from collections import UserDict
-from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
+from collections.abc import (
+    Callable,
+    Collection,
+    Generator,
+    Iterable,
+    Iterator,
+    Sequence,
+)
 from enum import Enum
 from functools import singledispatch
 from itertools import count, filterfalse, islice
@@ -36,6 +44,7 @@ if TYPE_CHECKING:
 
 K = TypeVar("K", str, bytes)
 V = TypeVar("V")
+T = TypeVar("T")
 
 MAX_FILE_COUNT = 2048
 
@@ -350,6 +359,66 @@ def strip_comments(
     )
 
     return strip_function(data, comment_char=comment_char)
+
+
+@overload
+def head_tail(coll: str) -> Generator[tuple[str, str]]: ...
+@overload
+def head_tail(coll: Sequence[T]) -> Generator[tuple[Sequence[T], Sequence[T]]]: ...
+def head_tail(coll: Sequence[T]) -> Generator[tuple[Sequence[T], Sequence[T]]]:
+    """Get sequential heads/tails.
+
+    Parameters
+    ----------
+    coll : Sequence[T]
+        Collection to head/tail
+
+    Yields
+    ------
+    tuple[Sequence[T], Sequence[T]]
+        Heads and tails of sequence.
+
+    Examples
+    --------
+    >>> list(head_tail("bye"))
+    [('', 'bye'), ('b', 'ye'), ('by', 'e'), ('bye', '')]
+    """
+
+    for i in range(len(coll)):
+        yield coll[:i], coll[i:]
+
+
+def get_trailing_digits(inp: str) -> tuple[str, int]:
+    """Get digits from the end of a string.
+
+    Always returns ``1`` if no digits.
+
+    Parameters
+    ----------
+    inp : str
+        String to parse.
+
+    Returns
+    -------
+    str
+        String with digits stripped.
+    int
+        Digits from end of string as ``int``.
+
+    Examples
+    --------
+    >>> get_trailing_digits("str123")
+    ('str', 123)
+    >>> get_trailing_digits("nodigits")
+    ('nodigits', 1)
+    >>> get_trailing_digits("123preceding")
+    ('123preceding', 1)
+    """
+    for head, tail in head_tail(inp):
+        if tail.isdigit() and not head.endswith(string.digits):
+            return head, int(tail)
+
+    return inp, 1
 
 
 def summarise_array(
