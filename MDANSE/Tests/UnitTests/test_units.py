@@ -175,4 +175,4 @@ def test_sqrt():
     m = m.sqrt()
 
     assert m.toval() == 2.0
-    assert m.dimension == [0, 1, -1, 0, 0, 0, 0, 0, 0]
+    assert list(m.dimension) == [0, 1, -1, 0, 0, 0, 0, 0, 0]
