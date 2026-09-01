@@ -226,7 +226,7 @@ class Action(QWidget):
             type(self._job_instance).__name__,
             job_name,
         )
-        if type(self._job_instance).__name__ != job_name:
+        if self._job_instance is None or type(self._job_instance).__name__ != job_name:
             self.clear_panel()
             self._has_been_initialised = False
 
@@ -257,6 +257,7 @@ class Action(QWidget):
                 self.layout.addWidget(widget)
                 self._widgets_in_layout["err"] = widget
                 self._widgets.append(widget)
+                self._job_instance = None
                 return
 
             job_instance.build_configuration()
