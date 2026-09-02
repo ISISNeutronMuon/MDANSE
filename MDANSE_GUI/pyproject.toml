@@ -49,7 +49,7 @@ dev = [
   {include-group = "lint"}
 ]
 test=["pytest", "pytest-timeout", "pytest-qt"]
-lint=["ruff<0.14"]
+lint=["ruff<0.17"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
