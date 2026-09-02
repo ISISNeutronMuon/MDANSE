@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import os
 import sys
+from pathlib import Path
 
+import MDANSE_GUI
 from MDANSE_GUI.main import mdanse_icon_path
 
 
@@ -34,11 +36,11 @@ def main():
     else:
         script_path = Path(__file__).parent
         make_shortcut(
-            script_path / "mdanse_gui.py",
+            str(script_path / "mdanse_gui.py"),
             name="MDANSE_GUI",
-            working_dir=script_path,
+            working_dir=str(script_path),
             description=f"MDANSE {MDANSE_GUI.__version__}, software for molecular dynamics trajectory analysis",
-            icon=mdanse_icon_path,
+            icon=str(mdanse_icon_path),
         )
 
 
