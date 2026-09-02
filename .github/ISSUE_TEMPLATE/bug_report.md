@@ -9,9 +9,9 @@ assignees: ''
 
 **Background information**
 Your OS: (e.g. Debian 13.5, Windows 11, MacOS 26.5.1, ...)
-Python version: (e.g. 3.10, 3.11, ...)
+Python version: (e.g. 3.11, 3.12, ...)
 MDANSE version: (e.g. 2.0.1)
-MDANSE_GUI version: (e.g. 2.0.1; only if you are using the GUI) 
+MDANSE_GUI version: (e.g. 2.0.1; only if you are using the GUI)
 CPU architecture: (e.g. x86_64, ARM, ... - if you know)
 
 This summary can be produced using "Help -> Version information" in the MDANSE
