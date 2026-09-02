@@ -110,7 +110,7 @@ class TrajectoryModel(QStandardItemModel):
     finished_loading = Signal(int)
     free_name = Signal(str)
 
-    def __init__(self, parent: QObject = None):
+    def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
         self.mutex = QMutex()
         self._node_numbers = []
@@ -150,7 +150,7 @@ class TrajectoryModel(QStandardItemModel):
         self._loading_threads[index] = thread
         thread.start()
 
-    def get_trajectory(self, index: int) -> None | str | Trajectory:
+    def get_trajectory(self, index: int) -> str | Trajectory | None:
         result = None
         if index not in self._loading_threads:
             LOG.info("Requesting a missing trajectory with index %s", index)

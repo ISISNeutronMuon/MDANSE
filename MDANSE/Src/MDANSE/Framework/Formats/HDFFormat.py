@@ -184,7 +184,7 @@ class HDFFormat(IFormat):
         extension: str | None = None,
         *,
         in_memory: bool = False,
-    ) -> None | h5py.File:
+    ) -> h5py.File | None:
         """Write a set of output variables into an HDF file.
 
         Parameters
@@ -202,7 +202,7 @@ class HDFFormat(IFormat):
 
         Returns
         -------
-        None | h5py.File
+        h5py.File | None
             ``None`` if not ``in_memory``, otherwise the "written" datafile.
         """
         if extension is None:

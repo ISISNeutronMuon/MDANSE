@@ -50,7 +50,7 @@ dev = [
 ]
 external=["MDAnalysis", "ase", "mdtraj", "finufft"]
 test=["pytest", "pytest-timeout"]
-lint=["ruff<0.14"]
+lint=["ruff<0.17"]
 
 [project.optional-dependencies]
 cli=["tqdm"]
