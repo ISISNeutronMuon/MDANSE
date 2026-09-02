@@ -21,6 +21,7 @@ import sys
 import textwrap
 import time
 from argparse import ArgumentParser
+from pathlib import Path
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
 from qtpy.QtGui import QIcon, QPixmap
