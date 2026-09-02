@@ -30,11 +30,16 @@ class TextInfo(QTextBrowser):
     )
 
     def __init__(
-        self, *args, header: str | None = None, footer: str | None = None, **kwargs
+        self,
+        *args,
+        header: str | None = None,
+        footer: str | None = None,
+        font: str | None = None,
+        **kwargs,
     ):
         self._header = header if header is not None else self.default_header
         self._footer = footer if footer is not None else self.default_footer
-        self._font = kwargs.pop("font", None)
+        self._font = font
         super().__init__(*args, **kwargs)
         if self._font is not None:
             self.setFont(QFont(self._font))

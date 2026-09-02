@@ -43,61 +43,6 @@ if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 
-class NormOperations(UCEnum):
-    """Enum for selecting mathematical operations when calculating norms."""
-
-    AVERAGE = enum.auto()
-    SUM = enum.auto()
-    NOT_IMPLEMENTED = enum.auto()
-
-    @classmethod
-    def _missing_(cls, value: str) -> NormOperations:
-        if res := super()._missing_(value):
-            return res
-        return cls.NOT_IMPLEMENTED
-
-
-def str_to_enum(operation: str) -> NormOperations:
-    """Get the right enum from the input text string.
-
-    Parameters
-    ----------
-    operation : str
-        Name of the mathematical operation as string.
-
-    Returns
-    -------
-    NormOperations
-        Enum value of the operation.
-
-    """
-    return NormOperations(operation)
-
-
-def enum_to_str(operation: NormOperations) -> str:
-    """Convert the enum to a text string for the GUI.
-
-    Parameters
-    ----------
-    operation : NormOperations
-        Enum of the mathematical operation.
-
-    Returns
-    -------
-    str
-        Name of the operation as string.
-
-    """
-    return operation.name.lower()
-
-
-NORMALISATION_DEFAULTS = {
-    "apply": False,
-    "min_index": 0,
-    "max_index": 1,
-    "operation": NormOperations.AVERAGE,
-}
-
 ValidPlotters = Literal["Single", "Vectors", "Text", "Heatmap", "Grid"]
 
 
@@ -131,8 +76,6 @@ class Plotter(RegisterFactory["Plotter"]):
         self._toolbar = None
         self._slider_reference = None
         self.curve_length_limit = 10
-        self._normalisation_values = copy.copy(NORMALISATION_DEFAULTS)
-        self._normalisation_errors = []
         self._n_curves = 0
 
     def request_slider_values(self):
@@ -213,94 +156,6 @@ class Plotter(RegisterFactory["Plotter"]):
         """Respond to new slider values."""
         self._slider_values = new_value
 
-    def normalise_curve(
-        self, xdata: FloatArray, ydata: FloatArray
-    ) -> tuple[FloatArray, FloatArray]:
-        """Scale a 1D curve according to the current normalisation parameters.
-
-        Parameters
-        ----------
-        xdata : FloatArray
-            1D array of x values of the curve
-        ydata : FloatArray
-            1D array of y values of the curve
-
-        Returns
-        -------
-        tuple[FloatArray]
-            xdata and ydata with scaling applied
-
-        """
-        apply = self._normalisation_values["apply"]
-        operation = self._normalisation_values["operation"]
-        if not apply or operation is NormOperations.NOT_IMPLEMENTED:
-            return xdata, ydata
-
-        min_index = self._normalisation_values["min_index"]
-        max_index = self._normalisation_values["max_index"]
-        ref_values = ydata[min_index:max_index]
-
-        if len(ref_values) < 1:
-            self._normalisation_errors.append(
-                "No points within the specified index range"
-            )
-            return xdata, ydata
-
-        if operation is NormOperations.AVERAGE:
-            scale_factor = np.nanmean(ref_values)
-        elif operation is NormOperations.SUM:
-            scale_factor = np.sum(np.nan_to_num(ref_values))
-
-        if np.isclose(scale_factor, 0.0):
-            self._normalisation_errors.append(
-                "Normalisation factor is 0 and will not be applied."
-            )
-            return xdata, ydata
-
-        return xdata, ydata / scale_factor
-
-    def normalise_array(self, data_array: FloatArray) -> FloatArray:
-        """Normalise a 2D array according to the current normalisation parameters.
-
-        Parameters
-        ----------
-        data_array : FloatArray
-            2D array of data for plotting
-
-        Returns
-        -------
-        FloatArray
-            the data_array with new relative intensities between rows
-
-        """
-        apply = self._normalisation_values["apply"]
-        operation = self._normalisation_values["operation"]
-        if not apply or operation == NormOperations.NOT_IMPLEMENTED:
-            return data_array
-        min_index = self._normalisation_values["min_index"]
-        max_index = self._normalisation_values["max_index"]
-        ref_column = data_array[:, min_index:max_index]
-        if ref_column.shape[1] < 1:
-            return data_array
-
-        if operation is NormOperations.AVERAGE:
-            scale_column = np.nanmean(ref_column, axis=1)
-        elif operation is NormOperations.SUM:
-            scale_column = np.sum(np.nan_to_num(ref_column), axis=1)
-
-        if np.any(np.isclose(scale_column, 0.0)):
-            self._normalisation_errors.append(
-                "Normalisation factor is 0 for some rows of the 2D array."
-            )
-            return data_array
-
-        return data_array / scale_column.reshape((len(scale_column), 1))
-
-    def change_normalisation(self, new_value: dict[str, Any]):
-        """Respond to new normalisation values."""
-        self._normalisation_errors = []
-        self._normalisation_values = new_value
-
     def plot(
         self,
         plotting_context: PlottingContext,
@@ -323,8 +178,6 @@ class Plotter(RegisterFactory["Plotter"]):
             GUI instance of the matplotlib toolbar, by default None.
 
         """
-        LOG.info(f"normalisation errors {self._normalisation_errors}, setting to []")
-        self._normalisation_errors = []
         if (target := self.get_figure(figure)) is None:
             return
 

@@ -37,7 +37,7 @@ from MDANSE.Framework.InstrumentResolutions.IInstrumentResolution import (
 )
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
+from MDANSE_GUI.Plots.PlotUtils import MDANSEMatPlotLibNavBar
 from MDANSE_GUI.Utils import block_signals
 
 widget_text_map = {

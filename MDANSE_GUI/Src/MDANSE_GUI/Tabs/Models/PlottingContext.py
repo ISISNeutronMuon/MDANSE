@@ -17,11 +17,13 @@ from __future__ import annotations
 
 import copy
 import functools
+from collections.abc import Generator
 from contextlib import suppress
-from itertools import islice
+from itertools import compress, islice
 from math import prod
+from operator import itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, TypeAlias
 
 import h5py
 import matplotlib.pyplot as mpl
@@ -34,10 +36,13 @@ from matplotlib.markers import MarkerStyle
 from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
+from typing_extensions import Unpack
 
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import ComplexArray, FloatArray, IntArray
+from MDANSE_GUI.Plots.Ops.Op import Op, PreApply
+from MDANSE_GUI.Utils import parse_token
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Iterator, Sequence
@@ -47,6 +52,9 @@ if TYPE_CHECKING:
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
 SCALE_FACTOR_FORMAT = "3.3f"
+
+Curve: TypeAlias = tuple[str | float | None, tuple[FloatArray, FloatArray]]
+Plane: TypeAlias = tuple[str, FloatArray, tuple[str, str]]
 
 
 class PlotArgs(NamedTuple):
@@ -109,6 +117,7 @@ class SingleDataset:
         self._axes_order: list[str] = []
         self._xerror: FloatArray | None = None
         self._yerror: FloatArray | None = None
+        self.ops: list[Op] = []
 
         self.configure(source, **kwargs)
 
@@ -372,44 +381,6 @@ class SingleDataset:
             setattr(new_dataset, attr, copy.deepcopy(getattr(self, attr)))
         return new_dataset
 
-    @staticmethod
-    def parse_token(token: str, max_len: int) -> Iterable[int]:
-        """Parse a token component into an appropriate value for dimension slicing.
-
-        Parameters
-        ----------
-        token : str
-            Token to parse.
-        max_len : int
-            Size of array for un-ended slices.
-
-        Returns
-        -------
-        Iterable[int]
-            Parsed values.
-
-        Examples
-        --------
-        >>> parse_token("3:5", 10)
-        range(3, 5)
-        >>> parse_token("3:60:2", 5)
-        range(3, 5, 2)
-        >>> parse_token("8", 10)
-        (8, )
-        >>> parse_token("6-8", 10)
-        range(6, 8)
-        """
-        if ":" in token:
-            slice_parts = map(int, token.split(":"))
-            slc = slice(*slice_parts).indices(max_len)
-            return range(*slc)
-
-        if "-" in token:
-            start, stop = map(int, token.split("-"))
-            return range(start, stop + 1)
-
-        return (int(token),)
-
     def set_data_limits(self, limit_string: str, main_axis: str = ""):
         """Parse the string used for selecting a subset of data.
 
@@ -435,7 +406,7 @@ class SingleDataset:
 
         for token in limit_string.split(";"):
             try:
-                add_ord(self.parse_token(token, max_len))
+                add_ord(parse_token(token, max_len))
             except Exception as err:
                 LOG.error(
                     "Ignoring invalid token (%r) in set_data_limits.\n %s", token, err
@@ -528,7 +499,6 @@ class SingleDataset:
         -------
         str
             A string label for the plot legend or a number for Text plotter.
-
         """
         if self._n_dim < 2:
             return ""
@@ -574,19 +544,14 @@ class SingleDataset:
         """
         return islice(self._data_limits, limits)
 
-    def curves_vs_axis(
+    def _curves_vs_axis(
         self,
         axis_label: tuple[str, str] | str,
         max_limit: int | None = None,
         *,
         axis_unit: str | None = None,
         skip_label_text: bool = False,
-    ) -> Generator[
-        tuple[
-            str | float | None,
-            tuple[FloatArray, FloatArray],
-        ]
-    ]:
+    ) -> Generator[Curve]:
         """Prepare a set of curves for plotting.
 
         Parameters
@@ -686,17 +651,100 @@ class SingleDataset:
         else:
             raise ValueError("Array shape does not match the order of the axes")
 
-    def planes_vs_axis(
+    def _apply_ops_curve(self, curves: Iterable[Curve]) -> Generator[Curve]:
+        """Apply operations to curves."""
+        if self._data_limits is None:
+            return
+
+        # Pre applies
+        is_pa = [isinstance(op, PreApply) for op in self.ops]
+        if any(is_pa):
+            curves = list(curves)
+
+            def getter(targets: Iterable[int]) -> list[FloatArray]:
+                return [
+                    ydata for _label, (_xdata, ydata) in itemgetter(*targets)(curves)
+                ]
+
+            for op in compress(self.ops, is_pa):
+                op.pre_calculate(getter(op.targets(max(self._data_limits))))
+
+        for idx, (label, (xaxis, yaxis)) in zip(
+            sorted(self.curve_ind()), curves, strict=False
+        ):
+            data = yaxis
+            for op in self.ops:
+                if idx in op.targets(max(self._data_limits)):
+                    data = op.apply_single(data)
+
+            # Remove null data
+            filt = ~np.isnan(data)
+
+            if not filt.any():
+                LOG.error("No data after applying operations.")
+                yield label, (xaxis, np.full_like(xaxis, np.nan))
+                continue
+
+            yield label, (xaxis[filt], data[filt])
+
+    def curves_vs_axis(
+        self,
+        axis_label: tuple[str, str] | str,
+        max_limit: int | None = None,
+        *,
+        axis_unit: str | None = None,
+        skip_label_text: bool = False,
+        raw: bool = False,
+    ) -> Generator[Curve]:
+        """Prepare a set of curves for plotting.
+
+        Parameters
+        ----------
+        axis_label : str
+            Name of the primary plotting axis.
+        axis_unit : str, optional
+            Unit of the primary plotting axis.
+        max_limit : int, optional
+            Maximum number of curves allowed by plotter, by default 1
+        skip_label_text : bool, optional
+            Whether to skip the axis name and unit in the curve label, by default False.
+        raw : bool, optional
+            Don't apply dataset ops to data.
+
+        Yields
+        ------
+        str
+            Plot label.
+        FloatArray
+            x-axis.
+        FloatArray
+            Curve to plot.
+        """
+        curves = self._curves_vs_axis(
+            axis_label,
+            max_limit,
+            axis_unit=axis_unit,
+            skip_label_text=skip_label_text,
+        )
+
+        if raw:
+            yield from curves
+        else:
+            yield from self._apply_ops_curve(curves)
+
+    def _planes_vs_axis(
         self,
         main_axis: str,
         max_limit: int = 9,
-    ) -> Generator[tuple[str, FloatArray, tuple[str, str]]]:
+    ) -> Generator[Plane]:
         """Prepare for plotting 2D subsets of an ND array.
 
         Parameters
         ----------
         main_axis : str
             Label of the axis perpendicular to the plotted array.
+        max_limit : int
+            Max plots to generate.
 
         Yields
         ------
@@ -740,6 +788,55 @@ class SingleDataset:
                 raise NotImplementedError(
                     f"Cannot handle {self._data.ndim}-dimensional data."
                 )
+
+    def _apply_ops_plane(self, planes: Iterator[Plane]) -> Generator[Plane]:
+        """Apply operations to planes."""
+        if self._data_limits is None:
+            return
+
+        for idx, (label, array, axes) in zip(
+            sorted(self.curve_ind()), planes, strict=False
+        ):
+            data = array
+            for op in self.ops:
+                if idx in op.targets(max(self._data_limits)):
+                    data = op.apply_single(data)
+
+            yield label, data, axes
+
+    def planes_vs_axis(
+        self,
+        main_axis: str,
+        max_limit: int = 9,
+        *,
+        raw: bool = False,
+    ) -> Generator[Plane]:
+        """Prepare for plotting 2D subsets of an ND array.
+
+        Parameters
+        ----------
+        main_axis : str
+            Label of the axis perpendicular to the plotted array.
+        max_limit : int
+            Max plots to generate.
+        raw : bool, optional
+            Don't apply dataset ops to data.
+
+        Yields
+        ------
+        main_label : str
+            Grid label.
+        image_array : FloatArray
+            2D array.
+        axis_labels : tuple[str, ...]
+            Labels for each axis.
+        """
+        planes = self._planes_vs_axis(main_axis, max_limit)
+
+        if raw:
+            yield from planes
+        else:
+            yield from self._apply_ops_plane(planes)
 
     def main_axis_index(
         self, main_axis: str | None, *, default: int | None = None
@@ -1088,34 +1185,33 @@ class PlottingContext(QStandardItemModel):
         self._datasets.pop(dkey, None)
 
     def planes(
-        self, default_axis: int | None = None, planes_per_dataset: int | None = None
-    ) -> Generator[tuple[PlotArgs, str, FloatArray, tuple[str, str]]]:
+        self,
+        default_axis: int | None = None,
+        planes_per_dataset: int | None = None,
+        *,
+        raw: bool = False,
+    ) -> Generator[tuple[PlotArgs, Unpack[Plane]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
             for label, plane, axis_labels in islice(
-                ds.planes_vs_axis(databundle.main_axis),
+                ds.planes_vs_axis(databundle.main_axis, raw=raw),
                 planes_per_dataset,
             ):
                 yield databundle, label, plane, axis_labels
 
     def curves(
-        self, curves_per_dataset: int | None = None
-    ) -> Generator[
-        Generator[
-            tuple[
-                PlotArgs,
-                str,
-                tuple[FloatArray, FloatArray],
-            ]
-        ]
-    ]:
+        self,
+        curves_per_dataset: int | None = None,
+        *,
+        raw: bool = False,
+    ) -> Generator[Generator[tuple[PlotArgs, Unpack[Curve]]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
             yield (
                 (databundle, label, curve)
                 for label, curve in islice(
-                    ds.curves_vs_axis(databundle.main_axis), curves_per_dataset
+                    ds.curves_vs_axis(databundle.main_axis, raw=raw), curves_per_dataset
                 )
             )

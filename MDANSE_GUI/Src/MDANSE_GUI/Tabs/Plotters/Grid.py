@@ -61,36 +61,6 @@ class Grid(Plotter):
             xdata = self._backup_curves[num][0]
             self.curve_length_limit = max(self.curve_length_limit, len(xdata))
 
-    def change_normalisation(self, new_value: dict[str, Any]):
-        """Normalise the data based on the new parameters.
-
-        Parameters
-        ----------
-        new_value : dict[str, Any]
-            parameters as in NORMALISATION_DEFAULTS
-
-        """
-        super().change_normalisation(new_value)
-        target = self._figure
-        if target is None or not self._active_curves:
-            return
-
-        for curve_index, curve in enumerate(self._active_curves):
-            xdata, ydata = self._backup_curves[curve_index]
-            xdata, ydata = self.normalise_curve(xdata, ydata)
-            curve.set_xdata(xdata)
-            curve.set_ydata(ydata)
-
-        target.canvas.draw()
-
-        for axes in self._axes:
-            axes.relim()
-            axes.autoscale()
-
-        if self._toolbar is not None:
-            self._toolbar.update()
-            self._toolbar.push_current()
-
     def toggle_legend(self, enabled: bool) -> None:
         if self._figure is None:
             return
@@ -143,7 +113,6 @@ class Grid(Plotter):
         self._axes_titles = []
         self._backup_curves = []
         self._active_curves = []
-        self._normalisation_errors = []
         self.apply_settings(plotting_context)
 
         self._n_curves = min(
