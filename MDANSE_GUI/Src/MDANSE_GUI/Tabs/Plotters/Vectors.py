@@ -92,6 +92,7 @@ class Vectors(Plotter):
             self._toolbar = toolbar
 
         self._figure = target
+        self._figure.set_layout_engine(layout="constrained")
         self._normalisation_errors = []
         self._axes = []
         self._active_curves = []
@@ -123,7 +124,7 @@ class Vectors(Plotter):
                     for ind, (_x, curve) in enumerate(dataset.curves_vs_axis("|q|")):
                         lab = plotlabel if dataset._n_dim != 2 else next(labels)
                         width = (
-                            0.8 * abs(np.mean(np.diff(curve[0])))
+                            0.8 * abs(np.min(np.diff(curve[0])))
                             if len(curve[0]) > 1
                             else 1
                         )
@@ -240,6 +241,7 @@ class Vectors(Plotter):
         for axes in self._axes:
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
+            legend.set_in_layout(False)
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()
