@@ -162,7 +162,11 @@ class Vectors3D(Plotter):
                 axes = self._figure.add_subplot(gs[1], projection="3d")
 
                 all_coords = np.concatenate(
-                    [dataset.x_axis("q_x"), dataset.x_axis("q_y"), dataset.x_axis("q_z")]
+                    [
+                        dataset.x_axis("q_x"),
+                        dataset.x_axis("q_y"),
+                        dataset.x_axis("q_z"),
+                    ]
                 )
                 self.axis3d_min = np.min(all_coords)
                 self.axis3d_max = np.max(all_coords)
