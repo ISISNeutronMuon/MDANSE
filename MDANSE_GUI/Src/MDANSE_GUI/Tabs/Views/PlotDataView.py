@@ -444,9 +444,7 @@ def vector_q_statistics_datasets(
         linestyle=":",
         marker="o",
         data=available_vectors,
-        plot_axes={
-            "|q|": qvals
-        },
+        plot_axes={"|q|": qvals},
         axes_units={"|q|": "1/nm"},
         optional_filename=filename,
     )
