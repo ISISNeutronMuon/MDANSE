@@ -130,9 +130,10 @@ class Vectors3D(Plotter):
                 axes.set_xlabel(", ".join(x_axis_labels))
                 axes.set_title(dataset._name)
             elif "vs" in plotlabel:
+                x_label, y_label = dataset._axes_units.keys()
                 [curve] = shared_axes.plot(
-                    bins,
-                    dataset.data,
+                    dataset.x_axis(x_label),
+                    dataset.x_axis(y_label),
                     linestyle=databundle.line_style,
                     label=plotlabel,
                     color=databundle.colour,
@@ -143,13 +144,30 @@ class Vectors3D(Plotter):
                     with contextlib.suppress(Exception):
                         curve.set_marker(int(databundle.marker))
 
-                shared_axes.set_xlabel(", ".join(x_axis_labels))
+                shared_axes.set_box_aspect(1)
+                x_axis_label = dataset.x_axis_label(x_label)
+                current_x_axis_label = shared_axes.get_xlabel()
+                y_axis_label = dataset.x_axis_label(y_label)
+                current_y_axis_label = shared_axes.get_ylabel()
+                if current_x_axis_label:
+                    shared_axes.set_xlabel(f"{current_x_axis_label}, {x_axis_label}")
+                else:
+                    shared_axes.set_xlabel(x_axis_label)
+                if current_x_axis_label:
+                    shared_axes.set_ylabel(f"{current_y_axis_label}, {y_axis_label}")
+                else:
+                    shared_axes.set_ylabel(y_axis_label)
+                shared_axes.set_title("q-vectors in 2D")
 
             elif "in 3D" in plotlabel:
                 axes = self._figure.add_subplot(gs[1], projection="3d")
-
+                axes.set_box_aspect((1, 1, 1))
                 all_coords = np.concatenate(
-                    [dataset.x_axis("q_x"), dataset.x_axis("q_y"), dataset.data]
+                    [
+                        dataset.x_axis("q_x"),
+                        dataset.x_axis("q_y"),
+                        dataset.x_axis("q_z"),
+                    ]
                 )
                 self.axis3d_min = np.min(all_coords)
                 self.axis3d_max = np.max(all_coords)
@@ -157,7 +175,7 @@ class Vectors3D(Plotter):
                 axes.scatter(
                     dataset.x_axis("q_x"),
                     dataset.x_axis("q_y"),
-                    dataset.data,
+                    dataset.x_axis("q_z"),
                     marker=databundle.marker,
                     label=plotlabel,
                     color=databundle.colour,
@@ -166,6 +184,7 @@ class Vectors3D(Plotter):
                 self.axes3d = axes
                 axes.set_xlabel(dataset.x_axis_label("q_x"))
                 axes.set_ylabel(dataset.x_axis_label("q_y"))
+                axes.set_zlabel(dataset.x_axis_label("q_z"))
                 axes.set_title(dataset._name)
 
         for axes in self._axes:
