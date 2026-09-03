@@ -144,6 +144,7 @@ class Vectors3D(Plotter):
                     with contextlib.suppress(Exception):
                         curve.set_marker(int(databundle.marker))
 
+                shared_axes.set_box_aspect(1)
                 x_axis_label = dataset.x_axis_label(x_label)
                 current_x_axis_label = shared_axes.get_xlabel()
                 y_axis_label = dataset.x_axis_label(y_label)
@@ -160,7 +161,7 @@ class Vectors3D(Plotter):
 
             elif "in 3D" in plotlabel:
                 axes = self._figure.add_subplot(gs[1], projection="3d")
-
+                axes.set_box_aspect((1, 1, 1))
                 all_coords = np.concatenate(
                     [
                         dataset.x_axis("q_x"),
