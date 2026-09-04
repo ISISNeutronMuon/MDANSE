@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
-from qtpy.QtGui import QDesktopServices
+from qtpy.QtGui import QCloseEvent, QDesktopServices, QIcon
 from qtpy.QtWidgets import (
     QAction,
     QApplication,
@@ -30,6 +30,7 @@ from qtpy.QtWidgets import (
     QMenu,
     QMenuBar,
     QMessageBox,
+    QSystemTrayIcon,
     QToolBar,
 )
 
@@ -114,10 +115,16 @@ class TabbedWindow(QMainWindow):
         parent=None,
         title="MDANSE",
         settings=None,
-        app_instance=None,
+        app_instance: QApplication | None = None,
+        create_systray_icon: bool = True,
+        systray_icon: QIcon | None = None,
         **kwargs,
     ):
         super().__init__(parent, *args, **kwargs)
+        self.system_tray_icon = None
+        self.icon_object = systray_icon
+        self.will_create_systray_icon = create_systray_icon
+        self.app_instance = None
         self.tabs = NotificationTabWidget(self)
         self.setCentralWidget(self.tabs)
         self._views = defaultdict(list)
@@ -145,6 +152,7 @@ class TabbedWindow(QMainWindow):
         self.style_selector.icon_swap.connect(self.invertToolbar)
 
         if app_instance is not None:
+            self.app_instance = app_instance
             app_instance.aboutToQuit.connect(self._session.save)
         self._session.load()
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
@@ -190,6 +198,53 @@ class TabbedWindow(QMainWindow):
         self.tabs.currentChanged.connect(self.tabs.reset_current_color)
         self.check_dark_mode()
 
+        if create_systray_icon:
+            self.create_systray_icon()
+
+        if self.system_tray_icon is not None:
+            self._job_holder.job_finished.connect(self.systray_message_job_finished)
+
+    def block_gui_shutdown(self):
+        """Pop up a window to inform a user that MDANSE jobs are still running.
+
+        This is run instead of shutting down the GUI.
+        """
+        _ = QMessageBox.warning(
+            self,
+            "Some tasks haven't finished",
+            "There are unfinished tasks present in the 'Running jobs' tab, "
+            "or trajectories are still being loaded in the 'Trajectories tab. "
+            "You will not be able to close MDANSE until they have finished, "
+            "or have been terminated by you manually (using the context menu).",
+        )
+
+    def create_systray_icon(self):
+        """Create a QSystemTrayIcon and redefine the window close mechanism.
+
+        The system tray icon will produce notifications when jobs finish,
+        and will only allow the software to exit if the main window is
+        closed and no MDANSE jobs are running.
+        """
+        self.system_tray_icon = QSystemTrayIcon(self.icon_object)
+        self.tray_menu = QMenu()
+        for label, func_slot in [
+            ("Show GUI window", self.showNormal),
+            (None, None),
+            ("Quit", self.close_only_if_finished),
+        ]:
+            if label is None and func_slot is None:
+                self.tray_menu.addSeparator()
+            else:
+                self.tray_menu.addAction(label, func_slot)
+        self.system_tray_icon.setContextMenu(self.tray_menu)
+        self.system_tray_icon.setVisible(True)
+
+    @Slot(object)
+    def systray_message_job_finished(self, job_details: tuple[str, str]):
+        self.system_tray_icon.showMessage(
+            "MDANSE run finshed", f"{job_details[0]} {job_details[1]}"
+        )
+
     def check_dark_mode(self):
         style_hints = QApplication.styleHints()
         colour_scheme = style_hints.colorScheme()
@@ -202,6 +257,45 @@ class TabbedWindow(QMainWindow):
         if event.type() == event.PaletteChange:
             self.check_dark_mode()
         super().changeEvent(event)
+
+    @Slot()
+    def close_only_if_finished(self):
+        """Close the software if not background tasks are running.
+
+        If any converter, analysis, or trajectory loader thread are still
+        running, this method will pop up a warning message and will not
+        close the software.
+        """
+        if self.can_be_closed:
+            self.close()
+            self.app_instance.quit()  # This should be ignored if a window is still open
+        else:
+            self.block_gui_shutdown()
+
+    def closeEvent(self, event: QCloseEvent):
+        if self.will_create_systray_icon:
+            event.ignore()
+            if self.system_tray_icon is None:
+                self.close_only_if_finished()
+                return
+            if not event.spontaneous() or not self.isVisible():
+                return
+            if self.system_tray_icon.isVisible():
+                self.hide()
+                return
+        elif self.can_be_closed:
+            return super().closeEvent(event)
+        else:
+            event.ignore()
+            self.block_gui_shutdown()
+
+    @property
+    def can_be_closed(self) -> bool:
+        """Return True if no background tasks are still running, False otherwise."""
+        return not (
+            self._job_holder.jobs_still_running
+            or self._trajectory_model.running_loaders
+        )
 
     def createCommonModels(self):
         self._trajectory_model = TrajectoryModel()
@@ -261,8 +355,12 @@ class TabbedWindow(QMainWindow):
         )
         file_group.addMenu(self.recent_plot_selection_file_menu)
         file_group.addSeparator()
-        self.exitAct = QAction("Exit", parent=menubar)
-        self.exitAct.triggered.connect(self.shut_down)
+        if self.will_create_systray_icon:
+            self.exitAct = QAction("Hide Window", parent=menubar)
+            self.exitAct.triggered.connect(self.hide)
+        else:
+            self.exitAct = QAction("Exit", parent=menubar)
+            self.exitAct.triggered.connect(self.close_only_if_finished)
         file_group.addAction(self.exitAct)
         self.settingsAct = QAction("User Settings", parent=menubar)
         self.settingsAct.triggered.connect(self.launchSettingsEditor)
@@ -282,10 +380,6 @@ class TabbedWindow(QMainWindow):
         help_group.addSeparator()
         help_group.addAction(self.aboutAct)
         self.setMenuBar(menubar)
-
-    def shut_down(self):
-        QApplication.quit()
-        self.destroy(True, True)
 
     def populate_recent_menu(
         self,
@@ -597,6 +691,3 @@ class TabbedWindow(QMainWindow):
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("state", self.saveState())
         self.settings.endGroup()
-
-    def reportError(self, text: str):
-        LOG.error(text)
