@@ -119,6 +119,7 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status = {}
         self._loading_threads = {}
         self._next_number = itertools.count()
+        self.running_loaders = 0
 
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:
@@ -142,6 +143,7 @@ class TrajectoryModel(QStandardItemModel):
         display_item: QStandardItem | None = None,
         target_label: str | None = None,
     ) -> None:
+        self.running_loaders += 1
         thread = LoaderThread(
             None, filename, index, display_item=display_item, target_label=target_label
         )
@@ -169,7 +171,9 @@ class TrajectoryModel(QStandardItemModel):
         self.finished_loading.emit(index)
         filename = self._trajectory_paths[index]
         self.recent_files.store_recently_used_filename(str(filename))
-        # self._loading_threads[index].wait()
+        self._loading_threads[index].quit()
+        self._loading_threads[index].wait()
+        self.running_loaders -= 1
 
     @Slot(int)
     def accept_failure(self, index) -> None:
@@ -178,7 +182,9 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status[index] = LoadStatus.FAILED
         self.free_name.emit(self._trajectory_paths[index])
         self.finished_loading.emit(index)
-        # self._loading_threads[index].wait()
+        self._loading_threads[index].quit()
+        self._loading_threads[index].wait()
+        self.running_loaders -= 1
 
     def item_status(self, row: int) -> LoadStatus:
         try:

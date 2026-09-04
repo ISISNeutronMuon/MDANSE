@@ -123,6 +123,7 @@ class TabbedWindow(QMainWindow):
         super().__init__(parent, *args, **kwargs)
         self.system_tray_icon = None
         self.icon_object = systray_icon
+        self.will_create_systray_icon = create_systray_icon
         self.app_instance = None
         self.tabs = NotificationTabWidget(self)
         self.setCentralWidget(self.tabs)
@@ -204,15 +205,26 @@ class TabbedWindow(QMainWindow):
             self._job_holder.job_finished.connect(self.systray_message_job_finished)
 
     def block_gui_shutdown(self):
+        """Pop up a window to inform a user that MDANSE jobs are still running.
+
+        This is run instead of shutting down the GUI.
+        """
         _ = QMessageBox.warning(
             self,
             "Some tasks haven't finished",
-            "There are unfinished tasks present in the 'Running jobs' tab. "
+            "There are unfinished tasks present in the 'Running jobs' tab, "
+            "or trajectories are still being loaded in the 'Trajectories tab. "
             "You will not be able to close MDANSE until they have finished, "
             "or have been terminated by you manually (using the context menu).",
         )
 
     def create_systray_icon(self):
+        """Create a QSystemTrayIcon and redefine the window close mechanism.
+
+        The system tray icon will produce notifications when jobs finish,
+        and will only allow the software to exit if the main window is
+        closed and no MDANSE jobs are running.
+        """
         self.system_tray_icon = QSystemTrayIcon(self.icon_object)
         self.tray_menu = QMenu()
         for label, func_slot in [
@@ -248,22 +260,42 @@ class TabbedWindow(QMainWindow):
 
     @Slot()
     def close_only_if_finished(self):
-        if not self._job_holder.jobs_still_running:
+        """Close the software if not background tasks are running.
+
+        If any converter, analysis, or trajectory loader thread are still
+        running, this method will pop up a warning message and will not
+        close the software.
+        """
+        if self.can_be_closed:
             self.close()
-            self.app_instance.quit()
+            self.app_instance.quit()  # This should be ignored if a window is still open
         else:
             self.block_gui_shutdown()
 
     def closeEvent(self, event: QCloseEvent):
-        event.ignore()
-        if self.system_tray_icon is None:
-            self.close_only_if_finished()
-            return
-        if not event.spontaneous() or not self.isVisible():
-            return
-        if self.system_tray_icon.isVisible():
-            self.hide()
-            return
+        if self.will_create_systray_icon:
+            event.ignore()
+            if self.system_tray_icon is None:
+                self.close_only_if_finished()
+                return
+            if not event.spontaneous() or not self.isVisible():
+                return
+            if self.system_tray_icon.isVisible():
+                self.hide()
+                return
+        elif self.can_be_closed:
+            return super().closeEvent(event)
+        else:
+            event.ignore()
+            self.block_gui_shutdown()
+
+    @property
+    def can_be_closed(self) -> bool:
+        """Return True if no background tasks are still running, False otherwise."""
+        return not (
+            self._job_holder.jobs_still_running
+            or self._trajectory_model.running_loaders
+        )
 
     def createCommonModels(self):
         self._trajectory_model = TrajectoryModel()
@@ -323,8 +355,12 @@ class TabbedWindow(QMainWindow):
         )
         file_group.addMenu(self.recent_plot_selection_file_menu)
         file_group.addSeparator()
-        self.exitAct = QAction("Exit", parent=menubar)
-        self.exitAct.triggered.connect(self.close_only_if_finished)
+        if self.will_create_systray_icon:
+            self.exitAct = QAction("Hide Window", parent=menubar)
+            self.exitAct.triggered.connect(self.hide)
+        else:
+            self.exitAct = QAction("Exit", parent=menubar)
+            self.exitAct.triggered.connect(self.close_only_if_finished)
         file_group.addAction(self.exitAct)
         self.settingsAct = QAction("User Settings", parent=menubar)
         self.settingsAct.triggered.connect(self.launchSettingsEditor)
