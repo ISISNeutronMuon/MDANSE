@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (
@@ -28,125 +28,48 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE_GUI.Tabs.Layouts.Panel import Panel
+
 if TYPE_CHECKING:
     from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 
 
-class DoublePanel(QWidget):
+class DoublePanel(Panel):
     """A basic component of the GUI, it combines the
     viewer for a data model, a visualiser for a specific
     component, and a button panel for actions.
     """
 
-    error = Signal(str)
-    item_picked = Signal(object)
-
-    def __init__(
-        self,
-        *args,
-        data_side=None,
-        visualiser_side=None,
-        tab_reference=None,
-        **kwargs,
-    ):
-        self._model = None
-        self._view = None
-        self._visualiser = None
-
-        self._tab_reference = tab_reference
-
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        buffer = QWidget(self)
-        layout = QHBoxLayout(buffer)
-        base_layout = QHBoxLayout(self)
-        buffer.setLayout(layout)
-        self.setLayout(base_layout)
-        self._base = buffer
         self._splitter = QSplitter(self._base)
-        base_layout.addWidget(self._splitter)
+        self._base_layout.addWidget(self._splitter)
 
-        leftside = QWidget(self._base)
+        self._rightside = QWidget(self._base)
+        self._rightlayout = QVBoxLayout(self._rightside)
+        self._rightside.setLayout(self._rightlayout)
+
+        # Reparent left/right side to scrolls
         scroll_area_left = QScrollArea()
-        scroll_area_left.setWidget(leftside)
+        scroll_area_left.setWidget(self._leftside)
         scroll_area_left.setWidgetResizable(True)
-        leftlayout = QVBoxLayout(leftside)
-        leftside.setLayout(leftlayout)
 
-        rightside = QWidget(self._base)
         scroll_area_right = QScrollArea()
-        scroll_area_right.setWidget(rightside)
+        scroll_area_right.setWidget(self._rightside)
         scroll_area_right.setWidgetResizable(True)
-        rightlayout = QVBoxLayout(rightside)
-        rightside.setLayout(rightlayout)
 
         self._splitter.addWidget(scroll_area_left)
         self._splitter.addWidget(scroll_area_right)
 
-        upper_buttons = QWidget(leftside)
-        ub_layout = QHBoxLayout(upper_buttons)
-        upper_buttons.setLayout(ub_layout)
-        lower_buttons = QWidget(leftside)
-        lb_layout = QHBoxLayout(lower_buttons)
-        lower_buttons.setLayout(lb_layout)
+        if self._view is not None:
+            # Insert between upper/lower
+            self._leftlayout.insertWidget(2, self._view)
 
-        self._tab_label = QLabel(leftside)
-        leftlayout.addWidget(self._tab_label)
-        leftlayout.addWidget(upper_buttons)
-        if data_side is not None:
-            leftlayout.addWidget(data_side)
-            self._view = data_side
-        leftlayout.addWidget(lower_buttons)
-
-        self._leftlayout = leftlayout
-        self._rightlayout = rightlayout
-        self._lb_layout = lb_layout
-        self._ub_layout = ub_layout
-
-        if visualiser_side is not None:
-            self._visualiser = visualiser_side
-            self._rightlayout.addWidget(visualiser_side)
+        if self._visualiser is not None:
+            self._rightlayout.addWidget(self._visualiser)
             if self._view is not None:
-                self._view.connect_to_visualiser(visualiser_side)
+                self._view.connect_to_visualiser(self._visualiser)
 
         self._splitter.setStretchFactor(0, 1)
-        self._splitter.setStretchFactor(1, 2)
-
-    def connect_logging(self):
-        self.error.connect(self._tab_reference.error)
-        for thing in [self._view, self._visualiser, self._model]:
-            thing.error.connect(self._tab_reference.error)
-
-    def set_model(self, model: GeneralModel):
-        self._model = model
-        self._view.setModel(model)
-
-    @Slot(str)
-    def set_label_text(self, text: str):
-        self._tab_label.setTextFormat(Qt.TextFormat.RichText)
-        self._tab_label.setWordWrap(True)
-        self._tab_label.setText(text)
-
-    def add_widget(self, tempwidget: QWidget = None, upper=True):
-        if upper:
-            self._ub_layout.addWidget(tempwidget)
-        else:
-            self._lb_layout.addWidget(tempwidget)
-
-    def add_button(self, label: str = "Button!", slot=None, upper=True):
-        temp = QPushButton(label, self._base)
-        if slot is not None:
-            temp.clicked.connect(slot)
-        if upper:
-            self._ub_layout.addWidget(temp)
-        else:
-            self._lb_layout.addWidget(temp)
-
-    def current_item(self):
-        try:
-            index = self._view.currentIndex()
-            item = self._model.itemFromIndex(index)
-        except Exception as e:
-            self.error.emit(repr(e))
-        else:
-            return item
+        self._splitter.setStretchFactor(1, 6)
