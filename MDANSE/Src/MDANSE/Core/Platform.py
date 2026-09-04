@@ -19,6 +19,7 @@ import abc
 import os
 import platform
 from pathlib import Path
+from typing import ClassVar
 
 
 def version_summary(show_backend: bool = True, show_gui: bool = True) -> str:
@@ -57,6 +58,8 @@ class Platform(metaclass=abc.ABCMeta):
     """
 
     __instance = None
+    _default_application_directory: ClassVar[Path]
+    _application_directory: Path
 
     def __new__(cls, *args, **kwargs):
         """
@@ -72,6 +75,7 @@ class Platform(metaclass=abc.ABCMeta):
 
         return cls.__instance
 
+    @property
     @abc.abstractmethod
     def application_directory(self) -> Path:
         """
@@ -83,6 +87,10 @@ class Platform(metaclass=abc.ABCMeta):
         :rtype: Path
         """
         pass
+
+    @property
+    def main_settings(self) -> Path:
+        return self.application_directory / "mdanse.toml"
 
     @classmethod
     def is_file_writable(cls, filepath: Path | str) -> bool:
@@ -119,7 +127,6 @@ class Platform(metaclass=abc.ABCMeta):
 
         try:
             path.mkdir(parents=True, exist_ok=True)
-        # An error occured.
         except OSError as err:
             raise PlatformError(
                 f"Problem trying to create a directory at {path}"
@@ -138,7 +145,7 @@ class Platform(metaclass=abc.ABCMeta):
         """
         return Path(path).expanduser().absolute()
 
-    def pid(self):
+    def pid(self) -> int:
         """
         Return the pid of the process that currently runs MDANSE.
 
@@ -148,15 +155,35 @@ class Platform(metaclass=abc.ABCMeta):
 
         return os.getpid()
 
-    def base_directory(self):
+    @property
+    def base_directory(self) -> Path:
         """
         Returns the path for MDANSE base directory.
 
-        @return: the path for MDANSE base directory.
-        @rtype: str
+        Returns
+        -------
+        Path
+            The path for MDANSE base directory.
         """
 
         return Path(__file__).parents[2]
+
+    @property
+    def gui_base_directory(self) -> Path | None:
+        """
+        Returns the path for MDANSE_GUI base directory.
+
+        Returns
+        -------
+        Path
+            The path for MDANSE_GUI base directory.
+        """
+        try:
+            import MDANSE_GUI
+        except ImportError:
+            return None
+
+        return Path(MDANSE_GUI.__file__).parent
 
 
 class PlatformPosix(Platform):
@@ -164,7 +191,11 @@ class PlatformPosix(Platform):
     Base class for POSIX derived OS.
     """
 
-    def application_directory(self):
+    _default_application_directory = Path.home()
+    _application_directory = _default_application_directory
+
+    @property
+    def application_directory(self) -> Path:
         """
         Returns the path for MDANSE application directory.
 
@@ -174,10 +205,10 @@ class PlatformPosix(Platform):
         :rtype: str
         """
 
-        basedir = Path(os.environ["HOME"]) / ".mdanse"
+        basedir = self._application_directory / ".mdanse"
 
         # If the application directory does not exist, create it.
-        basedir.mkdir(exist_ok=True, parents=True)
+        self.create_directory(basedir)
 
         return basedir
 
@@ -204,7 +235,10 @@ class PlatformWin(Platform):
     """
 
     name = "windows"
+    _default_application_directory = Path(os.environ.get("APPDATA") or "")
+    _application_directory = _default_application_directory
 
+    @property
     def application_directory(self) -> Path:
         """
         Returns the path for MDANSE application directory.
@@ -215,10 +249,10 @@ class PlatformWin(Platform):
         :rtype: Path
         """
 
-        basedir = Path(os.environ["APPDATA"]) / "mdanse"
+        basedir = self._application_directory / "mdanse"
 
         # If the application directory does not exist, create it.
-        basedir.mkdir(parents=True, exist_ok=True)
+        self.create_directory(basedir)
 
         return basedir
 

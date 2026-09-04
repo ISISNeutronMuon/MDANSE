@@ -25,122 +25,78 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
+from MDANSE.Core.Settings import Option, Settings
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Session.Session import Session
+from MDANSE_GUI.Session.Settings import GUISettings
 
 
+@Settings.parametrise(
+    colourmap=Option(
+        "viridis",
+        group="matplotlib",
+        comment="Name of the matplotlib colormap to be used in 2D plots.",
+    ),
+    mpl_style=Option(
+        "default",
+        group="matplotlib",
+        comment="Name of the matplotlib style to be used for plotting.",
+    ),
+)
 class PlotSettings(QWidget):
     plot_settings_changed = Signal()
 
-    def __init__(self, *args, settings=None, **kwargs) -> None:
+    def __init__(self, *args, settings: Session | None = None, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self._settings = settings
+        self._session = settings or Session()
         self._unit_fields = {}
-        self.plot_settings_changed.connect(self.update_settings_file)
-
-    @Slot()
-    def update_settings_file(self):
-        self._settings.save_values()
+        self.plot_settings_changed.connect(Settings.save)
+        self.plot_settings_changed.connect(self._session._settings.populate_model)
 
     @Slot(str)
     def set_style(self, style_name: str):
-        mpl_group = self._settings.group("matplotlib")
-        if not mpl_group.set("style", style_name):
-            mpl_group.add(
-                "style",
-                style_name,
-                "Name of the matplotlib style to be used for plotting.",
-            )
         try:
             mpl.style.use(style_name)
+            self.mpl_style = style_name
         except Exception:
             LOG.error(f"Could not set matplotlib style to {style_name}")
-            backup_style = self._unit_lookup._settings.default_value(
-                "matplotlib", "style"
-            )
+            backup_style = Settings.get_default("matplotlib", "mpl_style")
             if backup_style is None:
                 mpl.style.use("default")
+                self.mpl_style = "default"
             else:
                 mpl.style.use(backup_style)
+                self.mpl_style = backup_style
         else:
             self.plot_settings_changed.emit()
 
     @Slot(str)
     def set_cmap(self, cmap_name: str):
-        colour_group = self._settings.group("colours")
-        if not colour_group.set("colormap", cmap_name):
-            colour_group.add(
-                "colormap",
-                cmap_name,
-                "Name of the matplotlib colormap to be used in 2D plots.",
-            )
+        self.colourmap = cmap_name
         self.plot_settings_changed.emit()
 
     @Slot()
     def update_units(self):
-        unit_group = self._settings.group("units")
-        try:
-            energy = self._unit_fields["energy"].currentText()
-        except Exception:
-            LOG.warning("Could not get the energy unit from GUI")
-        else:
+        for dim, trial in {
+            "energy": "rad/ps",
+            "time": "ps",
+            "distance": "nm",
+            "reciprocal": "1/nm",
+        }.items():
             try:
-                measure(1.0, "rad/ps", equivalent=True).toval(energy)
+                read = self._unit_fields[dim].currentText()
             except Exception:
-                energy = self._settings.default_value("units", "energy")
-            else:
-                if not unit_group.set("energy", energy):
-                    unit_group.add(
-                        "energy",
-                        energy,
-                        "Preferred physical unit for expressing energy.",
-                    )
-        try:
-            time = self._unit_fields["time"].currentText()
-        except Exception:
-            LOG.warning("Could not get the time unit from GUI")
-        else:
+                LOG.warning("Could not get the %s unit from GUI", dim)
+                continue
+
             try:
-                measure(1.0, "ps").toval(time)
+                measure(1.0, trial, equivalent=True).toval(read)
             except Exception:
-                time = self._settings.default_value("units", "time")
-            else:
-                if not unit_group.set("time", time):
-                    unit_group.add(
-                        "time", time, "Preferred physical unit for expressing time."
-                    )
-        try:
-            distance = self._unit_fields["distance"].currentText()
-        except Exception:
-            LOG.warning("Could not get the distance unit from GUI")
-        else:
-            try:
-                measure(1.0, "nm").toval(distance)
-            except Exception:
-                distance = self._settings.default_value("units", "distance")
-            else:
-                if not unit_group.set("distance", distance):
-                    unit_group.add(
-                        "distance",
-                        distance,
-                        "Preferred physical unit for expressing distance.",
-                    )
-        try:
-            reciprocal = self._unit_fields["reciprocal"].currentText()
-        except Exception:
-            LOG.warning("Could not get the reciprocal space unit from GUI")
-        else:
-            try:
-                measure(1.0, "1/nm").toval(reciprocal)
-            except Exception:
-                reciprocal = self._settings.default_value("units", "reciprocal")
-            else:
-                if not unit_group.set("reciprocal", reciprocal):
-                    unit_group.add(
-                        "reciprocal",
-                        reciprocal,
-                        "Preferred physical unit for expressing (quasi)momentum, i.e. reciprocal space units.",
-                    )
+                read = Settings.get_default("units", dim)
+
+            self._session._settings["units", dim] = read
+
         self.plot_settings_changed.emit()
 
     def make_layout(self, width=12.0, height=9.0, dpi=100):
@@ -164,58 +120,50 @@ class PlotSettings(QWidget):
         top_layout = QFormLayout()
         style_selector = QComboBox(self)
         style_selector.addItem("default")
+
         style_list_mpl = mpl.style.available
         style_list_filtered = [x for x in style_list_mpl if x[0] != "_"]
         style_list_filtered = [x for x in style_list_filtered if "lorbli" not in x]
         style_list_filtered = [x for x in style_list_filtered if x != "fast"]
+
         style_selector.addItems(style_list_filtered)
-        try:
-            style_string = self._settings.group("matplotlib").get("style")
-        except Exception:
-            style_string = "default"
+        style_string: str = self.mpl_style
         style_selector.setCurrentText(style_string)
         style_selector.currentTextChanged.connect(self.set_style)
         top_layout.addRow("Matplotlib style:", style_selector)
-        try:
-            colour_group = self._settings.group("colours")
-            try:
-                current_cmap = colour_group.get("colormap")
-            except KeyError:
-                LOG.warning("Could not get colormap from colours")
-                colour_group.add(
-                    "colormap",
-                    "viridis",
-                    "Name of the matplotlib colormap to be used in 2D plots.",
-                )
-                current_cmap = "viridis"
-            else:
-                if current_cmap not in mpl.colormaps():
-                    current_cmap = "viridis"
-        except Exception:
-            LOG.warning("Could not get the colours group")
+
+        if (current_cmap := self.colourmap) not in mpl.colormaps():
             current_cmap = "viridis"
+
         cmap_selector = QComboBox(self)
         cmap_selector.addItems(mpl.colormaps())
         cmap_selector.setCurrentText(current_cmap)
         cmap_selector.currentTextChanged.connect(self.set_cmap)
+
         top_layout.addRow("Colormap:", cmap_selector)
         layout.addLayout(top_layout)
+
         box = QGroupBox("Units", self)
         layout.addWidget(box)
         unit_layout = QFormLayout(box)
         box.setLayout(unit_layout)
+
         energy_combo = QComboBox(box)
         energy_combo.addItems(["meV", "1/cm", "THz"])
         energy_combo.currentTextChanged.connect(self.update_units)
+
         time_combo = QComboBox(box)
         time_combo.addItems(["fs", "ps", "ns"])
         time_combo.currentTextChanged.connect(self.update_units)
+
         distance_combo = QComboBox(box)
         distance_combo.addItems(["ang", "Bohr", "nm", "pm"])
         distance_combo.currentTextChanged.connect(self.update_units)
+
         reciprocal_combo = QComboBox(box)
         reciprocal_combo.addItems(["1/ang", "1/Bohr", "1/nm", "1/pm"])
         reciprocal_combo.currentTextChanged.connect(self.update_units)
+
         unit_layout.addRow("Energy unit:", energy_combo)
         unit_layout.addRow("Time unit:", time_combo)
         unit_layout.addRow("Distance unit:", distance_combo)
@@ -224,16 +172,12 @@ class PlotSettings(QWidget):
         self._unit_fields["time"] = time_combo
         self._unit_fields["distance"] = distance_combo
         self._unit_fields["reciprocal"] = reciprocal_combo
-        try:
-            unit_group = self._settings.group("units")
-        except Exception:
-            pass
-        else:
-            current_energy = unit_group.get("energy")
-            current_time = unit_group.get("time")
-            current_distance = unit_group.get("distance")
-            current_reciprocal = unit_group.get("reciprocal")
-            energy_combo.setCurrentText(current_energy)
-            time_combo.setCurrentText(current_time)
-            distance_combo.setCurrentText(current_distance)
-            reciprocal_combo.setCurrentText(current_reciprocal)
+
+        current_energy = self._session._settings["units", "energy"]
+        current_time = self._session._settings["units", "time"]
+        current_distance = self._session._settings["units", "distance"]
+        current_reciprocal = self._session._settings["units", "reciprocal"]
+        energy_combo.setCurrentText(current_energy)
+        time_combo.setCurrentText(current_time)
+        distance_combo.setCurrentText(current_distance)
+        reciprocal_combo.setCurrentText(current_reciprocal)

@@ -55,7 +55,7 @@ class OutputStructureConfigurator(IConfigurator):
         IConfigurator.__init__(self, name, **kwargs)
 
         self.formats = [fmt for fmt in ioformats if ioformats[fmt].can_write]
-        self.forbidden_files = []
+        self.forbidden_files = set()
 
     def configure(self, value):
         """

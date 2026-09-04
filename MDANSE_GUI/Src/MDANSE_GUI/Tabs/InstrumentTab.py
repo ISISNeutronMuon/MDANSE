@@ -18,7 +18,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from qtpy.QtCore import Slot
+from qtpy.QtCore import QMessageLogger, QSettings, Slot
 
 from MDANSE import PLATFORM
 from MDANSE.MLogging import LOG
@@ -61,7 +61,7 @@ class InstrumentTab(GeneralTab):
         except Exception as e:
             LOG.error(f"Could not load instruments from {builtin_file}: {e}")
         filename = os.path.join(
-            PLATFORM.application_directory(), "InstrumentDefinitions.toml"
+            PLATFORM.application_directory, "InstrumentDefinitions.toml"
         )
         try:
             self._view.load_from_file(filename)
@@ -95,17 +95,18 @@ class InstrumentTab(GeneralTab):
     def gui_instance(
         cls,
         parent: QWidget,
+        *,
         name: str,
         session: Session,
-        settings,
-        logger,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
         **kwargs,
     ):
         the_tab = cls(
             parent,
             name=name,
             session=session,
-            settings=settings,
+            qt_settings=qt_settings,
             logger=logger,
             model=kwargs.get("model", GeneralModel()),
             view=InstrumentList(),

@@ -21,14 +21,18 @@ import sys
 import textwrap
 import time
 from argparse import ArgumentParser
+from pathlib import Path
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
 from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
 
 import MDANSE_GUI
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Core.Platform import PLATFORM
 from MDANSE.MLogging import FMT, LOG
-from MDANSE_GUI.TabbedWindow import TabbedWindow
+from MDANSE_GUI.Session.Settings import GUISettings
+from MDANSE_GUI.TabbedWindow import MDANSEMainWindow
 
 
 # an additonal section which will pass exception information to the logger
@@ -66,6 +70,29 @@ def build_parser():
         action="store_true",
         help="Do not display splash screen on startup.",
     )
+    parser.add_argument(
+        "--settings",
+        help="Settings folder to use.",
+        default=None,
+    )
+    parser.add_argument(
+        "--local",
+        help="Use local settings.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--no-save-settings",
+        action="store_true",
+        help="Do not save settings.",
+    )
+    parser.add_argument(
+        "-L",
+        "--loglevel",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Set log level.",
+    )
+
     return parser
 
 
@@ -74,15 +101,16 @@ def startGUI(some_args):
     args = pars.parse_args(some_args)
 
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel("INFO")
+    stream_handler.setLevel(args.loglevel)
     stream_handler.setFormatter(FMT)
     LOG.addHandler(stream_handler)
 
     app = QApplication(some_args)
     app.setStyle(QStyleFactory.create("Fusion"))
 
-    path = os.path.dirname(os.path.abspath(__file__))
-    app.setWindowIcon(QIcon(os.path.join(path, "Icons/MDANSE.ico")))
+    assert PLATFORM.gui_base_directory
+
+    app.setWindowIcon(QIcon(str(PLATFORM.gui_base_directory / "Icons/MDANSE.ico")))
     fixed_locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedKingdom)
     fixed_locale.setNumberOptions(
         QLocale.NumberOption.RejectGroupSeparator
@@ -90,21 +118,36 @@ def startGUI(some_args):
     )
     QLocale.setDefault(fixed_locale)
 
-    settings = QSettings(
+    qt_settings = QSettings(
         "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
     )
 
-    path = os.path.dirname(os.path.abspath(__file__))
-
     if not args.no_splash:
-        splash_img = QPixmap(os.path.join(path, "Resources/splash.png"))
+        splash_img = QPixmap(str(PLATFORM.gui_base_directory / "Resources/splash.png"))
         splash_img.setDevicePixelRatio(2)
         splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
         splash.show()
         t0 = time.time()
 
-    root = TabbedWindow(
-        parent=None, title="MDANSE for Python 3", settings=settings, app_instance=app
+    # Override settings directories.
+    if args.local:
+        PLATFORM._application_directory = Path.cwd()
+    if args.settings:
+        PLATFORM._application_directory = Path(args.settings)
+
+    # Reload atoms database with new paths.
+    ATOMS_DATABASE._load()
+
+    settings = GUISettings(
+        settings=PLATFORM.main_settings, save=not args.no_save_settings
+    )
+
+    root = MDANSEMainWindow(
+        parent=None,
+        title="MDANSE for Python 3",
+        mdanse_settings=settings,
+        qt_settings=qt_settings,
+        app_instance=app,
     )
     root.show()
 
