@@ -139,6 +139,7 @@ class Grid(Plotter):
             return
 
         self._figure = target
+        self._figure.set_layout_engine(layout="constrained")
         self._axes = []
         self._axes_titles = []
         self._backup_curves = []
