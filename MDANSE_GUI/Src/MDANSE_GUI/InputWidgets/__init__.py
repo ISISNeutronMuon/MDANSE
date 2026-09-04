@@ -46,6 +46,7 @@ from .MDAnalysisMDTrajTimeStepWidget import (
 from .MDAnalysisTopologyFileWidget import (
     MDAnalysisTopologyFileWidget as MDAnalysisTopologyFileWidget,
 )
+from .MDTrajAnalysisWidget import MDTrajAnalysisWidget as MDTrajAnalysisWidget
 from .MDTrajTopologyFileWidget import (
     MDTrajTopologyFileWidget as MDTrajTopologyFileWidget,
 )
