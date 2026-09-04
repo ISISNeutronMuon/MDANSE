@@ -45,7 +45,7 @@ ALLOWED_ACTIONS = {
 }
 
 
-@dataclass(eq=False)  # With 3.10 add: slots=True, kw_only=True
+@dataclass(eq=False, slots=True, kw_only=True)
 class JobInfo:
     """Current state of job."""
 

@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     if: ${{ !contains( github.ref, 'legacy' ) }}
     steps:
@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
        os: [ubuntu-latest, windows-latest, macOS-latest]
-       python-version: ["3.10", "3.11", "3.12", "3.13"]
+       python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v7
@@ -84,7 +84,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
 
     defaults:
       run:
@@ -112,45 +112,45 @@ jobs:
         working-directory: MDANSE-Examples/tutorials/tutorial1-phase-transition/mdanse_inputs
         run: |
           set -euxo pipefail
-  
+
           echo "Running tutorial 1 scripts"
-  
+
           echo "Running script1_conversion.py"
           python script1_conversion.py
           echo "Checking converted_trajectory.mdt exists"
           test -f ../mdanse_outputs/converted_trajectory.mdt
-  
+
           echo "Running script2_temperature.py"
           python script2_temperature.py
           echo "Checking temperature.mda exists"
           test -f ../mdanse_outputs/temperature.mda
-  
+
           echo "Running script3_rmsd.py"
           python script3_rmsd.py
           echo "Checking root_mean_square_displacement.mda exists"
           test -f ../mdanse_outputs/root_mean_square_displacement.mda
-  
+
           echo "Running script4_pdf.py"
           python script4_pdf.py
           echo "Checking pair_distribution_function_solid.mda exists"
           test -f ../mdanse_outputs/pair_distribution_function_solid.mda
           echo "Checking pair_distribution_function_liquid.mda exists"
-          test -f ../mdanse_outputs/pair_distribution_function_liquid.mda          
+          test -f ../mdanse_outputs/pair_distribution_function_liquid.mda
 
       - name: Run tutorial 2 scripts
         working-directory: MDANSE-Examples/tutorials/tutorial2-van-hove-function/mdanse_inputs
         run: |
           set -euxo pipefail
-  
+
           echo "Running tutorial 2 scripts"
-  
+
           echo "Running script1_conversion.py"
           python script1_conversion.py
           echo "Checking converted_trajectory.mdt exists"
           test -f ../mdanse_outputs/converted_trajectory.mdt
-  
+
           echo "Skipping script2_vhfd.py as it can take some time."
-  
+
           echo "Running script3_vhfs.py"
           python script3_vhfs.py
           echo "Checking vanhovefunctionself.mda exists"
@@ -160,19 +160,19 @@ jobs:
         working-directory: MDANSE-Examples/tutorials/tutorial3-quasielastic-neutron-scattering/mdanse_inputs
         run: |
           set -euxo pipefail
-  
+
           echo "Running tutorial 3 scripts"
-  
+
           echo "Running script1_conversion.py"
           python script1_conversion.py
           echo "Checking converted_trajectory.mdt exists"
           test -f ../mdanse_outputs/converted_trajectory.mdt
-  
+
           echo "Running script2_disf.py"
           python script2_disf.py
           echo "Checking dynamicincoherentstructurefactor.mda exists"
           test -f ../mdanse_outputs/dynamicincoherentstructurefactor.mda
-  
+
           echo "Running script3_gdisf.py"
           python script3_gdisf.py
           echo "Checking gaussiandynamicincoherentstructurefactor.mda exists"
@@ -182,41 +182,41 @@ jobs:
         working-directory: MDANSE-Examples/tutorials/tutorial4-coherent-and-incoherent-scattering/mdanse_inputs
         run: |
           set -euxo pipefail
-  
+
           echo "Running tutorial 4 scripts"
-  
+
           echo "Running script1_conversion.py"
           python script1_conversion.py
           echo "Checking converted_trajectory.mdt exists"
           test -f ../mdanse_outputs/converted_trajectory.mdt
-  
+
           echo "Running script2_random.py"
           python script2_random.py
-  
+
           echo "Running script3_atm1_atm2.py"
           python script3_atm1_atm2.py
           echo "Checking converted_atm1_atm2.mdt exists"
           test -f ../mdanse_outputs/converted_atm1_atm2.mdt
-          
+
           echo "Running script4_atm1atm2.py"
           python script4_atm1atm2.py
           echo "Checking converted_atm1atm2.mdt exists"
           test -f ../mdanse_outputs/converted_atm1atm2.mdt
-          
+
           echo "Running script5_disf.py"
           python script5_disf.py
           echo "Checking disf_atm1_atm2.mda exists"
           test -f ../mdanse_outputs/disf_atm1_atm2.mda
           echo "Checking disf_atm1atm2.mda exists"
           test -f ../mdanse_outputs/disf_atm1atm2.mda
-          
+
           echo "Running script6_dcsf.py"
           python script6_dcsf.py
           echo "Checking dcsf_atm1_atm2.mda exists"
           test -f ../mdanse_outputs/dcsf_atm1_atm2.mda
           echo "Checking dcsf_atm1atm2.mda exists"
           test -f ../mdanse_outputs/dcsf_atm1atm2.mda
-          
+
           echo "Running script7_ndtsf.py"
           python script7_ndtsf.py
           echo "Checking ndtsf_atm1_atm2.mda exists"
