@@ -261,6 +261,16 @@ class IJob(Configurable, RegisterFactory["IJob"], ABC):
     def results(self):
         return self._in_memory_result
 
+    def predict_memory(self) -> int:
+        """Calculate RAM (in bytes) needed by a single process.
+
+        This is just a placeholder function, and the correct form
+        should be implemented and calibrated for each job."""
+        axis1 = self.trajectory.chunk_size(array_name="position")
+        axis2 = self.configuration["frames"]["number"]
+        data_size = self.trajectory.bytes_per_num(array_name="position")
+        return axis1 * axis2 * data_size
+
     def initialize(self):
         try:
             if (
