@@ -80,6 +80,7 @@ class Vectors3D(Plotter):
             self._toolbar = toolbar
 
         self._figure = target
+        self._figure.set_layout_engine(layout="constrained")
         self._normalisation_errors = []
         self._axes = []
         self.apply_settings(plotting_context)
@@ -208,6 +209,7 @@ class Vectors3D(Plotter):
         for axes in self._axes:
             legend = axes.legend()
             legend.set_visible(plotting_context.use_legend)
+            legend.set_in_layout(False)
             axes.grid(plotting_context.use_grid)
             axes.relim()
             axes.autoscale()

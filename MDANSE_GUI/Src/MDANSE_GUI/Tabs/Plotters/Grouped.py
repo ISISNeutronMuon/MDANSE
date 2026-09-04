@@ -160,7 +160,9 @@ class Grouped(Plotter):
                 title if enabled else "",
                 fontsize=self.title_fontsize(title),
             )
-            axes.get_legend().set_visible(enabled)
+            legend = axes.get_legend()
+            legend.set_visible(enabled)
+            legend.set_in_layout(False)
 
         self._figure.canvas.draw()
 
@@ -201,6 +203,7 @@ class Grouped(Plotter):
 
         self.height_max, self.length_max = 0.0, 0.0
         self._figure = target
+        self._figure.set_layout_engine(layout="constrained")
 
         self._axes = []
         self._axes_titles = []

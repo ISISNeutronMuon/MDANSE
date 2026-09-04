@@ -404,24 +404,23 @@ def vector_q_statistics_datasets(
             for index in range(len(qvals))
             if source["q_vectors"][qvals[index]] is not None
         ]
-        nshells = len(valid_shells)
 
         def q_data(elem: str) -> Generator:
             for index in valid_shells:
                 yield source["q_vectors"][qvals[index]][elem]
 
         modq_per_shell = [np.linalg.norm(dat, axis=0) for dat in q_data("q_vectors")]
-        available_vectors = np.array(
-            [
-                (
-                    n_found,
-                    n_used,
-                )
-                for n_found, n_used in zip(
-                    q_data("n_q_found"), q_data("n_q_vectors"), strict=False
-                )
-            ],
-        )
+
+        available_vectors = []
+        for idx in range(len(qvals)):
+            if source["q_vectors"][qvals[idx]] is None:
+                n_found, n_used = 0, 0
+            else:
+                n_found = source["q_vectors"][qvals[idx]]["n_q_found"]
+                n_used = source["q_vectors"][qvals[idx]]["n_q_vectors"]
+            available_vectors.append((n_found, n_used))
+        available_vectors = np.array(available_vectors)
+
         vec_weights = [dat[:] for dat in q_data("weights")]
     if q_bin_limits is None:
         qmin, qmax = np.min(modq_per_shell[0]), np.max(modq_per_shell[-1])
@@ -445,11 +444,7 @@ def vector_q_statistics_datasets(
         linestyle=":",
         marker="o",
         data=available_vectors,
-        plot_axes={
-            "|q|": qvals
-            if len(qvals) == len(available_vectors)
-            else qvals[valid_shells]
-        },
+        plot_axes={"|q|": qvals},
         axes_units={"|q|": "1/nm"},
         optional_filename=filename,
     )
