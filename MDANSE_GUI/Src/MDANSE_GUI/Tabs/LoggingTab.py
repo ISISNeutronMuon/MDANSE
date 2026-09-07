@@ -18,11 +18,10 @@ from __future__ import annotations
 import html
 import logging
 from logging import Handler, LogRecord
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Self
 
 from qtpy.QtCore import Signal, Slot, qInstallMessageHandler
 from qtpy.QtWidgets import QComboBox, QHBoxLayout, QLabel, QWidget
-from typing_extensions import Self
 
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
