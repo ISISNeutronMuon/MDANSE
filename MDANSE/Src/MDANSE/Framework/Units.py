@@ -20,16 +20,21 @@ import json
 import math
 import numbers
 from collections import ChainMap, defaultdict
-from collections.abc import Generator, Mapping
-from functools import singledispatchmethod
-from pathlib import Path
-from typing import ClassVar, NamedTuple, Self, TypedDict
-from collections import defaultdict
-from collections.abc import Generator, MutableMapping
+from collections.abc import Callable, Generator, Mapping, MutableMapping
 from functools import reduce, singledispatchmethod
-from operator import mul
+from numbers import Complex, Real
+from operator import add, mul, sub
 from pathlib import Path
-from typing import ClassVar, Literal, NamedTuple, Self
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Generic,
+    Literal,
+    NamedTuple,
+    Self,
+    TypedDict,
+    TypeVar,
+)
 
 from more_itertools import one
 
@@ -64,13 +69,13 @@ class Dims(NamedTuple):
         if not isinstance(other, Dims):
             return NotImplemented
 
-        return type(self)(*(s - o for s, o in zip(self, other, strict=True)))
+        return type(self)(*map(sub, self, other))
 
     def __add__(self, other) -> Self:
         if not isinstance(other, Dims):
             return NotImplemented
 
-        return type(self)(*(s + o for s, o in zip(self, other, strict=True)))
+        return type(self)(*map(add, self, other))
 
     @property
     def with_units(self) -> Generator[tuple[str, float]]:
@@ -188,15 +193,17 @@ class _Unit:
         uname: str,
         factor: float,
         dims: Dims = _COMMON_DIMS["au"],
+        *,
+        format: str = "g",
         **dim_overrides,
     ):
         self._factor = factor
         self._dimension: Dims = dims._replace(**dim_overrides)
-        self._format = "g"
+        self.format = format
         self._uname = uname
         self._ounit = None
         self._out_factor = None
-        self._equivalent = False
+        self.equivalent = False
 
     def __add__(self, other: _Unit) -> Self:
         """Add two _Unit instances.
@@ -222,7 +229,7 @@ class _Unit:
 
         if u.is_analog(other):
             u._factor += other._factor
-        elif self._equivalent:
+        elif self.equivalent:
             equivalence_factor = u.get_equivalence_factor(other)
             if equivalence_factor is None:
                 raise UnitError("The units are not equivalent")
@@ -245,7 +252,7 @@ class _Unit:
 
         if u.is_analog(other):
             u._factor -= other._factor
-        elif u._equivalent:
+        elif u.equivalent:
             equivalence_factor = u.get_equivalence_factor(other)
             if equivalence_factor is None:
                 raise UnitError("The units are not equivalent")
@@ -256,7 +263,7 @@ class _Unit:
 
         return u
 
-    def __truediv__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
+    def __truediv__(self, other: Complex | Real | _Unit) -> Self:
         """Divide two _Unit instances.
 
         To be divided, the units have to be analog or equivalent.
@@ -279,7 +286,7 @@ class _Unit:
         10 V
         """
         u = copy.deepcopy(self)
-        if isinstance(other, numbers.Number | numbers.Complex):
+        if isinstance(other, (Complex, Real)):
             u._factor /= other
         elif isinstance(other, _Unit):
             u._div_by(other)
@@ -288,7 +295,7 @@ class _Unit:
 
         return u
 
-    def __floordiv__(self, other: int | float | complex | _Unit) -> Self:
+    def __floordiv__(self, other: Real | _Unit) -> Self:
         """Divide two _Unit instances and truncate.
 
         To be divided, the units have to be analog or equivalent.
@@ -311,17 +318,21 @@ class _Unit:
         1 ohm
         """
         u = copy.deepcopy(self)
-        if isinstance(other, numbers.Number):
+        if isinstance(other, Real):
             u._factor //= other
         elif isinstance(other, _Unit):
             u._div_by(other)
+
+            if u._factor.imag:
+                raise TypeError("Cannot floor complex number")
+
             u._factor = math.floor(u._factor)
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
         return u
 
-    def __mul__(self, other):
+    def __mul__(self, other: Real | Complex | _Unit) -> Self:
         """Multiply _Unit instances or scaling factors.
 
         Examples
@@ -335,16 +346,16 @@ class _Unit:
         """
 
         u = copy.deepcopy(self)
-        if isinstance(other, numbers.Number | numbers.Complex):
+        if isinstance(other, (Real, Complex)):
             u._factor *= other
-            return u
         elif isinstance(other, _Unit):
             u._mult_by(other)
-            return u
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
-    def __pow__(self, n: float):
+        return u
+
+    def __pow__(self, n: float) -> Self:
         """Raise a _Unit to a factor.
 
         Examples
@@ -355,7 +366,7 @@ class _Unit:
         output_unit = copy.copy(self)
         output_unit._ounit = None
         output_unit._out_factor = None
-        output_unit._factor = pow(output_unit._factor, n)
+        output_unit._factor = output_unit._factor**n
         output_unit._dimension = output_unit._dimension**n
 
         return output_unit
@@ -403,6 +414,9 @@ class _Unit:
 
         r = copy.deepcopy(self)
 
+        if r._factor.imag:
+            raise TypeError("Cannot ceil complex number.")
+
         if r._ounit is not None:
             val = math.ceil(r.toval(r._ounit))
             newu = _Unit("au", val)
@@ -426,6 +440,9 @@ class _Unit:
         """
 
         r = copy.deepcopy(self)
+
+        if r._factor.imag:
+            raise TypeError("Cannot floor complex number.")
 
         if r._ounit is not None:
             val = math.floor(r.toval(r._ounit))
@@ -451,6 +468,9 @@ class _Unit:
 
         r = copy.deepcopy(self)
 
+        if r._factor.imag:
+            raise TypeError("Cannot round complex number.")
+
         if r._ounit is not None:
             val = round(r.toval(r._ounit), ndigits)
             newu = _Unit("au", val)
@@ -474,18 +494,18 @@ class _Unit:
 
         if self.is_analog(other):
             self._factor += other._factor
-            return self
-        elif self._equivalent:
+        elif self.equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
-            if equivalence_factor is not None:
-                self._factor += other._factor / equivalence_factor
-                return self
-            else:
+            if equivalence_factor is None:
                 raise UnitError("The units are not equivalent")
+            self._factor += other._factor / equivalence_factor
+
         else:
             raise UnitError("Incompatible units")
 
-    def __itruediv__(self, other: numbers.Number | numbers.Complex | Self):
+        return self
+
+    def __itruediv__(self, other: Complex | Real | Self):
         """Divide _Unit instances.
 
         See Also
@@ -493,14 +513,14 @@ class _Unit:
         __div__
         """
 
-        if isinstance(other, numbers.Number | numbers.Complex):
+        if isinstance(other, (Real, Complex)):
             self._factor /= other
-            return self
         elif isinstance(other, _Unit):
             self._div_by(other)
-            return self
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
+
+        return self
 
     def __ifloordiv__(self, other):
         """Divide _Unit instances and truncate.
@@ -513,7 +533,7 @@ class _Unit:
         self._factor = math.floor(self._factor)
         return self
 
-    def __imul__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
+    def __imul__(self, other: Real | Complex | _Unit) -> Self:
         """
         Multiply _Unit instances.
 
@@ -522,17 +542,17 @@ class _Unit:
         __mul__
         """
 
-        if isinstance(other, numbers.Number | numbers.Complex):
+        if isinstance(other, (Real, Complex)):
             self._factor *= other
-            return self
         elif isinstance(other, _Unit):
             self._mult_by(other)
-            return self
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
+        return self
+
     def __ipow__(self, n: float) -> Self:
-        self._factor = pow(self._factor, n)
+        self._factor = self._factor**n
         self._dimension = self._dimension**n
 
         self._ounit = None
@@ -545,16 +565,15 @@ class _Unit:
 
         if self.is_analog(other):
             self._factor -= other._factor
-            return self
-        elif self._equivalent:
+        elif self.equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
-            if equivalence_factor is not None:
-                self._factor -= other._factor / equivalence_factor
-                return self
-            else:
+            if equivalence_factor is None:
                 raise UnitError("The units are not equivalent")
+            self._factor -= other._factor / equivalence_factor
         else:
             raise UnitError("Incompatible units")
+
+        return self
 
     def __radd__(self, other: _Unit) -> Self:
         """Add _Unit instances.
@@ -565,29 +584,29 @@ class _Unit:
         """
         return self.__add__(other)
 
-    def __rdiv__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
+    def __rdiv__(self, other: Real | Complex | _Unit) -> Self:
         u = copy.deepcopy(self)
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, (Real, Complex)):
             u._factor /= other
-            return u
         elif isinstance(other, _Unit):
             u._div_by(other)
-            return u
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
-    def __rmul__(self, other: numbers.Number | numbers.Complex | _Unit) -> Self:
+        return u
+
+    def __rmul__(self, other: Real | Complex | _Unit) -> Self:
         """Multiply _Unit instances.  See __mul__."""
 
         u = copy.deepcopy(self)
-        if isinstance(other, (numbers.Number, numbers.Complex)):
+        if isinstance(other, (Real, Complex)):
             u._factor *= other
-            return u
         elif isinstance(other, _Unit):
             u._mult_by(other)
-            return u
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
+
+        return u
 
     def __rsub__(self, other: _Unit) -> _Unit:
         """Subtract _Unit instances.  See __sub__."""
@@ -597,37 +616,36 @@ class _Unit:
     def __str__(self) -> str:
         unit = copy.copy(self)
 
-        if self._ounit is None:
-            s = format(unit._factor, self._format)
-
-            positive_units = []
-            negative_units = []
-            for uname, uval in unit._dimension.with_units:
-                if uval == 0:
-                    continue
-
-                ref = positive_units if uval > 0 else negative_units
-                unit = str(uname) + (
-                    format(abs(uval), "d") if isinstance(uval, int) else str(uval)
-                )
-                ref.append(unit)
-
-            positive_units_str = " ".join(positive_units)
-            negative_units_str = " ".join(negative_units)
-
-            if positive_units_str:
-                s += f" {positive_units_str}"
-
-            if negative_units_str:
-                if not positive_units_str:
-                    s += " 1"
-                s += f" / {negative_units_str}"
-
-        else:
+        if self._ounit is not None and self._out_factor is not None:
             u = copy.deepcopy(self)
             u._div_by(self._out_factor)
 
-            s = f"{u._factor:{self._format}} {self._ounit}"
+            return f"{u._factor:{self.format}} {self._ounit}"
+
+        s = format(unit._factor, self.format)
+
+        positive_units = []
+        negative_units = []
+        for uname, uval in unit._dimension.with_units:
+            if uval == 0:
+                continue
+
+            ref = positive_units if uval > 0 else negative_units
+            unit = str(uname) + (
+                format(abs(uval), "d") if isinstance(uval, int) else str(uval)
+            )
+            ref.append(unit)
+
+        positive_units_str = " ".join(positive_units)
+        negative_units_str = " ".join(negative_units)
+
+        if positive_units_str:
+            s += f" {positive_units_str}"
+
+        if negative_units_str:
+            if not positive_units_str:
+                s += " 1"
+            s += f" / {negative_units_str}"
 
         return s
 
@@ -654,7 +672,7 @@ class _Unit:
         if self.is_analog(other):
             self._factor /= other._factor
             self._dimension = Dims()
-        elif self._equivalent:
+        elif self.equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is None:
                 raise UnitError(
@@ -693,7 +711,7 @@ class _Unit:
         if self.is_analog(other):
             self._factor *= other._factor
             self._dimension = self._dimension**2
-        elif self._equivalent:
+        elif self.equivalent:
             equivalence_factor = self.get_equivalence_factor(other)
             if equivalence_factor is None:
                 raise UnitError(
@@ -717,30 +735,10 @@ class _Unit:
         return self._dimension
 
     @property
-    def equivalent(self) -> bool:
-        """Getter for _equivalent attribute."""
-
-        return self._equivalent
-
-    @equivalent.setter
-    def equivalent(self, equivalent):
-        self._equivalent = equivalent
-
-    @property
-    def factor(self) -> float:
+    def factor(self) -> complex | float:
         """Getter for _factor attribute."""
 
         return self._factor
-
-    @property
-    def format(self) -> str:
-        """Getter for the output format."""
-
-        return self._format
-
-    @format.setter
-    def format(self, fmt: str) -> None:
-        self._format = fmt
 
     def is_analog(self, other: _Unit) -> bool:
         """Whether two units are analog.
@@ -805,7 +803,7 @@ class _Unit:
             return None
 
         powerized_equivalences = {
-            k**upower: pow(v, upower) for k, v in self._EQUIVALENCES[dimension].items()
+            k**upower: v**upower for k, v in self._EQUIVALENCES[dimension].items()
         }
         return powerized_equivalences.get(other._dimension)
 
@@ -837,12 +835,12 @@ class _Unit:
 
         out_factor = _Unit.from_str(ounit)
 
-        if not self.is_analog(out_factor) and not self._equivalent:
+        if not self.is_analog(out_factor) and not self.equivalent:
             raise UnitError(f"The units {self._uname} and {ounit} are not compatible.")
 
         if (
             not self.is_analog(out_factor)
-            and self._equivalent
+            and self.equivalent
             and self.get_equivalence_factor(out_factor) is None
         ):
             raise UnitError(f"The units {self._uname} and {ounit} are not equivalents")
@@ -867,7 +865,7 @@ class _Unit:
 
         return self**0.5
 
-    def toval(self, ounit: str | None = "") -> float:
+    def toval(self, ounit: str | None = "") -> complex | float:
         """Returns the numeric value of a unit.
 
         The value is given in ounit or in the default output unit.
@@ -895,22 +893,22 @@ class _Unit:
         if not ounit:
             ounit = self._ounit
 
-        if ounit is not None:
-            out_factor = _Unit.from_str(ounit)
-
-            if newu.is_analog(out_factor):
-                newu._div_by(out_factor)
-                return newu._factor
-            elif newu._equivalent:
-                if newu.get_equivalence_factor(out_factor) is not None:
-                    newu._div_by(out_factor)
-                    return newu._factor
-                else:
-                    raise UnitError("The units are not equivalents")
-            else:
-                raise UnitError(f"The units {newu} and {ounit} are not compatible")
-        else:
+        if ounit is None:
             return newu._factor
+
+        out_factor = _Unit.from_str(ounit)
+
+        if newu.is_analog(out_factor):
+            newu._div_by(out_factor)
+        elif newu.equivalent:
+            if newu.get_equivalence_factor(out_factor) is None:
+                raise UnitError("The units are not equivalents")
+
+            newu._div_by(out_factor)
+        else:
+            raise UnitError(f"The units {newu} and {ounit} are not compatible")
+
+        return newu._factor
 
     @classmethod
     def _au(cls) -> Self:
