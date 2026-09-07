@@ -103,47 +103,26 @@ FLOAT_SPINBOX_DECIMALS: Final[int] = 8
 
 T = TypeVar("T")
 
-if TYPE_CHECKING:  # 3.10 doesn't support generic Namedtuple
 
-    class Param(NamedTuple, Generic[T]):
-        name: str
-        value: T | Iterable[T]
-        tooltip: str
-        initial: T | None = None
-        connect: Callable | None = None
-        internal_name: str | None = None
-        extra_args: dict[str, Any] | None = None
+class Param(NamedTuple, Generic[T]):
+    name: str
+    value: T | Iterable[T]
+    tooltip: str
+    initial: T | None = None
+    connect: Callable | None = None
+    internal_name: str | None = None
+    extra_args: dict[str, Any] | None = None
 
-        @property
-        def args(self):
-            if self.extra_args is None:
-                return {}
-            return self.extra_args.copy()
+    @property
+    def args(self):
+        if self.extra_args is None:
+            return {}
+        return self.extra_args.copy()
 
-    class Field(NamedTuple, Generic[T]):
-        label: QLabel
-        widget: T
 
-else:
-
-    class Param(NamedTuple):
-        name: str
-        value: Any | Iterable[Any]
-        tooltip: str
-        initial: Any | None = None
-        connect: Callable | None = None
-        internal_name: str | None = None
-        extra_args: dict[str, Any] | None = None
-
-        @property
-        def args(self):
-            if self.extra_args is None:
-                return {}
-            return self.extra_args.copy()
-
-    class Field(NamedTuple):
-        label: QLabel
-        widget: Any
+class Field(NamedTuple, Generic[T]):
+    label: QLabel
+    widget: T
 
 
 class FilterDesSettings(TypedDict):
