@@ -366,8 +366,8 @@ class Heatmap(Plotter):
             y_axis[-1] + dy / 2,
         )
 
-        axes.set_xlabel(x_label)
-        axes.set_ylabel(y_label)
+        axes.set_xlabel(f"{x_label} ({dataset._current_units[x_label]})")
+        axes.set_ylabel(f"{y_label} ({dataset._current_units[y_label]})")
 
         image = axes.imshow(
             plane,

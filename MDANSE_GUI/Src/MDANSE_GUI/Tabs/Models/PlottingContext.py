@@ -725,6 +725,8 @@ class SingleDataset:
                 if perpendicular_axis is None:
                     return
 
+                perpendicular_axis = self.x_axis(perpendicular_axis_name)
+
                 reordered_view = np.moveaxis(self.data, main_axis_index, 0)
 
                 for plane_number in self.curve_ind(max_limit):
@@ -732,7 +734,7 @@ class SingleDataset:
                         continue
 
                     yield (
-                        f"{self._labels['minimal']}:{perpendicular_axis_name}={perpendicular_axis[plane_number]}",
+                        f"{self._labels['minimal']}:{perpendicular_axis_name} = {perpendicular_axis[plane_number]:.5g} ({self._current_units[main_axis]})",
                         reordered_view[plane_number],
                         other_labels,
                     )
