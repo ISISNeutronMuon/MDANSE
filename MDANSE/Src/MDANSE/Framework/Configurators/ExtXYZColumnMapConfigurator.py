@@ -45,6 +45,7 @@ class ExtXYZColumnMapConfigurator(IConfigurator):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.mapping = {}
+        self.units = {}
 
     @override
     def configure(self, value: dict[str, str | None] | None = None) -> None:

@@ -15,10 +15,10 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from functools import partial
 from operator import is_
-from typing import ClassVar, Literal
+from typing import ClassVar, Literal, Self
 
 from more_itertools import first_true
 from qtpy.QtCore import QModelIndex, QObject, Qt, Signal, Slot
@@ -37,7 +37,7 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from typing_extensions import Never, override
+from typing_extensions import override
 
 from MDANSE.Framework.Configurators.ExtXYZColumnMapConfigurator import (
     ExtXYZColumnMapConfigurator,
@@ -49,9 +49,12 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class ComboBoxDelegate(QStyledItemDelegate):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.items: list[str] = []
+        self.items = []
 
-    def setItems(self, items: Iterable[str]) -> None:
+    def setItems(self, items: Iterable[str] | Callable[[Self], Iterable[str]]) -> None:
+        if callable(items):
+            self.items = property(items)
+            return
         self.items = list(items)
 
     @override
@@ -77,7 +80,7 @@ class ComboBoxDelegate(QStyledItemDelegate):
 
 class ColumnAssignModel(QStandardItemModel):
     KNOWN_PROPS: ClassVar[tuple[str, ...]] = (
-        *ExtXYZColumnMapConfigurator.KEY_DEFAULTS.keys(),
+        *ExtXYZColumnMapConfigurator.KEY_DEFAULTS,
         "None",
     )
 
