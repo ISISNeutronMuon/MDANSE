@@ -206,7 +206,6 @@ class _Unit:
         self._out_factor = None
         self.equivalent = False
 
-
     class DBInput(TypedDict):
         factor: float
         dimension: tuple[int, int, int, int, int, int, int, int, int]
