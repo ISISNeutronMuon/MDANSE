@@ -27,6 +27,12 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import h5py
 import numpy as np
+try:
+    import mixbox
+    mixbox_available = True
+except ImportError:
+    mixbox_available = False
+
 from more_itertools import always_iterable, first
 
 from MDANSE import PLATFORM
@@ -973,22 +979,75 @@ def create_average_atom(
                 / np.sum([int(x[1]) for x in temp])
                 + radius_padding
             )
-        else:
-            for entry in temp:
-                try:
-                    converted = float(entry[0])
-                except TypeError:
-                    total = entry
-                except ValueError:
-                    total = entry
-                else:
-                    total += converted * entry[1]
+        elif property == "color":
+            colours = []
+            for i in temp:
+                r, g, b = i[0].split(";")
+                colours.append((int(r), int(g), int(b)))
+
+            weights = []
+            for element_name, element_count in atom_dictionary.items():
+                # weight color mixture by the atom volume
+                weights.append(
+                    float(database.get_atom_property(element_name, "vdw_radius") ** 3 * element_count)
+                )
+
+            rgb = mix_colors(colours, weights)
+            total = f"{rgb[0]};{rgb[1]};{rgb[2]}"
+
         values[property] = total
     is_dummy = 1
     for element_name, _ in atom_dictionary.items():
         is_dummy = is_dummy and database.get_atom_property(element_name, "dummy")
     values["dummy"] = is_dummy
     return values
+
+
+def mix_colors(colors: list[tuple[int, int, int]], weights: list[float] | None = None) -> tuple[int, int, int]:
+    """Mix colors together.
+
+    Parameters
+    ----------
+    colors : list[tuple[int, int, int]]
+        List of colors to blend.
+    weights : list[float] | None
+        Weight of the color when blending.
+
+    Returns
+    -------
+    tuple[int, int, int]
+        The new blended colors.
+    """
+    if weights is None:
+        weights = [1.0] * len(colors)
+    total = sum(weights)
+
+    if mixbox_available:
+        # should apparently produce a mixture which is similar to the
+        # mixing of paints in the real world e.g. yellow + blue = green
+        latents = [mixbox.rgb_to_latent(c) for c in colors]
+        z_mix  = [0.0] * mixbox.LATENT_SIZE
+        for latent, w in zip(latents, weights):
+            for i in range(len(latent)):
+                z_mix[i] += latent[i] * (w / total)
+        return mixbox.latent_to_rgb(z_mix)
+
+    else:
+        # a gamma-corrected weighted mix which is better than the naive
+        # rgb average
+        mix = [0.0, 0.0, 0.0]
+
+        for c, w in zip(colors, weights):
+            for i in range(3):
+                mix[i] += ((c[i] / 255) ** 2.2) * w
+
+        result = []
+        for i in range(3):
+            avg_linear = mix[i] / total
+            val = (avg_linear ** (1 / 2.2)) * 255
+            result.append(round(max(0, min(255, val))))
+
+        return tuple(result)
 
 
 class TrajectoryWriterError(Exception):
