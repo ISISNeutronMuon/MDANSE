@@ -19,6 +19,8 @@ import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.util_types import FloatArray
 
 
@@ -30,7 +32,7 @@ class UnitCellConfigurator(IConfigurator):
     or to change the existing cell definition.
     """
 
-    _default = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False
+    _default = np.eye(3), False
     label = "Unit cell"
     tooltip = "The definition of the simulation box dimensions."
 
@@ -54,8 +56,8 @@ class UnitCellConfigurator(IConfigurator):
         IConfigurator.__init__(self, name, **kwargs)
         self["apply"] = False
 
-    def update_trajectory_information(self):
-        traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
+    def update_trajectory_information(self, traj_config: Trajectory):
+
         has_valid_cell = True
         has_changing_cell = True
         try:
@@ -79,7 +81,6 @@ class UnitCellConfigurator(IConfigurator):
             )
 
         if not has_valid_cell:
-            traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
             self.recommended_cell = (
                 2.0 * np.eye(3) * np.linalg.norm(traj_config.max_span)
             )
@@ -104,9 +105,8 @@ class UnitCellConfigurator(IConfigurator):
 
         self._original_input = value
         self["apply"] = value[1]
-        if self["apply"]:
-            self.update_trajectory_information()
 
+        if self["apply"]:
             try:
                 input_array = np.array(value[0], dtype=float)
             except Exception:
@@ -114,12 +114,13 @@ class UnitCellConfigurator(IConfigurator):
                     "Could not convert the inputs into a floating point array."
                 )
                 return
-            else:
-                if input_array.shape != (3, 3):
-                    self.error_status = "Input shape must be 3x3."
-                    return
 
-            self["value"] = value[0]
+            if input_array.shape != (3, 3):
+                self.error_status = "Input shape must be 3x3."
+                return
+
+            self["value"] = UnitCell(input_array)
         else:
-            self["value"] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+            self["value"] = UnitCell(np.eye(3))
+
         self.error_status = "OK"
