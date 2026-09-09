@@ -44,7 +44,7 @@ class MultiInputFileConfigurator(IConfigurator):
         self["values"] = self._default
         self._original_input = values
 
-        if type(values) is str:
+        if isinstance(values, str):
             if values:
                 try:
                     # some issues when \ is used in the path as this
@@ -63,12 +63,11 @@ class MultiInputFileConfigurator(IConfigurator):
             else:
                 values = []
 
-        if isinstance(values, list):
-            if not all(isinstance(value, str) for value in values):
-                self.error_status = "Input values should be a list of str."
-                return
+        elif isinstance(values, list) and not all(isinstance(value, str) for value in values):
+            self.error_status = "Input values should be a list of str."
+            return
         else:
-            self.error_status = "Not possible to evaluate input values as a list.."
+            self.error_status = "Not possible to evaluate input values as a list."
             return
 
         values = [PLATFORM.get_path(value) for value in values]

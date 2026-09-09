@@ -20,14 +20,21 @@ from functools import partial
 from operator import is_
 from typing import ClassVar, Literal, Self
 
-from more_itertools import first_true
+from more_itertools import first_true, nth
 from qtpy.QtCore import QModelIndex, QObject, Qt, Signal, Slot
-from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
+from qtpy.QtGui import (
+    QBrush,
+    QFocusEvent,
+    QStandardItem,
+    QStandardItemModel,
+    QValidator,
+)
 from qtpy.QtWidgets import (
     QApplication,
     QComboBox,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QListView,
     QSizePolicy,
     QStyledItemDelegate,
@@ -42,7 +49,7 @@ from typing_extensions import override
 from MDANSE.Framework.Configurators.ExtXYZColumnMapConfigurator import (
     ExtXYZColumnMapConfigurator,
 )
-from MDANSE.Framework.Converters import ExtXYZ
+from MDANSE.Framework.Units import _COMMON_DIMS, UNITS_MANAGER, Dims, UnitError, _Unit
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
@@ -51,10 +58,7 @@ class ComboBoxDelegate(QStyledItemDelegate):
         super().__init__(parent)
         self.items = []
 
-    def setItems(self, items: Iterable[str] | Callable[[Self], Iterable[str]]) -> None:
-        if callable(items):
-            self.items = property(items)
-            return
+    def setItems(self, items: Iterable[str]) -> None:
         self.items = list(items)
 
     @override
@@ -78,6 +82,58 @@ class ComboBoxDelegate(QStyledItemDelegate):
         model.setData(index, editor.currentText())
 
 
+class UnitBox(QStyledItemDelegate):
+    UNITS = tuple(_COMMON_DIMS.get(inp, _COMMON_DIMS["au"]) for inp in ExtXYZColumnMapConfigurator.KEY_DEFAULTS)
+
+    class UnitLE(QLineEdit):
+        def __init__(self, *args, dims: Dims, **kwargs):
+            self.dims = dims
+            super().__init__(*args, **kwargs)
+            self.editingFinished.connect(self._check_unit)
+            self._init_text = ""
+
+        @Slot()
+        def _check_unit(self):
+            try:
+                unit = _Unit.from_str(self.text())
+            except UnitError:
+                self.setText(self._init_text)
+                return
+
+            if unit.dimension != self.dims:
+                self.setText(self._init_text)
+                return
+
+        def focusInEvent(self, a0: QFocusEvent | None) -> None:
+            self._init_text = self.text()
+            super().focusInEvent(a0)
+
+    @override
+    def createEditor(
+        self, parent: QWidget | None, option: QStyleOptionViewItem, index: QModelInd3ex
+    ) -> QComboBox:
+        dims = self.UNITS[index.row()]
+        editor = QComboBox(parent)
+        editor.setEditable(True)
+        le = self.UnitLE(dims=dims)
+        editor.setLineEdit(le)
+        editor.addItems(UNITS_MANAGER.filter_by_dimension(dims))
+        editor.setInsertPolicy(QComboBox.InsertPolicy.InsertAlphabetically)
+        return editor
+
+    @override
+    def setEditorData(self, editor: QComboBox, index: QModelIndex) -> None:
+        value = index.model().data(index)
+        if value:
+            editor.setCurrentText(value)
+
+    @override
+    def setModelData(
+        self, editor: QComboBox, model: QStandardItemModel, index: QModelIndex
+    ) -> None:
+        model.setData(index, editor.currentText())
+
+
 class ColumnAssignModel(QStandardItemModel):
     KNOWN_PROPS: ClassVar[tuple[str, ...]] = (
         *ExtXYZColumnMapConfigurator.KEY_DEFAULTS,
@@ -88,6 +144,9 @@ class ColumnAssignModel(QStandardItemModel):
         super().__init__(*args, **kwargs)
         self.delegate = ComboBoxDelegate()
         self.delegate.setItems(())
+        self.unit_delegate = UnitBox()
+        self.delegate.setItems(())
+        self.setHorizontalHeaderLabels(["Property", "Component:File", "Units"])
         self.config = config
 
     def update(self):
@@ -98,12 +157,16 @@ class ColumnAssignModel(QStandardItemModel):
             label = QStandardItem(name)
             label.setEditable(False)
             val = QStandardItem(comp)
-            self.appendRow((label, val))
+            unit = QStandardItem("")
+            self.appendRow((label, val, unit))
 
     @property
     def settings(self) -> dict[str, str | None]:
         conf = {
-            self.item(row, 0).text(): elem if elem != "None" else None
+            self.item(row, 0).text(): (
+                elem if elem != "None" else None,
+                self.item(row, 2).text() or "au",
+            )
             for row in range(self.rowCount())
             if (elem := self.item(row, 1).text())
         }
@@ -141,6 +204,7 @@ class ExtXYZColumnWidget(WidgetBase):
         self.view = QTableView()
         self.view.setModel(self.model)
         self.view.setItemDelegateForColumn(1, self.model.delegate)
+        self.view.setItemDelegateForColumn(2, self.model.unit_delegate)
 
         self._layout.addWidget(self.view)
         self._file_widget.value_changed.connect(self.update)
