@@ -809,9 +809,7 @@ class PlottingContext(QStandardItemModel):
 
     needs_an_update = Signal("quint64")
 
-    def __init__(
-        self, *args, unit_lookup: int | None = None, **kwargs
-    ):
+    def __init__(self, *args, unit_lookup: int | None = None, **kwargs):
         super().__init__(*args, **kwargs)
         self._datasets: dict[str, SingleDataset] = {}
         self._current_axis = [None, None, None]

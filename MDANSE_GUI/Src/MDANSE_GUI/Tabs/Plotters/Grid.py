@@ -157,7 +157,9 @@ class Grid(Plotter):
         colours = {}
         for databundle in plotting_context.datasets().values():
             colours[databundle.row] = self.colours(
-                databundle.colour_1, databundle.colour_2, databundle.dataset.n_curves
+                databundle.colour_1,
+                databundle.colour_2,
+                min(self._plot_limit, databundle.dataset.n_curves),
             )
 
         for ind, (databundle, label, curve) in enumerate(

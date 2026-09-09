@@ -19,8 +19,10 @@ import copy
 import csv
 import enum
 import math
+
 try:
     import mixbox
+
     mixbox_available = True
 except ImportError:
     mixbox_available = False
@@ -543,7 +545,9 @@ class Plotter(RegisterFactory["Plotter"]):
         return self._n_curves
 
     @staticmethod
-    def colours(colour_1: str, colour_2: str, n_curves: int) -> Generator[tuple[float, float, float]]:
+    def colours(
+        colour_1: str, colour_2: str, n_curves: int
+    ) -> Generator[tuple[float, float, float]]:
         """Generate colours from a mixture of two colours.
 
         Parameters
