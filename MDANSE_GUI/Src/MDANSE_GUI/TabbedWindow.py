@@ -241,8 +241,9 @@ class TabbedWindow(QMainWindow):
 
     @Slot(object)
     def systray_message_job_finished(self, job_details: tuple[str, str]):
+        name, status = job_details
         self.system_tray_icon.showMessage(
-            "MDANSE run finshed", f"{job_details[0]} {job_details[1]}"
+            "MDANSE run finshed", f"{name} {status}"
         )
 
     def check_dark_mode(self):
