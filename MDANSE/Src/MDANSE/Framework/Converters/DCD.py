@@ -56,6 +56,10 @@ class DCD(Converter):
             "parser": DCDFile,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -87,9 +91,10 @@ class DCD(Converter):
         super().initialize()
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["dcd_file"].instance.n_frames
+        instance: DCDFile = self.configuration["dcd_file"].instance
+        self.numberOfSteps = instance.n_frames
 
-        self.frames = self.configuration["dcd_file"].instance.frames
+        self.frames = instance.frames
 
         # Create all chemical entities from the PDB file.
         self._chemical_system = self.configuration[
@@ -120,7 +125,12 @@ class DCD(Converter):
         # The x, y and z values of the current frame.
         unit_cell, config = next(self.frames)
 
-        conf = PeriodicAbsoluteConfiguration(config, unit_cell)
+        if self.configuration["unit_cell"]["apply"]:
+            conf = PeriodicAbsoluteConfiguration(
+                config, self.configuration["unit_cell"]["value"]
+            )
+        else:
+            conf = PeriodicAbsoluteConfiguration(config, unit_cell)
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()

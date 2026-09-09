@@ -72,6 +72,10 @@ class MDAnalysis(Converter):
             "dependencies": {"input_file": "topology_file"},
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -213,31 +217,36 @@ class MDAnalysis(Converter):
         # convert from MDAnalysis units to MDANSE units
         # see https://userguide.mdanalysis.org/stable/units.html for
         # default units in MDAnalysis
-        if self.u.trajectory.ts.triclinic_dimensions is None:
+        if self.configuration["unit_cell"]["apply"]:
+            unit_cell = self.configuration["unit_cell"]["value"]
+        elif self.u.trajectory.ts.triclinic_dimensions is not None:
+            unit_cell = UnitCell(
+                self.u.trajectory.ts.triclinic_dimensions
+                * measure(1.0, "ang").toval("nm")
+            )
+        else:
+            unit_cell = None
+
+        if unit_cell is None:
             conf = AbsoluteConfiguration(
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
             )
         else:
             conf = PeriodicAbsoluteConfiguration(
                 self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
-                UnitCell(
-                    self.u.trajectory.ts.triclinic_dimensions
-                    * measure(1.0, "ang").toval("nm")
-                ),
+                unit_cell,
             )
 
             if self.configuration["fold"]["value"]:
                 conf.fold_coordinates()
 
-            if hasattr(self.u.trajectory.ts, "velocities"):
-                conf["velocities"] = self.u.trajectory.ts.velocities * measure(
-                    1.0, "ang/ps"
-                ).toval("nm/ps")
+        if vel := getattr(self.u.trajectory.ts, "velocities", None):
+            conf["velocities"] = vel * measure(1.0, "ang/ps").toval("nm/ps")
 
-            if hasattr(self.u.trajectory.ts, "forces"):
-                conf["gradients"] = self.u.trajectory.ts.forces * measure(
-                    1.0, "kJ/mol ang", equivalent=True
-                ).toval("Da nm/ps2")
+        if force := getattr(self.u.trajectory.ts, "forces", None):
+            conf["gradients"] = force * measure(
+                1.0, "kJ/mol ang", equivalent=True
+            ).toval("Da nm/ps2")
 
         if float(self.configuration["time_step"]["value"]) == 0.0:
             time = index * self.u.trajectory.ts.dt
