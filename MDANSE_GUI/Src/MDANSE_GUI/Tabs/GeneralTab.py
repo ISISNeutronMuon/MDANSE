@@ -31,8 +31,8 @@ from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 if TYPE_CHECKING:
     from qtpy.QtWidgets import QAbstractItemView
 
-    from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-    from MDANSE_GUI.Tabs.Layouts.SinglePanel import SinglePanel
+    from MDANSE_GUI.Tabs.Layouts.Panel import Panel
+    from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 
 
 class GeneralTab(QObject):
@@ -56,11 +56,11 @@ class GeneralTab(QObject):
         name: str = "Unnamed GUI part",
         session: Session | None = None,
         settings: None = None,
-        model: QObject | None = None,
+        model: GeneralModel | None = None,
         visualiser=None,
         view: QAbstractItemView | None = None,
         logger=None,
-        layout: SinglePanel | DoublePanel | MultiPanel = DoublePanel,
+        layout: type[Panel] = DoublePanel,
         label_text: str = "An abstract GUI element",
         **kwargs,
     ):
@@ -86,8 +86,10 @@ class GeneralTab(QObject):
             visualiser_side=self._visualiser,
             tab_reference=self,
         )
+
         if self._model is not None:
             self._core.set_model(self._model)
+
         self._core.set_label_text(label_text)
         self.propagate_session()
 
