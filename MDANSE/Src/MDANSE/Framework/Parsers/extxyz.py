@@ -39,9 +39,18 @@ class ExtXYZFile(Parser):
         self.filename = filename
 
     @cached_property
-    def columns(self) -> tuple[dict[str, Any], dict[str, Any]]:
+    def info(self) -> dict[str, Any]:
         frame = next(self.frames)
-        return frame.info, frame.arrays
+        return frame.info
+
+    @cached_property
+    def arrays(self) -> dict[str, Any]:
+        frame = next(self.frames)
+        return frame.arrays
+
+    @property
+    def columns(self) -> tuple[dict[str, Any], dict[str, Any]]:
+        return self.info, self.arrays
 
     @cached_property
     def n_atoms(self) -> int:

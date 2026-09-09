@@ -20,10 +20,11 @@ from collections.abc import Iterable
 from functools import partial
 
 import numpy as np
-from more_itertools import first_true
+from more_itertools import first, first_true
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
+from MDANSE.Framework.Configurators import MultiFileWithAtomDataConfigurator
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers.extxyz import ExtXYZFile
@@ -53,12 +54,19 @@ class ExtXYZ(Converter):
 
     settings = {}
     settings["xyz_file"] = (
-        "FileWithAtomDataConfigurator",
+        "MultiFileWithAtomDataConfigurator",
         {
             "wildcard": "XYZ files (*.xyz);;ExtXYZ files (*.extxyz);;All files (*)",
             "default": "INPUT_FILENAME.xyz",
             "label": "Input file",
             "parser": ExtXYZFile,
+        },
+    )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {
+            "label": "Unit cell if not in file.",
+            "dependencies": {"trajectory": "xyz_file"},
         },
     )
     settings["time_step"] = (
@@ -105,9 +113,9 @@ class ExtXYZ(Converter):
         self.atom_aliases = self.configuration["atom_aliases"]["value"]
 
         # Create a representation of md file
-        self.trajectory_file: ExtXYZFile = self.configuration[
+        self.trajectory_file: MultiFileWithAtomDataConfigurator = self.configuration[
             "xyz_file"
-        ].parser_instance
+        ]
         self.frames = self.trajectory_file.frames
 
         self.column_mapping: dict[str, str | None] = self.configuration[
@@ -120,9 +128,13 @@ class ExtXYZ(Converter):
         # Create a bound universe
         self._chemical_system = ChemicalSystem()
 
+        col, file = self.column_mapping["species"].split(":")
+
         element_list = [
             get_element_from_mapping(self.atom_aliases, symbol)
-            for symbol in self.trajectory_file.element_list
+            for symbol in first(
+                self.trajectory_file.parser_instances[file].frames
+            ).arrays[col]
         ]
 
         self._chemical_system.initialise_atoms(element_list)
@@ -180,7 +192,10 @@ class ExtXYZ(Converter):
             variables["gradients"] = frame.arrays[force_key]
 
         if any(frame.pbc):
-            unit_cell = UnitCell(frame.cell)
+            if self.configuration["unit_cell"]["apply"]:
+                unit_cell = UnitCell(self.configuration["unit_cell"]["value"])
+            else:
+                unit_cell = UnitCell(frame.cell)
             conf = PeriodicAbsoluteConfiguration(coords, unit_cell, **variables)
             if self.configuration["fold"]["value"]:
                 conf.fold_coordinates()
