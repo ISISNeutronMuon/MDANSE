@@ -30,6 +30,7 @@ from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
 import MDANSE_GUI
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Platform import PLATFORM
+from MDANSE.Framework.Units import UNITS_MANAGER
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Session.Settings import GUISettings
 from MDANSE_GUI.TabbedWindow import MDANSEMainWindow
@@ -166,8 +167,9 @@ def startGUI(some_args):
     if args.settings:
         PLATFORM._application_directory = Path(args.settings)
 
-    # Reload atoms database with new paths.
+    # Reload databases with new paths.
     ATOMS_DATABASE._load()
+    UNITS_MANAGER.load()
 
     settings = GUISettings(
         settings=PLATFORM.main_settings, save=not args.no_save_settings

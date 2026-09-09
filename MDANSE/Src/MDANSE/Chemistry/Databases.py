@@ -20,7 +20,7 @@ import json
 from collections import ChainMap, defaultdict
 from collections.abc import ItemsView
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, SupportsComplex
+from typing import TYPE_CHECKING, Any, ClassVar, SupportsComplex
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
@@ -89,8 +89,12 @@ def color(color_string: str | None = None):
 class _Database(metaclass=Singleton):
     """Base class for all the databases."""
 
-    _DEFAULT_DATABASE: Path
-    _USER_DATABASE: Path
+    _DEFAULT_DATABASE: ClassVar[Path]
+    _LOCAL_PATH: ClassVar[Path]
+
+    @property
+    def _USER_DATABASE(self) -> Path:
+        return PLATFORM.application_directory / self._LOCAL_PATH
 
     def __init__(self):
         self._data = {}
@@ -209,11 +213,12 @@ class AtomsDatabase(_Database):
     """
 
     _DEFAULT_DATABASE = Path(__file__).parent / "atoms.json"
+    _LOCAL_PATH = "atoms_extended.json"
 
     # The user path
-    _OLD_USER_DATABASE = PLATFORM.application_directory / "atoms.json"
-
-    _USER_DATABASE = PLATFORM.application_directory / "atoms_extended.json"
+    @property
+    def _OLD_USER_DATABASE(self) -> Path:
+        return PLATFORM.application_directory / "atoms.json"
 
     # The python types supported by the database
     _TYPES = {
@@ -302,9 +307,7 @@ class AtomsDatabase(_Database):
 
         """
         self._user_database = (
-            Path(user_database)
-            if user_database is not None
-            else AtomsDatabase._USER_DATABASE
+            Path(user_database) if user_database is not None else self._USER_DATABASE
         )
 
         super()._load(user_database=user_database, default_database=default_database)
