@@ -181,7 +181,7 @@ class Connectivity:
                     continue
                 bonds.append(key)
         if bonds:
-            self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0)
+            self._unique_bonds = np.unique(np.sort(bonds, axis=1), axis=0).astype(int)
 
     def add_bond_information(self, new_chemical_system: ChemicalSystem):
         new_chemical_system.add_bonds(self._unique_bonds)
