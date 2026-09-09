@@ -69,7 +69,12 @@ def build_parser():
     parser.add_argument(
         "--no-systray",
         action="store_true",
-        help="Do not create a system tray icon.",
+        help="Do not create a system tray icon. "
+        "System tray icon allows you to close and restore the main window while keeping "
+        "analysis tasks running in the background. "
+        "Independent of the system tray icon being created or not, the GUI "
+        "will ask you to confirm if you try to close the GUI before all the tasks "
+        "have finished running.",
     )
     return parser
 
@@ -119,8 +124,9 @@ def startGUI(some_args):
         title="MDANSE for Python 3",
         settings=settings,
         app_instance=app,
-        create_systray_icon=not args.no_systray,
-        systray_icon=QIcon(os.path.join(path, "Icons/MDANSE.ico")),
+        systray_icon=None
+        if args.no_systray
+        else QIcon(os.path.join(path, "Icons/MDANSE.ico")),
     )
     root.show()
 

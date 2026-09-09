@@ -116,14 +116,13 @@ class TabbedWindow(QMainWindow):
         title="MDANSE",
         settings=None,
         app_instance: QApplication | None = None,
-        create_systray_icon: bool = True,
         systray_icon: QIcon | None = None,
         **kwargs,
     ):
         super().__init__(parent, *args, **kwargs)
         self.system_tray_icon = None
         self.icon_object = systray_icon
-        self.will_create_systray_icon = create_systray_icon
+        self.will_create_systray_icon = systray_icon is not None
         self.app_instance = None
         self.tabs = NotificationTabWidget(self)
         self.setCentralWidget(self.tabs)
@@ -198,7 +197,7 @@ class TabbedWindow(QMainWindow):
         self.tabs.currentChanged.connect(self.tabs.reset_current_color)
         self.check_dark_mode()
 
-        if create_systray_icon:
+        if self.will_create_systray_icon:
             self.create_systray_icon()
 
         if self.system_tray_icon is not None:
@@ -238,13 +237,20 @@ class TabbedWindow(QMainWindow):
                 self.tray_menu.addAction(label, func_slot)
         self.system_tray_icon.setContextMenu(self.tray_menu)
         self.system_tray_icon.setVisible(True)
+        self.system_tray_icon.activated.connect(self.double_click_system_tray_icon)
+
+    @Slot(QSystemTrayIcon.ActivationReason)
+    def double_click_system_tray_icon(self, reason: QSystemTrayIcon.ActivationReason):
+        """Show the main window when the system tray icon is double-clicked."""
+        if reason != QSystemTrayIcon.ActivationReason.DoubleClick:
+            return
+        if not self.isVisible():
+            self.showNormal()
 
     @Slot(object)
     def systray_message_job_finished(self, job_details: tuple[str, str]):
         name, status = job_details
-        self.system_tray_icon.showMessage(
-            "MDANSE run finshed", f"{name} {status}"
-        )
+        self.system_tray_icon.showMessage("MDANSE run finshed", f"{name} {status}")
 
     def check_dark_mode(self):
         style_hints = QApplication.styleHints()
@@ -275,20 +281,38 @@ class TabbedWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent):
         if self.will_create_systray_icon:
-            event.ignore()
-            if self.system_tray_icon is None:
-                self.close_only_if_finished()
-                return
-            if not event.spontaneous() or not self.isVisible():
-                return
-            if self.system_tray_icon.isVisible():
-                self.hide()
-                return
-        elif self.can_be_closed:
+            self.close_event_for_system_tray_icon(event)
+        elif self.can_be_closed:  # If no jobs are running, the GUI will exit.
             return super().closeEvent(event)
-        else:
+        else:  # If jobs are still running, we prevent the shutdown and inform the user.
             event.ignore()
             self.block_gui_shutdown()
+
+    def close_event_for_system_tray_icon(self, event: QCloseEvent):
+        """Handle a QCloseEvent if the GUI is using a system tray icon.
+
+        This method makes sure that the main window is not destroyed when
+        the user closes it with the top bar button. As long as the
+        system tray icon exists, the close button can only hide the main
+        window, and the GUI can be stopped only using the context menu
+        of the system tray icon.
+
+        Parameters
+        ----------
+        event : QCloseEvent
+            Event triggered by the main window's close button.
+        """
+        event.ignore()  # this stops the usual response which would destroy the window.
+        if (
+            self.system_tray_icon is None
+        ):  # if for any reason the QSystemTrayIcon was not created.
+            self.close_only_if_finished()
+            return
+        if not event.spontaneous() or not self.isVisible():
+            return
+        if self.system_tray_icon.isVisible():
+            self.hide()
+            return
 
     @property
     def can_be_closed(self) -> bool:
