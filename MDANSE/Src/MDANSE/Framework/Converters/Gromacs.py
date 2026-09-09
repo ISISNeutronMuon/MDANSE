@@ -66,6 +66,10 @@ class Gromacs(Converter):
             "label": "xtc or trr file",
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -181,9 +185,13 @@ class Gromacs(Converter):
 
         coords = np.squeeze(coords)
 
+        if self.configuration["unit_cell"]["apply"]:
+            unit_cell = UnitCell(self.configuration["unit_cell"]["value"])
+        else:
+            unit_cell = UnitCell(box[0, :, :])
         conf = PeriodicAbsoluteConfiguration(
             coords,
-            UnitCell(box[0, :, :]),
+            unit_cell,
             **variables,
         )
 

@@ -1,4 +1,7 @@
 from __future__ import annotations
+import h5py
+from MDANSE.Framework.Configurators import OutputTrajectoryConfigurator
+from typing import NamedTuple, Any
 
 import json
 from pathlib import Path
@@ -63,13 +66,13 @@ ase_janus = DATA_DIR / "ase_janus.extxyz"
 
 
 def _converter_test(
-    generate_benchmarks,
-    tmp_path,
-    converter_type,
-    result,
-    compare,
-    parameters,
-    compression,
+    generate_benchmarks: bool,
+    tmp_path: Path,
+    converter_type: str,
+    result: Path | str,
+    compare: tuple[str, ...],
+    parameters: dict[str, Any],
+    compression: str,
 ):
     temp_name = tmp_path / "output"
     out_name = temp_name.with_suffix(".mdt")
@@ -97,20 +100,153 @@ def _converter_test(
     assert log_name.is_file()
 
 
+ONE_TEST_EACH = (
+    (
+        "LAMMPS",
+        "lammps.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
+        {
+            "config_file": lammps_config,
+            "n_steps": 0,
+            "time_step": 1.0,
+            "trajectory_file": lammps_lammps,
+        },
+    ),
+    (
+        "VASP",
+        "vasp.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time"),
+        {"fold": False, "time_step": 1.0, "xdatcar_file": vasp_xdatcar},
+    ),
+    (
+        "cp2k",
+        "cp2k.mdt",
+        ("/configuration/coordinates", "/time", "/charge"),
+        {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": None},
+    ),
+    (
+        "charmm",
+        "hem_cam.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time"),
+        {
+            "dcd_file": hem_cam_dcd,
+            "fold": False,
+            "pdb_file": hem_cam_pdb,
+            "time_step": 1.0,
+        },
+    ),
+    (
+        "ase",
+        "ase.mdt",
+        ("/configuration/coordinates", "/configuration/velocities", "/time"),
+        {
+            "trajectory_file": ase_traj,
+            "fold": False,
+            "n_steps": 0,
+            "time_step": 50.0,
+            "time_unit": "fs",
+        },
+    ),
+    (
+        "DL_POLY",
+        "dlp_v4.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time"),
+        {
+            "atom_aliases": "{}",
+            "field_file": dlp_field_v4,
+            "fold": False,
+            "history_file": dlp_history_v4,
+        },
+    ),
+    (
+        "NAMD",
+        "namd.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time"),
+        {
+            "dcd_file": apoferritin_dcd,
+            "fold": False,
+            "pdb_file": apoferritin_pdb,
+            "time_step": "1.0",
+        },
+    ),
+    (
+        "CASTEP",
+        "castep.mdt",
+        (
+            "/configuration/coordinates",
+            "/configuration/velocities",
+            "/configuration/gradients",
+            "/unit_cell",
+            "/time",
+        ),
+        {"atom_aliases": "{}", "castep_file": pbanew_md, "fold": False},
+    ),
+    (
+        "DFTB",
+        "dftb.mdt",
+        (
+            "/configuration/coordinates",
+            "/configuration/velocities",
+            "/unit_cell",
+            "/time",
+            "/charge",
+        ),
+        {
+            "atom_aliases": "{}",
+            "fold": True,
+            "trj_file": h2o_trj,
+            "xtd_file": h2o_xtd,
+        },
+    ),
+    (
+        "Forcite",
+        "forcite.mdt",
+        (
+            "/configuration/coordinates",
+            "/configuration/velocities",
+            "/unit_cell",
+            "/time",
+            "/charge",
+        ),
+        {
+            "atom_aliases": "{}",
+            "fold": False,
+            "trj_file": h2o_trj,
+            "xtd_file": h2o_xtd,
+        },
+    ),
+    (
+        "Gromacs",
+        "md.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time"),
+        {"fold": False, "pdb_file": md_pdb, "xtc_file": md_xtc},
+    ),
+    (
+        "MDAnalysis",
+        "md.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time"),
+        {
+            "topology_file": (md_pdb, "AUTO"),
+            "coordinate_files": ([str(md_xtc)], "XTC"),
+        },
+    ),  # Does not work with Path
+    (
+        "MDTraj",
+        "hem_cam.mdt",
+        ("/configuration/coordinates", "/unit_cell", "/time"),
+        {
+            "topology_file": hem_cam_pdb,
+            "coordinate_files": [str(hem_cam_dcd)],  # Does not work with Path
+            "time_step": 1.0,
+        },
+    ),
+)
+
+
 @pytest.mark.parametrize(
     "converter_type,result,compare,parameters",
     (
-        (
-            "LAMMPS",
-            "lammps.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time", "/charge"),
-            {
-                "config_file": lammps_config,
-                "n_steps": 0,
-                "time_step": 1.0,
-                "trajectory_file": lammps_lammps,
-            },
-        ),
+        *ONE_TEST_EACH,
         (
             "LAMMPS",
             "lammps_cao.mdt",
@@ -140,12 +276,6 @@ def _converter_test(
             },
         ),
         (
-            "VASP",
-            "vasp.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time"),
-            {"fold": False, "time_step": 1.0, "xdatcar_file": vasp_xdatcar},
-        ),
-        (
             "cp2k",
             "cp2k_velocity.mdt",
             (
@@ -155,12 +285,6 @@ def _converter_test(
                 "/charge",
             ),
             {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": cp2k_vel},
-        ),
-        (
-            "cp2k",
-            "cp2k.mdt",
-            ("/configuration/coordinates", "/time", "/charge"),
-            {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": None},
         ),
         (
             "cp2k",
@@ -192,29 +316,6 @@ def _converter_test(
                 "pos_file": cp2k_srtio3_pos,
                 "cell_file": cp2k_srtio3_cell,
                 "force_file": cp2k_srtio3_frc,
-            },
-        ),
-        (
-            "charmm",
-            "hem_cam.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time"),
-            {
-                "dcd_file": hem_cam_dcd,
-                "fold": False,
-                "pdb_file": hem_cam_pdb,
-                "time_step": 1.0,
-            },
-        ),
-        (
-            "ase",
-            "ase.mdt",
-            ("/configuration/coordinates", "/configuration/velocities", "/time"),
-            {
-                "trajectory_file": ase_traj,
-                "fold": False,
-                "n_steps": 0,
-                "time_step": 50.0,
-                "time_unit": "fs",
             },
         ),
         (
@@ -279,17 +380,6 @@ def _converter_test(
         ),
         (
             "DL_POLY",
-            "dlp_v4.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time"),
-            {
-                "atom_aliases": "{}",
-                "field_file": dlp_field_v4,
-                "fold": False,
-                "history_file": dlp_history_v4,
-            },
-        ),
-        (
-            "DL_POLY",
             "dlp_CH3OH_H2O.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),
             {
@@ -334,92 +424,10 @@ def _converter_test(
             },
         ),
         (
-            "NAMD",
-            "namd.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time"),
-            {
-                "dcd_file": apoferritin_dcd,
-                "fold": False,
-                "pdb_file": apoferritin_pdb,
-                "time_step": "1.0",
-            },
-        ),
-        (
-            "CASTEP",
-            "castep.mdt",
-            (
-                "/configuration/coordinates",
-                "/configuration/velocities",
-                "/configuration/gradients",
-                "/unit_cell",
-                "/time",
-            ),
-            {"atom_aliases": "{}", "castep_file": pbanew_md, "fold": False},
-        ),
-        (
-            "DFTB",
-            "dftb.mdt",
-            (
-                "/configuration/coordinates",
-                "/configuration/velocities",
-                "/unit_cell",
-                "/time",
-                "/charge",
-            ),
-            {
-                "atom_aliases": "{}",
-                "fold": True,
-                "trj_file": h2o_trj,
-                "xtd_file": h2o_xtd,
-            },
-        ),
-        (
-            "Forcite",
-            "forcite.mdt",
-            (
-                "/configuration/coordinates",
-                "/configuration/velocities",
-                "/unit_cell",
-                "/time",
-                "/charge",
-            ),
-            {
-                "atom_aliases": "{}",
-                "fold": False,
-                "trj_file": h2o_trj,
-                "xtd_file": h2o_xtd,
-            },
-        ),
-        (
-            "Gromacs",
-            "md.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time"),
-            {"fold": False, "pdb_file": md_pdb, "xtc_file": md_xtc},
-        ),
-        (
             "Gromacs",
             "gromacs-nvt.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),
             {"fold": False, "pdb_file": gromacs_nvt[0], "xtc_file": gromacs_nvt[1]},
-        ),
-        (
-            "MDAnalysis",
-            "md.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time"),
-            {
-                "topology_file": (md_pdb, "AUTO"),
-                "coordinate_files": ([str(md_xtc)], "XTC"),
-            },
-        ),  # Does not work with Path
-        (
-            "MDTraj",
-            "hem_cam.mdt",
-            ("/configuration/coordinates", "/unit_cell", "/time"),
-            {
-                "topology_file": hem_cam_pdb,
-                "coordinate_files": [str(hem_cam_dcd)],  # Does not work with Path
-                "time_step": 1.0,
-            },
         ),
     ),
 )
@@ -442,6 +450,28 @@ def test_build_mdt_file_and_load(
         parameters,
         compression,
     )
+
+
+@pytest.mark.parametrize(
+    "converter_type,parameters", tuple((conv, param) for conv, _res, _comp, param in ONE_TEST_EACH)
+)
+def test_convert_with_uc(
+    tmp_path: Path,
+    converter_type: str,
+    parameters: dict[str, Any],
+):
+
+    op = tmp_path / "output"
+    parameters.update(
+        unit_cell = (5 * np.eye(3), True),
+        output_files = (op, 64, 128, "none", "INFO"),
+    )
+
+    converter = Converter.create(converter_type)
+    converter.run(parameters, status=True)
+
+    with h5py.File(op.with_suffix(".mdt")) as result:
+        assert all(np.allclose(unit_cell, parameters["unit_cell"][0]) for unit_cell in result["/unit_cell"][:])
 
 
 @pytest.mark.parametrize(

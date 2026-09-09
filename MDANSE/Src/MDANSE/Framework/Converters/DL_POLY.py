@@ -65,6 +65,10 @@ class DL_POLY(Converter):
             "parser": DLPHistory,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -138,8 +142,15 @@ class DL_POLY(Converter):
 
         frame = next(self.frames)
 
-        if self.history_file.imcon:
-            conf = PeriodicAbsoluteConfiguration(frame["positions"], frame["unit_cell"])
+        if self.configuration["unit_cell"]["apply"]:
+            unit_cell = self.configuration["unit_cell"]["value"]
+        elif self.history_file.imcon:
+            unit_cell = frame["unit_cell"]
+        else:
+            unit_cell = None
+
+        if unit_cell:
+            conf = PeriodicAbsoluteConfiguration(frame["positions"], unit_cell)
         else:
             conf = AbsoluteConfiguration(frame["positions"])
 
