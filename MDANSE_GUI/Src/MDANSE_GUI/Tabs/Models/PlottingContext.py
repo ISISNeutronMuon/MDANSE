@@ -53,7 +53,9 @@ class PlotArgs(NamedTuple):
     """Arguments for plotting data."""
 
     dataset: SingleDataset
-    colour: str
+    colour_1: str
+    colour_2: str
+    colour_map: str
     line_style: str
     marker: str
     row: int
@@ -91,12 +93,14 @@ class SingleDataset:
         source: h5py.File | None,
         linestyle: str = "-",
         marker: str | None = None,
+        colour_map: str = "viridis",
         **kwargs,
     ):
         self._name = name
         self._use_scaling = True
         self._linestyle = linestyle
         self._marker = marker
+        self._colour_map = colour_map
         self._data_limits = None
         self._imaginary_data = None
         self._valid = True
@@ -787,7 +791,9 @@ plotting_column_labels = [
     "Unit",
     "Main axis",
     "Use it?",
-    "Colour",
+    "Colour 1",
+    "Colour 2",
+    "Colour map",
     "Line style",
     "Marker",
     "Apply scaling?",
@@ -804,7 +810,7 @@ class PlottingContext(QStandardItemModel):
     needs_an_update = Signal("quint64")
 
     def __init__(
-        self, *args, unit_lookup: int | None = None, colormap: str = "viridis", **kwargs
+        self, *args, unit_lookup: int | None = None, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self._datasets: dict[str, SingleDataset] = {}
@@ -816,7 +822,6 @@ class PlottingContext(QStandardItemModel):
         self._best_xunits = []
         self._colour_list = get_mpl_colours()
         self._last_colour_list = get_mpl_colours()
-        self._colour_map = colormap
         self._last_colour = 0
         self._unit_lookup = unit_lookup
         self.plot_widget_id = -1
@@ -847,19 +852,6 @@ class PlottingContext(QStandardItemModel):
         self._last_colour += 1
         return colour
 
-    @property
-    def colormap(self):
-        """Matplotlib colormap out of the list of valid names."""
-        backup_cmap = "viridis"
-        try:
-            cmap = self._unit_lookup._settings.group("colours").get("colormap")
-        except Exception:
-            return backup_cmap
-        else:
-            if cmap in mpl.colormaps():
-                return cmap
-            return self._unit_lookup._settings.default_value("colours", "colormap")
-
     @Slot()
     def regenerate_colours(self):
         """Populate the list of curve colours based on user input."""
@@ -878,10 +870,17 @@ class PlottingContext(QStandardItemModel):
                 self._last_colour += 1
             else:
                 next_colour = self.next_colour()
-                self.item(row, plotting_column_index["Colour"]).setText(
+                self.item(row, plotting_column_index["Colour 1"]).setText(
                     str(next_colour),
                 )
-                self.item(row, plotting_column_index["Colour"]).setData(
+                self.item(row, plotting_column_index["Colour 1"]).setData(
+                    QColor(str(next_colour)),
+                    role=Qt.ItemDataRole.BackgroundRole,
+                )
+                self.item(row, plotting_column_index["Colour 2"]).setText(
+                    str(next_colour),
+                )
+                self.item(row, plotting_column_index["Colour 2"]).setData(
                     QColor(str(next_colour)),
                     role=Qt.ItemDataRole.BackgroundRole,
                 )
@@ -964,7 +963,9 @@ class PlottingContext(QStandardItemModel):
             self._datasets[key].set_current_units(self._unit_lookup)
             result[key] = PlotArgs(
                 dataset=self._datasets[key],
-                colour=row_data["Colour"].text(),
+                colour_1=row_data["Colour 1"].text(),
+                colour_2=row_data["Colour 2"].text(),
+                colour_map=row_data["Colour map"].text(),
                 line_style=row_data["Line style"].text(),
                 marker=row_data["Marker"].text(),
                 row=row,
@@ -995,6 +996,7 @@ class PlottingContext(QStandardItemModel):
             return
 
         self._datasets[newkey] = new_dataset
+        next_colour = self.next_colour()
         items = [
             QStandardItem(str(x))
             for x in (
@@ -1004,7 +1006,9 @@ class PlottingContext(QStandardItemModel):
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
                 "",
-                self.next_colour(),
+                next_colour,
+                next_colour,
+                new_dataset._colour_map,
                 new_dataset._linestyle,
                 new_dataset._marker or "None",
                 format(new_dataset._scaling_factor, SCALE_FACTOR_FORMAT)
@@ -1035,7 +1039,9 @@ class PlottingContext(QStandardItemModel):
             f"0:{prod(len(arr) for arr in new_dataset.dep_axes.values())}:1",
         )
 
-        temp = items[plotting_column_index["Colour"]]
+        temp = items[plotting_column_index["Colour 1"]]
+        temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
+        temp = items[plotting_column_index["Colour 2"]]
         temp.setData(QColor(temp.text()), role=Qt.ItemDataRole.BackgroundRole)
 
         self.appendRow(items)

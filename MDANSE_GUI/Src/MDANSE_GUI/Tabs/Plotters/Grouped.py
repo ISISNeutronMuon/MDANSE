@@ -234,7 +234,7 @@ class Grouped(Plotter):
             self._axes_titles.append(ds._name)
 
             n_curves = min(self._curve_limit_per_dataset, ds.n_curves)
-            colours = self.colours(db.colour, n_curves)
+            colours = self.colours(db.colour_1, db.colour_2, n_curves)
 
             for curve_ind, ((databundle, label, curve), colour) in enumerate(
                 zip(dataclump, colours, strict=False)

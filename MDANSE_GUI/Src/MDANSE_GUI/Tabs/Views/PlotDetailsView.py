@@ -15,6 +15,7 @@
 #
 from __future__ import annotations
 
+import matplotlib.pyplot as mpl
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QTreeView
 
@@ -32,13 +33,21 @@ class PlotDetailsView(QTreeView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._delegates = {
-            "colour": ColourPicker(),
+            "colour 1": ColourPicker(),
+            "colour 2": ColourPicker(),
             "axis": MainAxisCombo(),
+            "colour map": MplStyleCombo(mpl_items=mpl.colormaps()),
             "line": MplStyleCombo(mpl_items=get_mpl_lines()),
             "marker": MplStyleCombo(mpl_items=get_mpl_markers()),
         }
         self.setItemDelegateForColumn(
-            plotting_column_index["Colour"], self._delegates["colour"]
+            plotting_column_index["Colour 1"], self._delegates["colour 1"]
+        )
+        self.setItemDelegateForColumn(
+            plotting_column_index["Colour 2"], self._delegates["colour 2"]
+        )
+        self.setItemDelegateForColumn(
+            plotting_column_index["Colour map"], self._delegates["colour map"]
         )
         self.setItemDelegateForColumn(
             plotting_column_index["Line style"], self._delegates["line"]

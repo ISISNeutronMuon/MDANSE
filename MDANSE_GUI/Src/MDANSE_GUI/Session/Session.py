@@ -183,7 +183,6 @@ class LocalSession(Session):
     """
 
     new_units = Signal(dict)
-    new_cmap = Signal(str)
 
     def __init__(self, *args, filename: str = "mdanse_general_settings", **kwargs):
         super().__init__(*args, **kwargs)
