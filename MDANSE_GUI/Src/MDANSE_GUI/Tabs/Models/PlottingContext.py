@@ -29,6 +29,7 @@ import numpy as np
 import numpy.typing as npt
 from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
+from matplotlib.colors import to_rgb
 from matplotlib.lines import lineStyles
 from matplotlib.markers import MarkerStyle
 from more_itertools import first, locate, nth, nth_product
@@ -844,11 +845,12 @@ class PlottingContext(QStandardItemModel):
         """
         return self._colour_list[number % len(self._colour_list)]
 
-    def next_colour(self) -> str:
+    def next_colour(self) -> tuple[str, str]:
         """Get the next matplotlib colour and increment the counter."""
         colour = self.generate_colour(self._last_colour)
+        r, g, b = to_rgb(colour)
         self._last_colour += 1
-        return colour
+        return colour, mpl_to_hex((1 - r, 1 - g, 1 - b))
 
     @Slot()
     def regenerate_colours(self):
@@ -867,7 +869,7 @@ class PlottingContext(QStandardItemModel):
                 )
                 self._last_colour += 1
             else:
-                next_colour = self.next_colour()
+                next_colour, inverted = self.next_colour()
                 self.item(row, plotting_column_index["Colour 1"]).setText(
                     str(next_colour),
                 )
@@ -876,10 +878,10 @@ class PlottingContext(QStandardItemModel):
                     role=Qt.ItemDataRole.BackgroundRole,
                 )
                 self.item(row, plotting_column_index["Colour 2"]).setText(
-                    str(next_colour),
+                    str(inverted),
                 )
                 self.item(row, plotting_column_index["Colour 2"]).setData(
-                    QColor(str(next_colour)),
+                    QColor(str(inverted)),
                     role=Qt.ItemDataRole.BackgroundRole,
                 )
         self._last_colour_list = list(self._colour_list)
@@ -994,7 +996,7 @@ class PlottingContext(QStandardItemModel):
             return
 
         self._datasets[newkey] = new_dataset
-        next_colour = self.next_colour()
+        next_colour, inverted = self.next_colour()
         items = [
             QStandardItem(str(x))
             for x in (
@@ -1005,7 +1007,7 @@ class PlottingContext(QStandardItemModel):
                 new_dataset.longest_axis()[-1],
                 "",
                 next_colour,
-                next_colour,
+                inverted,
                 new_dataset._colour_map,
                 new_dataset._linestyle,
                 new_dataset._marker or "None",
