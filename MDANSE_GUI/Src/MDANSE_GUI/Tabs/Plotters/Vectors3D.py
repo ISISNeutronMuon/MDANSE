@@ -115,7 +115,7 @@ class Vectors3D(Plotter):
                     dataset.data[0, :],
                     linestyle="none",
                     label=plotlabel,
-                    color=databundle.colour,
+                    color=databundle.colour_1,
                     width=np.mean(np.diff(bins)),
                 )
                 axes.bar(
@@ -137,7 +137,7 @@ class Vectors3D(Plotter):
                     dataset.x_axis(y_label),
                     linestyle=databundle.line_style,
                     label=plotlabel,
-                    color=databundle.colour,
+                    color=databundle.colour_1,
                 )
                 try:
                     curve.set_marker(databundle.marker)
@@ -179,7 +179,7 @@ class Vectors3D(Plotter):
                     dataset.x_axis("q_z"),
                     marker=databundle.marker,
                     label=plotlabel,
-                    color=databundle.colour,
+                    color=databundle.colour_1,
                 )
                 self._axes.append(axes)
                 self.axes3d = axes
