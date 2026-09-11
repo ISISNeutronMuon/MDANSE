@@ -55,5 +55,8 @@ class RestrictedSlider(QSlider):
             self._lower_limit is not None and a0 < self._lower_limit
         ):
             return
-        self.new_limit.emit(a0)
         return super().setValue(a0)
+
+    def manually_emit_new_limit(self) -> None:
+        if self._coupled:
+            self.new_limit.emit(self.value())

@@ -88,6 +88,8 @@ class SliderPack(QWidget):
             box.valueChanged.connect(self.collect_values)
 
             slider.valueChanged.connect(self.slider_to_box)
+        self._sliders[0].new_limit.connect(self._sliders[1].set_lower_limit)
+        self._sliders[1].new_limit.connect(self._sliders[0].set_upper_limit)
 
     @Slot(bool)
     def new_coupling(self, new_val: bool):
@@ -191,6 +193,8 @@ class SliderPack(QWidget):
         """Get and emit current values from all sliders/spinboxes."""
         self._current_values = self.box_values
         self.new_values.emit(self.box_values)
+        for slider in self._sliders:
+            slider.manually_emit_new_limit()
 
 
 class PlotWidget(QWidget):
