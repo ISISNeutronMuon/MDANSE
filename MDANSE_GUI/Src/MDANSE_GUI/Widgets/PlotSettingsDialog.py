@@ -298,7 +298,7 @@ class PlotSettingsEditor(QDialog):
 
     def load_settings(self):
         """Load previously saved plot settings from an MDANSE config file."""
-        settings_file = PLATFORM.application_directory() / "matplotlib.txt"
+        settings_file = PLATFORM.application_directory / "matplotlib.txt"
         if not settings_file.exists():
             LOG.info(
                 "File %s does not exist. Using standard matplotlib settings.",
@@ -322,7 +322,7 @@ class PlotSettingsEditor(QDialog):
 
     def save_changes(self):
         """Save the changed settings to an MDANSE config file."""
-        with (PLATFORM.application_directory() / "matplotlib.txt").open(
+        with (PLATFORM.application_directory / "matplotlib.txt").open(
             mode="w", encoding="utf-8"
         ) as target:
             for key, item in self._changed_keys.items():

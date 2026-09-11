@@ -18,7 +18,7 @@ from __future__ import annotations
 from functools import partial
 from typing import TYPE_CHECKING
 
-from qtpy.QtCore import Slot
+from qtpy.QtCore import QMessageLogger, QSettings, Slot
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
@@ -92,16 +92,16 @@ class PlotTab(GeneralTab):
         parent: QWidget,
         name: str,
         session: Session,
-        settings,
-        logger,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
         **kwargs,
     ):
-        plt_settings = PlotSettings(settings=settings)
+        plt_settings = PlotSettings(settings=session)
         the_tab = cls(
             parent,
             name=name,
             session=session,
-            settings=settings,
+            qt_settings=qt_settings,
             logger=logger,
             model=None,
             view=PlotDetailsView(),

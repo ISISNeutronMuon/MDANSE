@@ -20,7 +20,7 @@ import logging
 from logging import Handler, LogRecord
 from typing import TYPE_CHECKING, ClassVar, Self
 
-from qtpy.QtCore import Signal, Slot, qInstallMessageHandler
+from qtpy.QtCore import QMessageLogger, QSettings, Signal, Slot, qInstallMessageHandler
 from qtpy.QtWidgets import QComboBox, QHBoxLayout, QLabel, QWidget
 
 from MDANSE.MLogging import FMT, LOG
@@ -162,17 +162,18 @@ class LoggingTab(GeneralTab):
     def gui_instance(
         cls,
         parent: QWidget,
+        *,
         name: str,
         session: Session,
-        settings,
-        logger,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
         **kwargs,
     ) -> Self:
         the_tab = cls(
             parent,
             name=name,
             session=session,
-            settings=settings,
+            qt_settings=qt_settings,
             logger=logger,
             visualiser=LogInfo(footer="", font="Courier New"),
             layout=SinglePanel,

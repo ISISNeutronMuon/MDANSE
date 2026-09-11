@@ -18,7 +18,7 @@ from __future__ import annotations
 from functools import partial
 from typing import TYPE_CHECKING
 
-from qtpy.QtCore import Slot
+from qtpy.QtCore import QMessageLogger, QSettings, Slot
 
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
@@ -79,10 +79,11 @@ class ConverterTab(GeneralTab):
     def gui_instance(
         cls,
         parent: QWidget,
+        *,
         name: str,
         session: Session,
-        settings,
-        logger,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
         **kwargs,
     ):
         action = Action()
@@ -90,7 +91,7 @@ class ConverterTab(GeneralTab):
             parent,
             name=name,
             session=session,
-            settings=settings,
+            qt_settings=qt_settings,
             logger=logger,
             model=kwargs.get("model", JobTree(parent_class=Converter, hidden_levels=1)),
             view=ActionsTree(),

@@ -18,7 +18,7 @@ from __future__ import annotations
 from functools import partial
 from typing import TYPE_CHECKING
 
-from qtpy.QtCore import Qt, Slot
+from qtpy.QtCore import QMessageLogger, QSettings, Qt, Slot
 from qtpy.QtWidgets import (
     QApplication,
     QComboBox,
@@ -137,16 +137,6 @@ class JobTab(GeneralTab):
         self.action.new_thread_objects.connect(self._job_starter.startProcess)
         self.action.run_and_load.connect(self._job_starter.startProcessAndLoad)
 
-    def grouped_settings(self):
-        return super().grouped_settings() | {
-            "Execution": (
-                {"auto-load": "True"},
-                {
-                    "auto-load": "Unless manually switched off, the GUI will try to load the job results when the job is finished."
-                },
-            ),
-        }
-
     @Slot(int)
     def reload_trajectory(self, node_number: int) -> None:
         if node_number != self._current_trajectory_index:
@@ -219,10 +209,11 @@ class JobTab(GeneralTab):
     def gui_instance(
         cls,
         parent: QWidget,
+        *,
         name: str,
         session: Session,
-        settings,
-        logger,
+        qt_settings: QSettings | None,
+        logger: QMessageLogger,
         combo_model,
         **kwargs,
     ):
@@ -231,7 +222,7 @@ class JobTab(GeneralTab):
             parent,
             name=name,
             session=session,
-            settings=settings,
+            qt_settings=qt_settings,
             logger=logger,
             model=kwargs.get("model", JobTree(filter="Converters")),
             combo_model=combo_model,
