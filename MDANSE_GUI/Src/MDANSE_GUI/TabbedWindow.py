@@ -120,6 +120,7 @@ class TabbedWindow(QMainWindow):
         **kwargs,
     ):
         super().__init__(parent, *args, **kwargs)
+        self.really_closing = False
         self.system_tray_icon = None
         self.icon_object = systray_icon
         self.will_create_systray_icon = systray_icon is not None
@@ -229,7 +230,7 @@ class TabbedWindow(QMainWindow):
         for label, func_slot in [
             ("Show GUI window", self.showNormal),
             (None, None),
-            ("Quit", self.close_only_if_finished),
+            ("Quit", self.close_from_systray),
         ]:
             if label is None and func_slot is None:
                 self.tray_menu.addSeparator()
@@ -266,8 +267,24 @@ class TabbedWindow(QMainWindow):
         super().changeEvent(event)
 
     @Slot()
+    def close_from_systray(self):
+        """Close the software if no background tasks are running.
+
+        If any converter, analysis, or trajectory loader thread are still
+        running, this method will pop up a warning message and will not
+        close the software.
+        """
+        if self.can_be_closed:
+            self.really_closing = True
+            self.close()
+            self.app_instance.quit()  # This should be ignored if a window is still open
+        else:
+            self.block_gui_shutdown()
+        self.really_closing = False
+
+    @Slot()
     def close_only_if_finished(self):
-        """Close the software if not background tasks are running.
+        """Close the software if no background tasks are running.
 
         If any converter, analysis, or trajectory loader thread are still
         running, this method will pop up a warning message and will not
@@ -302,16 +319,18 @@ class TabbedWindow(QMainWindow):
         event : QCloseEvent
             Event triggered by the main window's close button.
         """
-        event.ignore()  # this stops the usual response which would destroy the window.
         if (
             self.system_tray_icon is None
         ):  # if for any reason the QSystemTrayIcon was not created.
             self.close_only_if_finished()
             return
-        if not event.spontaneous() or not self.isVisible():
-            return
         if self.system_tray_icon.isVisible():
-            self.hide()
+            if not self.really_closing:
+                event.ignore()
+                self.hide()
+            else:
+                super().closeEvent(event)
+        if not event.spontaneous() or not self.isVisible():
             return
 
     @property
