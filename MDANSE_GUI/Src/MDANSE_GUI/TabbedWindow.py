@@ -269,6 +269,8 @@ class TabbedWindow(QMainWindow):
         settings_group.addAction(self.settingsAct)
         self.aboutAct = QAction("Version information", parent=menubar)
         self.aboutAct.triggered.connect(self.version_information)
+        self.aboutQtAct = QAction("About Qt", parent=menubar)
+        self.aboutQtAct.triggered.connect(QApplication.aboutQt)
         self.website_actions = []
         for label, function in [
             ("source code", self.show_website_code),
@@ -281,6 +283,7 @@ class TabbedWindow(QMainWindow):
         help_group.addActions(self.website_actions)
         help_group.addSeparator()
         help_group.addAction(self.aboutAct)
+        help_group.addAction(self.aboutQtAct)
         self.setMenuBar(menubar)
 
     def shut_down(self):

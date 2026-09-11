@@ -69,6 +69,36 @@ def build_parser():
     return parser
 
 
+def check_qt_environment_vars(app_instance: QApplication):
+    """Log information about the current Qt settings.
+
+    This is intended to be run on startup to identify the platform on
+    which the GUI is running. If the platform is connected to known
+    issues, additional information will be output to warn the user about
+    potential problems and inform them about the known solutions.
+    """
+    qt_qpa_plugin = app_instance.platformName()
+    LOG.info("Qt GUI will start using the %s platform", qt_qpa_plugin)
+    set_vars = {
+        name: value for name, value in os.environ.items() if name.startswith("QT_")
+    }
+    for name, value in set_vars.items():
+        LOG.info("Found environment variable %s set to %s", name, value)
+    if "wayland" in qt_qpa_plugin:
+        LOG.warning(
+            "If you experience problems running MDANSE_GUI on wayland "
+            "please try setting the environment variable QT_QPA_PLATFORM=xcb"
+        )
+    if app_instance.devicePixelRatio() > 1.01:
+        LOG.warning(
+            "Your computer seems to be using at least one high-DPI display. "
+            "This is normally fully supported and should work fine. "
+            "If you get a GUI window of unusual size, please check the "
+            "Qt website for list of environment variables you may want to "
+            "change: https://doc.qt.io/qt-6/highdpi.html"
+        )
+
+
 def startGUI(some_args):
     pars = build_parser()
     args = pars.parse_args(some_args)
@@ -80,6 +110,7 @@ def startGUI(some_args):
 
     app = QApplication(some_args)
     app.setStyle(QStyleFactory.create("Fusion"))
+    check_qt_environment_vars(app)
 
     path = os.path.dirname(os.path.abspath(__file__))
     app.setWindowIcon(QIcon(os.path.join(path, "Icons/MDANSE.ico")))
