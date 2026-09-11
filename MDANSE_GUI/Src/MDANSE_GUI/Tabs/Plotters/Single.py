@@ -184,7 +184,9 @@ class Single(Plotter):
         colours = {}
         for databundle in plotting_context.datasets().values():
             colours[databundle.row] = self.colours(
-                databundle.colour, databundle.dataset.n_curves
+                databundle.colour_1,
+                databundle.colour_2,
+                min(self._curve_limit_per_dataset, databundle.dataset.n_curves),
             )
             x_axis_labels.append(databundle.dataset.x_axis_label(databundle.main_axis))
 

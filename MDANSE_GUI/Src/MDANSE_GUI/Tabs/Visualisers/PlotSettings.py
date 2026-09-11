@@ -65,17 +65,6 @@ class PlotSettings(QWidget):
         else:
             self.plot_settings_changed.emit()
 
-    @Slot(str)
-    def set_cmap(self, cmap_name: str):
-        colour_group = self._settings.group("colours")
-        if not colour_group.set("colormap", cmap_name):
-            colour_group.add(
-                "colormap",
-                cmap_name,
-                "Name of the matplotlib colormap to be used in 2D plots.",
-            )
-        self.plot_settings_changed.emit()
-
     @Slot()
     def update_units(self):
         unit_group = self._settings.group("units")
@@ -176,29 +165,6 @@ class PlotSettings(QWidget):
         style_selector.setCurrentText(style_string)
         style_selector.currentTextChanged.connect(self.set_style)
         top_layout.addRow("Matplotlib style:", style_selector)
-        try:
-            colour_group = self._settings.group("colours")
-            try:
-                current_cmap = colour_group.get("colormap")
-            except KeyError:
-                LOG.warning("Could not get colormap from colours")
-                colour_group.add(
-                    "colormap",
-                    "viridis",
-                    "Name of the matplotlib colormap to be used in 2D plots.",
-                )
-                current_cmap = "viridis"
-            else:
-                if current_cmap not in mpl.colormaps():
-                    current_cmap = "viridis"
-        except Exception:
-            LOG.warning("Could not get the colours group")
-            current_cmap = "viridis"
-        cmap_selector = QComboBox(self)
-        cmap_selector.addItems(mpl.colormaps())
-        cmap_selector.setCurrentText(current_cmap)
-        cmap_selector.currentTextChanged.connect(self.set_cmap)
-        top_layout.addRow("Colormap:", cmap_selector)
         layout.addLayout(top_layout)
         box = QGroupBox("Units", self)
         layout.addWidget(box)

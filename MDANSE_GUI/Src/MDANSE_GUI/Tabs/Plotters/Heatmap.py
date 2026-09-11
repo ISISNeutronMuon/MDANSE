@@ -239,7 +239,7 @@ class Heatmap(Plotter):
                 databundle,
                 label=label,
                 axis_labels=axis_labels,
-                colour=plotting_context.colormap,
+                colour=databundle.colour_map,
             )
 
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()

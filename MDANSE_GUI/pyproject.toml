@@ -48,8 +48,13 @@ dev = [
   {include-group = "test"},
   {include-group = "lint"}
 ]
+external=["pymixbox"]
 test=["pytest", "pytest-timeout", "pytest-qt"]
 lint=["ruff<0.17"]
+
+[project.optional-dependencies]
+pymixbox=["pymixbox"]
+all=["MDANSE[pymixbox]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"

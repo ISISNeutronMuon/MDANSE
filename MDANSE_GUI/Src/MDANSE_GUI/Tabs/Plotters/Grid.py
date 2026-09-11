@@ -154,6 +154,14 @@ class Grid(Plotter):
         grid_size = self.grid_size(self.n_curves)
         gs = self._figure.add_gridspec(*grid_size)
 
+        colours = {}
+        for databundle in plotting_context.datasets().values():
+            colours[databundle.row] = self.colours(
+                databundle.colour_1,
+                databundle.colour_2,
+                min(self._plot_limit, databundle.dataset.n_curves),
+            )
+
         for ind, (databundle, label, curve) in enumerate(
             islice(flatten(plotting_context.curves()), self._plot_limit)
         ):
@@ -165,7 +173,7 @@ class Grid(Plotter):
                 curve,
                 databundle,
                 label="",
-                colour=databundle.colour,
+                colour=next(colours[databundle.row]),
             )
             self._axes.append(axes)
 

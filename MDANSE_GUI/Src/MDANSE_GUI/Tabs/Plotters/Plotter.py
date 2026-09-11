@@ -19,7 +19,13 @@ import copy
 import csv
 import enum
 import math
-from itertools import count
+
+try:
+    import mixbox
+
+    mixbox_available = True
+except ImportError:
+    mixbox_available = False
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
 
 import numpy as np
@@ -539,24 +545,42 @@ class Plotter(RegisterFactory["Plotter"]):
         return self._n_curves
 
     @staticmethod
-    def colours(colour: str, n_curves: int) -> Generator[tuple[float, float, float]]:
-        """Generate colours from root colour.
+    def colours(
+        colour_1: str, colour_2: str, n_curves: int
+    ) -> Generator[tuple[float, float, float]]:
+        """Generate colours from a mixture of two colours.
 
         Parameters
         ----------
-        colour : str
-            Root colour.
+        colour_1 : str
+            Start colour.
+        colour_2 : str
+            End colour.
+        n_curves : int
+            Number of curves to colour.
 
         Returns
         -------
         Generator[tuple[float, float, float]]
             Next colour in sequence.
         """
-        main_colour = np.array(to_rgb(colour))
-        colour_increment = (0.5 - main_colour) / n_curves
-        for _ in range(n_curves):
-            yield tuple(main_colour)
-            main_colour += colour_increment
+        if mixbox_available:
+            # mixbox should give a more natural blending e.g. yellow to
+            # blue should give a green intermediate
+            colour_1 = tuple(round(v * 255) for v in to_rgb(colour_1))
+            colour_2 = tuple(round(v * 255) for v in to_rgb(colour_2))
+            for i in range(n_curves):
+                t = i / (n_curves - 1) if n_curves > 1 else 0.0
+                r, g, b = mixbox.lerp(colour_1, colour_2, t)
+                yield r / 255, g / 255, b / 255
+        else:
+            colour_1 = np.array(to_rgb(colour_1)) ** 2.2
+            colour_2 = np.array(to_rgb(colour_2)) ** 2.2
+            for i in range(n_curves):
+                step = i / (n_curves - 1) if n_curves > 1 else 0.0
+                mix = colour_1 * (1 - step) + colour_2 * step
+                mix = np.clip(mix, 0, 1) ** (1 / 2.2)
+                yield tuple(mix)
 
     def title_fontsize(self, title_text: str) -> int:
         normal_size = rcParams["font.size"]
