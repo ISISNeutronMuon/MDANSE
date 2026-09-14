@@ -76,12 +76,15 @@ def parameters_have_changed(qvec_configurator, plotting_object) -> bool:
     """Check if the vector generator type and input parameters have changed."""
     new_params = qvec_configurator["parameters"]
     new_type = qvec_configurator["vector_type"]
+    new_status = qvec_configurator.error_status
     if (
         new_type != plotting_object.last_vec_type
         or new_params != plotting_object.last_vec_params
+        or new_status != plotting_object.last_status
     ):
         plotting_object.last_vec_type = new_type
         plotting_object.last_vec_params = copy.copy(new_params)
+        plotting_object.last_status = new_status
         return True
     return False
 
@@ -207,11 +210,11 @@ class ShellPanel(QWidget):
         self.qvec_config = qvec_configurator
         self.plotter_type = plotter_type
         self.parent_dialog = dialog_reference
+        self.last_status = ""
         self.last_vec_type = ""
         self.last_vec_params = {}
-        self.current_plotted_shell = -1
+        self.current_plotted_shell = 0
         self.create_layout()
-        self.set_shell(0)
 
     def create_layout(self):
         """Create the GUI elements of a vector shell viewer."""
@@ -246,18 +249,15 @@ class ShellPanel(QWidget):
         self.shell_selector.setMaximum(number_of_shells - 1)
         with block_signals(self.shell_selector):
             self.shell_selector.setValue(current_shell)
-        self.set_shell(current_shell, update_limit=False)
 
     @Slot(int)
-    def set_shell(self, shell_index: int, *, update_limit: bool = True):
+    def set_shell(self, shell_index: int):
         """Change the index of the current vector shell and update the plots.
 
         Parameters
         ----------
         shell_index : int
             Vector shell index in the vector generator.
-        update_limit : bool, optional
-            Update the spinbox upper limit, by default True
         """
         if (
             not parameters_have_changed(self.qvec_config, self)
@@ -265,8 +265,7 @@ class ShellPanel(QWidget):
         ):
             return
         vec_dict = self.qvec_config["q_vectors"]
-        if update_limit:
-            self.set_upper_limit(len(vec_dict))
+        self.current_plotted_shell = shell_index
         try:
             vec_key = nth(vec_dict, shell_index)
         except KeyError:
@@ -301,7 +300,6 @@ class ShellPanel(QWidget):
         self.plot_widget.use_grid()
         self.plot_widget.use_legend()
         self.plot_widget.plot_data()
-        self.current_plotted_shell = shell_index
         new_model.needs_an_update.connect(self.update_plot)
 
     @Slot()
@@ -344,6 +342,7 @@ class VectorViewer(QDialog):
         super().__init__(parent, *args, **kwargs)
         self.tab_index = {}
         self.qvec_configurator = configurator
+        self.last_status = ""
         self.last_vec_type = ""
         self.last_vec_params = {}
         self.setWindowTitle(self._helper_title)
@@ -402,7 +401,6 @@ class VectorViewer(QDialog):
         shells = self.tab_index["shells"]
         if current_tab == stats:
             self.calculate_vector_statistics()
-            self.plot_widget.plot_data(update_only=True)
         elif current_tab == shells:
             self.shell_panel_3D.update_plot()
 
@@ -483,6 +481,7 @@ class QVectorsWidget(WidgetBase):
         """
         dialog_instance = VectorViewer(self._base, configurator=self._configurator)
         self.new_shell_number.connect(dialog_instance.shell_panel_3D.set_upper_limit)
+        self.new_shell_number.emit(self._configurator["n_shells"])
         return dialog_instance
 
     @Slot()
@@ -511,8 +510,18 @@ class QVectorsWidget(WidgetBase):
         if not self.helper.isVisible():
             return
         if self._configurator.error_status != "OK":
+            new_params = self._configurator["parameters"]
+            new_type = self._configurator["vector_type"]
+            new_status = self._configurator.error_status
+            self.helper.last_vec_type = new_type
+            self.helper.last_vec_params = copy.copy(new_params)
+            self.helper.last_status = new_status
+            self.helper.shell_panel_3D.last_vec_type = new_type
+            self.helper.shell_panel_3D.last_vec_params = copy.copy(new_params)
+            self.helper.shell_panel_3D.last_status = new_status
+            self.helper.shell_panel_3D.current_plotted_shell = 0
             self.helper.plot_widget._plotter.plot_blank()
-            self.helper.shell_panel_3D.plot_widget._plotter.plot_blank()
+            self.helper.shell_panel_3D.plot_widget.plot_blank()
             return
         self.helper.update_plot()
 
@@ -524,4 +533,4 @@ class QVectorsWidget(WidgetBase):
         if is_valid:
             self.new_shell_number.emit(self._configurator["n_shells"])
             return temp
-        return None
+        self.new_shell_number.emit(1)
