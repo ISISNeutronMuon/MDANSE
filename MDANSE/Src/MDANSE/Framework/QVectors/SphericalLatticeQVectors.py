@@ -93,7 +93,7 @@ class SphericalLatticeQVectors(LatticeQVectors):
             selection = fpsampling(
                 q_vectors.T,
                 nvecs_per_shell,
-                partial(spherical_vectors, q=1, q_width=0, n_vecs=1),
+                partial(spherical_vectors, q=1, q_width=0, n_vecs=1, rng=rng),
                 rng,
             )
             lattice_hkl_vectors = lattice_hkl_vectors.T[selection].T
