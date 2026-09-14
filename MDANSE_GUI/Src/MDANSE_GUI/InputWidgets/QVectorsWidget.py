@@ -520,7 +520,7 @@ class QVectorsWidget(WidgetBase):
             self.helper.shell_panel_3D.last_vec_params = copy.copy(new_params)
             self.helper.shell_panel_3D.last_status = new_status
             self.helper.shell_panel_3D.current_plotted_shell = 0
-            self.helper.plot_widget._plotter.plot_blank()
+            self.helper.plot_widget.plot_blank()
             self.helper.shell_panel_3D.plot_widget.plot_blank()
             return
         self.helper.update_plot()
