@@ -245,7 +245,7 @@ class TabbedWindow(QMainWindow):
         """Show the main window when the system tray icon is double-clicked."""
         if reason != QSystemTrayIcon.ActivationReason.DoubleClick:
             return
-        if not self.isVisible():
+        if not self.isVisible() or self.isMinimized():
             self.showNormal()
 
     @Slot(object)
