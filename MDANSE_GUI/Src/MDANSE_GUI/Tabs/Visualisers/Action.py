@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import traceback
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from qtpy.QtCore import Signal, Slot
@@ -35,6 +36,7 @@ from MDANSE.Core.Settings import Option, Settings
 from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
     HDFTrajectoryConfigurator,
 )
+from MDANSE.Framework.Formats.HDFFormat import get_input_params
 from MDANSE.Framework.Jobs.IJob import Dummy, IJob
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
@@ -369,6 +371,7 @@ class Action(QWidget):
             buttonlayout = QHBoxLayout(buttonbase)
             buttonbase.setLayout(buttonlayout)
             self.save_button = QPushButton("Save as script", buttonbase)
+            self.load_button = QPushButton("Load from output file", buttonbase)
             self.execute_button = DelayedButton("RUN!", buttonbase, delay=3000)
             font = self.execute_button.font()
             font.setBold(True)
@@ -377,10 +380,12 @@ class Action(QWidget):
             self.post_execute_checkbox.setChecked(self.auto_load)
 
             self.save_button.clicked.connect(self.save_dialog)
+            self.load_button.clicked.connect(self.load_dialog)
             self.execute_button.clicked.connect(self.execute_converter)
             self.execute_button.needs_updating.connect(self.allow_execution)
 
             buttonlayout.addWidget(self.save_button)
+            buttonlayout.addWidget(self.load_button)
             buttonlayout.addWidget(self.execute_button)
             buttonlayout.addWidget(self.post_execute_checkbox)
 
@@ -411,6 +416,21 @@ class Action(QWidget):
             if isinstance(widget, OutputFilesWidget | OutputTrajectoryWidget):
                 widget.updateValue()
         self.allow_execution()
+
+    def apply_parameters(self, new_parameters: dict[str, Any]):
+        for widnum, key in enumerate(self._job_instance.settings.keys()):
+            if key not in new_parameters:
+                continue
+            widget = self._widgets[widnum]
+            with block_signals(widget):
+                LOG.info(
+                    "Setting widget %s, key %s to value %s",
+                    widget,
+                    key,
+                    new_parameters[key],
+                )
+        self.allow_execution()
+        self.show_output_prediction()
 
     def apply_instrument(self):
         if self._current_instrument is not None:
@@ -501,6 +521,28 @@ class Action(QWidget):
     @Slot()
     def cancel_dialog(self):
         self.destroy()
+
+    @Slot()
+    def load_dialog(self):
+        try:
+            _cname = self._job_name
+        except Exception:
+            currentpath = Path().absolute()
+        else:
+            currentpath = Path(self._parent_tab.get_path(self._job_name))
+        fname, _ftype = QFileDialog.getOpenFileName(
+            self,
+            "Load parameters from file",
+            str(currentpath),
+            "MDANSE results (*.mda *.mdt);;All files(*.*)",
+        )
+        if fname == "":
+            return None
+        new_params = get_input_params(fname)
+        if not new_params:
+            LOG.warning("No input parameters were found in %s", fname)
+            return None
+        self.apply_parameters(new_params)
 
     @Slot()
     def save_dialog(self):
