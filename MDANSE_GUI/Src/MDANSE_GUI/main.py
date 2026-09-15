@@ -24,7 +24,7 @@ from argparse import ArgumentParser
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory
+from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory, QSystemTrayIcon
 
 import MDANSE_GUI
 from MDANSE.MLogging import FMT, LOG
@@ -66,6 +66,16 @@ def build_parser():
         action="store_true",
         help="Do not display splash screen on startup.",
     )
+    parser.add_argument(
+        "--no-systray",
+        action="store_true",
+        help="Do not create a system tray icon. "
+        "System tray icon allows you to close and restore the main window while keeping "
+        "analysis tasks running in the background. "
+        "Independent of the system tray icon being created or not, the GUI "
+        "will ask you to confirm if you try to close the GUI before all the tasks "
+        "have finished running.",
+    )
     return parser
 
 
@@ -103,8 +113,20 @@ def startGUI(some_args):
         splash.show()
         t0 = time.time()
 
+    if not args.no_systray:
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            app.setQuitOnLastWindowClosed(False)
+        else:
+            LOG.error("System Tray Icon is not supported by your OS.")
+
     root = TabbedWindow(
-        parent=None, title="MDANSE for Python 3", settings=settings, app_instance=app
+        parent=None,
+        title="MDANSE for Python 3",
+        settings=settings,
+        app_instance=app,
+        systray_icon=None
+        if args.no_systray
+        else QIcon(os.path.join(path, "Icons/MDANSE.ico")),
     )
     root.show()
 
@@ -116,7 +138,7 @@ def startGUI(some_args):
             max([0, round(2000 - 1000 * (t1 - t0))]), lambda: splash.finish(root)
         )
 
-    app.exec()  # once this is done, the GUI has its event loop running.
+    sys.exit(app.exec())  # once this is done, the GUI has its event loop running.
     # no more Python scripting now, we are in the event loop.
 
 
