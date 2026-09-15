@@ -21,6 +21,7 @@ import sys
 import textwrap
 import time
 from argparse import ArgumentParser
+from pathlib import Path
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
 from qtpy.QtGui import QIcon, QPixmap
@@ -40,6 +41,9 @@ def catch_exceptions(t, val, tb):
 old_hook = sys.excepthook
 sys.excepthook = catch_exceptions
 # end of exception handling part.
+
+mdanse_gui_path = Path(__file__).parent
+mdanse_icon_path = mdanse_gui_path / "Icons/MDANSE.ico"
 
 
 def build_parser():
@@ -81,8 +85,7 @@ def startGUI(some_args):
     app = QApplication(some_args)
     app.setStyle(QStyleFactory.create("Fusion"))
 
-    path = os.path.dirname(os.path.abspath(__file__))
-    app.setWindowIcon(QIcon(os.path.join(path, "Icons/MDANSE.ico")))
+    app.setWindowIcon(QIcon(str(mdanse_icon_path)))
     fixed_locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedKingdom)
     fixed_locale.setNumberOptions(
         QLocale.NumberOption.RejectGroupSeparator
