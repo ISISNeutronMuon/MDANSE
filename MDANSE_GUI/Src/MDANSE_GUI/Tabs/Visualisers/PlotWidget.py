@@ -38,10 +38,10 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
+from MDANSE_GUI.Plots.PlotTransformWidget import PlotTransformWidget
+from MDANSE_GUI.Plots.PlotUtils import MDANSEMatPlotLibNavBar
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 from MDANSE_GUI.Utils import block_signals
-from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 
 if TYPE_CHECKING:
@@ -216,7 +216,7 @@ class PlotWidget(QWidget):
         super().__init__(*args, **kwargs)
         self._plotter = None
         self._sliderpack = None
-        self._normaliser = None
+        self._transform = None
         self._plotting_context = None
         self._slider_max = 100
         self.unique_id = -1
@@ -263,12 +263,6 @@ class PlotWidget(QWidget):
     def slider_change(self, new_values: object):
         """Pass the new slider values to the plotter."""
         self._plotter.handle_slider(new_values)
-
-    @Slot(dict)
-    def normaliser_change(self, new_values: dict):
-        """Pass the new normalisation parameters to the plotter."""
-        self._plotter.change_normalisation(new_values)
-        self.mark_normalisation()
 
     @Slot(bool)
     def set_slider_values(self, reset_needed: bool):
@@ -348,18 +342,7 @@ class PlotWidget(QWidget):
             update_only=update_only,
             toolbar=self._toolbar,
         )
-
-        self._normaliser.update_spinbox_limits(self._plotter.curve_length_limit)
-        self._normaliser.collect_values()
         self._sliderpack.collect_values()
-        self.mark_normalisation()
-
-    def mark_normalisation(self):
-        """Indicate in the GUI if normalisation failed for some curves."""
-        if self._plotter._normalisation_errors:
-            self._normaliser.mark_error("\n".join(self._plotter._normalisation_errors))
-        else:
-            self._normaliser.clear_error()
 
     def make_canvas(self):
         """Create a matplotlib figure for plotting.
@@ -423,9 +406,9 @@ class PlotWidget(QWidget):
         self._sliderpack.new_values.connect(self.slider_change)
         layout.addWidget(self._sliderpack)
 
-        self._normaliser = NormalisationWidget(self)
-        self._normaliser.new_values.connect(self.normaliser_change)
-        layout.addWidget(self._normaliser)
+        transform_button = QPushButton("Transform")
+        transform_button.pressed.connect(self._transform_window)
+        layout.addWidget(transform_button)
 
         self.plot_selector = QComboBox(self)
         self.plot_selector.addItems(self.available_plotters())
@@ -460,3 +443,12 @@ class PlotWidget(QWidget):
         )
 
         self._plotter.save_data(save_loc)
+
+    def _transform_window(self):
+        if self._transform is None:
+            self._transform = PlotTransformWidget(
+                self, plotting_context=self._plotting_context
+            )
+            self._transform.finished.connect(self.plot_data)
+
+        self._transform.show()
