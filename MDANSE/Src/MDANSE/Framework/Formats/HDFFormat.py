@@ -37,6 +37,28 @@ if TYPE_CHECKING:
 json_decoder = json.decoder.JSONDecoder()
 
 
+def get_input_params(file_name: Path | str) -> dict[str, str]:
+    """Return MDANSE input parameters used to create the result file file_name.
+
+    Parameters
+    ----------
+    file_name : Path | str
+        Path to an MDANSE output file, .mda or .mdt
+
+    Returns
+    -------
+    dict[str, str]
+        A reconstruction of the parameter dictionary originally passed to the MDANSE job.
+    """
+    with h5py.File(file_name) as source:
+        mdata_dict = check_metadata(source)
+    return {
+        key.removeprefix("inputs/"): value
+        for key, value in mdata_dict.items()
+        if "inputs" in key
+    }
+
+
 def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
     """Extract metadata from an MDANSE HDF5 file.
 
