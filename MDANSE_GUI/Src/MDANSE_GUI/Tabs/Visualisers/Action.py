@@ -413,6 +413,8 @@ class Action(QWidget):
         for widnum, key in enumerate(self._job_instance.settings.keys()):
             if key not in new_parameters:
                 continue
+            if new_parameters[key] is None:
+                continue
             widget = self._widgets[widnum]
             with block_signals(widget):
                 widget.set_value_manually(new_parameters[key])
