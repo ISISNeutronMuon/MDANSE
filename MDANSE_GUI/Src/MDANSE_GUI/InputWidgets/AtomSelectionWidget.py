@@ -810,3 +810,7 @@ class AtomSelectionWidget(WidgetBase):
 
         """
         return self.selection_model.current_steps()
+
+    def set_value_manually(self, new_input: str):
+        self.initialise_helper()
+        self.helper.selection_model.create_from_string(new_input)

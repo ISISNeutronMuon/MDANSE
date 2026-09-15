@@ -99,3 +99,6 @@ class InterpolationOrderWidget(WidgetBase):
         value = self._field.value()
 
         return value
+
+    def set_value_manually(self, new_input: int):
+        self._field.setValue(new_input)
