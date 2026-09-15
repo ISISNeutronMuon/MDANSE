@@ -79,7 +79,7 @@ def _converter_test(
     if generate_benchmarks:
         temp_name = result_file.with_suffix("")
 
-    parameters["output_files"] = (temp_name, 64, 128, compression, "INFO")
+    parameters["output_files"] = (temp_name, 64, (1, 128), compression, "INFO", 8192)
 
     converter = Converter.create(converter_type)
     converter.run(parameters, status=True)
@@ -549,7 +549,7 @@ def test_lammps_ix_unwrap(tmp_path, files):
     parameters = {
         "config_file": DATA_DIR / "POSCAR.lmp",
         "n_steps": 0,
-        "output_files": (out_1, 64, 128, "none", "INFO"),
+        "output_files": (out_1, 64, (1, 128), "none", "INFO", 8192),
         "time_step": 1.0,
     }
 
@@ -558,7 +558,7 @@ def test_lammps_ix_unwrap(tmp_path, files):
     converter.run(parameters, status=True)
 
     parameters["trajectory_file"] = DATA_DIR / files[1]
-    parameters["output_files"] = (out_2, 64, 128, "none", "INFO")
+    parameters["output_files"] = (out_2, 64, (1, 128), "none", "INFO", 8192)
     converter = Converter.create("LAMMPS")
     converter.run(parameters, status=True)
 
@@ -1055,7 +1055,7 @@ def test_atom_aliases_work(
 ):
     temp_name = tmp_path / "output"
 
-    parameters["output_files"] = (temp_name, 32, 128, "none", "INFO")
+    parameters["output_files"] = (temp_name, 32, (1, 128), "none", "INFO", 8192)
     parameters["atom_aliases"] = atom_alias
 
     converter = Converter.create(converter_type)
