@@ -240,3 +240,6 @@ class AtomMappingWidget(WidgetBase):
         else:
             self._empty = False
         return mapping_string
+
+    def set_value_manually(self, new_input: str):
+        self._field.setText(new_input)

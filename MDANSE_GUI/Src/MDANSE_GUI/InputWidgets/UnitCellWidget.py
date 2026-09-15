@@ -87,3 +87,9 @@ class UnitCellWidget(WidgetBase):
                         f"Could not set value ({key[0]}, {key[1]}) to {value.text()}"
                     )
         return array, apply
+
+    def set_value_manually(self, new_input: tuple[list[float], bool]):
+        array, apply = new_input
+        self._apply_box.setChecked(apply)
+        for key, field in self._array_fields.items():
+            field.setText(str(array[key[0], key[1]]))

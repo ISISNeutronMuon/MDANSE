@@ -50,3 +50,7 @@ class VectorWidget(WidgetBase):
         except Exception:
             vector = [0, 0, 0]
         return vector
+
+    def set_value_manually(self, new_input: list[float]):
+        for n, field in enumerate(self._vector_fields):
+            field.setText(str(new_input[n]))

@@ -415,12 +415,9 @@ class Action(QWidget):
                 continue
             widget = self._widgets[widnum]
             with block_signals(widget):
-                LOG.info(
-                    "Setting widget %s, key %s to value %s",
-                    widget,
-                    key,
-                    new_parameters[key],
-                )
+                widget.set_value_manually(new_parameters[key])
+        for widget in self._widgets:
+            widget.updateValue()
         self.allow_execution()
         self.show_output_prediction()
 

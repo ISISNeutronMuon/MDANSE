@@ -228,3 +228,6 @@ class PartialChargeWidget(AtomSelectionWidget):
         """
         text = self._field.text()
         return text or self._default_value
+
+    def set_value_manually(self, new_input: str):
+        self._field.setText(new_input)

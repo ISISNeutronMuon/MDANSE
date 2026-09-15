@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import copy
+from typing import Any
 
 from more_itertools import nth
 from qtpy.QtCore import QObject, Qt, Signal, Slot
@@ -469,6 +470,11 @@ class QVectorsWidget(WidgetBase):
         qvector_type = self._selector.currentText()
         pardict = self._model.params_summary()
         return (qvector_type, pardict)
+
+    def set_value_manually(self, new_input: tuple[str, dict[str, Any]]):
+        vector_type, parameters = new_input
+        self._selector.setCurrentText(vector_type)
+        self._model.switch_qvector_type(vector_type, parameters)
 
     def configure_using_default(self):
         """This is too complex to have a default value"""

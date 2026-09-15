@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from more_itertools import first_true
 from qtpy.QtCore import QObject, Signal, Slot
@@ -245,4 +245,11 @@ class WidgetBase(QObject):
                     self._configurator.dependencies[dependency]
                 ]
             ),
+        )
+
+    def set_value_manually(self, new_input: Any):
+        LOG.warning(
+            "Widget %s does not know how to accept input %s",
+            type(self).__name__,
+            new_input,
         )
