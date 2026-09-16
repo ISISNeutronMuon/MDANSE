@@ -173,7 +173,12 @@ class SliderPack(QWidget):
                 self._sliders,
                 strict=True,
             ):
-                box.setValue(box.minimum() + (slider.value() * box.singleStep()))
+                slider_value = slider.value()
+                if slider._upper_limit is not None:
+                    slider_value = min(slider_value, slider._upper_limit)
+                if slider._lower_limit is not None:
+                    slider_value = max(slider_value, slider._lower_limit)
+                box.setValue(box.minimum() + (slider_value * box.singleStep()))
         self.box_to_slider()
 
     @Slot()
