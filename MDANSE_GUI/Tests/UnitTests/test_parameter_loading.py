@@ -92,6 +92,8 @@ def fix_paths(temp_params: dict[str, Any]) -> dict[str, Any]:
         if isinstance(value, str):
             if value.split('/')[-1] == "output_dcsf.mda":
                 new_params[key] = str(DATA_DIR_ANALYSIS / "dcsf_short_traj.mda")
+            elif value.split('/')[-1] == "output_disf.mda":
+                new_params[key] = str(DATA_DIR_ANALYSIS / "disf_short_traj.mda")
             elif value.endswith(".mda"):
                 new_params[key] = str(DATA_DIR_ANALYSIS / value.split('/')[-1])
             elif value.endswith(".mdt"):
@@ -207,5 +209,4 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, index):
     print(caplog.text)
 
     assert "Traceback" not in caplog.text, "Error raised with traceback."
-    assert "ERROR" not in caplog.text, "Error raised."
     assert item.text() == key

@@ -170,7 +170,7 @@ def _converter_test(
         ),
         (
             "cp2k",
-            "cp2k_srtio3.mdt",
+            "cp2k_srtio3_velocity.mdt",
             (
                 "/configuration/coordinates",
                 "/configuration/velocities",

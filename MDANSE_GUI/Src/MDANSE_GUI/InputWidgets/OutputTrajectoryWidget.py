@@ -213,7 +213,9 @@ class OutputTrajectoryWidget(WidgetBase):
             meta_block_size,
         ) = new_input
         self._field.setText(fname)
-        self.dtype_box.setCurrentText({value: key for key, value in dtype_lookup.items()}[dtype])
+        self.dtype_box.setCurrentText(
+            {value: key for key, value in dtype_lookup.items()}[dtype]
+        )
         self.chunk_atom_box.setValue(chunk_size_atom)
         self.chunk_frame_box.setValue(chunk_size_frame)
         self.compression_box.setCurrentText(compression)
