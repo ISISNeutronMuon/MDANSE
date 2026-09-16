@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from qtpy.QtWidgets import QLabel, QLineEdit
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
@@ -51,6 +53,6 @@ class VectorWidget(WidgetBase):
             vector = [0, 0, 0]
         return vector
 
-    def set_value_manually(self, new_input: list[float]):
+    def set_value_manually(self, new_input: Sequence[float]):
         for n, field in enumerate(self._vector_fields):
             field.setText(str(new_input[n]))

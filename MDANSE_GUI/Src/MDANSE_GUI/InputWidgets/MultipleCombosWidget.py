@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from qtpy.QtWidgets import QComboBox
 
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
@@ -70,6 +72,6 @@ class MultipleCombosWidget(WidgetBase):
         result = [field.currentText() for field in self._fields]
         return result
 
-    def set_value_manually(self, new_input: str):
+    def set_value_manually(self, new_input: Sequence[str]):
         for n, field in enumerate(self._fields):
-            field.setCurrentText(new_input[n])
+            field.setCurrentText(str(new_input[n]))

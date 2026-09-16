@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 from typing import Any
 
@@ -87,6 +86,13 @@ ANALYSIS_OUTPUTS = {
 
 
 def fix_paths(temp_params: dict[str, Any]) -> dict[str, Any]:
+    """Replace paths from input files with paths to existing files.
+    
+    The main purpose of the unit tests in this file is to check if the
+    widgets can parse the input received from the existing output files.
+    Changing the paths is meant to eliminate errors caused by the paths
+    not pointing to existing files, which is not an indication of a widget
+    functioning incorrectly."""
     new_params = {}
     for key, value in temp_params.items():
         if isinstance(value, str):
