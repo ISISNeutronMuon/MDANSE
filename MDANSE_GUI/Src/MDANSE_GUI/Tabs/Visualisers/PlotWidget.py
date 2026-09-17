@@ -40,7 +40,7 @@ from qtpy.QtWidgets import (
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, ValidPlotters
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, ValidPlotters, SliderSettings
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
@@ -91,41 +91,15 @@ class SliderPack(QWidget):
         self._sliders[0].new_limit.connect(self._sliders[1].set_lower_limit)
         self._sliders[1].new_limit.connect(self._sliders[0].set_upper_limit)
 
-    @Slot(bool)
-    def new_coupling(self, new_val: bool):
-        """Couples the first two sliders together if new_val is true.
-
-        Parameters
-        ----------
-        new_val : bool
-            True for coupled sliders, false otherwise
-
-        """
-        for slider in islice(self._sliders, 2):
-            slider._coupled = new_val
-
     @Slot(object)
-    def new_slider_labels(self, input_labels: list[str]):
+    def new_slider_settings(self, settings: SliderSettings):
         """Change the text labels of the sliders to new values."""
-        for label, element in zip(self._labels, input_labels, strict=True):
+        for label, element in zip(self._labels, settings.labels, strict=True):
             label.setText(element)
-
-    @Slot(object)
-    def new_limits(self, input_limits: list[tuple[float, float, float]]):
-        """Change the limits and step number of the sliders.
-
-        Since QSlider works with integer numbers, the float
-        values of limits are used in the spin boxes, while
-        the sliders work with integer 'clicks' in the background.
-
-        Parameters
-        ----------
-        input_limits : list[tuple[float, float, float]]
-            For each slider, [minimum, maximum, step_size] values
-
-        """
+        for slider in islice(self._sliders, 2):
+            slider._coupled = settings.coupled
         for (minimum, maximum, stepsize), box, slider in zip(
-            input_limits, self._spinboxes, self._sliders, strict=True
+            settings.limits, self._spinboxes, self._sliders, strict=True
         ):
             clicks = round((maximum - minimum) / stepsize)
 
@@ -205,10 +179,8 @@ class SliderPack(QWidget):
 class PlotWidget(QWidget):
     """Plotting area with controls."""
 
-    change_slider_labels = Signal(object)
-    change_slider_limits = Signal(object)
+    change_slider_settings = Signal(object)
     reset_slider_values = Signal(bool)
-    change_slider_coupling = Signal(bool)
 
     def __init__(
         self,
@@ -254,9 +226,7 @@ class PlotWidget(QWidget):
         self._plotter._figure = self._figure
         self.plot_blank()
 
-        self.change_slider_labels.emit(self._plotter.slider_labels())
-        self.change_slider_limits.emit(self._plotter.slider_limits())
-        self.change_slider_coupling.emit(self._plotter.sliders_coupled())
+        self.change_slider_settings.emit(self._plotter.slider_settings())
         self.reset_slider_values.emit(self._plotter._value_reset_needed)
 
         self._plotter._slider_reference = self._sliderpack
@@ -420,9 +390,7 @@ class PlotWidget(QWidget):
         # The following widgets are placed below the plot.
 
         self._sliderpack = SliderPack(self)
-        self.change_slider_labels.connect(self._sliderpack.new_slider_labels)
-        self.change_slider_limits.connect(self._sliderpack.new_limits)
-        self.change_slider_coupling.connect(self._sliderpack.new_coupling)
+        self.change_slider_settings.connect(self._sliderpack.new_slider_settings)
         self.reset_slider_values.connect(self.set_slider_values)
         self._sliderpack.new_values.connect(self.slider_change)
         layout.addWidget(self._sliderpack)

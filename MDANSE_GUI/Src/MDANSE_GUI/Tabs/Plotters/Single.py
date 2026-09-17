@@ -24,7 +24,7 @@ import numpy as np
 from more_itertools import flatten, ilen
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, SliderMode, SliderSettings
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -49,13 +49,13 @@ class Single(Plotter):
 
         self.height_max, self.length_max = 0.0, 0.0
 
-    def slider_labels(self) -> list[str]:
-        """Return slider labels for single plot mode."""
-        return ["Y offset", "X offset"]
-
-    def slider_limits(self) -> list[tuple[float, float, float]]:
-        """Return slider limits for single plot mode."""
-        return [(-1.0, 1.0, 0.001)] * self._number_of_sliders
+    def slider_settings(self) -> SliderSettings:
+        return SliderSettings(
+            labels=["Y offset", "X offset"],
+            limits=[(-1.0, 1.0, 0.001)] * self._number_of_sliders,
+            coupled=False,
+            valid_modes=[SliderMode.LINEAR],
+        )
 
     def handle_slider(self, new_value: list[float]):
         """Save slider values and call offset_curves."""

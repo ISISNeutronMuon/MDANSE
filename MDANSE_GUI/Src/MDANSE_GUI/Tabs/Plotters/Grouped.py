@@ -24,7 +24,7 @@ import numpy as np
 from more_itertools import ilen
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, SliderMode, SliderSettings
 
 if TYPE_CHECKING:
     import numpy.typing as npt
@@ -49,13 +49,13 @@ class Grouped(Plotter):
         self._backup_curves: list[tuple[FloatArray, FloatArray]] = []
         self.height_max, self.length_max = -np.inf, -np.inf
 
-    def slider_labels(self) -> list[str]:
-        """Return labels to show that sliders are not used."""
-        return ["Y offset", "X offset"]
-
-    def slider_limits(self) -> list[tuple[float, float, float]]:
-        """Return generic slider limit values."""
-        return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
+    def slider_settings(self) -> SliderSettings:
+        return SliderSettings(
+            labels=["Y offset", "X offset"],
+            limits=[(-1.0, 1.0, 0.001)] * self._number_of_sliders,
+            coupled=False,
+            valid_modes=[SliderMode.LINEAR],
+        )
 
     def handle_slider(self, new_value: list[float]):
         """Save slider values and call offset_curves."""

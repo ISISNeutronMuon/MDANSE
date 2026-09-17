@@ -20,7 +20,7 @@ import csv
 import enum
 import math
 from itertools import count
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, TextIO
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, NamedTuple, TextIO
 
 import numpy as np
 from matplotlib import rcParams
@@ -101,6 +101,19 @@ NORMALISATION_DEFAULTS = {
 ValidPlotters = Literal["Single", "Vectors", "Text", "Heatmap", "Grid"]
 
 
+class SliderMode(enum.Enum):
+    LINEAR = enum.auto()
+    LOGSCALE = enum.auto()
+    PERCENTILE = enum.auto()
+
+
+class SliderSettings(NamedTuple):
+    labels: list[str]
+    limits: list[tuple[float, float, float]]
+    coupled: bool
+    valid_modes: list[SliderMode]
+
+
 class Plotter(RegisterFactory["Plotter"]):
     """Parent class to all classes used for displaying data."""
 
@@ -156,17 +169,13 @@ class Plotter(RegisterFactory["Plotter"]):
             return
         target.clear()
 
-    def slider_labels(self) -> list[str]:
-        """Get text to be shown next to sliders."""
-        return ["Slider 1", "Slider 2"]
-
-    def slider_limits(self) -> list[tuple[float, float, float]]:
-        """Get default limit values for sliders."""
-        return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
-
-    def sliders_coupled(self) -> bool:
-        """Check if the slider values depend on each other."""
-        return False
+    def slider_settings(self) -> SliderSettings:
+        return SliderSettings(
+            labels=["Slider 1", "Slider 2"],
+            limits=[(-1.0, 1.0, 0.01)] * self._number_of_sliders,
+            coupled=False,
+            valid_modes=[SliderMode.LINEAR],
+        )
 
     def get_figure(self, figure: Figure | None = None):
         """Get the reference to the current figure, if present."""

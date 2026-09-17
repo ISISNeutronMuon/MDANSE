@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Any
 from more_itertools import flatten, ilen
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, SliderMode, SliderSettings
 
 if TYPE_CHECKING:
     import numpy as np
@@ -46,13 +46,13 @@ class Grid(Plotter):
         self._active_curves = []
         self._backup_curves = []
 
-    def slider_labels(self) -> list[str]:
-        """Return labels to show that sliders are not used."""
-        return ["Inactive", "Inactive"]
-
-    def slider_limits(self) -> list[tuple[float, float, float]]:
-        """Return generic slider limit values."""
-        return [(-1.0, 1.0, 0.01)] * self._number_of_sliders
+    def slider_settings(self) -> SliderSettings:
+        return SliderSettings(
+            labels=["Inactive", "Inactive"],
+            limits=[(-1.0, 1.0, 0.01)] * self._number_of_sliders,
+            coupled=False,
+            valid_modes=[SliderMode.LINEAR],
+        )
 
     def check_curve_lengths(self):
         """Find the maximum number of elements in the x axes of the plot data."""

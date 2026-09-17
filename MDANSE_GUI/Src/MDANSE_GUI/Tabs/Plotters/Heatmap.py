@@ -30,7 +30,7 @@ from scipy.interpolate import interp1d
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
+from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, SliderMode, SliderSettings
 
 if TYPE_CHECKING:
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
@@ -66,17 +66,13 @@ class Heatmap(Plotter):
         self._slider_values = [0.0, 100.0]
         self._slice_axis = 2
 
-    def slider_labels(self) -> list[str]:
-        """Return labels for the sliders in heatmap mode."""
-        return ["Minimum (percentile)", "Maximum (percentile)"]
-
-    def slider_limits(self) -> list[tuple[float, float, float]]:
-        """Return slider limits for the colormap, in percent."""
-        return [(0.0, 100.0, 0.01)] * self._number_of_sliders
-
-    def sliders_coupled(self) -> bool:
-        """Confirm that sliders are coupled in heatmap mode."""
-        return True
+    def slider_settings(self) -> SliderSettings:
+        return SliderSettings(
+            labels=["Minimum", "Maximum"],
+            limits=[(0.0, 100.0, 0.01)] * self._number_of_sliders,
+            coupled=True,
+            valid_modes=[SliderMode.LINEAR, SliderMode.LOGSCALE, SliderMode.PERCENTILE],
+        )
 
     def change_normalisation(self, new_value: dict[str, Any]):
         """Normalise the data based on the new parameters.
