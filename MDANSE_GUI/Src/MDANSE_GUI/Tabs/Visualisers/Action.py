@@ -84,6 +84,7 @@ from MDANSE_GUI.InputWidgets import (
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.DelayedButton import DelayedButton
+from MDANSE_GUI.Widgets.JobParameterDialog import JobParameterDialog
 
 widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "FloatConfigurator": FloatWidget,
@@ -533,7 +534,13 @@ class Action(QWidget):
         if not new_params:
             LOG.warning("No input parameters were found in %s", fname)
             return None
-        self.apply_parameters(new_params)
+        dialog = JobParameterDialog(
+            current_parameters=self.set_parameters(), new_parameters=new_params
+        )
+        dialog.exec()
+        if dialog.is_accepted:
+            filtered_parameters = dialog.get_results()
+            self.apply_parameters(filtered_parameters)
 
     @Slot()
     def save_dialog(self):
