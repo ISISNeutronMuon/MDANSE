@@ -103,7 +103,6 @@ ValidPlotters = Literal["Single", "Vectors", "Text", "Heatmap", "Grid"]
 
 class SliderMode(enum.Enum):
     LINEAR = enum.auto()
-    LOGSCALE = enum.auto()
     PERCENTILE = enum.auto()
 
 
@@ -140,6 +139,7 @@ class Plotter(RegisterFactory["Plotter"]):
         self._axes = []
         self._initial_values = [0.0, 0.0]
         self._slider_values = [0.0, 0.0]
+        self._slider_mode = SliderMode.LINEAR
         self._value_reset_needed = True
         self._toolbar = None
         self._slider_reference = None
@@ -176,6 +176,11 @@ class Plotter(RegisterFactory["Plotter"]):
             coupled=False,
             valid_modes=[SliderMode.LINEAR],
         )
+
+    def set_slider_mode(self, new_mode: SliderMode):
+        if self._slider_mode == new_mode:
+            return
+        self._slider_mode = new_mode
 
     def get_figure(self, figure: Figure | None = None):
         """Get the reference to the current figure, if present."""

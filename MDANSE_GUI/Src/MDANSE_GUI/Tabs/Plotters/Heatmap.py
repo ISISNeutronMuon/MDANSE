@@ -48,11 +48,11 @@ class Heatmap(Plotter):
     @dataclass
     class BackupInfo:
         ind: int
+        interp: dict[SliderMode, interp1d]
         image: AxesImage = None
         array: FloatArray = field(default_factory=lambda: np.empty((0,), dtype=float))
         minmax: tuple[float, float] = (-np.inf, np.inf)
         limits: tuple[float, float, float, float] = (-np.inf, np.inf, -np.inf, np.inf)
-        interp: interp1d = None
         title: str = ""
 
     def __init__(self) -> None:
@@ -71,7 +71,7 @@ class Heatmap(Plotter):
             labels=["Minimum", "Maximum"],
             limits=[(0.0, 100.0, 0.01)] * self._number_of_sliders,
             coupled=True,
-            valid_modes=[SliderMode.LINEAR, SliderMode.LOGSCALE, SliderMode.PERCENTILE],
+            valid_modes=[SliderMode.LINEAR, SliderMode.PERCENTILE],
         )
 
     def change_normalisation(self, new_value: dict[str, Any]):
@@ -111,7 +111,7 @@ class Heatmap(Plotter):
                 backup.minmax = (-1, -1)
                 last_minmax = [-1, -1]
 
-            interpolator = backup.interp
+            interpolator = backup.interp[self._slider_mode]
             newmax = interpolator(new_value[1])
             newmin = interpolator(new_value[0])
 
@@ -152,6 +152,17 @@ class Heatmap(Plotter):
         """Find the maximum number of elements in the x axes of the plot data."""
         self.curve_length_limit = max(map(len, self._current_x_axes), default=0)
 
+    def make_interpolator(self, data, slider_mode: SliderMode) -> interp1d:
+        match slider_mode:
+            case SliderMode.PERCENTILE:
+                percentiles = np.linspace(0, 100.0, 21)
+                results = [
+                    np.percentile(np.nan_to_num(data), perc) for perc in percentiles
+                ]
+                return interp1d(percentiles, results)
+            case SliderMode.LINEAR:
+                return interp1d([0, 100.0], [np.min(data), np.max(data)])
+
     def plot(
         self,
         plotting_context: PlottingContext,
@@ -186,7 +197,9 @@ class Heatmap(Plotter):
         self._figure.set_layout_engine(layout="constrained")
         self._current_x_axes = []
 
-        scale_interpolators = {val.ind: val.interp for val in self._backup.values()}
+        scale_interpolators = {
+            val.ind: val.interp[self._slider_mode] for val in self._backup.values()
+        }
 
         self._backup.clear()
         self._axes.clear()
@@ -205,16 +218,12 @@ class Heatmap(Plotter):
             self.plot_blank()
             return
 
-        def get_interp(ind: int, data: FloatArray):
+        def get_interp(ind: int, data: FloatArray, slider_mode: SliderMode):
             # Check interpolators
             try:
                 scale_interpolators[ind](51.2)
             except Exception:
-                percentiles = np.linspace(0, 100.0, 21)
-                results = [
-                    np.percentile(np.nan_to_num(data), perc) for perc in percentiles
-                ]
-                return interp1d(percentiles, results)
+                return self.make_interpolator(data, slider_mode)
             else:
                 return scale_interpolators[ind]
 
@@ -224,7 +233,7 @@ class Heatmap(Plotter):
         for ind, (databundle, label, plane, axis_labels) in enumerate(
             islice(plotting_context.planes(self._slice_axis), self._plot_limit),
         ):
-            self._backup[label] = Heatmap.BackupInfo(ind=ind)
+            self._backup[label] = Heatmap.BackupInfo(ind=ind, interp={})
             dataset = databundle.dataset
 
             axes = self._figure.add_subplot(gs[ind])
@@ -240,11 +249,15 @@ class Heatmap(Plotter):
 
             xlimits, ylimits = axes.get_xlim(), axes.get_ylim()
 
-            self._backup[label].interp = get_interp(ind, plane)
+            for slider_mode in self.slider_settings().valid_modes:
+                current_interpolator = get_interp(ind, plane, slider_mode)
+                self._backup[label].interp[slider_mode] = current_interpolator
+
+            current_interpolator = self._backup[label].interp[self._slider_mode]
 
             last_minmax = (
-                self._backup[label].interp(self._slider_values[0]),
-                self._backup[label].interp(self._slider_values[1]),
+                current_interpolator(self._slider_values[0]),
+                current_interpolator(self._slider_values[1]),
             )
 
             try:

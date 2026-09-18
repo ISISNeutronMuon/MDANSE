@@ -34,13 +34,20 @@ from qtpy.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
+    QSizePolicy,
+    QSpinBox,
     QVBoxLayout,
     QWidget,
 )
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
-from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter, ValidPlotters, SliderSettings
+from MDANSE_GUI.Tabs.Plotters.Plotter import (
+    Plotter,
+    SliderMode,
+    SliderSettings,
+    ValidPlotters,
+)
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
@@ -70,18 +77,45 @@ class SliderPack(QWidget):
         layout = QGridLayout(self)
         self.setLayout(layout)
 
+        self._valid_modes = [SliderMode.LINEAR]
+        self._mode_box = QComboBox(self)
         self._labels = [QLabel(self) for _ in range(n_sliders)]
         self._sliders = [
             RestrictedSlider(Qt.Orientation.Horizontal, self) for _ in range(n_sliders)
         ]
         self._spinboxes = [QDoubleSpinBox(self) for _ in range(n_sliders)]
+        self._precision_spinbox = QSpinBox(self)
+        self._precision_spinbox.setValue(2)
+        self._precision_spinbox.setMinimum(0)
+        self._precision_spinbox.setMaximum(9)
+        self._precision_spinbox.setToolTip(
+            "Precision: number of decimal points used by sliders"
+        )
+
+        layout.addWidget(self._mode_box, 0, 0)
+        layout.addWidget(self._precision_spinbox, 1, 0)
+        self._mode_box.addItems([str(x.name).capitalize() for x in SliderMode])
+        self._mode_box.setToolTip(
+            "Slider mode: the way slider values are converted to plot values."
+        )
+        self.update_slider_mode_box()
+
+        for widget in [
+            *self._labels,
+            self._precision_spinbox,
+            self._mode_box,
+            *self._spinboxes,
+        ]:
+            widget.setSizePolicy(
+                QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred
+            )
 
         for n, (label, slider, box) in enumerate(
             zip(self._labels, self._sliders, self._spinboxes, strict=True)
         ):
-            layout.addWidget(label, n, 0)
-            layout.addWidget(slider, n, 1, 1, 2)
-            layout.addWidget(box, n, 3)
+            layout.addWidget(label, n, 1)
+            layout.addWidget(slider, n, 2, 1, 2)
+            layout.addWidget(box, n, 4)
 
             box.setSingleStep(0.01)
             box.valueChanged.connect(self.box_to_slider)
@@ -90,27 +124,59 @@ class SliderPack(QWidget):
             slider.valueChanged.connect(self.slider_to_box)
         self._sliders[0].new_limit.connect(self._sliders[1].set_lower_limit)
         self._sliders[1].new_limit.connect(self._sliders[0].set_upper_limit)
+        self._mode_box.currentTextChanged.connect(self.collect_values)
+        self._precision_spinbox.valueChanged.connect(self.set_precision)
+
+    @Slot(int)
+    def set_precision(self, new_decimals: int):
+        step_size = 10 ** (-new_decimals)
+        for box, slider in zip(self._spinboxes, self._sliders, strict=True):
+            box.setSingleStep(step_size)
+            box.setDecimals(new_decimals)
+            vmin, vmax, val = box.minimum(), box.maximum(), box.value()
+            clicks = round((vmax - vmin) / step_size)
+            slider.setRange(0, clicks)
+            slider.setValue(round((val - vmin) / step_size))
 
     @Slot(object)
     def new_slider_settings(self, settings: SliderSettings):
         """Change the text labels of the sliders to new values."""
+        self._valid_modes = settings.valid_modes
+        self.update_slider_mode_box()
         for label, element in zip(self._labels, settings.labels, strict=True):
             label.setText(element)
         for slider in islice(self._sliders, 2):
             slider._coupled = settings.coupled
-        for (minimum, maximum, stepsize), box, slider in zip(
-            settings.limits, self._spinboxes, self._sliders, strict=True
+        for (minimum, maximum, stepsize), box in zip(
+            settings.limits, self._spinboxes, strict=True
         ):
-            clicks = round((maximum - minimum) / stepsize)
-
-            slider.setRange(0, clicks)
-
             temp_value = np.clip(box.value(), minimum, maximum)
             box.setRange(minimum, maximum)
             box.setSingleStep(stepsize)
             box.setDecimals(abs(int(np.floor(np.log10(stepsize)))))
             box.setValue(temp_value)
+        self.set_precision(self._precision_spinbox.value())
         self.box_to_slider()
+
+    def update_slider_mode_box(self):
+        valid_items = [str(x.name).capitalize() for x in self._valid_modes]
+        bmodel = self._mode_box.model()
+        current_index = self._mode_box.currentIndex()
+        valid_indices = set()
+        for row in range(bmodel.rowCount()):
+            temp_index = bmodel.index(row, 0)
+            temp_item = bmodel.itemFromIndex(temp_index)
+            if str(temp_index.data()) in valid_items:
+                temp_item.setEnabled(True)
+                valid_indices.update({row})
+            else:
+                temp_item.setEnabled(False)
+        if current_index not in valid_indices:
+            self._mode_box.setCurrentIndex(valid_indices.pop())
+
+    @property
+    def current_mode(self) -> SliderMode:
+        return SliderMode[self._mode_box.currentText().upper()]
 
     def set_values(self, new_values: list[float]):
         """Set both spinboxes and sliders to the new incoming values.
@@ -171,7 +237,7 @@ class SliderPack(QWidget):
     def collect_values(self):
         """Get and emit current values from all sliders/spinboxes."""
         self._current_values = self.box_values
-        self.new_values.emit(self.box_values)
+        self.new_values.emit((self.box_values, self.current_mode))
         for slider in self._sliders:
             slider.manually_emit_new_limit()
 
@@ -234,8 +300,10 @@ class PlotWidget(QWidget):
         self.plot_data()
 
     @Slot(object)
-    def slider_change(self, new_values: object):
+    def slider_change(self, new_slider_output: tuple[list[float], SliderMode]):
         """Pass the new slider values to the plotter."""
+        new_values, new_mode = new_slider_output
+        self._plotter.set_slider_mode(new_mode)
         self._plotter.handle_slider(new_values)
 
     @Slot(dict)
