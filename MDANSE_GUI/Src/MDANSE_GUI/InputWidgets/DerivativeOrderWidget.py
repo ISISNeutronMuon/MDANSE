@@ -83,3 +83,6 @@ class DerivativeOrderWidget(WidgetBase):
     def get_widget_value(self):
         value = self._field.value()
         return value
+
+    def set_value_manually(self, new_input: str | int):
+        self._field.setValue(int(new_input))

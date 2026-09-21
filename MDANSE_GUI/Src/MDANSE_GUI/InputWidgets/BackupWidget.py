@@ -40,3 +40,6 @@ class BackupWidget(WidgetBase):
         temp_text = self._field.text().strip()
         self._empty = temp_text in {"None", ""}
         return str(self._configurator.default) if self._empty else temp_text
+
+    def set_value_manually(self, new_input: str):
+        self._field.setText(new_input)

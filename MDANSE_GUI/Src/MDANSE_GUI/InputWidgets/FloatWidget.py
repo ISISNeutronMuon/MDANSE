@@ -78,3 +78,6 @@ class FloatWidget(WidgetBase):
         else:
             self._empty = False
         return strval
+
+    def set_value_manually(self, new_input: float):
+        self._field.setText(str(new_input))

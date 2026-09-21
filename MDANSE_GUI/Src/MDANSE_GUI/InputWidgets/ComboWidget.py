@@ -64,3 +64,6 @@ class ComboWidget(WidgetBase):
 
     def get_widget_value(self):
         return self._field.currentText()
+
+    def set_value_manually(self, new_input: str):
+        self._field.setCurrentText(new_input)

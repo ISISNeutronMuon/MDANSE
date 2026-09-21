@@ -86,3 +86,18 @@ class ProjectionWidget(WidgetBase):
             return ("AxialProjector", vector)
         else:
             return ("PlanarProjector", vector)
+
+    def set_value_manually(self, new_input: tuple[str, tuple[float, float, float]]):
+        projector, vector = new_input
+        match projector:
+            case "NullProjector":
+                mode = 0
+            case "AxialProjector":
+                mode = 1
+            case _:
+                mode = 2
+        self._button_group.button(mode).setChecked(True)
+        self.button_switched(mode)
+        if mode:
+            for n, field in enumerate(self._vector_fields):
+                field.setText(str(vector[n]))

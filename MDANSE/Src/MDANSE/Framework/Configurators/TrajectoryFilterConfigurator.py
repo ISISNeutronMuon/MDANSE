@@ -75,6 +75,7 @@ class TrajectoryFilterConfigurator(IConfigurator):
         if not self.update_needed(value):
             return
         self.warning_status = ""
+        self._original_input = value
 
         self._settings = value
 

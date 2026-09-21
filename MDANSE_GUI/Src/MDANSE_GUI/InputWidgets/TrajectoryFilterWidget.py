@@ -1397,3 +1397,12 @@ class TrajectoryFilterWidget(WidgetBase):
             )
 
         return json.dumps(settings)
+
+    def set_value_manually(self, new_input: tuple[str, dict[str, Any]]):
+        filter_type, filter_params = new_input
+        self._type_combo.setCurrentText(filter_type)
+        for name, (_, field) in self.current_fields.items():
+            if hasattr(field, "setText"):
+                field.setText(str(filter_params[name]))
+            elif hasattr(field, "setValue"):
+                field.setValue(filter_params[name])

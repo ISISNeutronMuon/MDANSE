@@ -94,3 +94,7 @@ class AseInputFileWidget(WidgetBase):
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
         return self._field.text(), self._type_combo.currentText()
+
+    def set_value_manually(self, new_input: tuple[str, str]):
+        self._field.setText(new_input[0])
+        self._type_combo.setCurrentText(new_input[1])
