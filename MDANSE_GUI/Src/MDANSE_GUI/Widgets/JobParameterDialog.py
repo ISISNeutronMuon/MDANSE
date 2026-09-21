@@ -27,7 +27,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QTextEdit,
+    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
@@ -36,33 +36,43 @@ if TYPE_CHECKING:
     from MDANSE.Framework.Jobs.IJob import IJob
 
 
-class MatchingEntriesLine(QWidget):
-    def __init__(
-        self,
-        *args,
-        name: str = "Entry",
-        current_value: str = "",
-        new_value: str = "",
-        use_it: bool = True,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-        layout = QHBoxLayout(self)
-        self.label = QLabel(name, self)
-        self.key = name
-        self.value = new_value
-        self.newval_line = QLineEdit(str(new_value), self)
-        currentval_line = QLineEdit(current_value, self)
-        self.use_checkbox = QCheckBox("Replace", self)
-        self.use_checkbox.setChecked(True)
-        for widget in [
-            self.label,
-            self.newval_line,
-            self.use_checkbox,
-            currentval_line,
-        ]:
-            layout.addWidget(widget)
-        self.setLayout(layout)
+def create_matching_line(
+    parent: QWidget,
+    name: str = "Entry",
+    current_value: str = "",
+    new_value: str = "",
+    use_it: bool = True,
+) -> tuple[QLabel, QTextBrowser, QCheckBox, QTextBrowser]:
+    """Create widgets for one entry from the parameter dictionary.
+
+    Parameters
+    ----------
+    parent : QWidget
+        Parent object for the new widgets.
+    name : str, optional
+        Name of the input parameter, by default "Entry",
+    current_value : str, optional
+        Value stored by the IJob at the moment, by default "".
+    new_value : str, optional
+        Value imported from the file, by default "".
+    use_it : bool, optional
+        True if the checkbox should start off already checked, by default True.
+
+    Returns
+    -------
+    tuple[QLabel, QTextBrowser, QCheckBox, QTextBrowser]
+        Name label, new value as text, use-it checkbox, current value as text.
+    """
+    label = QLabel(name, parent)
+    newval_line = QTextBrowser(parent)
+    currentval_line = QTextBrowser(parent)
+    newval_line.setText(str(new_value))
+    currentval_line.setText(current_value)
+    use_checkbox = QCheckBox("Replace", parent)
+    use_checkbox.setChecked(use_it)
+    newval_line.setReadOnly(True)
+    currentval_line.setReadOnly(True)
+    return (label, newval_line, use_checkbox, currentval_line)
 
 
 class JobParameterDialog(QDialog):
@@ -75,7 +85,7 @@ class JobParameterDialog(QDialog):
     ):
         super().__init__(*args, **kwargs)
         self.is_accepted = False
-        layout = QVBoxLayout(self)
+        layout = QGridLayout(self)
         incoming_keys = set(new_parameters.keys())
         existing_keys = set(current_parameters.keys())
         matches = incoming_keys.intersection(existing_keys)
@@ -83,24 +93,39 @@ class JobParameterDialog(QDialog):
         self.ok_button = QPushButton("Accept values", self)
         self.ok_button.clicked.connect(self.accept_values)
         self.match_lines = []
-        for key in matches:
-            line = MatchingEntriesLine(
+        layout.addWidget(QLabel("Variable name", self), 0, 0)
+        layout.addWidget(QLabel("New value", self), 0, 1)
+        layout.addWidget(QLabel("Replace value?", self), 0, 2)
+        layout.addWidget(QLabel("Current value", self), 0, 3)
+        for row_num, key in enumerate(matches):
+            label, left_text, checkbox, right_text = create_matching_line(
                 self,
                 name=key,
                 current_value=str(current_parameters[key]),
                 new_value=new_parameters[key],
                 use_it=True,
             )
-            layout.addWidget(line)
-            self.match_lines.append(line)
+            layout.addWidget(label, row_num + 1, 0)
+            layout.addWidget(left_text, row_num + 1, 1)
+            layout.addWidget(checkbox, row_num + 1, 2)
+            layout.addWidget(right_text, row_num + 1, 3)
+            self.match_lines.append((key, checkbox, new_parameters[key]))
+        last_row = len(matches) + 1
         layout.addWidget(
             QLabel(
                 "The file contained the following parameters that will not be used:",
                 self,
-            )
+            ),
+            last_row,
+            0,
+            1,
+            4,
         )
-        layout.addWidget(QLineEdit(", ".join([str(x) for x in missing]), self))
-        layout.addWidget(self.ok_button)
+        missing_parameters_box = QTextBrowser(self)
+        missing_parameters_box.setText(", ".join([str(x) for x in missing]))
+        missing_parameters_box.setReadOnly(True)
+        layout.addWidget(missing_parameters_box, last_row + 1, 0, 1, 4)
+        layout.addWidget(self.ok_button, last_row + 2, 1, 1, 2)
 
     def accept_values(self):
         self.is_accepted = True
@@ -110,7 +135,7 @@ class JobParameterDialog(QDialog):
         if not self.is_accepted:
             return {}
         result = {}
-        for line in self.match_lines:
-            if line.use_checkbox.isChecked():
-                result[line.key] = line.value
+        for key, checkbox, new_value in self.match_lines:
+            if checkbox.isChecked():
+                result[key] = new_value
         return result
