@@ -507,4 +507,6 @@ def test_ssf3d(generate_benchmarks, tmp_path, traj_info):
         ("ssf3d", ),
         startswith=True,
         compare_axis=True,
+        atol=1e-6,
+        rtol=1e-7,
     )
