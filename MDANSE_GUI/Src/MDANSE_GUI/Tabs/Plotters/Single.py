@@ -62,17 +62,6 @@ class Single(Plotter):
         super().handle_slider(new_value)
         self.offset_curves()
 
-    def change_normalisation(self, new_value: dict[str, Any]):
-        """Normalise the data based on the new parameters.
-
-        Parameters
-        ----------
-        new_value : dict[str, Any]
-            Parameters as in NORMALISATION_DEFAULTS.
-        """
-        super().change_normalisation(new_value)
-        self.offset_curves()
-
     def offset_curves(self):
         """Offset curves against each other based on slider settings."""
         target = self._figure
@@ -84,7 +73,6 @@ class Single(Plotter):
 
         for num, curve in enumerate(self._active_curves):
             xdata, ydata = self._backup_curves[num]
-            xdata, ydata = self.normalise_curve(xdata, ydata)
             new_xdata = xdata + num * self.length_max * new_value[1]
             new_ydata = ydata + num * self.height_max * new_value[0]
             curve.set_xdata(new_xdata)
@@ -159,7 +147,7 @@ class Single(Plotter):
         self._figure.set_layout_engine(None)
         self._active_curves = []
         self._backup_curves = []
-        self._normalisation_errors = []
+
         x_axis_labels = []
 
         self.apply_settings(plotting_context)
