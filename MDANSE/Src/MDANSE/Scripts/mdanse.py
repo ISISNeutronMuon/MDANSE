@@ -29,7 +29,7 @@ import h5py
 
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Core.Platform import version_summary
+from MDANSE.Core.Platform import PLATFORM, version_summary
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.IO.AtomInfo import atom_info
@@ -448,6 +448,16 @@ def build_parsers() -> ArgumentParser:
         action="version",
         version=f"{version_summary(show_backend=False)}",
     )
+    parser.add_argument(
+        "--settings",
+        help="Settings folder to use.",
+        default=None,
+    )
+    parser.add_argument(
+        "--local",
+        help="Use local settings.",
+        action="store_true",
+    )
     subparsers = parser.add_subparsers(
         title="MDANSE CLI Commands",
         help="Run each command with -h to see input options.",
@@ -469,6 +479,16 @@ def main():
     print(f"MDANSE {MDANSE.__version__}")  # noqa: T201
     parser = build_parsers()
     args: Namespace = parser.parse_args()
+
+    # Override settings directories.
+    if args.local:
+        PLATFORM._application_directory = Path.cwd()
+    if args.settings:
+        PLATFORM._application_directory = Path(args.settings)
+
+    # Reload databases with new paths.
+    ATOMS_DATABASE._load()
+
     if not vars(args):
         parser.print_help()
     else:
