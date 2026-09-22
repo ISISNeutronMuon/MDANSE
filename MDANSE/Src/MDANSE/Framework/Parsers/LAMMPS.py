@@ -302,6 +302,31 @@ class LAMMPSReader(ABC):
             If file invalid.
         """
 
+    @abstractmethod
+    def run_step(
+        self, index: int, unit_cell_override: UnitCell | None = None
+    ) -> tuple[int, int | None]:
+        """Runs a single step of the conversion job.
+
+        Parameters
+        ----------
+        index : int
+            The index of the step.
+        unit_cell_override : UnitCell | None
+            Unit Cell to use.
+
+        Notes
+        -----
+        The argument index is the index of the loop not the index of the frame.
+
+        Returns
+        -------
+        int
+            Index of frame.
+        int
+            Next line of file to start at.
+        """
+
 
 class LAMMPScustom(LAMMPSReader):
     """Parse LAMMPS custom dump format.
@@ -496,13 +521,17 @@ class LAMMPScustom(LAMMPSReader):
 
         return chemical_system
 
-    def run_step(self, index: int) -> tuple[int, int | None]:
+    def run_step(
+        self, index: int, unit_cell_override: UnitCell | None = None
+    ) -> tuple[int, int | None]:
         """Runs a single step of the conversion job.
 
         Parameters
         ----------
         index : int
             The index of the step.
+        unit_cell_override : UnitCell | None
+            Unit Cell to use.
 
         Notes
         -----
@@ -545,8 +574,11 @@ class LAMMPScustom(LAMMPSReader):
             "Da nm/ps2"
         )
 
-        unit_cell *= len_conv
-        unit_cell = UnitCell(unit_cell)
+        if unit_cell_override:
+            unit_cell = unit_cell_override
+        else:
+            unit_cell *= len_conv
+            unit_cell = UnitCell(unit_cell)
 
         drop(
             file, self._item_location["ATOMS"][0] - self._item_location["BOX BOUNDS"][1]
@@ -778,7 +810,9 @@ class LAMMPSxyz(LAMMPSReader):
 
         return chemical_system
 
-    def run_step(self, index) -> tuple[int, int | None]:
+    def run_step(
+        self, index: int, unit_cell_override: UnitCell | None = None
+    ) -> tuple[int, int | None]:
         """Runs a single step of the conversion job.
 
         Parameters
@@ -803,7 +837,7 @@ class LAMMPSxyz(LAMMPSReader):
         except ValueError:
             return index, None
 
-        unit_cell = UnitCell(self._full_cell)
+        unit_cell = unit_cell_override or UnitCell(self._full_cell)
         time = timestep * self._timestep * measure(1.0, self.units["time"]).toval("ps")
 
         if self._fractionalCoordinates:

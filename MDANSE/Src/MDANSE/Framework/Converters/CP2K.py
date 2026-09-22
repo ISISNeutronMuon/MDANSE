@@ -89,6 +89,10 @@ class CP2K(Converter):
             "parser": CP2KCellFile,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -175,7 +179,10 @@ class CP2K(Converter):
         data = {
             key: next(frames) * self.UNITS[key] for key, frames in self.frames.items()
         }
-        data["cell"] = UnitCell(data["cell"])
+        if self.configuration["unit_cell"]["apply"]:
+            data["cell"] = self.configuration["unit_cell"]["value"]
+        else:
+            data["cell"] = UnitCell(data["cell"])
 
         real_conf = PeriodicAbsoluteConfiguration(
             data.pop("coordinates"),
