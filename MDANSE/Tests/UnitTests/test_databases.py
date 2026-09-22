@@ -75,7 +75,7 @@ class TestAtomsDatabase(unittest.TestCase):
         ATOMS_DATABASE._load()
 
     def overwrite_database(self):
-        ATOMS_DATABASE._data = ChainMap(self.data)
+        ATOMS_DATABASE.data = ChainMap(self.data)
         ATOMS_DATABASE._properties = self.properties
         ATOMS_DATABASE._units = self.units
 
@@ -138,7 +138,7 @@ class TestAtomsDatabase(unittest.TestCase):
     def test_add_property_valid(self):
         ATOMS_DATABASE.add_property("new_property", "str")
         self.assertEqual("str", ATOMS_DATABASE._properties["new_property"])
-        for at in ATOMS_DATABASE._data.values():
+        for at in ATOMS_DATABASE.data.values():
             self.assertEqual("", at["new_property"])
 
     def test_atoms(self):
