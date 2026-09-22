@@ -16,7 +16,7 @@
 from collections import ChainMap
 
 import unittest
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, ANY
 
 from MDANSE.Chemistry import (
     ATOMS_DATABASE,
@@ -75,7 +75,7 @@ class TestAtomsDatabase(unittest.TestCase):
         ATOMS_DATABASE._load()
 
     def overwrite_database(self):
-        ATOMS_DATABASE._data = ChainMap(self.data)
+        ATOMS_DATABASE.data = ChainMap(self.data)
         ATOMS_DATABASE._properties = self.properties
         ATOMS_DATABASE._units = self.units
 
@@ -138,7 +138,7 @@ class TestAtomsDatabase(unittest.TestCase):
     def test_add_property_valid(self):
         ATOMS_DATABASE.add_property("new_property", "str")
         self.assertEqual("str", ATOMS_DATABASE._properties["new_property"])
-        for at in ATOMS_DATABASE._data.values():
+        for at in ATOMS_DATABASE.data.values():
             self.assertEqual("", at["new_property"])
 
     def test_atoms(self):
@@ -207,7 +207,7 @@ class TestAtomsDatabase(unittest.TestCase):
         next(lines)
         self.assertEqual(next(lines).strip(), "H")
         self.assertTrue({"property", "value", "unit"}.issubset(next(lines).split()))
-        
+
         properties = {
             tokens[0] for line in lines if len(tokens := line.split()) > 2
         }
@@ -254,18 +254,18 @@ class TestAtomsDatabase(unittest.TestCase):
 
     def test__reset(self):
         ATOMS_DATABASE._reset()
-        self.assertDictEqual({}, dict(ATOMS_DATABASE._data))
+        self.assertDictEqual({}, dict(ATOMS_DATABASE._units))
         self.assertDictEqual({}, ATOMS_DATABASE._properties)
 
     def test_save(self):
         with (
             patch("builtins.open", new_callable=mock_open) as op,
-            patch("json.dumps") as dump,
+            patch("json.dump") as dump,
         ):
             ATOMS_DATABASE.save()
-            op.assert_called_with(ATOMS_DATABASE._USER_DATABASE, "w")
+            op.assert_called_with(ATOMS_DATABASE._user_database, "w")
             dump.assert_called_with(
-                {"properties": self.properties, "units": self.units, "atoms": self.data}, indent=4, cls=MDANSEEncoder
+                {"properties": self.properties, "units": self.units, "atoms": self.data}, ANY, indent=4, cls=MDANSEEncoder
             )
 
     def test_remove_atom(self):

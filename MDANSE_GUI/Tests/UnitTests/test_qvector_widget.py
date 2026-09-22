@@ -9,8 +9,7 @@ from qtpy.QtWidgets import QMainWindow
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
-from MDANSE_GUI.Session.Session import LocalSession
-from MDANSE_GUI.Session.Settings import LocalSettings
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Models.TrajectoryModel import TrajectoryModel
@@ -51,8 +50,8 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, qvector_type):
     widget = JobTab.gui_instance(
         parent=window,
         name="Job",
-        session=LocalSession(),
-        settings=LocalSettings(),
+        session=Session(),
+        qt_settings=None,
         logger=QMessageLogger(),
         model=JobTree(parent_class=IJob),
         combo_model=TrajectoryModel(),

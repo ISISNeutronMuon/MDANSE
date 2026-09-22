@@ -71,7 +71,7 @@ class OutputFilesConfigurator(IConfigurator):
         self.formats = (
             formats if formats is not None else OutputFilesConfigurator._default[1]
         )
-        self.forbidden_files = []
+        self.forbidden_files = set()
 
     def configure(self, value):
         """Configure a set of output files for an analysis.

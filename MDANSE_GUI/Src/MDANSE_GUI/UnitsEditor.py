@@ -84,6 +84,7 @@ class UnitModel(QStandardItemModel):
     def populateUnitList(self):
         for unit in self._defaultUnits:
             item = QStandardItem(unit)
+            item.setEditable(False)
             item.setData(unit)
             self.appendRow(item)
 
@@ -130,6 +131,7 @@ class UnitModel(QStandardItemModel):
             )
             UNITS_MANAGER.save()
             item = QStandardItem(unit_name)
+            item.setEditable(False)
             item.setData(unit_name)
             self.appendRow(item)
 
