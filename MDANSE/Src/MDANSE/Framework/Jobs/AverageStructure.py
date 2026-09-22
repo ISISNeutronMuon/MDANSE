@@ -64,7 +64,7 @@ def avgs_memory_per_atom(
     n_frames = frame_config["number"]
     data_size = 8
     chunk_size = trajectory.chunk_size(array_name="position")
-    prefactor = 4 * n_frames * n_dimensions * data_size / 2**20
+    prefactor = 5.5 * n_frames * n_dimensions * data_size / 2**20
     return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 

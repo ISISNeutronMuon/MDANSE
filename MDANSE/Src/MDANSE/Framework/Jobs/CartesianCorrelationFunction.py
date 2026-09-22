@@ -57,9 +57,10 @@ def ccorr_memory_per_atom(
     frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
     n_dimensions = 3
     n_frames = frame_config["number"]
+    corr_frames = frame_config["n_frames"]
     data_size = 8
     chunk_size = trajectory.chunk_size(array_name="position")
-    prefactor = 4 * n_frames * n_dimensions * data_size / 2**20
+    prefactor = 5.5 * (n_frames + corr_frames) * n_dimensions * data_size / 2**20
     return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 
