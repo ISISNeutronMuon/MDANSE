@@ -122,9 +122,7 @@ class _Database(metaclass=Singleton):
 
         """
         self._user_database = (
-            Path(user_database)
-            if user_database is not None
-            else self._USER_DATABASE
+            Path(user_database) if user_database is not None else self._USER_DATABASE
         )
         default_database = (
             Path(default_database)
@@ -133,7 +131,9 @@ class _Database(metaclass=Singleton):
         )
 
         self._default_data: dict[str, Any] = json_handler(default_database)
-        self._data: dict[str, Any] = json_handler(self._user_database) if self._user_database.exists() else {}
+        self._data: dict[str, Any] = (
+            json_handler(self._user_database) if self._user_database.exists() else {}
+        )
         self.data = ChainMap(self._data, self._default_data)
 
     def __iter__(self):
