@@ -169,7 +169,7 @@ def startGUI(some_args):
 
     # Reload databases with new paths.
     ATOMS_DATABASE._load()
-    UNITS_MANAGER.load()
+    UNITS_MANAGER._load()
 
     settings = GUISettings(
         settings=PLATFORM.main_settings, save=not args.no_save_settings

@@ -162,7 +162,7 @@ def guess_element(atm_label: str, mass: float | int | None = None) -> str:
     # guesses failed
     best_diff = np.inf
     if mass is not None:
-        for atm, properties in ATOMS_DATABASE._data.items():
+        for atm, properties in ATOMS_DATABASE.data.items():
             atm_mass = properties.get("atomic_weight", None)
             if atm_mass is None:
                 continue

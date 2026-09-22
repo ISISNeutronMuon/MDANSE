@@ -24,7 +24,6 @@ from typing import TYPE_CHECKING, Any, ClassVar, SupportsComplex
 
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
-from MDANSE.Framework.Units import measure
 from MDANSE.IO.IOUtils import MDANSEEncoder, json_handler
 from MDANSE.MLogging import LOG
 
@@ -99,16 +98,11 @@ class _Database(metaclass=Singleton):
     def __init__(self):
         self._data = {}
         self._default_data = {}
-
+        self.data = ChainMap(self._data, self._default_data)
         self._reset()
 
         # Load the user database. If any problem occurs while loading it, loads the default one
         self._load()
-
-    def __iter__(self):
-        """Return a generator over the entries stored in the database."""
-        for v in self._data.values():
-            yield copy.deepcopy(v)
 
     def _load(
         self,
@@ -127,19 +121,25 @@ class _Database(metaclass=Singleton):
             The path to the MDANSE atom database. If None, built-in path is used.
 
         """
-        if user_database is None:
-            user_database = self._USER_DATABASE
-        else:
-            user_database = Path(user_database)
-        if default_database is None:
-            default_database = self._DEFAULT_DATABASE
-        else:
-            default_database = Path(default_database)
+        self._user_database = (
+            Path(user_database)
+            if user_database is not None
+            else self._USER_DATABASE
+        )
+        default_database = (
+            Path(default_database)
+            if default_database is not None
+            else self._DEFAULT_DATABASE
+        )
 
-        database_path = user_database if user_database.exists() else default_database
+        self._default_data: dict[str, Any] = json_handler(default_database)
+        self._data: dict[str, Any] = json_handler(self._user_database) if self._user_database.exists() else {}
+        self.data = ChainMap(self._data, self._default_data)
 
-        self._default_data = json_handler(default_database)
-        self._data = json_handler(database_path)
+    def __iter__(self):
+        """Return a generator over the entries stored in the database."""
+        for v in self.data.values():
+            yield copy.deepcopy(v)
 
     def items(self) -> ItemsView[str, dict]:
         """Return the iterator over the items of the data dict.
@@ -153,11 +153,11 @@ class _Database(metaclass=Singleton):
             dict_items iterator of the internal dictionary.
 
         """
-        return self._data.items()
+        return self.data.items()
 
     def _reset(self) -> None:
         """Reset the database, removing all data."""
-        self._data.clear()
+        self.data.clear()
 
     def save(self) -> None:
         """Save a copy of the database to MDANSE application directory.
@@ -166,7 +166,7 @@ class _Database(metaclass=Singleton):
         If the user database already exists, calling this function will overwrite it.
         """
         with open(self._USER_DATABASE, "w") as f:
-            json.dump(dict(self._data), f, indent=4)
+            json.dump(dict(self.data.maps[0]), f, indent=4)
 
 
 class AtomsDatabaseError(Exception):
@@ -270,7 +270,7 @@ class AtomsDatabase(_Database):
             True if atom is in the database, False otherwise.
 
         """
-        return element in self._data
+        return element in self.data
 
     def __getitem__(self, item: str) -> dict:
         """Return an entry from the database.
@@ -284,10 +284,10 @@ class AtomsDatabase(_Database):
             Name of the database entry. Here it is an atom type name.
 
         """
-        if item not in self._data:
+        if item not in self.data:
             raise KeyError(f"The element {item} is not registered in the database.")
 
-        return copy.deepcopy(self._data[item])
+        return copy.deepcopy(self.data[item])
 
     def _load(
         self,
@@ -306,15 +306,10 @@ class AtomsDatabase(_Database):
             The path to the MDANSE atom database. If None, built-in path is used.
 
         """
-        self._user_database = (
-            Path(user_database) if user_database is not None else self._USER_DATABASE
-        )
-
         super()._load(user_database=user_database, default_database=default_database)
         self._properties.update(self._default_data["properties"])
         self._units.update(self._default_data["units"])
-
-        self._data = ChainMap(self._default_data["atoms"], self._data["atoms"])
+        self.data = ChainMap(self._data.get("atoms", {}), self._default_data["atoms"])
 
         try:
             number_of_protons = self.get_property("proton")
@@ -342,7 +337,7 @@ class AtomsDatabase(_Database):
             When the atom already exist in the database.
 
         """
-        if atom in self._data:
+        if atom in self.data:
             raise AtomsDatabaseError(
                 f"The atom {atom} is already stored in the database.",
             )
@@ -350,7 +345,7 @@ class AtomsDatabase(_Database):
         properties = {}
         for pname, ptype in self._properties.items():
             properties[pname] = AtomsDatabase._TYPES[ptype]()
-        self._data[atom] = properties
+        self.data[atom] = properties
 
     def add_property(self, pname: str, ptype: str, unit: str = "none") -> None:
         """Add a new property to the atoms database.
@@ -387,13 +382,13 @@ class AtomsDatabase(_Database):
         ptype = AtomsDatabase._TYPES[ptype]
         self._units[pname] = unit
 
-        for element in self._data.values():
+        for element in self.data.values():
             element[pname] = ptype()
 
     @property
     def atoms(self) -> list[str]:
         """Returns the names of all the atoms in the database, sorted alphabetically."""
-        return sorted(self._data.keys())
+        return sorted(self.data.keys())
 
     def get_isotopes(self, atom: str) -> list[str]:
         """Return the names of all the isotopes of the input atom.
@@ -414,15 +409,15 @@ class AtomsDatabase(_Database):
             If atom type is not in the database.
 
         """
-        if atom not in self._data:
+        if atom not in self.data:
             raise KeyError(f"The atom {atom} is not in the database.")
 
         # The isotopes are searched according to |symbol| property
-        symbol = self._data[atom]["symbol"]
+        symbol = self.data[atom]["symbol"]
 
         return [
             iname
-            for iname, props in self._data.items()
+            for iname, props in self.data.items()
             if props["symbol"] == symbol and iname != symbol
         ]
 
@@ -458,7 +453,7 @@ class AtomsDatabase(_Database):
         if pname not in self._properties:
             raise KeyError(f"The property {pname} is not registered in the database.")
 
-        return {element: self.get_value(element, pname) for element in self._data}
+        return {element: self.get_value(element, pname) for element in self.data}
 
     def get_value(
         self, atom: str, pname: str, *, raw_value: bool = False
@@ -485,7 +480,9 @@ class AtomsDatabase(_Database):
             If atom type or property cannot be found in the database.
 
         """
-        if atom not in self._data:
+        from MDANSE.Framework.Units import measure
+
+        if atom not in self.data:
             raise KeyError(f"The atom {atom} is not in the database.")
 
         if pname not in self._properties:
@@ -494,7 +491,7 @@ class AtomsDatabase(_Database):
         ptype = AtomsDatabase._TYPES[ptype_str]
         punit = self._units[pname]
 
-        value = self._data[atom].get(pname, ptype())
+        value = self.data[atom].get(pname, ptype())
         if raw_value:
             return value
         if ptype_str == "complex":
@@ -534,14 +531,14 @@ class AtomsDatabase(_Database):
             If the property does not support the input value type.
 
         """
-        if atom not in self._data:
+        if atom not in self.data:
             raise KeyError(f"The element {atom} is not in the database.")
 
         if pname not in self._properties:
             raise KeyError(f"The property {pname} is not registered in the database.")
 
         try:
-            self._data[atom][pname] = AtomsDatabase._TYPES[self._properties[pname]](
+            self.data[atom][pname] = AtomsDatabase._TYPES[self._properties[pname]](
                 value,
             )
         except ValueError as err:
@@ -563,7 +560,7 @@ class AtomsDatabase(_Database):
             True if the atom information is in the database, False otherwise.
 
         """
-        return atom in self._data
+        return atom in self.data
 
     def has_property(self, pname: str) -> bool:
         """Check if a property is in the database.
@@ -626,7 +623,7 @@ class AtomsDatabase(_Database):
         try:
             return [
                 atom
-                for atom, properties in self._data.items()
+                for atom, properties in self.data.items()
                 if abs(properties.get(pname, 0) - value) <= tolerance
             ]
         except TypeError as err:
@@ -647,7 +644,7 @@ class AtomsDatabase(_Database):
             Number of all the stored atom types.
 
         """
-        return len(self._data)
+        return len(self.data)
 
     @property
     def n_properties(self) -> int:
@@ -681,7 +678,7 @@ class AtomsDatabase(_Database):
         """Reset (clear) the atom database."""
         self._properties.clear()
         self._units.clear()
-        self._data.clear()
+        self.data.clear()
 
     def save(self) -> None:
         """Save a copy of the atom database to MDANSE application directory.
@@ -692,7 +689,7 @@ class AtomsDatabase(_Database):
         d = {
             "properties": self._properties,
             "units": self._units,
-            "atoms": dict(self._data),
+            "atoms": self.data.maps[0],
         }
 
         with open(self._user_database, "w") as fout:
@@ -722,7 +719,7 @@ class AtomsDatabase(_Database):
             return self.get_value(symbol, atom_property)
         except KeyError:
             if atom_property == "dummy":
-                if symbol == "Du" or self._data[symbol]["element"] == "dummy":
+                if symbol == "Du" or self.data[symbol]["element"] == "dummy":
                     return 1
                 return 0
             return None
@@ -756,7 +753,7 @@ class AtomsDatabase(_Database):
 
         """
         try:
-            del self._data[symbol]
+            del self.data[symbol]
         except KeyError as err:
             raise AtomsDatabaseError(f"Atom {symbol} does not exist.") from err
 
@@ -775,7 +772,7 @@ class AtomsDatabase(_Database):
             raise AtomsDatabaseError(f"Atom property {label} does not exist.") from None
 
         for atm in self.atoms:
-            del self._data[atm][label]
+            del self.data[atm][label]
 
     def rename_atom_type(self, old_key: str, new_key: str):
         """Rename the atom key in the atom database.
@@ -788,15 +785,15 @@ class AtomsDatabase(_Database):
             The new key of the atom.
 
         """
-        if old_key not in self._data:
+        if old_key not in self.data:
             raise AtomsDatabaseError(f"Atom {old_key} does not exist.")
-        if new_key in self._data:
+        if new_key in self.data:
             raise AtomsDatabaseError(
                 f"Cannot rename atom from {old_key} to {new_key} as {new_key}"
                 " already exists.",
             )
 
-        self._data[new_key] = self._data.pop(old_key)
+        self.data[new_key] = self.data.pop(old_key)
 
     def rename_atom_property(self, old_key: str, new_key: str):
         """Rename the atom property in the atom database.
@@ -817,7 +814,7 @@ class AtomsDatabase(_Database):
                 " already exists.",
             )
         self._properties[new_key] = self._properties.pop(old_key)
-        for element in self._data.values():
+        for element in self.data.values():
             element[new_key] = element.pop(old_key)
 
 

@@ -25,6 +25,7 @@ from functools import singledispatchmethod
 from pathlib import Path
 from typing import ClassVar, NamedTuple, Self, TypedDict
 
+from MDANSE.Chemistry.Databases import _Database
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 
@@ -1041,15 +1042,16 @@ def _str_to_unit(s: str) -> _Unit:
     return unit
 
 
-class UnitsManager(metaclass=Singleton):
+class UnitsManager(_Database):
     """Database dictionary for handling units."""
 
     _UNITS: ClassVar[ChainMap[str, _Unit]] = ChainMap()
 
     _DEFAULT_DATABASE = PLATFORM.base_directory / "MDANSE" / "Framework" / "units.json"
+    _LOCAL_PATH = "units.json"
 
     def __init__(self):
-        self.load()
+        self._load()
 
     def add_unit(
         self, uname, factor, kg=0, m=0, s=0, K=0, mol=0, A=0, cd=0, rad=0, sr=0
@@ -1068,7 +1070,7 @@ class UnitsManager(metaclass=Singleton):
     def has_unit(self, uname) -> bool:
         return uname in UnitsManager._UNITS
 
-    def load(
+    def _load(
         self,
         user_database: Path | str | None = None,
         default_database: Path | str | None = None,
@@ -1077,34 +1079,13 @@ class UnitsManager(metaclass=Singleton):
 
         Fill self with unit infomration.
         """
-        self._user_database = (
-            Path(user_database)
-            if user_database is not None
-            else PLATFORM.application_directory / "units.json"
-        )
-        default_database = (
-            Path(default_database)
-            if default_database is not None
-            else UnitsManager._DEFAULT_DATABASE
-        )
+        super()._load(user_database, default_database)
 
-        with open(default_database, encoding="utf-8") as fin:
-            defaults = {
-                name: decode_from_json(name, dict)
-                for name, dict in json.load(fin).items()
-            }
-
-        custom = {}
-        if self._user_database.is_file():
-            with open(self._user_database, encoding="utf-8") as fin:
-                custom.update(
-                    {
-                        name: decode_from_json(name, dict)
-                        for name, dict in json.load(fin).items()
-                    }
-                )
+        defaults = {name: decode_from_json(name, udict) for name, udict in self._default_data.items()}
+        custom = {name: decode_from_json(name, udict) for name, udict in self._data.items()}
 
         UnitsManager._UNITS = ChainMap(custom, defaults)
+        self.data = UnitsManager._UNITS
 
     def save(self):
         """Write self to custom user database."""
