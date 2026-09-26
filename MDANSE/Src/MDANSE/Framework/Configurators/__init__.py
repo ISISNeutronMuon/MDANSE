@@ -74,6 +74,9 @@ from .MDAnalysisTopologyFileConfigurator import (
 from .MDMCTrajectoryConfigurator import (
     MDMCTrajectoryConfigurator as MDMCTrajectoryConfigurator,
 )
+from .MDTrajAnalysisConfigurator import (
+    MDTrajAnalysisConfigurator as MDTrajAnalysisConfigurator,
+)
 from .MDTrajTimeStepConfigurator import (
     MDTrajTimeStepConfigurator as MDTrajTimeStepConfigurator,
 )

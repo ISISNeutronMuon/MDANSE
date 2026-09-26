@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+import MDANSE.mdtraj
+
 from .AreaPerMolecule import AreaPerMolecule as AreaPerMolecule
 from .AverageStructure import AverageStructure as AverageStructure
 from .CartesianCorrelationFunction import (
