@@ -119,8 +119,9 @@ class UnitCellConfigurator(IConfigurator):
                 self.error_status = "Input shape must be 3x3."
                 return
 
-            self["value"] = UnitCell(input_array)
+            self["value_raw"] = input_array
         else:
-            self["value"] = UnitCell(np.eye(3))
+            self["value_raw"] = np.eye(3)
 
+        self["value"] = UnitCell(self["value_raw"])
         self.error_status = "OK"

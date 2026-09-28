@@ -143,7 +143,7 @@ class TrajectoryEditor(IJob):
                 self._input_trajectory._trajectory
             )
 
-            self._new_unit_cell = np.array(self.configuration["unit_cell"]["value"])
+            self._new_unit_cell = self.configuration["unit_cell"]["value_raw"]
             self._input_trajectory._trajectory.unit_cells_raw = np.tile(
                 self._new_unit_cell, (len(self._input_trajectory), 1, 1)
             )
