@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from enum import auto
 
 import numpy as np
@@ -49,6 +49,13 @@ class GlobalNormalise(Op):
         SUM = auto()
         AVERAGE = auto()
 
+    OPERATIONS: dict[Normalisation, Callable[[FloatArray], np.floating]] = {
+        Normalisation.MAX: np.nanmax,
+        Normalisation.AVERAGE: np.nanmean,
+        Normalisation.ABSMAX: lambda x: np.nanmax(np.abs(x)),
+        Normalisation.SUM: lambda x: np.sum(np.nan_to_num(x)),
+    }
+
     def __init__(self, *args, mode: str, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.mode = mode
@@ -81,19 +88,8 @@ class GlobalNormalise(Op):
 
     def stats_calculate(self, datasets: Iterable[FloatArray]) -> None:
         """Pre-compute stats from all targets."""
-        scale_factors = []
-        for dataset in datasets:
-            match self.mode:
-                case self.Normalisation.AVERAGE:
-                    scale_factors.append(np.nanmean(dataset))
-                case self.Normalisation.MAX:
-                    scale_factors.append(np.nanmax(dataset))
-                case self.Normalisation.SUM:
-                    scale_factors.append(np.sum(np.nan_to_num(dataset)))
-                case self.Normalisation.ABSMAX:
-                    scale_factors.append(np.nanmax(np.abs(dataset)))
-
-        self.scale_factor = max(scale_factors)
+        op = self.OPERATIONS[self.mode]
+        self.scale_factor = max(op(dataset) for dataset in datasets)
 
     def apply_single(self, dataset: FloatArray) -> FloatArray:
         return dataset * (1 / self.scale_factor)
