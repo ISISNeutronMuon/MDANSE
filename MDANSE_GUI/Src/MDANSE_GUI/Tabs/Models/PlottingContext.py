@@ -1118,7 +1118,7 @@ class PlottingContext(QStandardItemModel):
         if newkey in self._datasets:
             return
 
-        self._datasets[newkey] = new_dataset
+        self._datasets[newkey] = copy.deepcopy(new_dataset)
         next_colour, inverted = self.next_colour()
         items = [
             QStandardItem(str(x))

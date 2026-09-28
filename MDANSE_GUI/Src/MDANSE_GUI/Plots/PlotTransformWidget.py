@@ -364,11 +364,12 @@ class PlotTransformWidget(QDialog):
         self._local_pc.clear()
 
         self.orig_ds = self._plotting_context._datasets[ds_label]
-        self.current_ds = copy.copy(self.orig_ds)
+        # add_dataset creates deepcopy
         self._local_pc.add_dataset(
-            self.current_ds,
+            self.orig_ds,
             self._plotting_context.datasets()[ds_label],
         )
+        self.current_ds = self._local_pc._datasets[ds_label]
 
         limit = self._local_pc.item(0, plotting_column_index["Use it?"]).text()
 
