@@ -97,7 +97,7 @@ def build_parser():
     parser.add_argument(
         "--no-save-settings",
         action="store_true",
-        help="Do not save settings.",
+        help="Do not automatically save settings.",
     )
     parser.add_argument(
         "-L",
