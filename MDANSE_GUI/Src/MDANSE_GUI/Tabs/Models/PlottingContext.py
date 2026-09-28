@@ -37,7 +37,6 @@ from matplotlib.markers import MarkerStyle
 from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
-from typing_extensions import Unpack
 
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
@@ -46,7 +45,7 @@ from MDANSE_GUI.Plots.Ops.Op import Op, PreApply
 from MDANSE_GUI.Utils import parse_token
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable, Iterator, Sequence
+    from collections.abc import Generator, Iterable, Sequence
 
     import h5py
 
@@ -725,6 +724,7 @@ class SingleDataset:
         FloatArray
             Curve to plot.
         """
+
         curves = self._curves_vs_axis(
             axis_label,
             max_limit,
@@ -796,7 +796,7 @@ class SingleDataset:
                     f"Cannot handle {self._data.ndim}-dimensional data."
                 )
 
-    def _apply_ops_plane(self, planes: Iterator[Plane]) -> Generator[Plane]:
+    def _apply_ops_plane(self, planes: Iterable[Plane]) -> Generator[Plane]:
         """Apply operations to planes."""
         if self._data_limits is None:
             return
@@ -1198,7 +1198,7 @@ class PlottingContext(QStandardItemModel):
         planes_per_dataset: int | None = None,
         *,
         raw: bool = False,
-    ) -> Generator[tuple[PlotArgs, Unpack[Plane]]]:
+    ) -> Generator[tuple[PlotArgs, *Plane]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 
@@ -1213,7 +1213,7 @@ class PlottingContext(QStandardItemModel):
         curves_per_dataset: int | None = None,
         *,
         raw: bool = False,
-    ) -> Generator[Generator[tuple[PlotArgs, Unpack[Curve]]]]:
+    ) -> Generator[Generator[tuple[PlotArgs, *Curve]]]:
         for databundle in self.datasets().values():
             ds = databundle.dataset
 

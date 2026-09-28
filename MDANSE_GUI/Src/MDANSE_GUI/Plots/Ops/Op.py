@@ -18,9 +18,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from asyncio import run
 from collections.abc import Callable, Iterable
-from typing import Any, ClassVar, NamedTuple, Protocol, runtime_checkable
+from typing import Any, ClassVar, NamedTuple, Protocol, Self, runtime_checkable
 
-from typing_extensions import Self, TypeIs
+from typing_extensions import TypeIs
 
 from MDANSE.Core.RegisterFactory import RegisterFactory
 from MDANSE.IO.IOUtils import UCDict
