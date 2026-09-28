@@ -25,7 +25,7 @@ from MDANSE_GUI.Tabs.Visualisers.Action import Action
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
 if TYPE_CHECKING:
-    from qtpy.QtGui import QMouseEvent
+    from qtpy.QtGui import QMouseEvent, QStandardItem
 
 
 class ActionsTree(QTreeView):
@@ -51,9 +51,14 @@ class ActionsTree(QTreeView):
 
     def on_select_action(self, index: QModelIndex):
         model = self.model()
-        item = model.itemFromIndex(index)
+        item: QStandardItem = model.itemFromIndex(index)
         text = item.text()
-        LOG.debug(f"tree: clicked on {text}")
+        is_a_group = item.data(role=model.group_role)
+        LOG.debug(
+            f"tree: clicked on {text}, which is {'a group' if is_a_group else 'an action'}"
+        )
+        if is_a_group:
+            return
         self.jobname_selected.emit(text)
 
     @Slot(QModelIndex)
