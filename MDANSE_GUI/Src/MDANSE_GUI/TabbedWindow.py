@@ -21,8 +21,6 @@ from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from qtpy.QtCore import QMessageLogger, QSize, Qt, QTimer, QUrl, Signal, Slot
-from qtpy.QtGui import QCloseEvent, QDesktopServices, QIcon
 from qtpy.QtCore import (
     QEvent,
     QMessageLogger,
@@ -34,7 +32,7 @@ from qtpy.QtCore import (
     Signal,
     Slot,
 )
-from qtpy.QtGui import QDesktopServices
+from qtpy.QtGui import QCloseEvent, QDesktopServices, QIcon
 from qtpy.QtWidgets import (
     QAction,
     QApplication,
@@ -92,7 +90,7 @@ class RecentFileAction(QAction):
     def __init__(
         self,
         *args,
-        file_path: str,
+        file_path: str | None = None,
         external_function: Callable | None = None,
         **kwargs,
     ):
@@ -167,14 +165,9 @@ class MDANSEMainWindow(QMainWindow):
         self.style_selector.icon_swap.connect(self.invertToolbar)
 
         if app_instance is not None:
-<<<<<<< HEAD
             self.app_instance = app_instance
             app_instance.aboutToQuit.connect(self._session.save)
-        self._session.load()
-=======
-            app_instance.aboutToQuit.connect(self._settings.save)
 
->>>>>>> a68ee9c99 (Initial settings rework)
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
         self._tabs["Plot Creator"]._visualiser.data_for_plotting.connect(
@@ -229,7 +222,7 @@ class MDANSEMainWindow(QMainWindow):
 
         This is run instead of shutting down the GUI.
         """
-        _ = QMessageBox.warning(
+        QMessageBox.warning(
             self,
             "Some tasks haven't finished",
             "There are unfinished tasks present in the 'Running jobs' tab, "
@@ -387,9 +380,8 @@ class MDANSEMainWindow(QMainWindow):
         self.setupMenubar()
         self.setupToolbar()
 
-<<<<<<< HEAD
-    def startSettings(self, init_settings):
-        self.settings = init_settings
+    def startSettings(self, init_settings: QSettings | None):
+        self.window_settings = init_settings
         self.restore_window_geometry()
         self.settings_timer = QTimer()
         self.settings_timer.timeout.connect(self.saveSettings)
@@ -399,31 +391,17 @@ class MDANSEMainWindow(QMainWindow):
 
     def restore_window_geometry(self):
         """Set the main window geometry based on the parameters stored in QSettings."""
-        if self.settings is not None:
-            self.settings.beginGroup("MainWindow")
-            geo = self.settings.value("geometry")
-=======
-    def startSettings(self, init_settings: QSettings | None):
-        self.window_settings = init_settings
-        if self.window_settings is not None:
-            self.window_settings.beginGroup("MainWindow")
-            geo = self.window_settings.value("geometry")
->>>>>>> a68ee9c99 (Initial settings rework)
-            if geo:
-                self.restoreGeometry(geo)
-            state = self.window_settings.value("state")
-            if state:
-                self.restoreState(state)
-<<<<<<< HEAD
-            self.settings.endGroup()
-=======
-            self.window_settings.endGroup()
-        self.settings_timer = QTimer()
-        self.settings_timer.timeout.connect(self.saveSettings)
-        self.settings_timer.setInterval(2000)
-        self.settings_timer.start()
-        self.destroyed.connect(self.settings_timer.stop)
->>>>>>> a68ee9c99 (Initial settings rework)
+        if self.window_settings is None:
+            return
+
+        self.window_settings.beginGroup("MainWindow")
+        geo = self.window_settings.value("geometry")
+        if geo:
+            self.restoreGeometry(geo)
+        state = self.window_settings.value("state")
+        if state:
+            self.restoreState(state)
+        self.window_settings.endGroup()
 
     def setupMenubar(self):
         menubar = QMenuBar()
@@ -450,18 +428,12 @@ class MDANSEMainWindow(QMainWindow):
         )
         file_group.addMenu(self.recent_plot_selection_file_menu)
         file_group.addSeparator()
-<<<<<<< HEAD
         if self.will_create_systray_icon:
             self.exitAct = QAction("Hide Window", parent=menubar)
             self.exitAct.triggered.connect(self.hide)
         else:
             self.exitAct = QAction("Exit", parent=menubar)
             self.exitAct.triggered.connect(self.close_only_if_finished)
-=======
-
-        self.exitAct = QAction("Exit", parent=menubar)
-        self.exitAct.triggered.connect(self.shut_down)
->>>>>>> a68ee9c99 (Initial settings rework)
         file_group.addAction(self.exitAct)
 
         self.settingsAct = QAction("User Settings", parent=menubar)
@@ -791,14 +763,8 @@ class MDANSEMainWindow(QMainWindow):
 
     @Slot()
     def saveSettings(self):
-<<<<<<< HEAD
         if not self.isVisible() or self.isMinimized():
             return
-        self.settings.beginGroup("MainWindow")
-        self.settings.setValue("geometry", self.saveGeometry())
-        self.settings.setValue("state", self.saveState())
-        self.settings.endGroup()
-=======
         self.window_settings.beginGroup("MainWindow")
         self.window_settings.setValue("geometry", self.saveGeometry())
         self.window_settings.setValue("state", self.saveState())
@@ -806,4 +772,3 @@ class MDANSEMainWindow(QMainWindow):
 
     def reportError(self, text: str):
         LOG.error(text)
->>>>>>> a68ee9c99 (Initial settings rework)

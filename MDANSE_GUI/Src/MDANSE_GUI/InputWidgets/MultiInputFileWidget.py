@@ -37,7 +37,9 @@ class MultiInputFileWidget(InputFileWidget):
 
     @Slot()
     def valueFromDialog(self):
-        self.default_path = Settings.get_opt_w_default("paths", self._job_name, self.default_path)
+        self.default_path = Settings.get_opt_w_default(
+            "paths", self._job_name, self.default_path
+        )
 
         new_value = self._file_dialog(
             self.parent(),
@@ -52,9 +54,7 @@ class MultiInputFileWidget(InputFileWidget):
             self._field.setText(f"[{', '.join(values)}]")
             self.updateValue()
             try:
-                LOG.info(
-                    f"Settings path of {self._job_name} to {as_path[0].parent}"
-                )
+                LOG.info(f"Settings path of {self._job_name} to {as_path[0].parent}")
                 Settings.set_opt("paths", self._job_name, as_path[0].parent)
             except Exception:
                 LOG.error(
