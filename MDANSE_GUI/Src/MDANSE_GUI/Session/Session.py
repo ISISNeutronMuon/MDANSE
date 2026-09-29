@@ -42,7 +42,7 @@ class Session(QObject):
 
         self._settings = settings or GUISettings(save=False)
         self.model = self._settings
-        self._reserved_filenames: set[Path] = set()
+        self._reserved_filenames: list[Path] = []
 
     def save(self, filename: Path | None = None) -> None:
         Settings.save(filename)
