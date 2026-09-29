@@ -58,6 +58,7 @@ class ActionsTree(QTreeView):
             f"tree: clicked on {text}, which is {'a group' if is_a_group else 'an action'}"
         )
         if is_a_group:
+            self.jobname_selected.emit("")
             return
         self.jobname_selected.emit(text)
 
