@@ -177,3 +177,6 @@ class MoleculeWidget(WidgetBase):
         if mol_key in self.mol_dict:
             return mol_key
         return None
+
+    def set_value_manually(self, new_input: str):
+        self._field.setCurrentText(new_input)

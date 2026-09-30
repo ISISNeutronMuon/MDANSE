@@ -165,6 +165,9 @@ class InstrumentResolutionWidget(WidgetBase):
         self.helper._panel.update_fields((function, params))
         return (function, params)
 
+    def set_value_manually(self, new_input: tuple[str, dict[str, float]]):
+        self.change_function(new_input[0], new_input[1])
+
     @Slot(dict)
     def set_parameters_from_dialog(self, input: dict):
         peak_function = input.get("function")

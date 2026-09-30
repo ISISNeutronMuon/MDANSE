@@ -129,3 +129,6 @@ class OutputFilesWidget(WidgetBase):
         log_level = self.logs_combo.currentText()
 
         return (str(Path(filename).absolute()), formats, log_level)
+
+    def set_value_manually(self, new_input: str):
+        self._field.setText(new_input[0])

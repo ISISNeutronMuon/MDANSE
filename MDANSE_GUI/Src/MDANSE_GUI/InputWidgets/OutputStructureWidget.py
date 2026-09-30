@@ -117,3 +117,8 @@ class OutputStructureWidget(WidgetBase):
         format = self.format_box.currentText()
         log_level = self.logs_combo.currentText()
         return (str(Path(filename).absolute()), format, log_level)
+
+    def set_value_manually(self, new_input: tuple[str, str, str]):
+        self._field.setText(new_input[0])
+        self.format_box.setCurrentText(new_input[1])
+        self.logs_combo.setCurrentText(new_input[2])

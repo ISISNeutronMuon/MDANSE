@@ -102,3 +102,7 @@ class OptionalFloatWidget(WidgetBase):
         LOG.info(f"Setting {default} as placeholder text")
         self._field.setPlaceholderText(str(self._default_value))
         self._configurator.configure(default)
+
+    def set_value_manually(self, new_input: float):
+        if new_input:
+            self._field.setText(str(new_input))

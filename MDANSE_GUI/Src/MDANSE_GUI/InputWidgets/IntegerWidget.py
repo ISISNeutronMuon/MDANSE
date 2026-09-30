@@ -74,3 +74,6 @@ class IntegerWidget(WidgetBase):
         else:
             self._empty = False
         return strval
+
+    def set_value_manually(self, new_input: int):
+        self._field.setText(str(new_input))
