@@ -36,7 +36,6 @@ from MDANSE.MolecularDynamics.UnitCell import (
     NO_CELL,
     UnitCell,
 )
-from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -46,6 +45,7 @@ if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Configuration import (
         _Configuration,
     )
+    from MDANSE.util_types import FloatArray
 
 
 class TrajDataArray(Enum):
@@ -65,6 +65,7 @@ class TrajectoryFile(ABC):
     def __init__(self) -> None:
         self._min_span = None
         self._max_span = None
+        self.unit_cells_raw: FloatArray | None = None
 
     def __contains__(self, key: str) -> bool:
         return self.has_variable(key)
