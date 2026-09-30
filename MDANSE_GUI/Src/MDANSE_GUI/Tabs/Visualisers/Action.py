@@ -213,24 +213,33 @@ class Action(QWidget):
         self._widgets_in_layout = {}
         self._preview_box = None
 
-    def update_panel(self, job_name: str) -> None:
+    def update_panel(self, job_name: str | None = None) -> None:
         """Sets all the widgets for the selected job.
+
+        If an item that is not a job is selected, it will clear the widgets.
+        If no job_name is given as input, it will use the name that was selected last.
+        This is meant to preserve the old behaviour where the job widgets appear if the
+        job had been selected before a trajectory was loaded.
 
         Parameters
         ----------
-        job_name : str
-            The job name.
+        job_name : str | None
+            The job name. If None, re-use the last name. If empty string, clear panel and return.
         """
         LOG.debug(
             "Old job type %s, new job type %s",
             type(self._job_instance).__name__,
             job_name,
         )
+        if job_name is None:
+            job_name = self._job_name
         if self._job_instance is None or type(self._job_instance).__name__ != job_name:
             self.clear_panel()
             self._has_been_initialised = False
 
             self._job_name = job_name
+            if not job_name:
+                return
             if self._default_path is None or Path(self._default_path).samefile(Path()):
                 self._default_path = str(Path(self._parent_tab.get_path(job_name)))
             try:

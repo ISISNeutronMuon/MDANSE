@@ -27,8 +27,11 @@ from MDANSE.IO.IOUtils import UCDict
 
 if TYPE_CHECKING:
     from MDANSE.Core.RegisterFactory import RegisterFactory
+    from MDANSE.Framework.Configurable import Configurable
     from MDANSE.Framework.Converters.Converter import Converter
-    from MDANSE.Framework.Parameters.Parameters import Configurable
+
+
+IS_GROUP_ROLE = Qt.ItemDataRole.UserRole + 1
 
 
 class JobTree(QStandardItemModel):
@@ -65,6 +68,7 @@ class JobTree(QStandardItemModel):
         self._by_ancestor = {}  # dict of list[int]
 
         self.nodecounter = 0  # each node is given a unique number
+        self.group_role = IS_GROUP_ROLE
 
         self.populateTree(parent_class=parent_class, filter=filter)
 
@@ -117,6 +121,7 @@ class JobTree(QStandardItemModel):
         new_number = self.nodecounter + 1
         self.nodecounter += 1
         new_node.setData(new_number, role=Qt.ItemDataRole.UserRole)
+        new_node.setData(0, role=IS_GROUP_ROLE)
         self._nodes[new_number] = new_node
         self._values[new_number] = thing
         self._docstrings[new_number] = thing.__doc__
@@ -154,6 +159,7 @@ class JobTree(QStandardItemModel):
         for cat_string in category_tuple:
             if cat_string not in self._categories:
                 current_node = QStandardItem(cat_string)
+                current_node.setData(1, role=IS_GROUP_ROLE)
                 parent.appendRow(current_node)
                 parent = current_node
                 self._categories[cat_string] = current_node

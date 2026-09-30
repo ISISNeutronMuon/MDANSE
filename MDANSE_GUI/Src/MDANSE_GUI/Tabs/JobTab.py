@@ -179,11 +179,7 @@ class JobTab(GeneralTab):
         if traj_instance is None or isinstance(traj_instance, str):
             return
         self.action.set_trajectory(trajectory=traj_instance)
-        current_item = self._core.current_item()
-        if current_item is not None:
-            # we only update the widget if a job is selected from the
-            # actions tree
-            self.action.update_panel(current_item.text())
+        self.action.update_panel()
 
     @Slot(int)
     def set_current_instrument(self, index: int):
