@@ -247,6 +247,8 @@ class TabbedWindow(QMainWindow):
             return
         if not self.isVisible() or self.isMinimized():
             self.showNormal()
+        self.activateWindow()
+        self.raise_()
 
     @Slot(object)
     def systray_message_job_finished(self, job_details: tuple[str, str]):
