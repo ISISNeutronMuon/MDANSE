@@ -56,10 +56,10 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 class ComboBoxDelegate(QStyledItemDelegate):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.items = []
+        self.items = ["None"]
 
     def setItems(self, items: Iterable[str]) -> None:
-        self.items = list(items)
+        self.items = ["None", *items]
 
     @override
     def createEditor(
@@ -83,7 +83,10 @@ class ComboBoxDelegate(QStyledItemDelegate):
 
 
 class UnitBox(QStyledItemDelegate):
-    UNITS = tuple(_COMMON_DIMS.get(inp, _COMMON_DIMS["au"]) for inp in ExtXYZColumnMapConfigurator.KEY_DEFAULTS)
+    UNITS = tuple(
+        _COMMON_DIMS.get(inp, _COMMON_DIMS["au"])
+        for inp in ExtXYZColumnMapConfigurator.ARRAY_ALIASES
+    )
 
     class UnitLE(QLineEdit):
         def __init__(self, *args, dims: Dims, **kwargs):
@@ -135,9 +138,8 @@ class UnitBox(QStyledItemDelegate):
 
 
 class ColumnAssignModel(QStandardItemModel):
-    KNOWN_PROPS: ClassVar[tuple[str, ...]] = (
-        *ExtXYZColumnMapConfigurator.KEY_DEFAULTS,
-        "None",
+    KNOWN_PROPS: ClassVar[tuple[str, ...]] = tuple(
+        ExtXYZColumnMapConfigurator.ARRAY_ALIASES
     )
 
     def __init__(self, *args, config: ExtXYZColumnMapConfigurator, **kwargs):
@@ -146,26 +148,32 @@ class ColumnAssignModel(QStandardItemModel):
         self.delegate.setItems(())
         self.unit_delegate = UnitBox()
         self.delegate.setItems(())
-        self.setHorizontalHeaderLabels(["Property", "Component:File", "Units"])
+        self.clear()
         self.config = config
+
+    @override
+    def clear(self) -> None:
+        super().clear()
+        self.setHorizontalHeaderLabels(["Property", "Component:File", "Units"])
 
     def update(self):
         self.config.configure()
         self.clear()
-        self.delegate.setItems(self.config.columns)
-        for name, comp in self.config.mapping.items():
+        self.delegate.setItems(map(str, self.config.columns))
+        for (name, comp), unit_ in zip(
+            self.config.mapping.items(), self.config.units.values(), strict=True
+        ):
             label = QStandardItem(name)
             label.setEditable(False)
-            val = QStandardItem(comp)
-            unit = QStandardItem("")
+            val = QStandardItem(str(comp))
+            unit = QStandardItem(unit_)
             self.appendRow((label, val, unit))
 
-    @property
     def settings(self) -> dict[str, str | None]:
         conf = {
             self.item(row, 0).text(): (
                 elem if elem != "None" else None,
-                self.item(row, 2).text() or "au",
+                self.item(row, 2).text() or "unitless",
             )
             for row in range(self.rowCount())
             if (elem := self.item(row, 1).text())
@@ -205,14 +213,20 @@ class ExtXYZColumnWidget(WidgetBase):
         self.view.setModel(self.model)
         self.view.setItemDelegateForColumn(1, self.model.delegate)
         self.view.setItemDelegateForColumn(2, self.model.unit_delegate)
+        sp = QSizePolicy()
+        sp.setVerticalPolicy(QSizePolicy.Policy.MinimumExpanding)
+        sp.setHorizontalPolicy(QSizePolicy.Policy.Preferred)
+        self.view.setSizePolicy(sp)
+        self.view.resizeColumnsToContents()
 
         self._layout.addWidget(self.view)
         self._file_widget.value_changed.connect(self.update)
 
     def get_widget_value(self) -> dict[str, str | None]:
-        return self.model.settings
+        return self.model.settings()
 
     @Slot()
     def update(self) -> None:
         if self._file_widget._configurator.valid:
             self.model.update()
+        self.view.resizeColumnsToContents()

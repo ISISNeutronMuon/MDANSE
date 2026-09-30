@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import traceback
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Generator
 from typing import Any, Generic, TypeVar
 
 from mdtraj.utils import ilen
@@ -81,7 +81,7 @@ class MultiFileWithAtomDataConfigurator(MultiInputFileConfigurator, Generic[P]):
 
         try:
             self.parser_instances: dict[str, P] = {
-                value:
+                value.name:
                 self.parser(value) for value in self["values"]
             }
         except Exception as e:
@@ -102,16 +102,18 @@ class MultiFileWithAtomDataConfigurator(MultiInputFileConfigurator, Generic[P]):
         return ilen(first(self.parser_instances.values()).frames)
 
     @property
-    def filenames(self) -> Iterable[str]:
+    def filenames(self) -> Generator[str]:
         yield from self["filenames"]
 
     @property
-    def frames(self) -> Iterable[Any]:
+    def frames(self) -> Generator[dict[str, Any]]:
         """Yield frames."""
-        yield from zip(*(p.frames for p in self.parser_instances.values()), strict=False)
+        for frames in zip(*(p.frames for p in self.parser_instances.values()), strict=False):
+            yield dict(zip(self.parser_instances, frames, strict=True))
+
 
     @property
-    def atom_labels(self) -> Iterable[AtomLabel]:
+    def atom_labels(self) -> Generator[AtomLabel]:
         """Yields atom labels"""
         for parser in self.parser_instances.values():
             yield from parser.atom_labels
