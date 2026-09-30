@@ -63,11 +63,12 @@ class MultiInputFileConfigurator(IConfigurator):
             else:
                 values = []
 
-        elif isinstance(values, list) and not all(isinstance(value, str) for value in values):
-            self.error_status = "Input values should be a list of str."
-            return
+        if isinstance(values, list):
+            if not all(isinstance(value, str) for value in values):
+                self.error_status = "Input values should be a list of str."
+                return
         else:
-            self.error_status = "Not possible to evaluate input values as a list."
+            self.error_status = "Not possible to evaluate input values as a list.."
             return
 
         values = [PLATFORM.get_path(value) for value in values]

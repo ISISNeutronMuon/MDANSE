@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Generic, Literal, TypeVar
+from typing import TYPE_CHECKING, Literal
 
 from more_itertools import first_true
 from qtpy.QtCore import QObject, Signal, Slot
@@ -30,15 +30,16 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
 Layouts = Literal["QHBoxLayout", "QVBoxLayout", "QGridLayout"]
 Bases = Literal["QWidget", "QGroupBox"]
 
-Conf = TypeVar("Conf", bound=IConfigurator)
 
-class WidgetBase(QWidget, Generic[Conf]):
+class WidgetBase(QObject):
     """Object to serve as an ABC to GUI widgets in MDANSE.
 
     Parameters
@@ -63,7 +64,7 @@ class WidgetBase(QWidget, Generic[Conf]):
         self,
         parent: QObject | None = None,
         *args,
-        configurator: Conf,
+        configurator: IConfigurator,
         label: str = "",
         tooltip: str = "",
         base_type: Bases = "QGroupBox",
