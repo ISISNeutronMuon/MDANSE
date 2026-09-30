@@ -49,6 +49,7 @@ ALL_JOBS = [
     "CP2K",
     "Forcite",
     "DL_POLY",
+    "ExtXYZ",
     "Gromacs",
     "LAMMPS",
     "MDAnalysis",

@@ -37,7 +37,6 @@ Layouts = Literal["QHBoxLayout", "QVBoxLayout", "QGridLayout"]
 Bases = Literal["QWidget", "QGroupBox"]
 Config = TypeVar("Config", bound=IConfigurator)
 
-Conf = TypeVar("Conf", bound=IConfigurator)
 
 class WidgetBase(QObject, Generic[Config]):
     """Object to serve as an ABC to GUI widgets in MDANSE.
@@ -64,7 +63,7 @@ class WidgetBase(QObject, Generic[Config]):
         self,
         parent: QObject | None = None,
         *args,
-        configurator: Conf,
+        configurator: Config,
         label: str = "",
         tooltip: str = "",
         base_type: Bases = "QGroupBox",
