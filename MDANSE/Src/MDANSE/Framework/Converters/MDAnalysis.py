@@ -240,10 +240,10 @@ class MDAnalysis(Converter):
             if self.configuration["fold"]["value"]:
                 conf.fold_coordinates()
 
-        if vel := getattr(self.u.trajectory.ts, "velocities", None):
+        if (vel := getattr(self.u.trajectory.ts, "velocities", None)) is not None:
             conf["velocities"] = vel * measure(1.0, "ang/ps").toval("nm/ps")
 
-        if force := getattr(self.u.trajectory.ts, "forces", None):
+        if (force := getattr(self.u.trajectory.ts, "forces", None)) is not None:
             conf["gradients"] = force * measure(
                 1.0, "kJ/mol ang", equivalent=True
             ).toval("Da nm/ps2")
