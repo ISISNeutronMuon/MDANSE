@@ -228,7 +228,7 @@ class TabbedWindow(QMainWindow):
         self.system_tray_icon = QSystemTrayIcon(self.icon_object)
         self.tray_menu = QMenu()
         for label, func_slot in [
-            ("Show GUI window", self.showNormal),
+            ("Show GUI window", self.show_window_right_size),
             (None, None),
             ("Quit", self.close_from_systray),
         ]:
@@ -245,8 +245,16 @@ class TabbedWindow(QMainWindow):
         """Show the main window when the system tray icon is double-clicked."""
         if reason != QSystemTrayIcon.ActivationReason.DoubleClick:
             return
+        self.show_window_right_size()
+
+    def show_window_right_size(self):
+        """Restore, activate and raise the main window.
+
+        If possible, use the saved geometry information to set the window back
+        to its shape before it was closed or minimised."""
         if not self.isVisible() or self.isMinimized():
             self.showNormal()
+            self.restore_window_geometry()
         self.activateWindow()
         self.raise_()
 
@@ -363,6 +371,15 @@ class TabbedWindow(QMainWindow):
 
     def startSettings(self, init_settings):
         self.settings = init_settings
+        self.restore_window_geometry()
+        self.settings_timer = QTimer()
+        self.settings_timer.timeout.connect(self.saveSettings)
+        self.settings_timer.setInterval(2000)
+        self.settings_timer.start()
+        self.destroyed.connect(self.settings_timer.stop)
+
+    def restore_window_geometry(self):
+        """Set the main window geometry based on the parameters stored in QSettings."""
         if self.settings is not None:
             self.settings.beginGroup("MainWindow")
             geo = self.settings.value("geometry")
@@ -372,11 +389,6 @@ class TabbedWindow(QMainWindow):
             if state:
                 self.restoreState(state)
             self.settings.endGroup()
-        self.settings_timer = QTimer()
-        self.settings_timer.timeout.connect(self.saveSettings)
-        self.settings_timer.setInterval(2000)
-        self.settings_timer.start()
-        self.destroyed.connect(self.settings_timer.stop)
 
     def setupMenubar(self):
         menubar = QMenuBar()
@@ -736,6 +748,8 @@ class TabbedWindow(QMainWindow):
 
     @Slot()
     def saveSettings(self):
+        if not self.isVisible() or self.isMinimized():
+            return
         self.settings.beginGroup("MainWindow")
         self.settings.setValue("geometry", self.saveGeometry())
         self.settings.setValue("state", self.saveState())
