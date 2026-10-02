@@ -32,9 +32,7 @@ except ImportError:
     extxyz_available = False
 
 
-
 class ExtXYZFile(Parser):
-
     def __init__(self, filename: Path | str):
         self.filename = filename
 

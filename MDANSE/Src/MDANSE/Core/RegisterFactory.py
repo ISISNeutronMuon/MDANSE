@@ -26,6 +26,7 @@ P = ParamSpec("P")
 T_co = TypeVar("T_co", bound="RegisterFactory", covariant=True)
 T = TypeVar("T")
 
+
 class RegisterFactory(Generic[T_co]):
     """
     Factory requiring manual registration to data.

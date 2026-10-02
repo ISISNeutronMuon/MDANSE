@@ -121,7 +121,7 @@ class ExtXYZColumnMapConfigurator(IConfigurator):
             return
         else:
             isinfo = {*map(str, infos)}
-            print(value)
+
             self.mapping = {
                 key: Reference.from_str(val[0], info=str(val[0]) in isinfo)
                 if val[0] is not None

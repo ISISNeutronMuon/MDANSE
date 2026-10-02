@@ -113,7 +113,7 @@ class UnitBox(QStyledItemDelegate):
 
     @override
     def createEditor(
-        self, parent: QWidget | None, option: QStyleOptionViewItem, index: QModelInd3ex
+        self, parent: QWidget | None, option: QStyleOptionViewItem, index: QModelIndex
     ) -> QComboBox:
         dims = self.UNITS[index.row()]
         editor = QComboBox(parent)
