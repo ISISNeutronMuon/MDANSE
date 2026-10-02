@@ -167,7 +167,6 @@ class ExtXYZ(Converter):
         frames = next(self.frames)
 
         # Read the information in the frame
-
         units = {
             "coords": measure(1.0, self.units["positions"]).toval("nm"),
             "velocities": measure(1.0, self.units["velocities"]).toval("nm / ps"),
@@ -178,7 +177,7 @@ class ExtXYZ(Converter):
             "time": measure(1.0, self.units["time"]).toval("ps"),
         }
 
-        match self.column_mapping["time"]:
+        match self.column_mapping.get("time"):
             case Reference(key=key, file=file, info=True):
                 time_step = frames[file].info[key] * units["time"]
             case None:

@@ -334,6 +334,25 @@ def _converter_test(
             },
         ),
         (
+            "ExtXYZ",
+            "extxyz_multifile.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/configuration/gradients",
+                "/time",
+            ),
+            {
+                "xyz_file": list(map(str, (cp2k_srtio3_pos, cp2k_srtio3_vel, cp2k_srtio3_frc))),
+                "column_mapping": {
+                    "species": (f"species:{cp2k_srtio3_pos.name}", "unitless"),
+                    "positions": (f"pos:{cp2k_srtio3_pos.name}", "ang"),
+                    "velocities": (f"pos:{cp2k_srtio3_vel.name}", "ang / ps"),
+                    "forces": (f"pos:{cp2k_srtio3_frc.name}", "Da ang / ps2"),
+                }
+            }
+        ),
+        (
             "NAMD",
             "namd.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),

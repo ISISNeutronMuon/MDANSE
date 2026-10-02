@@ -121,13 +121,17 @@ class ExtXYZColumnMapConfigurator(IConfigurator):
             return
         else:
             isinfo = {*map(str, infos)}
+            print(value)
             self.mapping = {
                 key: Reference.from_str(val[0], info=str(val[0]) in isinfo)
                 if val[0] is not None
                 else None
                 for key, val in value.items()
             }
-            self.units = {key: val[1] for key, val in value.items()}
+            self.units = {
+                key: value[key][1] if key in value else default._uname
+                for key, default in self.UNIT_DEFAULTS.items()
+            }
 
         if mismatch := set(self.mapping.values()) - {
             *self.columns,
