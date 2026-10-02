@@ -27,6 +27,7 @@ from .InputFileConfigurator import InputFileConfigurator
 
 P = TypeVar("P", bound=Parser)
 
+
 @IConfigurator.register("FileWithAtomDataConfigurator")
 class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
     """

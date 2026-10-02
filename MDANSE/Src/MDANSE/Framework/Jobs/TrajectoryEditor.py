@@ -139,7 +139,9 @@ class TrajectoryEditor(IJob):
         )
 
         if self.configuration["unit_cell"]["apply"]:
-            self.configuration["unit_cell"].update_trajectory_information(self._input_trajectory._trajectory)
+            self.configuration["unit_cell"].update_trajectory_information(
+                self._input_trajectory._trajectory
+            )
 
             self._new_unit_cell = self.configuration["unit_cell"]["value_raw"]
             self._input_trajectory._trajectory.unit_cells_raw = np.tile(

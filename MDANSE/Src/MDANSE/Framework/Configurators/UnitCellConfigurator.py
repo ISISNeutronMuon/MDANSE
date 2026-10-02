@@ -105,7 +105,6 @@ class UnitCellConfigurator(IConfigurator):
         self._original_input = value
         self["apply"] = value[1]
         if self["apply"]:
-
             try:
                 input_array = np.array(value[0], dtype=float)
             except Exception:

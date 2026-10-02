@@ -81,8 +81,7 @@ class MultiFileWithAtomDataConfigurator(MultiInputFileConfigurator, Generic[P]):
 
         try:
             self.parser_instances: dict[str, P] = {
-                value.name:
-                self.parser(value) for value in self["values"]
+                value.name: self.parser(value) for value in self["values"]
             }
         except Exception as e:
             self.error_status = f"File parsing error {e}: {traceback.format_exc()}."
@@ -108,9 +107,10 @@ class MultiFileWithAtomDataConfigurator(MultiInputFileConfigurator, Generic[P]):
     @property
     def frames(self) -> Generator[dict[str, Any]]:
         """Yield frames."""
-        for frames in zip(*(p.frames for p in self.parser_instances.values()), strict=False):
+        for frames in zip(
+            *(p.frames for p in self.parser_instances.values()), strict=False
+        ):
             yield dict(zip(self.parser_instances, frames, strict=True))
-
 
     @property
     def atom_labels(self) -> Generator[AtomLabel]:
@@ -126,4 +126,6 @@ class MultiFileWithAtomDataConfigurator(MultiInputFileConfigurator, Generic[P]):
         list[AtomLabel]
             An ordered list of atom labels.
         """
-        return list({label for p in self.parser_instances.values() for label in p.labels})
+        return list(
+            {label for p in self.parser_instances.values() for label in p.labels}
+        )

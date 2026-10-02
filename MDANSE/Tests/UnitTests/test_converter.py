@@ -353,6 +353,28 @@ def _converter_test(
             }
         ),
         (
+            "ExtXYZ",
+            "extxyz_singlefile.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/configuration/gradients",
+                "/unit_cell",
+                "/time",
+            ),
+            {
+                "xyz_file": [str(ase_janus)],
+                "column_mapping": {
+                    "species": (f"species:{ase_janus.name}", "unitless"),
+                    "positions": (f"pos:{ase_janus.name}", "ang"),
+                    "momenta": (f"momenta:{ase_janus.name}", "janus_mom"),
+                    "masses": (f"masses:{ase_janus.name}", "Da"),
+                    "forces": (f"pos:{ase_janus.name}", "eV / ang"),
+                    "time": (f"time:{ase_janus.name}", "fs"),
+                }
+            }
+        ),
+        (
             "NAMD",
             "namd.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),

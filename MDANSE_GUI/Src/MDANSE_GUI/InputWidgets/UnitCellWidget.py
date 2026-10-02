@@ -37,8 +37,6 @@ class UnitCellWidget(WidgetBase):
         self._layout.addWidget(self._apply_box, 2, 0)
         self._array_fields = {}
 
-
-
         try:
             self._configurator.update_trajectory_information(
                 self._configurator.configurable[
