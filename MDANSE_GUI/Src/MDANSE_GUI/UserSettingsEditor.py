@@ -29,6 +29,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.MLogging import LOG
+from MDANSE_GUI.Session.Session import Session
 
 
 class SettingsView(QTreeView):
@@ -74,7 +75,7 @@ class SettingsView(QTreeView):
 
 
 class UserSettingsEditor(QDialog):
-    def __init__(self, *args, current_session=None, **kwargs):
+    def __init__(self, *args, current_session: Session | None = None, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle("MDANSE User Settings Editor")
@@ -83,46 +84,38 @@ class UserSettingsEditor(QDialog):
 
         self.setLayout(layout)
 
-        self.filename_widget = QComboBox(self)
-        layout.addWidget(self.filename_widget)
         self._session = current_session
 
         self.viewer = SettingsView(self)
         self.viewer.setAnimated(True)
         layout.addWidget(self.viewer)
 
+        if self._session:
+            self.data_model = self._session._settings
+            self.proxy_model = QSortFilterProxyModel(self)
+            self.proxy_model.setSourceModel(self.data_model)
+            self.proxy_model.sort(0, Qt.SortOrder.AscendingOrder)
+            self.viewer.setModel(self.proxy_model)
+            self.expand_columns()
+
         self.writeout_button = QPushButton("Save settings", self)
         layout.addWidget(self.writeout_button)
         self.writeout_button.clicked.connect(self.save_changes)
-        self.filename_widget.currentTextChanged.connect(self.switch_model)
         self.viewer.expanded.connect(self.expand_columns)
-
-    @Slot(str)
-    def switch_model(self, model_key: str):
-        if not model_key:
-            return
-        self.data_model = self._session.settings_model(settings_filename=model_key)
-        self.data_model.refresh()
-        self.proxy_model = QSortFilterProxyModel(self)
-        self.proxy_model.setSourceModel(self.data_model)
-        self.viewer.setModel(self.proxy_model)
-        self.expand_columns()
-        self.data_model.itemChanged.connect(self.data_model.on_value_changed)
 
     @Slot()
     def expand_columns(self):
         for ncol in range(3):
             self.viewer.resizeColumnToContents(ncol)
 
-    def update_combo(self):
-        self.filename_widget.clear()
-        if self._session is not None:
-            self.filename_widget.addItems([str(x) for x in self._session._configs])
-            self.filename_widget.setCurrentText(self._session._main_config_name)
-
     @Slot()
-    def save_changes(self):
+    def save_changes(self) -> None:
         self._session.save()
+
+    def refresh(self) -> None:
+        if not self._session:
+            return
+        self._session._settings.populate_model()
 
 
 if __name__ == "__main__":

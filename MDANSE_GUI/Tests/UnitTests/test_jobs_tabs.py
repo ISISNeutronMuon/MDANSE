@@ -11,8 +11,7 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.NeutronDynamicTotalStructureFactor import NeutronDynamicTotalStructureFactor
 from MDANSE.Framework.Jobs.StructureFactorFromScatteringFunction import StructureFactorFromScatteringFunction
-from MDANSE_GUI.Session.Session import LocalSession
-from MDANSE_GUI.Session.Settings import LocalSettings
+from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Tabs.ConverterTab import ConverterTab
 from MDANSE_GUI.Tabs.JobTab import JobTab
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
@@ -65,8 +64,8 @@ def test_converter_widgets_load(qapp, qtbot, caplog, index):
     widget = ConverterTab.gui_instance(
         parent=window,
         name="Converter",
-        session=LocalSession(),
-        settings=LocalSettings(),
+        session=Session(),
+        qt_settings=None,
         logger=QMessageLogger(),
     )
     widget._core.setParent(window)
@@ -103,8 +102,8 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, index):
     widget = JobTab.gui_instance(
         parent=window,
         name="Job",
-        session=LocalSession(),
-        settings=LocalSettings(),
+        session=Session(),
+        qt_settings=None,
         logger=QMessageLogger(),
         model=JobTree(parent_class=IJob),
         combo_model=TrajectoryModel(),
