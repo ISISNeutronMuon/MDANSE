@@ -89,12 +89,12 @@ class UnitCellConfigurator(IConfigurator):
 
         first_cell, last_cell = self._get_cell(traj_config)
 
-        has_valid_cell = not (
-            first_cell is None
-            or np.allclose(first_cell, 0.0)
-            or np.allclose(last_cell, 0.0)
+        has_valid_cell = (
+            first_cell is not None
+            and not np.allclose(first_cell, 0.0)
+            and not np.allclose(last_cell, 0.0)
         )
-        has_changing_cell = not np.allclose(first_cell, last_cell)
+        has_changing_cell = has_valid_cell and not np.allclose(first_cell, last_cell)
 
         if has_valid_cell and has_changing_cell:
             LOG.warning(
