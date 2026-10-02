@@ -334,6 +334,47 @@ def _converter_test(
             },
         ),
         (
+            "ExtXYZ",
+            "extxyz_multifile.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/configuration/gradients",
+                "/time",
+            ),
+            {
+                "xyz_file": list(map(str, (cp2k_srtio3_pos, cp2k_srtio3_vel, cp2k_srtio3_frc))),
+                "column_mapping": {
+                    "species": (f"species:{cp2k_srtio3_pos.name}", "unitless"),
+                    "positions": (f"pos:{cp2k_srtio3_pos.name}", "ang"),
+                    "velocities": (f"pos:{cp2k_srtio3_vel.name}", "ang / ps"),
+                    "forces": (f"pos:{cp2k_srtio3_frc.name}", "Da ang / ps2"),
+                }
+            }
+        ),
+        (
+            "ExtXYZ",
+            "extxyz_singlefile.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/configuration/gradients",
+                "/unit_cell",
+                "/time",
+            ),
+            {
+                "xyz_file": [str(ase_janus)],
+                "column_mapping": {
+                    "species": (f"species:{ase_janus.name}", "unitless"),
+                    "positions": (f"pos:{ase_janus.name}", "ang"),
+                    "momenta": (f"momenta:{ase_janus.name}", "janus_mom"),
+                    "masses": (f"masses:{ase_janus.name}", "Da"),
+                    "forces": (f"pos:{ase_janus.name}", "eV / ang"),
+                    "time": (f"time:{ase_janus.name}", "fs"),
+                }
+            }
+        ),
+        (
             "NAMD",
             "namd.mdt",
             ("/configuration/coordinates", "/unit_cell", "/time"),

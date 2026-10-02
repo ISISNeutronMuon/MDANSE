@@ -87,14 +87,14 @@ class DCD(Converter):
         super().initialize()
 
         # The number of steps of the analysis.
-        self.numberOfSteps = self.configuration["dcd_file"].instance.n_frames
+        self.numberOfSteps = self.configuration["dcd_file"].parser_instance.n_frames
 
-        self.frames = self.configuration["dcd_file"].instance.frames
+        self.frames = self.configuration["dcd_file"].parser_instance.frames
 
         # Create all chemical entities from the PDB file.
         self._chemical_system = self.configuration[
             "pdb_file"
-        ].instance.build_chemical_system(self.configuration["atom_aliases"]["value"])
+        ].parser_instance.build_chemical_system(self.configuration["atom_aliases"]["value"])
 
         # A trajectory is opened for writing.
         self._trajectory = TrajectoryWriter(

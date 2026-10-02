@@ -170,7 +170,7 @@ class LAMMPS(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
 
-        self._lammpsConfig = self.configuration["config_file"].instance
+        self._lammpsConfig = self.configuration["config_file"].parser_instance
 
         self._lammps_units = self.configuration["lammps_units"]["value"]
         self._atom_type = self.configuration["atom_type"]["value"]

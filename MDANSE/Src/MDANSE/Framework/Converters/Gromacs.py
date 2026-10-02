@@ -137,7 +137,7 @@ class Gromacs(Converter):
         self.numberOfSteps = len(self._xdr_file)
 
         # Create all chemical entities from the PDB file.
-        chemical_system = self.configuration["pdb_file"].instance.build_chemical_system(
+        chemical_system = self.configuration["pdb_file"].parser_instance.build_chemical_system(
             self.configuration["atom_aliases"]["value"]
         )
 

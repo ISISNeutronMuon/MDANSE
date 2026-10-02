@@ -16,22 +16,25 @@
 from __future__ import annotations
 
 import traceback
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Generator
 from typing import Any, Generic, TypeVar
+
+from mdtraj.utils import ilen
+from more_itertools import all_equal, first
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Framework.Parsers.Parser import Parser
+from MDANSE.Framework.Parsers import Parser
 
-from .InputFileConfigurator import InputFileConfigurator
+from .MultiInputFileConfigurator import MultiInputFileConfigurator
 
 P = TypeVar("P", bound=Parser)
 
 
-@IConfigurator.register("FileWithAtomDataConfigurator")
-class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
+@IConfigurator.register("MultiFileWithAtomDataConfigurator")
+class MultiFileWithAtomDataConfigurator(MultiInputFileConfigurator, Generic[P]):
     """
-    Class for handling files that contain atom information.
+    Class for handling multiple files that contain atom information.
 
     Returns the parsed structure in the ``instance`` attribute.
 
@@ -52,10 +55,10 @@ class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
     def __init__(self, *args, parser: type[P] | Callable[[str], P], **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.parser_instance = None
+        self.parser_instances: dict[str, P] = {}
         self.parser = parser
 
-    def configure(self, value: str) -> None:
+    def configure(self, value: str | list[str]) -> None:
         """
         Parameters
         ----------
@@ -71,15 +74,21 @@ class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
         if self.optional and not value:
             self._original_input = value
             self["value"] = value
-            self["filename"] = value
-            self.parser_instance = None
+            self["filenames"] = value
+            self.parser_instances.clear()
             self.error_status = "OK"
             return
 
         try:
-            self.parser_instance = self.parser(value)
+            self.parser_instances: dict[str, P] = {
+                value.name: self.parser(value) for value in self["values"]
+            }
         except Exception as e:
             self.error_status = f"File parsing error {e}: {traceback.format_exc()}."
+            return
+
+        if not all_equal(ilen(p.frames) for p in self.parser_instances.values()):
+            self.error_status = "Frame length mismatch."
             return
 
         if not self.labels:
@@ -87,18 +96,27 @@ class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
             return
 
     @property
-    def frames(self) -> Iterable[Any]:
-        """Yield frames."""
-        if self.parser_instance is None:
-            return ()
-        return self.parser_instance.frames
+    def n_frames(self) -> int:
+        """Number of frames."""
+        return ilen(first(self.parser_instances.values()).frames)
 
     @property
-    def atom_labels(self) -> Iterable[AtomLabel]:
+    def filenames(self) -> Generator[str]:
+        yield from self["filenames"]
+
+    @property
+    def frames(self) -> Generator[dict[str, Any]]:
+        """Yield frames."""
+        for frames in zip(
+            *(p.frames for p in self.parser_instances.values()), strict=False
+        ):
+            yield dict(zip(self.parser_instances, frames, strict=True))
+
+    @property
+    def atom_labels(self) -> Generator[AtomLabel]:
         """Yields atom labels"""
-        if self.parser_instance is None:
-            return ()
-        return self.parser_instance.atom_labels
+        for parser in self.parser_instances.values():
+            yield from parser.atom_labels
 
     @property
     def labels(self) -> list[AtomLabel]:
@@ -108,6 +126,6 @@ class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
         list[AtomLabel]
             An ordered list of atom labels.
         """
-        if self.parser_instance is None:
-            return []
-        return self.parser_instance.labels
+        return list(
+            {label for p in self.parser_instances.values() for label in p.labels}
+        )

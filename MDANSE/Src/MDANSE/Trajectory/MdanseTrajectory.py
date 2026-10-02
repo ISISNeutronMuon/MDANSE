@@ -72,6 +72,7 @@ class MdanseTrajectory(TrajectoryFile):
             Path to the trajectory file.
 
         """
+        super().__init__()
         self.warned_about_complex_numbers = False
         self._property_map = {}
         self._data_types = {}
