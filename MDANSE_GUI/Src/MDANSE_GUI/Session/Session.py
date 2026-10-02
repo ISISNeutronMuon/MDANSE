@@ -63,15 +63,15 @@ class Session(QObject):
         return Settings.get_opt_w_default("units", key, "N/A")
 
     @property
-    def reserved_filenames(self) -> set[Path]:
+    def reserved_filenames(self) -> list[Path]:
         return self._reserved_filenames
 
     @Slot(str)
     def protect_filename(self, some_filename: str):
         new_filename = Path(some_filename).absolute()
-        self._reserved_filenames.add(new_filename)
+        self._reserved_filenames.append(new_filename)
 
     @Slot(str)
     def free_filename(self, some_filename: str):
         filename = Path(some_filename).absolute()
-        self._reserved_filenames.discard(filename)
+        self._reserved_filenames.remove(filename)
