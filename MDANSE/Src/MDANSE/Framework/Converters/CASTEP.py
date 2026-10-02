@@ -73,7 +73,7 @@ class CASTEP(Converter):
         self.atom_aliases = self.configuration["atom_aliases"]["value"]
 
         # Create a representation of md file
-        self.trajectory_file = self.configuration["castep_file"].instance
+        self.trajectory_file = self.configuration["castep_file"].parser_instance
         self.frames = self.trajectory_file.frames
 
         # Save the number of steps
