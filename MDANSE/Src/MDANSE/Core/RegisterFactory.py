@@ -22,18 +22,16 @@ from more_itertools import always_iterable
 
 from MDANSE.IO.IOUtils import UCDict
 
-P = ParamSpec("P")
-T_co = TypeVar("T_co", bound="RegisterFactory", covariant=True)
-T = TypeVar("T")
+T = TypeVar("T", bound="RegisterFactory")
 
 
-class RegisterFactory(Generic[T_co]):
+class RegisterFactory(Generic[T]):
     """
     Factory requiring manual registration to data.
 
     Attributes
     ----------
-    registry : dict[str, type[T_co]]
+    registry : dict[str, type[T]]
         Dictionary of keys to names.
 
     See Also
@@ -44,14 +42,14 @@ class RegisterFactory(Generic[T_co]):
     registry: ClassVar[dict[str, type[Any]]]
 
     @classmethod
-    def instance(cls, key: str) -> type[T_co]:
+    def instance(cls, key: str) -> type[T]:
         """
         Return a callable instance to construct given class.
         """
         return cls.registry[key]
 
     @classmethod
-    def create(cls, key: str, *args: P.args, **kwargs: P.kwargs) -> T_co:
+    def create(cls, key: str, *args, **kwargs) -> T:
         """
         Return an instance of given class.
         """
@@ -70,7 +68,7 @@ class RegisterFactory(Generic[T_co]):
         return cls.registry.keys()
 
     @classmethod
-    def raw_dict(cls) -> dict[str, type[T_co]]:
+    def raw_dict(cls) -> dict[str, type[T]]:
         """
         Get raw name dictionary.
 
@@ -106,7 +104,7 @@ class RegisterFactory(Generic[T_co]):
         return cls.registry.keys()
 
     @classmethod
-    def available_classes(cls) -> set[type[T_co]]:
+    def available_classes(cls) -> set[type[T]]:
         """
         Known classes supported by factory.
 

@@ -21,7 +21,7 @@ from typing import Any, Generic, TypeVar
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Framework.Parsers import Parser
+from MDANSE.Framework.Parsers.Parser import Parser
 
 from .InputFileConfigurator import InputFileConfigurator
 
@@ -89,14 +89,14 @@ class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
     @property
     def frames(self) -> Iterable[Any]:
         """Yield frames."""
-        if not self.parser_instance:
+        if self.parser_instance is None:
             return ()
         return self.parser_instance.frames
 
     @property
     def atom_labels(self) -> Iterable[AtomLabel]:
         """Yields atom labels"""
-        if not self.parser_instance:
+        if self.parser_instance is None:
             return ()
         return self.parser_instance.atom_labels
 
@@ -108,6 +108,6 @@ class FileWithAtomDataConfigurator(InputFileConfigurator, Generic[P]):
         list[AtomLabel]
             An ordered list of atom labels.
         """
-        if not self.parser_instance:
+        if self.parser_instance is None:
             return []
         return self.parser_instance.labels
