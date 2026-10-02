@@ -101,7 +101,7 @@ class VASP(Converter):
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
-        self.trajectory_file = self.configuration["xdatcar_file"].instance
+        self.trajectory_file = self.configuration["xdatcar_file"].parser_instance
         self.frames = self.trajectory_file.frames
 
         # The number of steps of the analysis.

@@ -86,8 +86,8 @@ class Forcite(Converter):
 
         self.atom_aliases = self.configuration["atom_aliases"]["value"]
 
-        self.xtd_file = self.configuration["xtd_file"].instance
-        self.trj_file = self.configuration["trj_file"].instance
+        self.xtd_file = self.configuration["xtd_file"].parser_instance
+        self.trj_file = self.configuration["trj_file"].parser_instance
 
         self._chemical_system = ChemicalSystem()
         coordinates = np.vstack([atom.xyz for atom in self.xtd_file._atoms.values()])
