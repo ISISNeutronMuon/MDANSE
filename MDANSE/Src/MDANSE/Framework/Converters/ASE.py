@@ -78,6 +78,10 @@ class ASE(Converter):
             "parser": ASEParser,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -193,18 +197,22 @@ class ASE(Converter):
 
         time = self._timeaxis[index]
 
-        if self._isPeriodic:
-            unitCell = frame.cell.array
-            if np.allclose(unitCell, 0.0):
+        if self.configuration["unit_cell"]["apply"]:
+            unit_cell = self.configuration["unit_cell"]["value"]
+        elif self._isPeriodic:
+            unit_cell = frame.cell.array
+            if np.allclose(unit_cell, 0.0):
                 LOG.warning(
                     "Unit cell missing at frame %s. Using initial unit cell: %s",
                     index,
                     self._backup_cell,
                 )
-                unitCell = self._backup_cell * self.units["length"]
+                unit_cell = self._backup_cell * self.units["length"]
             else:
-                unitCell *= self.units["length"]
-            unitCell = UnitCell(unitCell)
+                unit_cell *= self.units["length"]
+            unit_cell = UnitCell(unit_cell)
+        else:
+            unit_cell = None
 
         coords = frame.get_positions()
         coords *= self.units["length"]
@@ -224,8 +232,10 @@ class ASE(Converter):
             )
 
         try:
-            if self._isPeriodic:
-                real_conf = PeriodicAbsoluteConfiguration(coords, unitCell, **variables)
+            if unit_cell is not None:
+                real_conf = PeriodicAbsoluteConfiguration(
+                    coords, unit_cell, **variables
+                )
                 if self._configuration["fold"]["value"]:
                     real_conf.fold_coordinates()
             else:
