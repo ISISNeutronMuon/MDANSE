@@ -37,7 +37,7 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 try:
     from ase import Atoms
-    from ase.io.trajectory import Trajectory as ASETrajectory
+    from ase.units import Ang, fs
 
     from MDANSE.Framework.Parsers import ASEParser
 
@@ -118,7 +118,7 @@ class ASE(Converter):
         "energy": measure(1.0, "eV").toval("Da nm2 / ps2"),
         "forces": measure(1.0, "eV/ang").toval("Da nm / ps2"),
         "time": measure(1.0, "fs").toval("ps"),
-        "velocities": measure(1.0, "ang/fs").toval("nm/ps"),
+        "velocities": Ang / fs,
         "length": measure(1.0, "ang").toval("nm"),
     }
 
