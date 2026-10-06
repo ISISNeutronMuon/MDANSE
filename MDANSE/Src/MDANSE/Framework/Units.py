@@ -19,10 +19,13 @@ import copy
 import json
 import math
 import numbers
-from collections import defaultdict
+from collections import ChainMap, defaultdict
+from collections.abc import Generator, Mapping
 from functools import singledispatchmethod
-from typing import ClassVar
+from pathlib import Path
+from typing import ClassVar, NamedTuple, Self, TypedDict
 
+from MDANSE.Chemistry.Databases import _Database
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 
@@ -1003,19 +1006,16 @@ def _str_to_unit(s: str) -> _Unit:
     return unit
 
 
-class UnitsManager(metaclass=Singleton):
+class UnitsManager(_Database):
     """Database dictionary for handling units."""
 
-    _UNITS: ClassVar[dict[str, _Unit]] = {}
+    _UNITS: ClassVar[ChainMap[str, _Unit]] = ChainMap()
 
-    _DEFAULT_DATABASE = (
-        PLATFORM.base_directory() / "MDANSE" / "Framework" / "units.json"
-    )
-
-    _USER_DATABASE = PLATFORM.application_directory() / "units.json"
+    _DEFAULT_DATABASE = PLATFORM.base_directory / "MDANSE" / "Framework" / "units.json"
+    _LOCAL_PATH = "units.json"
 
     def __init__(self):
-        self.load()
+        self._load()
 
     def add_unit(
         self, uname, factor, kg=0, m=0, s=0, K=0, mol=0, A=0, cd=0, rad=0, sr=0
@@ -1034,35 +1034,34 @@ class UnitsManager(metaclass=Singleton):
     def has_unit(self, uname) -> bool:
         return uname in UnitsManager._UNITS
 
-    def load(self) -> None:
+    def _load(
+        self,
+        user_database: Path | str | None = None,
+        default_database: Path | str | None = None,
+    ) -> None:
         """Load units from databases.
 
         Fill self with unit infomration.
         """
-        UnitsManager._UNITS.clear()
+        super()._load(user_database, default_database)
 
-        d = {}
+        defaults = {
+            name: decode_from_json(name, udict)
+            for name, udict in self._default_data.items()
+        }
+        custom = {
+            name: decode_from_json(name, udict) for name, udict in self._data.items()
+        }
 
-        with open(UnitsManager._DEFAULT_DATABASE, encoding="utf-8") as fin:
-            d.update(json.load(fin))
-
-        try:
-            with open(UnitsManager._USER_DATABASE, encoding="utf-8") as fin:
-                d.update(json.load(fin))
-
-        except FileNotFoundError:
-            self.save()
-
-        finally:
-            for uname, udict in d.items():
-                factor = udict.get("factor", 1.0)
-                dim = udict.get("dimension", [0, 0, 0, 0, 0, 0, 0, 0, 0])
-                UnitsManager._UNITS[uname] = _Unit(uname, factor, *dim)
+        UnitsManager._UNITS = ChainMap(custom, defaults)
+        self.data = UnitsManager._UNITS
 
     def save(self):
         """Write self to custom user database."""
-        with open(UnitsManager._USER_DATABASE, "w") as fout:
-            json.dump(UnitsManager._UNITS, fout, indent=4, cls=UnitsManagerEncoder)
+        with open(self._user_database, "w") as fout:
+            json.dump(
+                UnitsManager._UNITS.maps[0], fout, indent=4, cls=UnitsManagerEncoder
+            )
 
     @property
     def units(self):
@@ -1088,6 +1087,13 @@ class UnitsManagerEncoder(json.JSONEncoder):
     @default.register(_Unit)
     def _(self, obj):
         return {"factor": obj.factor, "dimension": obj.dimension}
+
+
+def decode_from_json(uname: str, udict: _Unit.DBInput) -> _Unit:
+    """Read Unit from json database."""
+    factor = udict.get("factor", 1.0)
+    dim = udict.get("dimension", (0, 0, 0, 0, 0, 0, 0, 0, 0))
+    return _Unit(uname, factor, *dim)
 
 
 #: Set of units considered directly or indirectly equivalent.

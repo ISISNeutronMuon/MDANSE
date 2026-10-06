@@ -16,11 +16,12 @@
 from __future__ import annotations
 
 import os
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog
 
+from MDANSE.Core.Settings import Settings
 from MDANSE.MLogging import LOG
 
 from .InputFileWidget import InputFileWidget
@@ -36,11 +37,10 @@ class MultiInputFileWidget(InputFileWidget):
 
     @Slot()
     def valueFromDialog(self):
-        paths_group = self._settings.group("paths")
-        try:
-            self.default_path = paths_group.get(self._job_name)
-        except Exception:
-            LOG.warning(f"session.get_path failed for {self._job_name}")
+        self.default_path = Settings.get_opt_w_default(
+            "paths", self._job_name, self.default_path
+        )
+
         new_value = self._file_dialog(
             self.parent(),
             "Load file",
@@ -49,17 +49,14 @@ class MultiInputFileWidget(InputFileWidget):
         )
 
         if new_value is not None and new_value[0]:
-            values = ['"' + str(PurePath(value)) + '"' for value in new_value[0]]
-            self._field.setText("[" + ", ".join(values) + "]")
+            as_path = [Path(value) for value in new_value[0]]
+            values = [f'"{path}"' for path in as_path]
+            self._field.setText(f"[{', '.join(values)}]")
             self.updateValue()
             try:
-                LOG.info(
-                    f"Settings path of {self._job_name} to {os.path.split(new_value[0][0])[0]}"
-                )
-                paths_group.set(
-                    self._job_name, str(PurePath(os.path.split(new_value[0][0])[0]))
-                )
+                LOG.info(f"Settings path of {self._job_name} to {as_path[0].parent}")
+                Settings.set_opt("paths", self._job_name, as_path[0].parent)
             except Exception:
                 LOG.error(
-                    f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0][0])[0]}"
+                    f"session.set_path failed for {self._job_name}, {as_path[0].parent}"
                 )
