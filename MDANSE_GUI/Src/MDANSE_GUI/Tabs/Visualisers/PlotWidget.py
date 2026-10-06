@@ -406,7 +406,7 @@ class PlotWidget(QWidget):
         self._sliderpack.new_values.connect(self.slider_change)
         layout.addWidget(self._sliderpack)
 
-        transform_button = QPushButton("Transform")
+        transform_button = QPushButton("Transform (Experimental)")
         transform_button.pressed.connect(self._transform_window)
         layout.addWidget(transform_button)
 
@@ -451,4 +451,6 @@ class PlotWidget(QWidget):
             )
             self._transform.finished.connect(self.plot_data)
 
+        # Force replot
+        self._transform.plot_data()
         self._transform.show()
