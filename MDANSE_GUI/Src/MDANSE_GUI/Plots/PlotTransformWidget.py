@@ -248,7 +248,11 @@ class PlotTransformWidget(QDialog):
 
         self._plotter_select = QComboBox()
         self._plotter_select.addItems(
-            [str(x) for x in Plotter.raw_names() if str(x) != "Text"]
+            [
+                str(x)
+                for x in Plotter.raw_names()
+                if str(x) not in {"Text", "Heatmap", "Vectors", "Vectors3D"}
+            ]
         )
         self._plotter_select.currentTextChanged.connect(self.set_plotter)
         self._plotter_select.setCurrentText("Single")
@@ -508,26 +512,3 @@ class PlotTransformWidget(QDialog):
             return
 
         self.orig_ds.ops = self.model.get_ops()
-
-
-if __name__ == "__main__":
-    import sys
-
-    import numpy as np
-    from qtpy.QtWidgets import (
-        QApplication,
-    )
-
-    from MDANSE_GUI.Tabs.Models.PlottingContext import SingleDataset
-
-    app = QApplication(sys.argv)
-    pc = PlottingContext()
-
-    tmp_data = SingleDataset("Geoff", None, data=list(range(-5, 5)))
-    tmp_data_2 = SingleDataset("Bob", None, data=np.random.random((10, 3)))
-    pc.add_dataset(tmp_data)
-    pc.add_dataset(tmp_data_2)
-
-    root = PlotTransformWidget(None, plotting_context=pc)
-    root.show()
-    app.exec()
