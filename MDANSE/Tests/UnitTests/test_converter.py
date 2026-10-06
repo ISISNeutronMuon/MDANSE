@@ -174,7 +174,7 @@ def _converter_test(
             (
                 "/configuration/coordinates",
                 "/configuration/velocities",
-                "/configuration/forces",
+                "/configuration/gradients",
                 "/time",
             ),
             {
@@ -187,7 +187,7 @@ def _converter_test(
         (
             "cp2k",
             "cp2k_srtio3.mdt",
-            ("/configuration/coordinates", "/configuration/forces", "/time"),
+            ("/configuration/coordinates", "/configuration/gradients", "/time"),
             {
                 "pos_file": cp2k_srtio3_pos,
                 "cell_file": cp2k_srtio3_cell,
