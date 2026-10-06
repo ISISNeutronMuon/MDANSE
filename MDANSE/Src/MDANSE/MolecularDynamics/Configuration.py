@@ -18,12 +18,11 @@ from __future__ import annotations
 import abc
 import copy
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 import more_itertools
 import networkx as nx
 import numpy as np
-import typing_extensions
 
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray, IntArray
@@ -417,7 +416,7 @@ class _PeriodicConfiguration(_Configuration):
             raise ValueError("Invalid unit cell dimensions")
         self._unit_cell = unit_cell
 
-    def clone(self) -> typing_extensions.Self:
+    def clone(self) -> Self:
         """Return a deep copy of this configuration."""
 
         unit_cell = copy.deepcopy(self._unit_cell)

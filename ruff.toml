@@ -3,7 +3,6 @@ indent-width = 4
 target-version = "py311"
 
 extend-exclude = [
-    "MDANSE/Src/MDANSE/MolecularDynamics/Trajectory.py",
     "MDANSE/Tests",
     "MDANSE_GUI/Tests",
     "Doc",
