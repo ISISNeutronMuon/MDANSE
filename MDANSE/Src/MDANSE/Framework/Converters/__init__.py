@@ -23,6 +23,7 @@ from .CP2K import CP2K as CP2K
 from .DCD import DCD as DCD
 from .DFTB import DFTB as DFTB
 from .DL_POLY import DL_POLY as DL_POLY
+from .ExtXYZ import ExtXYZ as ExtXYZ
 from .Forcite import Forcite as Forcite
 from .Gromacs import Gromacs as Gromacs
 from .LAMMPS import LAMMPS as LAMMPS

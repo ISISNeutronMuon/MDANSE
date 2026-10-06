@@ -62,6 +62,11 @@ class TrajDataArray(Enum):
 class TrajectoryFile(ABC):
     """Abstract base class for objects which implement trajectories."""
 
+    def __init__(self) -> None:
+        self._min_span = None
+        self._max_span = None
+        self.unit_cells_raw: FloatArray | None = None
+
     def __contains__(self, key: str) -> bool:
         return self.has_variable(key)
 
@@ -396,3 +401,27 @@ class TrajectoryFile(ABC):
 
         """
         return str(self._h5_filename)
+
+    def calculate_coordinate_span(self) -> None:
+        min_span = np.full(3, 1e11, dtype=float)
+        max_span = np.zeros(3)
+
+        for frame in range(len(self)):
+            coords = self.coordinates(frame)
+            span = coords.max(axis=0) - coords.min(axis=0)
+            min_span = np.minimum(span, min_span)
+            max_span = np.maximum(span, max_span)
+        self._max_span = max_span
+        self._min_span = min_span
+
+    @property
+    def max_span(self):
+        if self._max_span is None:
+            self.calculate_coordinate_span()
+        return self._max_span
+
+    @property
+    def min_span(self):
+        if self._min_span is None:
+            self.calculate_coordinate_span()
+        return self._min_span

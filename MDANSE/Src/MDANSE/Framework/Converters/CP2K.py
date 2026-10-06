@@ -117,14 +117,14 @@ class CP2K(Converter):
         super().initialize()
 
         self.files = {
-            "coordinates": self.configuration["pos_file"].instance,
-            "cell": self.configuration["cell_file"].instance,
+            "coordinates": self.configuration["pos_file"].parser_instance,
+            "cell": self.configuration["cell_file"].parser_instance,
         }
 
-        if vfile := self.configuration["vel_file"].instance:
+        if vfile := self.configuration["vel_file"].parser_instance:
             self.files["velocities"] = vfile
 
-        if ffile := self.configuration["force_file"].instance:
+        if ffile := self.configuration["force_file"].parser_instance:
             self.files["forces"] = ffile
 
         for attr in ("time_step", "n_frames"):

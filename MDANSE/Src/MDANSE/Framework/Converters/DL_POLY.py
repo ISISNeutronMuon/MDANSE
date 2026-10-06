@@ -94,8 +94,8 @@ class DL_POLY(Converter):
 
         self._atomicAliases = self.configuration["atom_aliases"]["value"]
 
-        self.field_file = self.configuration["field_file"].instance
-        self.history_file = self.configuration["history_file"].instance
+        self.field_file = self.configuration["field_file"].parser_instance
+        self.history_file = self.configuration["history_file"].parser_instance
         self.frames = self.history_file.frames
 
         # The number of steps of the analysis.
