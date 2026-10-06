@@ -21,7 +21,7 @@ from random import random
 from typing import TypeVar, Union
 
 import pytest
-from MDANSE.Framework.Units import _PREFIXES, UnitError, _Unit, measure
+from MDANSE.Framework.Units import _PREFIXES, UnitError, _Unit, measure, Dims
 
 T = TypeVar("T")
 
@@ -175,4 +175,4 @@ def test_sqrt():
     m = m.sqrt()
 
     assert m.toval() == 2.0
-    assert list(m.dimension) == [0, 1, -1, 0, 0, 0, 0, 0, 0]
+    assert m.dimension == Dims(length=1, time=-1)

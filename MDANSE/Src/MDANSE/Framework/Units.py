@@ -20,7 +20,7 @@ import json
 import math
 import numbers
 from collections import ChainMap, defaultdict
-from collections.abc import Callable, Generator, Mapping, MutableMapping
+from collections.abc import Callable, Generator, Iterable, Mapping, MutableMapping
 from functools import reduce, singledispatchmethod
 from numbers import Complex, Real
 from operator import add, mul, sub
@@ -42,6 +42,7 @@ from MDANSE.Chemistry.Databases import _Database
 from MDANSE.Core.Platform import PLATFORM
 from MDANSE.Core.Singleton import Singleton
 from MDANSE.IO.IOUtils import get_trailing_digits, head_tail
+from MDANSE.MLogging import LOG
 
 
 class Dims(NamedTuple):
@@ -59,7 +60,7 @@ class Dims(NamedTuple):
 
     _UNAMES = ["kg", "m", "s", "K", "mol", "A", "cd", "rad", "sr"]
 
-    def __pow__(self, amt: float) -> Self:
+    def __pow__(self, amt) -> Self:
         if not isinstance(amt, (float, int)):
             return NotImplemented
 
@@ -185,6 +186,10 @@ class _Unit:
     sr : int
         Solid angular dimension.
     """
+
+    class DBInput(TypedDict):
+        factor: float
+        dimension: tuple[int, int, int, int, int, int, int, int, int]
 
     _EQUIVALENCES: ClassVar[MutableMapping[Dims, dict[Dims, float]]] = defaultdict(dict)
 
@@ -1009,6 +1014,21 @@ class UnitsManager(_Database):
     _DEFAULT_DATABASE = PLATFORM.base_directory / "MDANSE" / "Framework" / "units.json"
     _LOCAL_PATH = "units.json"
 
+    class Encoder(json.JSONEncoder):
+        """Custom encoder for writing units."""
+
+        def default(self, o):
+            match o:
+                case UnitsManager():
+                    return {
+                        k: {"factor": v.factor, "dimension": v.dimension}
+                        for k, v in o.units
+                    }
+                case _Unit(factor=fac, dimension=dim):
+                    return {"factor": fac, "dimension": tuple(dim)}
+                case _:
+                    return json.JSONEncoder.default(self, o)
+
     def __init__(self):
         self._load()
 
@@ -1040,6 +1060,27 @@ class UnitsManager(_Database):
     def has_unit(self, uname: str) -> bool:
         return uname in UnitsManager._UNITS
 
+    @staticmethod
+    def with_prefixes(bases: Iterable[str]) -> set[str]:
+        return {f"{pref}{unit}" for pref in _PREFIXES for unit in bases}
+
+    @property
+    def possible_units(self) -> set[str]:
+        """All possible combined units."""
+        return self.with_prefixes(UnitsManager._UNITS)
+
+    def has_conflict(
+        self, uname: str, alldefaults: set[str] | None = None
+    ) -> set[str] | None:
+        """Catch conflicts between added units."""
+        if alldefaults is None:
+            alldefaults = self.possible_units
+
+        units = {f"{pref}{uname}" for pref in _PREFIXES}
+        if conflict := units & alldefaults:
+            return conflict
+        return None
+
     def _load(
         self,
         user_database: Path | str | None = None,
@@ -1059,24 +1100,31 @@ class UnitsManager(_Database):
             name: decode_from_json(name, udict) for name, udict in self._data.items()
         }
 
+        alldefaults = self.with_prefixes(defaults)
+        for unit in list(custom):
+            if unit in defaults or unit == "kg":
+                LOG.warning(
+                    f'Skipping custom unit {unit} due to conflict. This is likely due to an old "units.json". No action should be necessary.'
+                )
+                del custom[unit]
+
+            if conflict := self.has_conflict(unit, alldefaults):
+                raise UnitError(
+                    f'Custom unit ({unit}) potentially ambiguous with ({" and ".join(conflict)}). To fix this error remove "{unit}" from {self._USER_DATABASE}.'
+                )
+
         UnitsManager._UNITS = ChainMap(custom, defaults)
         self.data = UnitsManager._UNITS
 
     def save(self):
         """Write self to custom user database."""
         with open(self._user_database, "w") as fout:
-            json.dump(
-                UnitsManager._UNITS.maps[0], fout, indent=4, cls=UnitsManagerEncoder
-            )
+            json.dump(UnitsManager._UNITS.maps[0], fout, indent=4, cls=self.Encoder)
 
     @property
-    def units(self) -> dict[str, _Unit]:
+    def units(self) -> MutableMapping[str, _Unit]:
         """Direct access to unit database."""
         return UnitsManager._UNITS
-
-    @units.setter
-    def units(self, units: dict[str, _Unit]) -> None:
-        UnitsManager._UNITS = units
 
     @classmethod
     def filter_by_dimension(cls, dims: Dims) -> dict[str, _Unit]:
@@ -1092,22 +1140,6 @@ class UnitsManager(_Database):
         ],
     ) -> dict[str, _Unit]:
         return cls.filter_by_dimension(_COMMON_DIMS[dim])
-
-
-class UnitsManagerEncoder(json.JSONEncoder):
-    """Custom encoder for writing units."""
-
-    @singledispatchmethod
-    def default(self, obj):
-        return json.JSONEncoder.default(self, obj)
-
-    @default.register(UnitsManager)
-    def _(self, obj):
-        return {k: {"factor": v.factor, "dimension": v.dimension} for k, v in obj.units}
-
-    @default.register(_Unit)
-    def _(self, obj):
-        return {"factor": obj.factor, "dimension": obj.dimension}
 
 
 def measure(
@@ -1152,6 +1184,13 @@ def measure(
     unit.ounit(ounit)
 
     return unit
+
+
+def decode_from_json(uname: str, udict: _Unit.DBInput) -> _Unit:
+    """Read Unit from json database."""
+    factor = udict.get("factor", 1.0)
+    dim = udict.get("dimension", (0, 0, 0, 0, 0, 0, 0, 0, 0))
+    return _Unit(uname, factor, Dims(*dim))
 
 
 UNITS_MANAGER = UnitsManager()
