@@ -178,7 +178,7 @@ class DCDFile(Parser):
         return ["Unknown"] * self.n_atoms
 
     @property
-    def frames(self) -> Iterator:
+    def frames(self) -> Iterator[tuple[UnitCell | None, FloatArray]]:
         with self.filename.open("rb") as inp:
             reader = binary_file_reader(inp, self._byte_order)
             self.read_header(reader)
