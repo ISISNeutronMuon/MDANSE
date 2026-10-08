@@ -13,7 +13,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
-from collections import ChainMap
+from collections import ChainMap, defaultdict
 
 import unittest
 from unittest.mock import patch, mock_open, ANY
@@ -30,6 +30,8 @@ from MDANSE.IO.AtomInfo import atom_info
 
 class TestAtomsDatabase(unittest.TestCase):
     def setUp(self):
+        self.properties = defaultdict(lambda: "str")
+        self.units = defaultdict(lambda: "none")
         self.data = {
             "H": {
                 "family": "non metal",
@@ -56,18 +58,18 @@ class TestAtomsDatabase(unittest.TestCase):
                 "symbol": "Fe",
             },
         }
-        self.properties = {
+        self.properties.update({
             "family": "str",
             "nucleon": "int",
             "electronegativity": "float",
             "symbol": "str",
-        }
-        self.units = {
+        })
+        self.units.update({
             "family": "none",
             "nucleon": "none",
             "electronegativity": "none",
             "symbol": "none",
-        }
+        })
         self.overwrite_database()
 
     @classmethod
@@ -234,7 +236,7 @@ class TestAtomsDatabase(unittest.TestCase):
             ATOMS_DATABASE.match_numeric_property("symbol", 0)
 
     def test_match_numeric_property_unknown_property(self):
-        with self.assertRaises(KeyError):
+        with self.assertRaises(AtomsDatabaseError):
             ATOMS_DATABASE.match_numeric_property("INVALID", 0)
 
     def test_match_numeric_property_non_numeric_value(self):

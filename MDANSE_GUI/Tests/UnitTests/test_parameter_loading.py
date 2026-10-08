@@ -158,6 +158,8 @@ def test_converter_parameters_load(qapp, qtbot, caplog, index):
     assert "ERROR" not in caplog.text, "Error raised."
     assert item.text() == key
 
+    window.close()
+
 
 @pytest.mark.parametrize(
     "index", enumerate(sorted(ENABLED_JOBS), 1), ids=lambda x: x[1]
@@ -215,3 +217,5 @@ def test_job_widgets_load(qapp, qtbot, caplog, trajectory, index):
 
     assert "Traceback" not in caplog.text, "Error raised with traceback."
     assert item.text() == key
+
+    window.close()
