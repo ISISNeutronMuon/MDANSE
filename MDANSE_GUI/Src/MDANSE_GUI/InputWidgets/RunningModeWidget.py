@@ -82,7 +82,7 @@ class RunningModeWidget(WidgetBase):
 
         return (mode,) if mode == "single-core" else (mode, numproc)
 
-    def set_value_manually(self, new_input: tuple[str, int]):
+    def set_value_manually(self, new_input: tuple[str, int] | tuple[str]):
         mode = new_input[0]
         self.mode_box.setCurrentText(mode)
         if len(new_input) > 1:

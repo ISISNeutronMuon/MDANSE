@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import SupportsInt
+
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QLabel, QSpinBox
 

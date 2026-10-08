@@ -101,5 +101,5 @@ class RangeWidget(WidgetBase):
         return result
 
     def set_value_manually(self, new_input: tuple[float, float, float]):
-        for field, val in zip(self._fields, new_input):
+        for field, val in zip(self._fields, new_input, strict=False):
             field.setText(str(val))

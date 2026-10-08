@@ -114,5 +114,5 @@ class MoleculeAndAxisWidget(MoleculeWidget):
 
     def set_value_manually(self, new_values: tuple[str, int, int | None, int | None]):
         self._field.setCurrentText(str(new_values[0]))
-        for val, combo in zip(new_values[1:], self.index_combo_boxes):
+        for val, combo in zip(new_values[1:], self.index_combo_boxes, strict=False):
             combo.setCurrentText(str(val))

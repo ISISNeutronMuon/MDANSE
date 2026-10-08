@@ -99,5 +99,5 @@ class ProjectionWidget(WidgetBase):
         self._button_group.button(mode).setChecked(True)
         self.button_switched(mode)
         if mode:
-            for field, val in zip(self._vector_fields, vector):
+            for field, val in zip(self._vector_fields, vector, strict=False):
                 field.setText(str(val))

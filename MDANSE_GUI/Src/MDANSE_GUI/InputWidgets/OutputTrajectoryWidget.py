@@ -37,6 +37,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Session.Session import Session
 
 dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
+reverse_dtype_lookup = {value: key for key, value in dtype_lookup.items()}
 
 
 class SpinBoxDefaults(NamedTuple):
@@ -214,9 +215,7 @@ class OutputTrajectoryWidget(WidgetBase):
             meta_block_size,
         ) = new_input
         self._field.setText(fname)
-        self.dtype_box.setCurrentText(
-            {value: key for key, value in dtype_lookup.items()}[dtype]
-        )
+        self.dtype_box.setCurrentText(reverse_dtype_lookup[dtype])
         self.chunk_atom_box.setValue(chunk_size_atom)
         self.chunk_frame_box.setValue(chunk_size_frame)
         self.compression_box.setCurrentText(compression)
