@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import SupportsInt
+
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QLabel, QSpinBox
 
@@ -83,3 +85,6 @@ class DerivativeOrderWidget(WidgetBase):
     def get_widget_value(self):
         value = self._field.value()
         return value
+
+    def set_value_manually(self, new_input: SupportsInt):
+        self._field.setValue(int(new_input))

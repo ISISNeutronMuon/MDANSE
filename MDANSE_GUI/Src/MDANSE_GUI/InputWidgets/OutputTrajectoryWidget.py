@@ -37,6 +37,7 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Session.Session import Session
 
 dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
+reverse_dtype_lookup = {value: key for key, value in dtype_lookup.items()}
 
 
 class SpinBoxDefaults(NamedTuple):
@@ -201,3 +202,22 @@ class OutputTrajectoryWidget(WidgetBase):
         logs = self.logs_combo.currentText()
         meta_block_size = self.meta_block_box.value()
         return (filename, dtype, chunk_size, compression, logs, meta_block_size)
+
+    def set_value_manually(
+        self, new_input: tuple[str, int, tuple[int, int], str, str, int]
+    ):
+        (
+            fname,
+            dtype,
+            (chunk_size_frame, chunk_size_atom),
+            compression,
+            logging,
+            meta_block_size,
+        ) = new_input
+        self._field.setText(fname)
+        self.dtype_box.setCurrentText(reverse_dtype_lookup[dtype])
+        self.chunk_atom_box.setValue(chunk_size_atom)
+        self.chunk_frame_box.setValue(chunk_size_frame)
+        self.compression_box.setCurrentText(compression)
+        self.logs_combo.setCurrentText(logging)
+        self.meta_block_box.setValue(meta_block_size)

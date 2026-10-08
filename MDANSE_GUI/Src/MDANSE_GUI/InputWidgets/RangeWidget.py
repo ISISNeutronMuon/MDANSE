@@ -99,3 +99,7 @@ class RangeWidget(WidgetBase):
                 val = self._num_type(self._default_values[n])
             result.append(val)
         return result
+
+    def set_value_manually(self, new_input: tuple[float, float, float]):
+        for field, val in zip(self._fields, new_input, strict=False):
+            field.setText(str(val))

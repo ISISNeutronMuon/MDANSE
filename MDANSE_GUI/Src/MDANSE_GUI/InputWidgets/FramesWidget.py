@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 from qtpy.QtGui import QIntValidator
 from qtpy.QtWidgets import QLabel, QLineEdit
 
@@ -98,3 +100,7 @@ class FramesWidget(WidgetBase):
                 val = int(self._default_values[n])
             result.append(val)
         return result
+
+    def set_value_manually(self, new_input: Iterable[int]):
+        for val, field in zip(new_input, self._fields, strict=False):
+            field.setText(str(val))

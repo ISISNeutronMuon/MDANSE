@@ -810,3 +810,13 @@ class AtomSelectionWidget(WidgetBase):
 
         """
         return self.selection_model.current_steps()
+
+    def set_value_manually(self, new_input: str):
+        self.initialise_helper()
+        if new_input:
+            self.helper.selection_model.create_from_string(new_input)
+        else:
+            LOG.info(
+                "AtomSelectionWidget.set_value_manually received an empty string and will use a default selection."
+            )
+            self.helper.reset()
