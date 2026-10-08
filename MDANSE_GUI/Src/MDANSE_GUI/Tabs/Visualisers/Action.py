@@ -420,9 +420,7 @@ class Action(QWidget):
 
     def apply_parameters(self, new_parameters: dict[str, Any]):
         for widnum, key in enumerate(self._job_instance.settings.keys()):
-            if key not in new_parameters:
-                continue
-            if new_parameters[key] is None:
+            if new_parameters.get(key) is None:
                 continue
             widget = self._widgets[widnum]
             with block_signals(widget):

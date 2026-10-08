@@ -103,6 +103,6 @@ class OptionalFloatWidget(WidgetBase):
         self._field.setPlaceholderText(str(self._default_value))
         self._configurator.configure(default)
 
-    def set_value_manually(self, new_input: float):
-        if new_input:
+    def set_value_manually(self, new_input: float | None):
+        if new_input is not None:
             self._field.setText(str(new_input))

@@ -58,7 +58,4 @@ class BooleanWidget(WidgetBase):
         return self._field.checkState() == Qt.CheckState.Checked
 
     def set_value_manually(self, new_input: str | bool):
-        if new_input in {True, "True", "true"}:
-            self._field.setChecked(True)
-        else:
-            self._field.setChecked(False)
+        self._field.setChecked(new_input in {True, "True", "true"})

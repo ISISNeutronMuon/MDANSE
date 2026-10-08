@@ -52,14 +52,13 @@ def values_match(val1, val2) -> bool:
     
     This is meant to ignore type differences and return True when comparing
     a list [1,2,3] to a tuple (1,2,3)."""
-    if isinstance(val1, Path) or isinstance(val2, Path):
-        val1, val2 = str(val1), str(val2)
-    if isinstance(val1, str) and isinstance(val2, str):
-        return val1 == val2
-    elif isinstance(val1, Iterable) and isinstance(val2, Iterable):
-        return all(values_match(x[0], x[1]) for x in zip(val1, val2, strict=True))
-    else:
-        return val1 == val2
+    match (val1, val2):
+        case (Path() | str(), Path() | str()):
+            return str(val1) == str(val2)
+        case (Iterable(), Iterable()):
+            return all(map(values_match, val1, val2))
+        case _:
+            return val1 == val2
 
 
 
@@ -81,10 +80,10 @@ def test_analysis_one_atom_total(generate_benchmarks, jobname, tmp_path):
         "running_mode": ("single-core",),
         "trajectory": trajname,
     }
-    if jobname in ["TrajectoryEditor", "TrajectoryFilter"]:
+    if jobname in {"TrajectoryEditor", "TrajectoryFilter"}:
         parameters["output_files"] = (temp_name,  64, 128, "none", "INFO")
         out_file = temp_name.with_suffix(".mdt")
-    elif jobname in ["AverageStructure"]:
+    elif jobname == "AverageStructure":
         parameters["output_files"] = (temp_name, "vasp", "INFO")
         out_file = temp_name
 
@@ -103,8 +102,8 @@ def test_analysis_one_atom_total(generate_benchmarks, jobname, tmp_path):
 
     assert out_file.is_file()
     mdata = get_input_params(out_file)
-    print(f"params - file: {set(parameters.keys()) - set(mdata.keys())}")
-    print(f"file - params: {set(mdata.keys()) - set(parameters.keys())}")
+    print(f"params - file: {parameters.keys() - mdata.keys()}")
+    print(f"file - params: {mdata.keys() - parameters.keys()}")
     mismatched = {}
     correct = {}
     for key, value in mdata.items():

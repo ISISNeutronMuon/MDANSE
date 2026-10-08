@@ -84,5 +84,5 @@ class DerivativeOrderWidget(WidgetBase):
         value = self._field.value()
         return value
 
-    def set_value_manually(self, new_input: str | int):
+    def set_value_manually(self, new_input: SupportsInt):
         self._field.setValue(int(new_input))

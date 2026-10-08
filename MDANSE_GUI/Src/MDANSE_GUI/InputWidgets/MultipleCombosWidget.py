@@ -73,5 +73,5 @@ class MultipleCombosWidget(WidgetBase):
         return result
 
     def set_value_manually(self, new_input: Sequence[str]):
-        for n, field in enumerate(self._fields):
-            field.setCurrentText(str(new_input[n]))
+        for val, field in zip(new_input, self._fields):
+            field.setCurrentText(str(val))

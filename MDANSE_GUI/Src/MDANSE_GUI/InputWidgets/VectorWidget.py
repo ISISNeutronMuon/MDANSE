@@ -54,5 +54,5 @@ class VectorWidget(WidgetBase):
         return vector
 
     def set_value_manually(self, new_input: Sequence[float]):
-        for n, field in enumerate(self._vector_fields):
-            field.setText(str(new_input[n]))
+        for field, val in zip(self._vector_fields, new_input, strict=False):
+            field.setText(str(val))
