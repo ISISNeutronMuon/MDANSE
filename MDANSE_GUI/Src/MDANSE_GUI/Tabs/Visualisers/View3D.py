@@ -50,6 +50,9 @@ class View3D(QWidget):
         self._controls = controls
         self._controls.toggle_projection()
 
+    def stop_animation(self):
+        self._controls.stop_animation()
+
     @Slot(tuple)
     def update_panel(self, data: tuple[str, Trajectory] | None):
         if data is None or data[0] == "":

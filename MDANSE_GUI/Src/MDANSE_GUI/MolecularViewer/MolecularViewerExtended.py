@@ -174,6 +174,8 @@ class MolecularViewerExtended(MolecularViewer):
             self._animation_timer.stop()
             return
 
+        if self._animation_timer.isActive():
+            return
         self._camera.SetPosition(20, 0, 0)
         self._camera.SetFocalPoint(0, 0, 0)
         self._camera.SetViewUp(0, 0, 1)
