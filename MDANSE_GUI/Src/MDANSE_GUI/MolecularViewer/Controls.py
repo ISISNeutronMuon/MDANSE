@@ -432,6 +432,11 @@ class ViewerControls(QWidget):
         if self._animation_timer.isActive():
             self._animation_timer.stop()
         self._mutex.unlock()
+        if (
+            hasattr(self._viewer, "_animation_timer")
+            and self._viewer._animation_timer.isActive()
+        ):
+            self._viewer._animation_timer.stop()
 
     def animate(self, step_size: int = 1):
         """Plays the animation as a movie.
@@ -442,10 +447,16 @@ class ViewerControls(QWidget):
         """
         if self._animation_timer.isActive():
             self._animation_timer.stop()
-        self._current_step_size = step_size
-        self._frame_step = self._current_step_size * self._frame_factor
-        self._animation_timer.setInterval(self._time_per_frame)
-        self._animation_timer.start()
+        if self._viewer._reader is not None:
+            self._current_step_size = step_size
+            self._frame_step = self._current_step_size * self._frame_factor
+            self._animation_timer.setInterval(self._time_per_frame)
+            self._animation_timer.start()
+        elif (
+            hasattr(self._viewer, "_animation_timer")
+            and not self._viewer._animation_timer.isActive()
+        ):
+            self._viewer._animation_timer.start()
 
     def advance_frame(self):
         firstFrame = self._frame_selector.minimum()
