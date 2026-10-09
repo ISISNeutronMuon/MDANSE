@@ -58,11 +58,23 @@ def vhsf_memory_per_atom(
     """
     trajectory = mem_conf.configurable[mem_conf.dependencies["trajectory"]]["instance"]
     frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
+    n_hist_points = len(
+        mem_conf.configurable[mem_conf.dependencies["r_values"]]["mid_points"]
+    )
     n_dimensions = 3
     n_frames = frame_config["number"]
+    n_corr_frames = frame_config["n_frames"]
     data_size = 8
     chunk_size = trajectory.chunk_size(array_name="position")
-    prefactor = 4 * n_frames * n_dimensions * data_size / 2**20
+    prefactor = 4 * (
+        (
+            (n_corr_frames * n_hist_points)
+            + n_frames * n_dimensions
+            + 2 * n_corr_frames * n_dimensions
+        )
+        * data_size
+        / 2**20
+    )
     return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 
@@ -199,6 +211,7 @@ class VanHoveFunctionSelf(IJob):
             "dependencies": {
                 "trajectory": "trajectory",
                 "frames": "frames",
+                "r_values": "r_values",
             },
             "mem_function": vhsf_memory_per_atom,
         },
