@@ -56,6 +56,8 @@ class TrajectoryTab(GeneralTab):
 
     @Slot()
     def load_trajectories(self):
+        if self._visualiser is not None:
+            self._visualiser.stop_animation()
         fnames = QFileDialog.getOpenFileNames(
             self._core,
             "Load an MD trajectory",
