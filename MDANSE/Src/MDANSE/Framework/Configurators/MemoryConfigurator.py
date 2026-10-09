@@ -17,33 +17,37 @@ from __future__ import annotations
 
 import os
 
+from MDANSE.Core.Settings import Option, Settings
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
     PredictionSettings,
 )
 from MDANSE.Framework.Configurators.IntegerConfigurator import IntegerConfigurator
 
-MAX_MEMORY_PER_PROCESS = int(os.environ.get("MDANSE_MAX_RAM_PER_PROCESS", "512"))
 
-
+@Settings.parametrise(
+    memory_warning_limit=Option(
+        1024,
+        group="memory",
+        comment="Amount of RAM per process (MB) which will trigger a warning in the GUI.",
+    ),
+)
 @IConfigurator.register("MemoryConfigurator")
 class MemoryConfigurator(IntegerConfigurator):
-    """Specified the upper limit of memory used by a single process.
+    """Number of atoms processed at the same time.
 
-    MDANSE will adjust the number of atoms or frames processed in a single
-    analysis step to lower the memory requirements. However, this will not
-    always be possible, as for large trajectories the memory limit may
-    be exceeded already for a single atom or a single frame.
+    This input will try to calculate the predicted memory requirements
+    of the analysis based on the other input parameters. Each analysis
+    type provides its own memory calculation function, which has to be
+    calibrated.
     """
 
-    _default = MAX_MEMORY_PER_PROCESS
+    _default = 256
 
     choices = None
 
-    label = "Memory options"
-    tooltip = (
-        "Set the upper limit of memory per process (MB) that you want MDANSE to use."
-    )
+    label = "Atoms per step (performance option)"
+    tooltip = "Set the number of atoms to process per step and check the predicted memory needs."
 
     def __init__(self, name, **kwargs):
         self.memory_function = kwargs.pop("mem_function", None)
@@ -77,14 +81,12 @@ class MemoryConfigurator(IntegerConfigurator):
             num_value = int(value)
         except (TypeError, ValueError):
             self.error_status = (
-                f"Input {num_value} cannot be converted to a number of MB."
+                f"Input {num_value} cannot be converted to a number of atoms."
             )
             return
 
         if num_value <= 0:
-            self.error_status = (
-                f"Upper limit of {num_value} MB cannot be used. Use a positive number."
-            )
+            self.error_status = f"Number of atoms per step has to be positive. Current value is {num_value}."
             return
 
         atoms_per_chunk = self.configurable[self.dependencies["trajectory"]][
@@ -95,15 +97,13 @@ class MemoryConfigurator(IntegerConfigurator):
             predicted_memory = self.memory_function(self)
             self["memory_per_atom"] = predicted_memory[0]
             self["memory_per_chunk"] = predicted_memory[1]
-            atoms_per_step = max(
-                1, min(num_value // predicted_memory[0], atoms_per_chunk)
-            )
+            atoms_per_step = min(num_value, atoms_per_chunk)
             self["memory_per_step"] = atoms_per_step * predicted_memory[0]
             self["atoms_per_step"] = [atoms_per_step]
-            if self["memory_per_step"] > num_value:
+            if self["memory_per_step"] > self.memory_warning_limit:
                 self.warning_status = (
                     f"Expected memory per step ({self['memory_per_step']} MB) "
-                    f"is larger than the requested upper limit ({num_value} MB)."
+                    f"is larger than the current preferred limit ({self.memory_warning_limit} MB)."
                 )
             self["memory_per_process"] = [self["memory_per_step"]]
         else:
