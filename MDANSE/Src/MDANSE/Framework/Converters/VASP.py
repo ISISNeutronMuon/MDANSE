@@ -69,6 +69,10 @@ class VASP(Converter):
             "parser": XDATCARFile,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -139,7 +143,11 @@ class VASP(Converter):
 
         # Read the current step in the xdatcar file.
         coords = frame["coords"]
-        unitCell = frame["unit_cell"]
+
+        if self.configuration["unit_cell"]["apply"]:
+            unitCell = self.configuration["unit_cell"]["value"]
+        else:
+            unitCell = frame["unit_cell"]
 
         conf = PeriodicFractionalConfiguration(coords, unitCell)
 

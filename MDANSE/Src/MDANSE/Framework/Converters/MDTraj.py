@@ -69,6 +69,10 @@ class MDTraj(Converter):
             "dependencies": {"coordinate_files": "coordinate_files"},
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -187,16 +191,21 @@ class MDTraj(Converter):
         tuple[int, None]
             A tuple of the job index and None.
         """
-        if self.traj.unitcell_vectors is None:
+        if self.configuration["unit_cell"]["apply"]:
+            unit_cell = UnitCell(self.configuration["unit_cell"]["value"])
+        elif self.traj.unitcell_vectors is not None:
+            unit_cell = UnitCell(self.traj.unitcell_vectors[index])
+        else:
+            unit_cell = None
+
+        if unit_cell is None:
             conf = AbsoluteConfiguration(
                 self.traj.xyz[index],
             )
         else:
             conf = PeriodicAbsoluteConfiguration(
                 self.traj.xyz[index],
-                UnitCell(
-                    self.traj.unitcell_vectors[index],
-                ),
+                unit_cell,
             )
             if self.configuration["fold"]["value"]:
                 conf.fold_coordinates()

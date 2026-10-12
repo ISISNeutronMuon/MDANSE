@@ -142,6 +142,7 @@ class H5MDTrajectory(TrajectoryFile):
         h5_filename : Path or str
             The trajectory filename.
         """
+        super().__init__()
         self.unit_cell_warning = ""
 
         self._h5_filename = Path(h5_filename)

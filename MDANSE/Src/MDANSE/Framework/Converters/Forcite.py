@@ -58,6 +58,10 @@ class Forcite(Converter):
             "parser": TrjFile,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -109,7 +113,12 @@ class Forcite(Converter):
         self._chemical_system.add_labels(label_dict)
         self._chemical_system.find_clusters_from_bonds()
 
-        if self.xtd_file.pbc:
+        if self.configuration["unit_cell"]["apply"]:
+            boxConf = PeriodicFractionalConfiguration(
+                coordinates, self.configuration["unit_cell"]["value"]
+            )
+            real_conf = boxConf.to_absolute_configuration()
+        elif self.xtd_file.pbc:
             boxConf = PeriodicFractionalConfiguration(coordinates, self.xtd_file.cell)
             real_conf = boxConf.to_absolute_configuration()
         else:

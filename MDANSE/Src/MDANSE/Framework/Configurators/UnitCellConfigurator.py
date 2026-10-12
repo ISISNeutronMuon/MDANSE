@@ -15,10 +15,15 @@
 #
 from __future__ import annotations
 
+from functools import singledispatchmethod
+
 import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.MLogging import LOG
+from MDANSE.MolecularDynamics.Trajectory import Trajectory
+from MDANSE.MolecularDynamics.UnitCell import UnitCell
+from MDANSE.Trajectory.FileTrajBase import TrajectoryFile
 from MDANSE.util_types import FloatArray
 
 
@@ -30,7 +35,7 @@ class UnitCellConfigurator(IConfigurator):
     or to change the existing cell definition.
     """
 
-    _default = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False
+    _default = np.eye(3), False
     label = "Unit cell"
     tooltip = "The definition of the simulation box dimensions."
 
@@ -54,24 +59,42 @@ class UnitCellConfigurator(IConfigurator):
         IConfigurator.__init__(self, name, **kwargs)
         self["apply"] = False
 
-    def update_trajectory_information(self):
-        traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
-        has_valid_cell = True
-        has_changing_cell = True
-        try:
-            first_cell = traj_config.unit_cell(0)._unit_cell
-            last_cell = traj_config.unit_cell(len(traj_config) - 1)._unit_cell
-        except Exception:
-            has_valid_cell = False
-        else:
-            if (
-                first_cell is None
-                or np.allclose(first_cell, 0.0)
-                or np.allclose(last_cell, 0.0)
-            ):
-                has_valid_cell = False
-            elif np.allclose(first_cell, last_cell):
-                has_changing_cell = False
+    @singledispatchmethod
+    def _get_cell(
+        self, trajectory: Trajectory | TrajectoryFile
+    ) -> tuple[FloatArray, FloatArray] | tuple[None, None]:
+        raise Exception(f"Cannot handle trajectory of type {type(trajectory).__name__}")
+
+    @_get_cell.register(Trajectory)
+    def _(
+        self, trajectory: Trajectory
+    ) -> tuple[FloatArray, FloatArray] | tuple[None, None]:
+        first = trajectory.unit_cell(0)
+        last = trajectory.unit_cell(len(trajectory) - 1)
+
+        if first is None or last is None:
+            return None, None
+
+        return first._unit_cell, last._unit_cell
+
+    @_get_cell.register(TrajectoryFile)
+    def _(
+        self, trajectory: TrajectoryFile
+    ) -> tuple[FloatArray, FloatArray] | tuple[None, None]:
+        if trajectory.unit_cells_raw is None:
+            return None, None
+        return trajectory.unit_cells_raw[0], trajectory.unit_cells_raw[-1]
+
+    def update_trajectory_information(self, traj_config: Trajectory | TrajectoryFile):
+
+        first_cell, last_cell = self._get_cell(traj_config)
+
+        has_valid_cell = (
+            first_cell is not None
+            and not np.allclose(first_cell, 0.0)
+            and not np.allclose(last_cell, 0.0)
+        )
+        has_changing_cell = has_valid_cell and not np.allclose(first_cell, last_cell)
 
         if has_valid_cell and has_changing_cell:
             LOG.warning(
@@ -79,7 +102,6 @@ class UnitCellConfigurator(IConfigurator):
             )
 
         if not has_valid_cell:
-            traj_config = self.configurable[self.dependencies["trajectory"]]["instance"]
             self.recommended_cell = (
                 2.0 * np.eye(3) * np.linalg.norm(traj_config.max_span)
             )
@@ -87,7 +109,7 @@ class UnitCellConfigurator(IConfigurator):
                 "Setting recommended cell to twice the maximum distance found in the trajectory."
             )
         else:
-            self.recommended_cell = (first_cell + last_cell) / 2.0
+            self.recommended_cell = (first_cell + last_cell) / 2
 
         self.recommended_cell = self.recommended_cell.tolist()
 
@@ -104,9 +126,8 @@ class UnitCellConfigurator(IConfigurator):
 
         self._original_input = value
         self["apply"] = value[1]
-        if self["apply"]:
-            self.update_trajectory_information()
 
+        if self["apply"]:
             try:
                 input_array = np.array(value[0], dtype=float)
             except Exception:
@@ -114,12 +135,14 @@ class UnitCellConfigurator(IConfigurator):
                     "Could not convert the inputs into a floating point array."
                 )
                 return
-            else:
-                if input_array.shape != (3, 3):
-                    self.error_status = "Input shape must be 3x3."
-                    return
 
-            self["value"] = value[0]
+            if input_array.shape != (3, 3):
+                self.error_status = "Input shape must be 3x3."
+                return
+
+            self["value_raw"] = input_array
         else:
-            self["value"] = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+            self["value_raw"] = np.eye(3)
+
+        self["value"] = UnitCell(self["value_raw"])
         self.error_status = "OK"

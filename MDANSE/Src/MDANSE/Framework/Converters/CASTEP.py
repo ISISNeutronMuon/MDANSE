@@ -44,6 +44,10 @@ class CASTEP(Converter):
             "parser": CASTEPMDFile,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
@@ -117,7 +121,10 @@ class CASTEP(Converter):
         # Read the information in the frame
         time_step = frame["time"]
 
-        unit_cell = UnitCell(np.vstack(frame["h"]))
+        if self.configuration["unit_cell"]["apply"]:
+            unit_cell = self.configuration["unit_cell"]["value"]
+        else:
+            unit_cell = UnitCell(np.vstack(frame["h"]))
         coords = np.vstack(tuple(arr[1] for arr in frame["R"]))
         variables = {
             "velocities": np.vstack(tuple(arr[1] for arr in frame["V"])),

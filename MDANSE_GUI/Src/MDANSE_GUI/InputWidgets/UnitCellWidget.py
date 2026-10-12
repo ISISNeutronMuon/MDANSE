@@ -36,11 +36,16 @@ class UnitCellWidget(WidgetBase):
         self._layout.addWidget(self._unit_label, 1, 0)
         self._layout.addWidget(self._apply_box, 2, 0)
         self._array_fields = {}
-        self._configurator.update_trajectory_information()
+
         try:
+            self._configurator.update_trajectory_information(
+                self._configurator.configurable[
+                    self._configurator.dependencies["trajectory"]
+                ]["instance"]
+            )
             self.start_values = self._configurator.recommended_cell
-        except AttributeError:
-            self.start_values = self._configurator.default
+        except (AttributeError, KeyError):
+            self.start_values = self._configurator.default[0]
         for row in range(3):
             for column in range(3):
                 temp = QLineEdit(

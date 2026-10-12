@@ -49,6 +49,10 @@ class DFTB(Forcite):
             "parser": TrjFile,
         },
     )
+    settings["unit_cell"] = (
+        "UnitCellConfigurator",
+        {},
+    )
     settings["atom_aliases"] = (
         "AtomMappingConfigurator",
         {
