@@ -376,6 +376,10 @@ class PlotTransformWidget(QDialog):
         self.current_ds = self._local_pc._datasets[ds_label]
 
         limit = self._local_pc.item(0, plotting_column_index["Use it?"]).text()
+        for col in ("Colour 1", "Colour 2"):
+            self._local_pc.item(0, plotting_column_index[col]).setText(
+                self._plotting_context.item(0, plotting_column_index[col]).text()
+            )
 
         self._ds_range.setText(limit)
 
