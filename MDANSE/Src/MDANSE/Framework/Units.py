@@ -187,10 +187,6 @@ class _Unit:
         Solid angular dimension.
     """
 
-    class DBInput(TypedDict):
-        factor: float
-        dimension: tuple[int, int, int, int, int, int, int, int, int]
-
     _EQUIVALENCES: ClassVar[MutableMapping[Dims, dict[Dims, float]]] = defaultdict(dict)
 
     def __init__(
@@ -209,6 +205,18 @@ class _Unit:
         self._ounit = None
         self._out_factor = None
         self.equivalent = False
+
+
+    class DBInput(TypedDict):
+        factor: float
+        dimension: tuple[int, int, int, int, int, int, int, int, int]
+
+    @classmethod
+    def from_json(cls, uname: str, udict: DBInput) -> Self:
+        """Read Unit from json database."""
+        factor = udict.get("factor", 1.0)
+        dim = udict.get("dimension", ())
+        return cls(uname, factor, Dims(*dim))
 
     def __add__(self, other: _Unit) -> Self:
         """Add two _Unit instances.
@@ -1093,11 +1101,11 @@ class UnitsManager(_Database):
         super()._load(user_database, default_database)
 
         defaults = {
-            name: decode_from_json(name, udict)
+            name: _Unit.from_json(name, udict)
             for name, udict in self._default_data.items()
         }
         custom = {
-            name: decode_from_json(name, udict) for name, udict in self._data.items()
+            name: _Unit.from_json(name, udict) for name, udict in self._data.items()
         }
 
         alldefaults = self.with_prefixes(defaults)
@@ -1184,13 +1192,6 @@ def measure(
     unit.ounit(ounit)
 
     return unit
-
-
-def decode_from_json(uname: str, udict: _Unit.DBInput) -> _Unit:
-    """Read Unit from json database."""
-    factor = udict.get("factor", 1.0)
-    dim = udict.get("dimension", (0, 0, 0, 0, 0, 0, 0, 0, 0))
-    return _Unit(uname, factor, Dims(*dim))
 
 
 UNITS_MANAGER = UnitsManager()
