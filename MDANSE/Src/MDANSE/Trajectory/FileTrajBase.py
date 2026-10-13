@@ -152,7 +152,7 @@ class TrajectoryFile(ABC):
             return -1
         if (chunk_shape := getattr(dataset, "chunks", None)) is None:
             LOG.warning("Dataset %s is not chunked, and was expected to be", data_key)
-            return -1
+            return dataset.shape[1]
         if len(chunk_shape) < 2:
             LOG.warning("Dataset %s does not have enough dimensions", data_key)
             return -1

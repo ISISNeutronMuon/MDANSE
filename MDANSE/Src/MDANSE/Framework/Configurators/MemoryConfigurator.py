@@ -100,7 +100,7 @@ class MemoryConfigurator(IntegerConfigurator):
             atoms_per_step = min(num_value, atoms_per_chunk)
             self["memory_per_step"] = atoms_per_step * predicted_memory[0]
             self["atoms_per_step"] = [atoms_per_step]
-            if self["memory_per_step"] > self.memory_warning_limit:
+            if self["memory_per_step"] > float(self.memory_warning_limit):
                 self.warning_status = (
                     f"Expected memory per step ({self['memory_per_step']} MB) "
                     f"is larger than the current preferred limit ({self.memory_warning_limit} MB)."
