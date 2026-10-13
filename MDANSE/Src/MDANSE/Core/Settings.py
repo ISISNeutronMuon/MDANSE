@@ -33,8 +33,7 @@ T = TypeVar("T")
 X = TypeVar("X")
 
 
-# 3.11+, Generic[T]
-class Option(NamedTuple):
+class Option(NamedTuple, Generic[T]):
     """Tuple defining a specialised option."""
 
     value: T
@@ -95,6 +94,7 @@ class Settings:
             self._reup()
             return super().__repr__()
 
+    initialised: ClassVar[bool] = False
     auto_save: ClassVar[bool] = False
     settings: ClassVar[_SettingsDict] = _SettingsDict()
     _defaults: ClassVar[SettingsDict] = defaultdict(dict)
@@ -139,10 +139,11 @@ class Settings:
 
         # Global settings
         for default in cls._parameters:
-            cls.set_item(default)
+            cls.set_item(default, __ignore_init__=True)
 
         cls.load(settings)
         cls._init_dicts(cls._defaults, cls._settings)
+        cls.initialised = True
 
     @classmethod
     def _init_dicts(cls, defaults: SettingsDict, settings: SettingsDict):
@@ -239,7 +240,7 @@ class Settings:
         Parameters
         ----------
         settings : Path | SettingsRaw, optional
-            Place to laod data from.
+            Place to load data from.
         """
         match settings:
             case None | Mapping():
@@ -306,11 +307,23 @@ class Settings:
                 return Option(val, key, grp_key, comment=add_comment)
 
     @classmethod
+    def _check_init(cls) -> None:
+        if not cls.initialised:
+            LOG.warning(
+                "Settings not initialised. "
+                "Initialising without loading settings file.\n\n"
+                "Use `Settings.init(path)`."
+            )
+            Settings.init()
+
+    @classmethod
     def _get_opt(cls, _, grp: str, key: str) -> T:
+        cls._check_init()
         return cls.settings[grp][key].value
 
     @classmethod
     def _set_opt(cls, _, value: T, grp: str, key: str) -> None:
+        cls._check_init()
         cls.settings[grp].setdefault(key, Option(value, key, grp))
         LOG.debug("Setting %s.%s=%s", grp, key, value)
 
@@ -318,6 +331,7 @@ class Settings:
 
     @classmethod
     def get_default(cls, grp: str, key: str) -> T:
+        cls._check_init()
         return cls._defaults[grp][key].value
 
     @classmethod
@@ -342,6 +356,7 @@ class Settings:
         T
             Value of setting.
         """
+        cls._check_init()
         if key not in cls.settings[grp]:
             cls.set_item(Option(default, key, grp, comment=comment))
         return cls.get_opt(grp, key)
@@ -380,7 +395,7 @@ class Settings:
         cls._set_opt(None, value, grp, key)
 
     @classmethod
-    def set_item(cls, item: Option[T]) -> None:
+    def set_item(cls, item: Option[T], *, __ignore_init__: bool = False) -> None:
         """Dynamically create a new default from an :ref:`Option`.
 
         Parameters
@@ -388,12 +403,16 @@ class Settings:
         item : Option[T]
             Default to create.
         """
+        if not __ignore_init__:
+            cls._check_init()
         cls._defaults.setdefault(item.group, {})
         cls._defaults[item.group][item.name] = item
         LOG.debug("Default %s.%s=%s", item.group, item.name, item.value)
 
     @classmethod
     def contains(cls, grp: str, key: str | None = None) -> bool:
+        cls._check_init()
+
         if key is None:
             return grp in cls.settings
 
@@ -420,6 +439,7 @@ class Settings:
 
         if clear_all:
             cls._parameters.clear()
+        cls.initialised = False
 
     @classmethod
     def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[type[X]], type[X]]:
@@ -466,7 +486,6 @@ class Settings:
                     ),
                 )
                 cls._parameters.add(value)
-
             return target
 
         return wrapped

@@ -22,7 +22,7 @@ from more_itertools import first_true, only
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-from MDANSE.Core.Settings import Settings, SettingsDict, SettingsRaw
+from MDANSE.Core.Settings import Settings, SettingsRaw
 from MDANSE_GUI.Utils import block_signals
 
 
