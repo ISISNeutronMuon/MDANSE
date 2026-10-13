@@ -170,7 +170,7 @@ the same format.
 OutputTrajectoryConfigurator
 ----------------------------
 
-default=('OUTPUT_TRAJECTORY', 64, 128, 'none', 'no logs')
+default=('OUTPUT_TRAJECTORY', 64, (1, 128), 'none', 'no logs')
 
 Specifies how a trajectory should be output to a file.
 
@@ -193,6 +193,21 @@ SingleChoiceConfigurator
 default=[]
 
 Selects a single item from multiple choices.
+
+.. _configurator-converter-UnitCellConfigurator:
+
+UnitCellConfigurator
+--------------------
+
+default=(array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]), False)
+
+Input a unit cell definition.
+
+This is normally used to introduce a cell definition to a trajectory,
+or to change the existing cell definition.
+
 
 Analysis Inputs
 ~~~~~~~~~~~~~~~
@@ -217,7 +232,6 @@ selects all atoms.
 Attributes
 ----------
 _default : str
-
 The default selection setting.
 
 
@@ -397,7 +411,7 @@ The grouping levels currently supported are:
 HDFInputFileConfigurator
 ------------------------
 
-default=INPUT_FILENAME.mda
+default=
 
 Uses an .mda file from another analysis as input.
 
@@ -552,7 +566,7 @@ Allows to define:
 OutputTrajectoryConfigurator
 ----------------------------
 
-default=('OUTPUT_TRAJECTORY', 64, 128, 'none', 'no logs')
+default=('OUTPUT_TRAJECTORY', 64, (1, 128), 'none', 'no logs')
 
 Specifies how a trajectory should be output to a file.
 
@@ -599,6 +613,22 @@ QRangeConfigurator
 default=(0, 10, 1)
 
 Range configurator for Q vector generation.
+
+.. _configurator-analysis-QVectors3DConfigurator:
+
+QVectors3DConfigurator
+----------------------
+
+default={'seed': 0, 'n_samples': 100, 'supercell_used': (1, 1, 1), 'q1': (1.0, 0.0, 0.0), 'q2': (0.0, 1.0, 0.0), 'q3': 'q1 x q2', 'q1_range': (-3.0, 3.0, 1.0), 'q2_range': (-3.0, 3.0, 1.0), 'q3_range': (-3.0, 3.0, 1.0)}
+
+Defines a 3D grid of reciprocal space vectors.
+
+Used as input for the StaticStructureFactor3D calculation.
+
+While the default input creates a grid centred on the origin,
+it is also possible to define a plane or a line by changing
+the range and the number of steps of the basis vectors.
+
 
 .. _configurator-analysis-QVectorsConfigurator:
 
@@ -682,7 +712,9 @@ The default selection setting.
 UnitCellConfigurator
 --------------------
 
-default=([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]], False)
+default=(array([[1., 0., 0.],
+       [0., 1., 0.],
+       [0., 0., 1.]]), False)
 
 Input a unit cell definition.
 

@@ -770,6 +770,25 @@ Inputs:
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
 
+.. _analysis-reference-StaticStructureFactor3D:
+
+StaticStructureFactor3D
+~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Inputs:
+
+- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
+- q_vectors: :ref:`configurator-analysis-QVectors3DConfigurator` default=N/A
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
+- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_coherent
+- output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
+- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
+
+
 .. _analysis-reference-StructureFactorFromScatteringFunction:
 
 StructureFactorFromScatteringFunction
