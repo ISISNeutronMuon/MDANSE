@@ -22,10 +22,14 @@ from more_itertools import first_true, only
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
-from MDANSE.Core.Settings import Settings, SettingsRaw
+from MDANSE.Core.Settings import Option, Settings, SettingsRaw
 from MDANSE_GUI.Utils import block_signals
 
 
+@Settings.parametrise(
+    splash=Option(True, group="startup", comment="Display splash screen on startup."),
+    systray=Option(True, group="startup", comment="Create a systry icon for MDANSE."),
+)
 class GUISettings(QStandardItemModel):
     def __init__(
         self,

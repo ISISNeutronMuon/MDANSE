@@ -20,7 +20,7 @@ import os
 import sys
 import textwrap
 import time
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 from pathlib import Path
 
 from qtpy.QtCore import QLocale, QSettings, Qt, QTimer
@@ -30,6 +30,7 @@ from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory, QSystemTr
 import MDANSE_GUI
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Platform import PLATFORM
+from MDANSE.Core.Settings import Option
 from MDANSE.Framework.Units import UNITS_MANAGER
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Session.Settings import GUISettings
@@ -70,19 +71,21 @@ def build_parser():
         version=f"%(prog)s v{MDANSE_GUI.__version__}",
     )
     parser.add_argument(
-        "--no-splash",
-        action="store_true",
-        help="Do not display splash screen on startup.",
+        "--splash",
+        action=BooleanOptionalAction,
+        help="Display splash screen on startup.",
+        default=None,
     )
     parser.add_argument(
-        "--no-systray",
-        action="store_true",
-        help="Do not create a system tray icon. "
+        "--systray",
+        action=BooleanOptionalAction,
+        help="Create a system tray icon. "
         "System tray icon allows you to close and restore the main window while keeping "
         "analysis tasks running in the background. "
         "Independent of the system tray icon being created or not, the GUI "
         "will ask you to confirm if you try to close the GUI before all the tasks "
         "have finished running.",
+        default=None,
     )
     parser.add_argument(
         "--settings",
@@ -144,44 +147,6 @@ def startGUI(some_args):
     pars = build_parser()
     args = pars.parse_args(some_args)
 
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(args.loglevel)
-    stream_handler.setFormatter(FMT)
-    LOG.addHandler(stream_handler)
-
-    app = QApplication(some_args)
-    app.setStyle(QStyleFactory.create("Fusion"))
-    check_qt_environment_vars(app)
-
-    assert PLATFORM.gui_base_directory
-
-    icon = QIcon(str(PLATFORM.gui_base_directory / "Icons/MDANSE.ico"))
-
-    app.setWindowIcon(icon)
-    fixed_locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedKingdom)
-    fixed_locale.setNumberOptions(
-        QLocale.NumberOption.RejectGroupSeparator
-        | QLocale.NumberOption.OmitGroupSeparator
-    )
-    QLocale.setDefault(fixed_locale)
-
-    qt_settings = QSettings(
-        "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
-    )
-
-    if not args.no_splash:
-        splash_img = QPixmap(str(PLATFORM.gui_base_directory / "Resources/splash.png"))
-        splash_img.setDevicePixelRatio(2)
-        splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
-        splash.show()
-        t0 = time.time()
-
-    if not args.no_systray:
-        if QSystemTrayIcon.isSystemTrayAvailable():
-            app.setQuitOnLastWindowClosed(False)
-        else:
-            LOG.error("System Tray Icon is not supported by your OS.")
-
     # Override settings directories.
     if args.local:
         PLATFORM._application_directory = Path.cwd()
@@ -195,6 +160,46 @@ def startGUI(some_args):
     settings = GUISettings(
         settings=PLATFORM.main_settings, save=not args.no_save_settings
     )
+    use_splash = args.splash if args.splash is not None else settings.splash
+    use_systray = args.systray if args.systray is not None else settings.systray
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(args.loglevel)
+    stream_handler.setFormatter(FMT)
+    LOG.addHandler(stream_handler)
+
+    app = QApplication(some_args)
+    app.setStyle(QStyleFactory.create("Fusion"))
+    check_qt_environment_vars(app)
+
+    assert PLATFORM.gui_base_directory
+
+    icon = QIcon(str(PLATFORM.gui_base_directory / "Icons/MDANSE.ico"))
+
+    if use_splash:
+        splash_img = QPixmap(str(PLATFORM.gui_base_directory / "Resources/splash.png"))
+        splash_img.setDevicePixelRatio(2)
+        splash = QSplashScreen(splash_img, Qt.WindowStaysOnTopHint)
+        splash.show()
+        t0 = time.time()
+
+    if use_systray:
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            app.setQuitOnLastWindowClosed(False)
+        else:
+            LOG.error("System Tray Icon is not supported by your OS.")
+
+    app.setWindowIcon(icon)
+    fixed_locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedKingdom)
+    fixed_locale.setNumberOptions(
+        QLocale.NumberOption.RejectGroupSeparator
+        | QLocale.NumberOption.OmitGroupSeparator
+    )
+    QLocale.setDefault(fixed_locale)
+
+    qt_settings = QSettings(
+        "ISIS Neutron and Muon Source", "MDANSE for Python 3", parent=app
+    )
 
     root = MDANSEMainWindow(
         parent=None,
@@ -202,12 +207,12 @@ def startGUI(some_args):
         mdanse_settings=settings,
         qt_settings=qt_settings,
         app_instance=app,
-        systray_icon=None if args.no_systray else icon,
+        systray_icon=icon if use_systray else None,
         save_settings=not args.no_save_settings,
     )
     root.show()
 
-    if not args.no_splash:
+    if use_splash:
         t1 = time.time()
         # only allow the splash screen to stay up for maximum of 2s if the
         # GUI loads fast but closes immediately if GUI was slow to load
