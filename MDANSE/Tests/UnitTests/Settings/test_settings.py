@@ -56,7 +56,6 @@ def test_save(tmp_path: Path, settings: type[Settings]):
     assert TOMLFile(pth).read() == {"a": {"a": 17}, "b": {"b": "hello"}}
 
 
-
 def test_load(settings: type[Settings], settings_file: Path):
     for trial in TEST_LABELS:
         assert not settings.contains("test", trial)
@@ -196,3 +195,12 @@ def test_parametrise(settings: type[Settings]):
     # Change through settings
     settings.set_opt("fish", "favourite", "bream")
     assert t.favourite == "bream"
+
+
+def test_warn_on_uninit(settings: type[Settings], caplog):
+    settings.get_opt("units", "energy")
+    assert any(
+        record.levelname == "WARNING"
+        and record.message.startswith("Settings not initialised")
+        for record in caplog.records
+    )
