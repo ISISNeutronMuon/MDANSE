@@ -1,10 +1,12 @@
 import os
 import pytest
 import tempfile
+from MDANSE.Framework.Converters import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 
 
 ALL_JOBS = [
+    "HydrogenBondStatistics",
     "AreaPerMolecule",
     "AverageStructure",
     "CenterOfMassesTrajectory",
@@ -69,6 +71,8 @@ def test_create_template_with_the_wrong_jobname_raises_error():
 
 
 def test_available_names_creates_list_of_all_possible_jobs():
+    print(set(IJob.raw_names()) - set(ALL_JOBS))
+    print(set(ALL_JOBS) - set(IJob.raw_names()))
     assert set(ALL_JOBS) == set(IJob.raw_names())
 
 
