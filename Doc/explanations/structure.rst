@@ -215,33 +215,29 @@ folding process of a protein.
 Solvent Accessible Surface
 ''''''''''''''''''''''''''
 
-The solvent accessible surface calculation involves defining the surface
-accessibility of molecules or atoms by creating a mesh of points. The
-number of points is determined by the field discussed, influencing the
-level of detail in the surface representation. Essentially, a higher
-density of points leads to a finer-grained representation, capturing
-smaller surface features and intricacies.
+Solvent Accessible Surface is calculated using the 'rolling ball' algorithm
+developed by Shrake & Rupley in 1973. The current implementation calculates
+the surface area of the atoms included in the selection, and can also calculate
+the surface area that is blocked by other atoms present in the trajectory,
+but not included in the selection.
 
-**Probe Radius**: Measured in nanometers, the probe radius is a crucial
-parameter influencing the precision of the calculation. Smaller probe
-radii provide a more detailed and  assessment of the
-molecular surface area, often resulting in a larger reported surface
-area due to increased sensitivity to surface features.
-
+A more detailed description can be found here:
+:ref:`analysis-reference-SolventAccessibleSurface`.
 
 .. _voronoi:
 
 Voronoi
 '''''''
 
-In MDANSE, Voronoi analysis plays a pivotal role in characterizing the
-spatial distribution and organization of particles or atoms within a
-molecular dynamics simulation. This analysis entails the division of the
-simulation box into Voronoi cells, with each cell centered around a
-particle. Voronoi cells provide essential insights into the local
-environment and packing of particles, allowing researchers to understand
-the arrangement and interactions of molecules in detail. Within MDANSE,
-the "apply periodic_boundary_condition" parameter is available to ensure
-accurate analysis, particularly for systems extending beyond the simulation
-box. This capability enables users to uncover valuable details about
-molecular structures and dynamics.
+Calculates the volume available to each atom in the simulation.
+
+The analysis divides the simulation box into Voronoi cells, with each cell
+constructed around a particle.
+
+Within MDANSE it is possible to include periodic boundary conditions
+in the Voronoi analysis. The atoms within a specified distance from the
+edge of the simulation box will be copied and used as a boundary limiting
+the volume accessible to the original atoms.
+
+More information on this analyis can be found here:
+:ref:`analysis-reference-Voronoi`.
