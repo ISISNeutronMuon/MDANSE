@@ -202,6 +202,7 @@ class PlotTransformWidget(QDialog):
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle(self._helper_title)
         self.setWindowFlags(Qt.Window)
+        self.setModal(True)
 
         self._plotting_context = plotting_context
         self._local_pc = PlottingContext(plotting_context._unit_lookup)
