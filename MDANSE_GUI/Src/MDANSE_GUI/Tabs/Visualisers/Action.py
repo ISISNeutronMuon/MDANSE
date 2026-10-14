@@ -31,7 +31,7 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE.Core.Settings import Option, Settings
+from MDANSE.Core.Settings import Option, Setting, Settings
 from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
     HDFTrajectoryConfigurator,
 )
@@ -133,14 +133,12 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
 }
 
 
-@Settings.parametrise(
-    auto_load=Option(
-        value=True,
+class Action(QWidget):
+    auto_load = Setting(
+        True,
         group="execution",
         comment="Unless manually switched off, the GUI will try to load the job results when the job is finished.",
     )
-)
-class Action(QWidget):
     new_thread_objects = Signal(list)
     run_and_load = Signal(list)
     new_path = Signal(str)
