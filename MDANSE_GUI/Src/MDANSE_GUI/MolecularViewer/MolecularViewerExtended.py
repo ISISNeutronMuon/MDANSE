@@ -22,11 +22,16 @@ import vtk
 from qtpy.QtCore import QTimer, Signal
 from vtk.util import numpy_support
 
+from MDANSE.Core.Settings import Option, Settings
 from MDANSE.MLogging import LOG
 
 from .MolecularViewer import MolecularViewer
 
 
+@Settings.parametrise(
+    display_disco=Option(True, group="startup", comment="Display disco logo."),
+    animate_disco=Option(True, group="startup", comment="Animate disco logo."),
+)
 class MolecularViewerExtended(MolecularViewer):
     """MolecularViewer which emits atom index when clicked."""
 
@@ -106,6 +111,8 @@ class MolecularViewerExtended(MolecularViewer):
     def create_placeholder(self):
         """Loads a 3D blender model of mdanse into the viewer."""
         self.clear_placeholder()
+        if not self.display_disco:
+            return
 
         spheres = [
             ("center_sphere.stl", (0.6, 0.6, 0.6), 0.4, (0, 0, 0)),  # grey center
@@ -163,6 +170,10 @@ class MolecularViewerExtended(MolecularViewer):
     def start_animation(self):
         """Set the camera and start the placeholder animation."""
         # side view of 3d model
+        if not self.display_disco or not self.animate_disco:
+            self._animation_timer.stop()
+            return
+
         self._camera.SetPosition(20, 0, 0)
         self._camera.SetFocalPoint(0, 0, 0)
         self._camera.SetViewUp(0, 0, 1)
