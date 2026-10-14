@@ -36,6 +36,7 @@ from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
+from MDANSE.Core.Settings import Option, Settings
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import ComplexArray, FloatArray, IntArray
@@ -85,8 +86,17 @@ def get_mpl_colours():
     return [mpl_to_hex(col) for col in colours]
 
 
+@Settings.parametrise(
+    colour_map=Option(
+        "viridis",
+        group="matplotlib",
+        comment="Name of the default matplotlib colormap to be used in 2D plots.",
+    ),
+)
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
+
+    colour_map: str
 
     def __init__(
         self,
@@ -94,14 +104,14 @@ class SingleDataset:
         source: h5py.File | None,
         linestyle: str = "-",
         marker: str | None = None,
-        colour_map: str = "viridis",
+        colour_map: str = "",
         **kwargs,
     ):
         self._name = name
         self._use_scaling = True
         self._linestyle = linestyle
         self._marker = marker
-        self._colour_map = colour_map
+        self._colour_map = colour_map or self.colour_map
         self._data_limits = None
         self._imaginary_data = None
         self._valid = True
