@@ -25,21 +25,20 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE.Core.Settings import Option, Settings
+from MDANSE.Core.Settings import Setting, Settings
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session
 from MDANSE_GUI.Session.Settings import GUISettings
 
 
-@Settings.parametrise(
-    mpl_style=Option(
+class PlotSettings(QWidget):
+    mpl_style = Setting(
         "default",
         group="matplotlib",
         comment="Name of the matplotlib style to be used for plotting.",
-    ),
-)
-class PlotSettings(QWidget):
+    )
+
     plot_settings_changed = Signal()
 
     def __init__(self, *args, settings: Session | None = None, **kwargs) -> None:
