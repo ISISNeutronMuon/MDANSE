@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from math import sqrt
+from typing import TYPE_CHECKING
 
 import numpy as np
 from more_itertools import always_iterable
@@ -33,13 +34,49 @@ from MDANSE.Mathematics.Signal import (
     get_spectrum,
 )
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices_precalculated
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.util_types import ComplexArray
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurators.MemoryConfigurator import MemoryConfigurator
 
 
 class CurrentCorrelationFunctionError(Exception):
     pass
+
+
+def ccf_memory_per_atom(
+    mem_conf: MemoryConfigurator, n_atoms: int = 1
+) -> tuple[int, int, int]:
+    """Calculate the memory requirements of a DISF calculation.
+
+    The data size is fixed as 8 bytes per number, since the arrays allocated
+    by numpy in this analysis are most likely going to be float64, even
+    if the coordinates in the input trajectory are float32.
+
+    Parameters
+    ----------
+    mem_conf : MemoryConfigurator
+        The configurator instance which contains the needed inputs
+    n_atoms : int, optional
+        Use a specific number of atoms in the calculation, by default 1
+
+    Returns
+    -------
+    tuple[int, int int]
+        MB per atom, per chunk and per n_atoms from input, respectively
+    """
+    trajectory = mem_conf.configurable[mem_conf.dependencies["trajectory"]]["instance"]
+    frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
+    vector_config = mem_conf.configurable[mem_conf.dependencies["q_vectors"]]
+    n_dimensions = 3
+    n_frames = frame_config["number"]
+    n_vectors = vector_config["parameters"].get("n_vectors", 1)
+    data_size = 8
+    chunk_size = trajectory.chunk_size(array_name="position")
+    prefactor = 4 * n_frames * n_vectors * n_dimensions * data_size / 2**20
+    return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 
 @IJob.register("CurrentCorrelationFunction")
@@ -60,7 +97,12 @@ class CurrentCorrelationFunction(IJob):
     enabled = True
 
     label = "Current Correlation Function"
-    PREDICTORS = ("instrument_resolution", "q_vectors")
+    PREDICTORS = (
+        "instrument_resolution",
+        "q_vectors",
+        "memory",
+        "running_mode",
+    )
 
     category = (
         "Analysis",
@@ -122,8 +164,26 @@ class CurrentCorrelationFunction(IJob):
             },
         },
     )
+    settings["memory"] = (
+        "MemoryConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "frames": "frames",
+                "q_vectors": "q_vectors",
+            },
+            "mem_function": ccf_memory_per_atom,
+        },
+    )
     settings["output_files"] = ("OutputFilesConfigurator", {})
-    settings["running_mode"] = ("RunningModeConfigurator", {})
+    settings["running_mode"] = (
+        "RunningModeConfigurator",
+        {
+            "dependencies": {
+                "memory": "memory",
+            }
+        },
+    )
 
     def initialize(self):
         """Initialize the input parameters and analysis self variables."""
@@ -138,6 +198,8 @@ class CurrentCorrelationFunction(IJob):
         self._instrResolution = self.configuration["instrument_resolution"]
 
         self._nOmegas = self._instrResolution["n_romegas"]
+
+        self.memory_group_size = self.configuration["memory"]["atoms_per_step"][0]
 
         self._outputData.add(
             "ccf/axes/q",
@@ -420,11 +482,11 @@ class CurrentCorrelationFunction(IJob):
                 dtype=np.complex64,
             )
 
-        grouped_indices = group_atom_indices(
+        grouped_indices = group_atom_indices_precalculated(
             self.trajectory,
             self.configuration["frames"]["number"],
             n_proc=self.n_proc,
-            memory_scale_factor=4 * nQVectors,
+            max_group_size=self.memory_group_size,
         )
 
         for element, idxs in list(self._indicesPerElement.items()):

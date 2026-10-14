@@ -83,6 +83,7 @@ from .MDTrajTopologyFileConfigurator import (
 from .MDTrajTrajectoryFileConfigurator import (
     MDTrajTrajectoryFileConfigurator as MDTrajTrajectoryFileConfigurator,
 )
+from .MemoryConfigurator import MemoryConfigurator as MemoryConfigurator
 from .MoleculeSelectionConfigurator import (
     MoleculeSelectionConfigurator as MoleculeSelectionConfigurator,
 )

@@ -201,4 +201,4 @@ def test_output_axis_preview(tmp_path, parameters):
     job = IJob.create("DensityOfStates")
     job.setup(parameters)
     axes = job.preview_output_axis()
-    assert len(axes) == 1  # we only use the axis for the main result
+    assert len(axes) == 4  # energy axis, atoms per step, memory per CPU, total memory
