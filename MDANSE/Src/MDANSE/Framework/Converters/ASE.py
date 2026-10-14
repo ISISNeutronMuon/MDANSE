@@ -41,9 +41,11 @@ try:
 
     from MDANSE.Framework.Parsers import ASEParser
 
+    vel_conv = ase_units.fs / ase_units.Ang
     ase_available = True
 except ImportError:
     ASEParser = object()
+    vel_conv = np.nan
     ase_available = False
 
 
@@ -122,7 +124,7 @@ class ASE(Converter):
         "energy": measure(1.0, "eV").toval("Da nm2 / ps2"),
         "forces": measure(1.0, "eV/ang").toval("Da nm / ps2"),
         "time": measure(1.0, "fs").toval("ps"),
-        "velocities": measure(ase_units.fs / ase_units.Ang, "ang/fs").toval("nm/ps"),
+        "velocities": measure(vel_conv, "ang/fs").toval("nm/ps"),
         "length": measure(1.0, "ang").toval("nm"),
     }
 
