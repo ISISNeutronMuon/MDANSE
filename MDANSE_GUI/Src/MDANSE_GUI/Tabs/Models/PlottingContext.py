@@ -111,7 +111,18 @@ class SingleDataset:
         self._use_scaling = True
         self._linestyle = linestyle
         self._marker = marker
+
         self._colour_map = colour_map or self.colour_map
+        if self._colour_map not in mpl.colormaps:
+            LOG.error(
+                "Colourmap (%s) not in permitted colourmaps, defaulting to 'viridis'. \nSupported: %s",
+                self._colour_map,
+                ", ".join(mpl.colormaps),
+            )
+            self._colour_map = "viridis"
+            if self.colour_map not in mpl.colormaps:
+                self.colour_map = "viridis"
+
         self._data_limits = None
         self._imaginary_data = None
         self._valid = True
