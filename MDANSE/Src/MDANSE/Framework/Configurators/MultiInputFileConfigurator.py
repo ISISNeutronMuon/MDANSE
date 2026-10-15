@@ -44,7 +44,7 @@ class MultiInputFileConfigurator(IConfigurator):
         self["values"] = self._default
         self._original_input = values
 
-        if type(values) is str:
+        if isinstance(values, str):
             if values:
                 try:
                     # some issues when \ is used in the path as this

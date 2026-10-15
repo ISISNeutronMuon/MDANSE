@@ -86,6 +86,9 @@ from .MDTrajTrajectoryFileConfigurator import (
 from .MoleculeSelectionConfigurator import (
     MoleculeSelectionConfigurator as MoleculeSelectionConfigurator,
 )
+from .MultiFileWithAtomDataConfigurator import (
+    MultiFileWithAtomDataConfigurator as MultiFileWithAtomDataConfigurator,
+)
 from .MultiInputFileConfigurator import (
     MultiInputFileConfigurator as MultiInputFileConfigurator,
 )

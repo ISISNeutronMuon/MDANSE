@@ -15,14 +15,13 @@
 #
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, KeysView, ValuesView
+from collections.abc import Callable, Iterable, KeysView, Mapping, ValuesView
 from typing import Any, ClassVar, Generic, ParamSpec, TypeVar
 
 from more_itertools import always_iterable
 
 from MDANSE.IO.IOUtils import UCDict
 
-P = ParamSpec("P")
 T = TypeVar("T", bound="RegisterFactory")
 
 
@@ -50,7 +49,7 @@ class RegisterFactory(Generic[T]):
         return cls.registry[key]
 
     @classmethod
-    def create(cls, key: str, *args: P.args, **kwargs: P.kwargs) -> T:
+    def create(cls, key: str, *args, **kwargs) -> T:
         """
         Return an instance of given class.
         """
@@ -82,12 +81,12 @@ class RegisterFactory(Generic[T]):
         -----
         Only available on cases where registry is UCDict.
         """
-        if not hasattr(cls.registry, "raw_dict"):
-            raise TypeError("No raw names available for class")
-        return cls.registry.raw_dict
+        if isinstance(cls.registry, UCDict):
+            return cls.registry.raw_dict
+        return cls.registry
 
     @classmethod
-    def raw_names(cls) -> ValuesView[str]:
+    def raw_names(cls) -> Iterable[str]:
         """
         Get raw names of classes.
 
@@ -100,9 +99,9 @@ class RegisterFactory(Generic[T]):
         -----
         Only available on cases where registry is UCDict.
         """
-        if not hasattr(cls.registry, "raw_mapping"):
-            raise TypeError("No raw names available for class")
-        return cls.registry.raw_mapping.values()
+        if isinstance(cls.registry, UCDict):
+            return cls.registry.raw_mapping.values()
+        return cls.registry.keys()
 
     @classmethod
     def available_classes(cls) -> set[type[T]]:
@@ -121,7 +120,7 @@ class RegisterFactory(Generic[T]):
         return cls.registry.copy()
 
     @classmethod
-    def register(cls, names: str | Iterable[str]) -> Callable[type[T], type[T]]:
+    def register(cls, names: str | Iterable[str]) -> Callable[[type[T]], type[T]]:
         """
         A class level decorator for registering classes.
 
