@@ -692,6 +692,8 @@ class SingleDataset:
             curves = list(curves)
 
             def getter(targets: Iterable[int]) -> list[FloatArray]:
+                if len(targets) == 1:  # Ydata
+                    return [curves[first(targets)][1][1]]
                 return [
                     ydata for _label, (_xdata, ydata) in itemgetter(*targets)(curves)
                 ]
