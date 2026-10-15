@@ -775,6 +775,14 @@ Inputs:
 StaticStructureFactor3D
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+Calculates the static structure factor of the system resolved in q_x, q_y and q_z.
+
+As opposed to the StaticStructureFactor analysis, this one does not assume the system
+to be isotropic and does not perform spherical averaging of the results.
+
+The result of this calculation is equivalent to a diffraction pattern. By running
+a simulation on a large enough supercell, it is possible to include the effects
+of diffuse scattering in the results.
 
 Inputs:
 
