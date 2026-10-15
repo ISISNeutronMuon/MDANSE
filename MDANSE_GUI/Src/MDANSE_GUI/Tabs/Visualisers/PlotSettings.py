@@ -33,11 +33,6 @@ from MDANSE_GUI.Session.Settings import GUISettings
 
 
 @Settings.parametrise(
-    colourmap=Option(
-        "viridis",
-        group="matplotlib",
-        comment="Name of the matplotlib colormap to be used in 2D plots.",
-    ),
     mpl_style=Option(
         "default",
         group="matplotlib",
@@ -70,11 +65,6 @@ class PlotSettings(QWidget):
                 self.mpl_style = backup_style
         else:
             self.plot_settings_changed.emit()
-
-    @Slot(str)
-    def set_cmap(self, cmap_name: str):
-        self.colourmap = cmap_name
-        self.plot_settings_changed.emit()
 
     @Slot()
     def update_units(self):
@@ -131,16 +121,6 @@ class PlotSettings(QWidget):
         style_selector.setCurrentText(style_string)
         style_selector.currentTextChanged.connect(self.set_style)
         top_layout.addRow("Matplotlib style:", style_selector)
-
-        if (current_cmap := self.colourmap) not in mpl.colormaps():
-            current_cmap = "viridis"
-
-        cmap_selector = QComboBox(self)
-        cmap_selector.addItems(mpl.colormaps())
-        cmap_selector.setCurrentText(current_cmap)
-        cmap_selector.currentTextChanged.connect(self.set_cmap)
-
-        top_layout.addRow("Colormap:", cmap_selector)
         layout.addLayout(top_layout)
 
         box = QGroupBox("Units", self)
