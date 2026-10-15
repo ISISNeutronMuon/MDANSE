@@ -38,6 +38,7 @@ class QVectors3DConfigurator(IConfigurator):
     it is also possible to define a plane or a line by changing
     the range and the number of steps of the basis vectors.
     """
+
     _default = {
         "seed": 0,
         "n_samples": 100,
