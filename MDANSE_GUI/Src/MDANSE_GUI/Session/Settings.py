@@ -28,7 +28,9 @@ from MDANSE_GUI.Utils import block_signals
 
 @Settings.parametrise(
     splash=Option(True, group="startup", comment="Display splash screen on startup."),
-    systray=Option(True, group="startup", comment="Create a systry icon for MDANSE."),
+    systray=Option(
+        True, group="startup", comment="Create a system tray icon for MDANSE."
+    ),
 )
 class GUISettings(QStandardItemModel):
     def __init__(

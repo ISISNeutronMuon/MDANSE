@@ -104,6 +104,36 @@ Make sure that you are starting MDANSE from a shell/console
 in which you have activated the Python virtual environment,
 as described above in section :ref:`venv_for_mdanse`.
 
+You can find out about the additional startup options
+by runningYou can now start using MDANSE by running the following command:
+
+.. code-block:: bash
+
+   mdanse_gui -h
+
+System Tray Icon
+''''''''''''''''
+
+The current default behaviour of the GUI is to create a system tray icon
+for MDANSE_GUI. The software does not exit when the main window is closed,
+allowing analysis tasks to continue running in the background. Also, the
+main window can be restored by double-clicking the system tray icon, or by
+using the "Show GUI window" option in the context menu.
+
+It is possible to switch back to the old behaviour. One way is to start
+the GUI with an additional keyword:
+
+.. code-block:: bash
+
+   mdanse_gui --no-systray
+
+You can also change the settings in the GUI by opening Settings and
+then the User Settings entry in the GUI menu. The 'startup' group
+contains the settings controlling the splash screen, system tray icon
+and the placeholder animation in the 3D view. They all can be disabled
+by changing the relevant settings. Remember to save the settings after
+making the changes.
+
 Run MDANSE in the shell
 ~~~~~~~~~~~~~~~~~~~~~~~
 

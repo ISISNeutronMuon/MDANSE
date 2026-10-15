@@ -80,6 +80,27 @@ mdanse_gui
 Please remember to activate your virtual environment when you start a new
 shell before you run `mdanse_gui`.
 
+### System tray icon
+
+The current default behaviour of the GUI is to create a system tray icon
+for MDANSE_GUI. The software does not exit when the main window is closed,
+allowing analysis tasks to continue running in the background. Also, the
+main window can be restored by double-clicking the system tray icon, or by
+using the "Show GUI window" option in the context menu.
+
+It is possible to switch back to the old behaviour. One way is to start
+the GUI with an additional keyword:
+```
+mdanse_gui --no-systray
+```
+
+You can also change the settings in the GUI by opening Settings and
+then the User Settings entry in the GUI menu. The 'startup' group
+contains the settings controlling the splash screen, system tray icon
+and the placeholder animation in the 3D view. They all can be disabled
+by changing the relevant settings. Remember to save the settings after
+making the changes.
+
 ## Installation: development version
 
 Between releases, MDANSE and MDANSE_GUI are undergoing frequent changes.
@@ -91,15 +112,47 @@ python3 -m pip install "git+https://github.com/ISISNeutronMuon/MDANSE@protos#egg
 ```
 ## Installation: optional dependencies
 
-If you prefer running MDANSE via scripts in the command line instead of using
-the GUI, you can install MDANSE with additional dependencies for CLI runs.
-This can be done using the command
+Some Python packages are not installed by default, but can be added to enable
+additional functionality in MDANSE.
+
+### Optional dependencies for MDANSE
+
+The following keywords can be used to install optional dependencies:
+
+- ase (adds ASE, enables the ASE converter and AverageStructure analysis)
+- cli (adds tqdm for the command line progress bar)
+- finufft (adds FINUFFT, enables StaticStructureFactor3D calculation)
+- mdanalysis (adds MDAnalysis, enables the MDAnalysis converter)
+- mdtraj (adds MDTraj, enables MDTraj and GROMACS converters)
+- pymixbox (adds pymixbox, changes output atom colours in CentreOfMassesTrajectory)
+
+These can be picked individually, as in
 ```
-pip install MDANSE[cli]
+pip install mdanse[cli,mdtraj]
 ```
-At the moment, the only additional package that will be added is
-``tqdm``, which will then be used to display
-progress bars for MDANSE scripts running in the shell.
+
+It is also possible to install them all using
+```
+pip install mdanse[all]
+```
+
+### Optional dependencies for MDANSE_GUI
+
+The following keywords can be used to install optional dependencies:
+
+- pymixbox (adds pymixbox, changes colours of curves in the plotter)
+- shortcuts (adds pyshortcuts, enables `create_mdanse_link` script for creating
+  an MDANSE desktop icon and Start Menu entry)
+
+These can be picked individually, as in
+```
+pip install mdanse_gui[shortcuts]
+```
+
+It is also possible to install them all using
+```
+pip install mdanse_gui[all]
+```
 
 ## Quick start: the workflow
 
@@ -180,6 +233,7 @@ potential experiment. The following properties can be computed:
 <li>Neutron Dynamic Total Structure Factor</li>
 <li>Scattering Length Density Profile</li>
 <li>Static Structure Factor</li>
+<li>Static Structure Factor 3D</li>
 <li>Structure Factor from Scattering Function</li>
 <li>X-Ray Static Structure Factor</li>
 </ul></details>
