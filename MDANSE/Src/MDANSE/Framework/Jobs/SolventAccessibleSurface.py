@@ -339,7 +339,7 @@ class SolventAccessibleSurface(IJob):
     of a group of atoms, please remove the other atoms from the trajectory.
 
     Solvent Accessible Surface is calculated using the 'rolling ball' algorithm
-    developed by Shrake & Rupley in 1973.
+    developed by Shrake and Rupley.
 
     * Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
 

@@ -171,3 +171,8 @@ References
 .. [Ref47] Fernandez-Alonso, F. and Price, D.
    "Neutron Scattering (Experimental Methods in the Physical Sciences)"
    ISBN: 9780123983749
+
+.. [Ref48] Shrake, A. and Rupley, J.A., 
+   Environment and exposure to solvent of protein atoms. Lysozyme and insulin,
+   "Journal of Molecular Biology", Volume 79, Issue 2, 1973, pp. 351-371,
+   DOI: 10.1016/0022-2836(73)90011-9.

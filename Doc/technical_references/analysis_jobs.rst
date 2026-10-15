@@ -710,9 +710,7 @@ be blocking the accessible surface. If you are interested in the **total** surfa
 of a group of atoms, please remove the other atoms from the trajectory.
 
 Solvent Accessible Surface is calculated using the 'rolling ball' algorithm
-developed by Shrake & Rupley in 1973.
-
-* Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
+developed by Shrake and Rupley [Ref48]_.
 
 This algorithm uses a sphere (of solvent) of a particular radius to 'probe' the
 surface of the molecule.
@@ -775,7 +773,7 @@ Inputs:
 StaticStructureFactor3D
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Calculates the static structure factor of the system resolved in q_x, q_y and q_z.
+Calculates the static structure factor of the system resolved in :mathbf:`q`.
 
 As opposed to the StaticStructureFactor analysis, this one does not assume the system
 to be isotropic and does not perform spherical averaging of the results.

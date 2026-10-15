@@ -36,7 +36,7 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 @IJob.register("StaticStructureFactor3D")
 class StaticStructureFactor3D(IJob):
-    """Calculates the static structure factor of the system resolved in q_x, q_y and q_z.
+    """Calculates the static structure factor of the system resolved in q.
 
     As opposed to the StaticStructureFactor analysis, this one does not assume the system
     to be isotropic and does not perform spherical averaging of the results.

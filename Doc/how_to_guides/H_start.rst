@@ -105,7 +105,7 @@ in which you have activated the Python virtual environment,
 as described above in section :ref:`venv_for_mdanse`.
 
 You can find out about the additional startup options
-by runningYou can now start using MDANSE by running the following command:
+by running:
 
 .. code-block:: bash
 

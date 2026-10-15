@@ -215,8 +215,8 @@ folding process of a protein.
 Solvent Accessible Surface
 ''''''''''''''''''''''''''
 
-Solvent Accessible Surface is calculated using the 'rolling ball' algorithm
-developed by Shrake & Rupley in 1973. The current implementation calculates
+Solvent Accessible Surface is calculated using the 'rolling ball'
+algorithm [Ref48]_. The current implementation calculates
 the surface area of the atoms included in the selection, and can also calculate
 the surface area that is blocked by other atoms present in the trajectory,
 but not included in the selection.
