@@ -252,7 +252,7 @@ class PlotTransformWidget(QDialog):
             [
                 str(x)
                 for x in Plotter.raw_names()
-                if str(x) not in {"Text", "Heatmap", "Vectors", "Vectors3D"}
+                if str(x) not in {"Text", "Heatmap", "Vectors", "Vectors3D", "Grouped"}
             ]
         )
         self._plotter_select.currentTextChanged.connect(self.set_plotter)

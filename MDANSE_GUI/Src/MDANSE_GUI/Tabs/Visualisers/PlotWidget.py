@@ -445,11 +445,18 @@ class PlotWidget(QWidget):
         self._plotter.save_data(save_loc)
 
     def _transform_window(self):
-        if self._transform is None:
-            self._transform = PlotTransformWidget(
-                self, plotting_context=self._plotting_context
-            )
-            self._transform.finished.connect(self.plot_data)
+        if not self._plotting_context or not any(self._plotting_context._datasets):
+            QMessageBox.warning(self, "No data", "No data in plot.")
+            return
+
+        if self._transform is not None:
+            self._transform.finished.disconnect(self.plot_data)
+            del self._transform
+
+        self._transform = PlotTransformWidget(
+            self, plotting_context=self._plotting_context
+        )
+        self._transform.finished.connect(self.plot_data)
 
         # Force replot
         self._transform.plot_data()
