@@ -336,7 +336,12 @@ class Settings:
 
     @classmethod
     def get_opt_w_default(
-        cls, grp: str, key: str, default: T, comment: str | None = None
+        cls,
+        grp: str,
+        key: str,
+        default: T,
+        comment: str | None = None,
+        visible: bool = True,
     ) -> Any:
         """Get value and if not present create one in "_defaults".
 
@@ -358,7 +363,7 @@ class Settings:
         """
         cls._check_init()
         if key not in cls.settings[grp]:
-            cls.set_item(Option(default, key, grp, comment=comment))
+            cls.set_item(Option(default, key, grp, comment=comment, visible=visible))
         return cls.get_opt(grp, key)
 
     @classmethod
@@ -441,55 +446,6 @@ class Settings:
             cls._parameters.clear()
         cls.initialised = False
 
-    @classmethod
-    def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[type[X]], type[X]]:
-        """Add settings to decorated class.
-
-        For x = val, x will be the property on the class
-        and can be accessed directly via . notation.
-
-        Assigning to this value will update the value in Settings.
-
-        If val is an :ref:`Option`, these settings should be defined there,
-        if not provided or val is just a value they will be inferred as
-        ``(Option(value=val, group=type(class).__name__, name=x, comment=None))``.
-
-        Returns
-        -------
-        Callable[[type], type]
-            Class decorator.
-
-        Examples
-        --------
-        ..
-            @Settings.parametrise(favourite=Option("pike", group="fish"))
-            class Test:
-                def __init__(self):
-                    print(self.favourite) # => "pike"
-                    self.favourite = "trout"
-                    print(Settings.get_opt("fish", "favourite")) # "trout"
-        """
-
-        def wrapped(target: type) -> type:
-            targ_key = target.__name__
-
-            for key, val in kwargs.items():
-                value = cls._process_val(key, targ_key, val)
-
-                setattr(
-                    target,
-                    key,
-                    property(
-                        partial(cls._get_opt, grp=value.group, key=value.name),
-                        partial(cls._set_opt, grp=value.group, key=value.name),
-                        doc=value.comment,
-                    ),
-                )
-                cls._parameters.add(value)
-            return target
-
-        return wrapped
-
     @staticmethod
     @contextmanager
     def temporary(**kwargs: Option[T] | T):
@@ -531,3 +487,39 @@ def temp_settings(**kwargs: Option[T] | T) -> Generator[None]:
         Settings.auto_save = save
         Settings._init_dicts(defaults, settings)
         Settings._filename = filename
+
+
+class Setting(Generic[T]):
+    """Descriptor managing settings."""
+
+    def __init__(
+        self,
+        default: T,
+        name: str = "",
+        group: str = "",
+        comment: str | None = None,
+        visible: bool = True,
+    ):
+        self._default = default
+        self._name = name
+        self._group = group
+        self._comment = comment
+        self._visible = visible
+
+    def __set_name__(self, owner, name):
+        if not self._name:
+            self._name = name
+        if not self._group:
+            self._group = owner.__name__
+        value = Option(
+            self._default, self._name, self._group, self._comment, self._visible
+        )
+        Settings._parameters.add(value)
+
+    def __get__(self, _obj: object, _objtype: type | None = None) -> T:
+        return Settings.get_opt_w_default(
+            self._group, self._name, self._default, self._comment, self._visible
+        )
+
+    def __set__(self, _obj: object, value: T) -> None:
+        Settings.set_opt(self._group, self._name, value)
