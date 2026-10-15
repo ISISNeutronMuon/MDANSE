@@ -7,7 +7,7 @@ name = "MDANSE"
 description = 'MDANSE Core package - Molecular Dynamics trajectory handling and analysis code'
 dynamic = ["version"]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<=3.14"
 license = {file = "LICENSE"}
 keywords = ["molecular dynamics", "science", "simulation", "analysis"]
 maintainers = [
