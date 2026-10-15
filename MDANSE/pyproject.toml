@@ -7,7 +7,7 @@ name = "MDANSE"
 description = 'MDANSE Core package - Molecular Dynamics trajectory handling and analysis code'
 dynamic = ["version"]
 readme = "README.md"
-requires-python = ">=3.11,<=3.14"
+requires-python = ">=3.11,<3.15"
 license = {file = "LICENSE"}
 keywords = ["molecular dynamics", "science", "simulation", "analysis"]
 maintainers = [
@@ -60,7 +60,7 @@ mdanalysis=["MDAnalysis"]
 mdtraj=["mdtraj"]
 finufft=["finufft"]
 pymixbox=["pymixbox"]
-all=["MDANSE[ase,mdanalysis,mdtraj,finufft,pymixbox]"]
+all=["MDANSE[ase,cli,mdanalysis,mdtraj,finufft,pymixbox]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
