@@ -349,6 +349,7 @@ class SelectionHelper(QDialog):
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle(self._helper_title)
         self.setWindowFlags(Qt.Window)
+        self.setModal(True)
 
         self.trajectory = traj_data[1]
         self.system = self.trajectory.chemical_system
@@ -408,6 +409,7 @@ class SelectionHelper(QDialog):
         3D viewer when it is closed and then reopened.
         """
         self.selection_model.finalise_manual_selection()
+        self.view_3d.stop_animation()
         a0.ignore()
         self.hide()
 

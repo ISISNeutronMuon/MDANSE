@@ -49,6 +49,7 @@ class MolecularViewerExtended(MolecularViewer):
 
         # Animation timer for rotating the 3D model
         self._animation_timer = QTimer()
+        self._animation_timer.setInterval(50)
         self._animation_timer.timeout.connect(self.animate_rotation)
         self.create_placeholder()
         self.start_animation()
@@ -174,12 +175,14 @@ class MolecularViewerExtended(MolecularViewer):
             self._animation_timer.stop()
             return
 
+        if self._animation_timer.isActive():
+            return
         self._camera.SetPosition(20, 0, 0)
         self._camera.SetFocalPoint(0, 0, 0)
         self._camera.SetViewUp(0, 0, 1)
         self._camera.SetWindowCenter(-0.5, -0.5)
         self._renderer.ResetCameraScreenSpace(0.4)
-        self._animation_timer.start(50)
+        self._animation_timer.start()
 
     def animate_rotation(self):
         """Continuously rotate the 3D model."""
