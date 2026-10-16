@@ -247,6 +247,7 @@ class Action(QWidget):
 
             self._job_name = job_name
             if not job_name:
+                self._job_instance = Dummy()
                 return
             if self._default_path is None or Path(self._default_path).samefile(Path()):
                 self._default_path = str(Path(self._parent_tab.get_path(job_name)))
