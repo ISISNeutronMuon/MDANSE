@@ -60,7 +60,7 @@ mdanalysis=["MDAnalysis"]
 mdtraj=["mdtraj"]
 finufft=["finufft"]
 pymixbox=["pymixbox"]
-all=["MDANSE[ase,mdanalysis,mdtraj,finufft,pymixbox]"]
+all=["MDANSE[ase,cli,mdanalysis,mdtraj,finufft,pymixbox]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
@@ -78,7 +78,7 @@ MDANSE = ["Chemistry/*.json",
 
 [tool.setuptools-git-versioning]
 enabled = true
-starting_version = "2.0.1"
+starting_version = "2.0.2rc1"
 
 [project.scripts]
 mdanse = "MDANSE.Scripts.mdanse:main"

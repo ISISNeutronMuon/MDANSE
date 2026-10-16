@@ -1,3 +1,7 @@
+.. |q| replace:: :math:`\mathbf{q}`
+
+.. |Q| replace:: :math:`\mathbf{Q}`
+
 .. _vector-generator-list:
 
 List of q-vector generators
@@ -17,10 +21,10 @@ Vectors are grouped into shells limited to the range of
 Only vectors commensurate with the reciprocal space lattice will be generated.
 If more lattice vectors than requested are available in the requested range
 for a shell, a subset of the vectors will be selected with the probability
-given as a Gaussian function with FWHM of width/2 and centred on the :math:`|q|`
+given as a Gaussian function with FWHM of width/2 and centred on the |q|
 which is the nominal centre of the shell.
 
-:math:`|Q|` values for which no valid vectors can be found are omitted in the output.
+|Q| values for which no valid vectors can be found are omitted in the output.
 
 Inputs:
 
@@ -125,11 +129,11 @@ Generates vectors randomly on a straight line.
 Only vectors commensurate with the reciprocal space lattice will be generated.
 If more lattice vectors than requested are available in the requested range
 for a shell, a subset of the vectors will be selected with the probability
-given as a Gaussian function with FWHM of width/2 and centred on the :math:`|q|`
+given as a Gaussian function with FWHM of width/2 and centred on the |q|
 which is the nominal centre of the shell.
 
-:math:`|Q|` values for which no valid vectors can be found are omitted in the output.
-Most calculations will produce one data point per :math:`|Q|` by averaging the results
+|Q| values for which no valid vectors can be found are omitted in the output.
+Most calculations will produce one data point per |Q| by averaging the results
 over all vectors in the group, which is still called a shell.
 
 Inputs:
@@ -150,7 +154,7 @@ LinearQVectors
 
 Generates vectors randomly on a straight line.
 
-Most calculations will produce one data point for :math:`|Q|` by averaging the results
+Most calculations will produce one data point for |Q| by averaging the results
 over all vectors in the group, which is still called a shell.
 
 The vector lengths in a single shell assume a normal distribution with the
@@ -197,11 +201,11 @@ Generates randomly-selected lattice vectors grouped into spheres.
 Only vectors commensurate with the reciprocal space lattice will be generated.
 If more lattice vectors than requested are available in the requested range
 for a shell, a subset of the vectors will be selected with the probability
-given as a Gaussian function with FWHM of width/2 and centred on the :math:`|q|`
+given as a Gaussian function with FWHM of width/2 and centred on the |q|
 which is the nominal centre of the shell.
 
-:math:`|Q|` values for which no valid vectors can be found are omitted in the output.
-Most calculations will produce one data point per :math:`|Q|` by averaging the results
+|Q| values for which no valid vectors can be found are omitted in the output.
+Most calculations will produce one data point per |Q| by averaging the results
 over all vectors in the shell.
 
 Inputs:
@@ -221,7 +225,7 @@ SphericalQVectors
 
 Generates vectors randomly on a sphere.
 
-Most calculations will produce one data point for :math:`|Q|` by averaging the
+Most calculations will produce one data point for |Q| by averaging the
 results over all vectors in the shell.
 
 The vector lengths in a single shell assume a normal distribution with the

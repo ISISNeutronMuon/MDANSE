@@ -74,7 +74,7 @@ correcting first for possible jumps due to periodic boundary conditions.
 The DOS is also related to the DISF, since for isotropic systems
 
 .. math::
-   :label: dos3
+   :label: dos4
 
    \mathrm{DOS}(\omega) = \lim_{q  \rightarrow 0} \frac{1}{3} \frac{\omega^2}{q^2} S_{\text{inc}}(q, \omega)
 

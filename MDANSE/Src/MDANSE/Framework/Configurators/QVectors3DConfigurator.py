@@ -30,6 +30,15 @@ from .VectorConfigurator import VectorConfigurator
 
 @IConfigurator.register("QVectors3DConfigurator")
 class QVectors3DConfigurator(IConfigurator):
+    """Defines a 3D grid of reciprocal space vectors.
+
+    Used as input for the StaticStructureFactor3D calculation.
+
+    While the default input creates a grid centred on the origin,
+    it is also possible to define a plane or a line by changing
+    the range and the number of steps of the basis vectors.
+    """
+
     _default = {
         "seed": 0,
         "n_samples": 100,

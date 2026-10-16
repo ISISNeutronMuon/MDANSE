@@ -710,9 +710,7 @@ be blocking the accessible surface. If you are interested in the **total** surfa
 of a group of atoms, please remove the other atoms from the trajectory.
 
 Solvent Accessible Surface is calculated using the 'rolling ball' algorithm
-developed by Shrake & Rupley in 1973.
-
-* Shrake, A., and J. A. Rupley. JMB (1973) 79:351-371.
+developed by Shrake and Rupley [Ref48]_.
 
 This algorithm uses a sphere (of solvent) of a particular radius to 'probe' the
 surface of the molecule.
@@ -762,6 +760,33 @@ Inputs:
 - frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
 - r_values: :ref:`configurator-analysis-DistHistCutoffConfigurator` default=N/A
 - q_values: :ref:`configurator-analysis-QRangeConfigurator` default=(0, 500, 1)
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
+- weights: :ref:`configurator-analysis-WeightsConfigurator` default=b_coherent
+- output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
+- running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
+
+
+.. _analysis-reference-StaticStructureFactor3D:
+
+StaticStructureFactor3D
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Calculates the static structure factor of the system resolved in :mathbf:`q`.
+
+As opposed to the StaticStructureFactor analysis, this one does not assume the system
+to be isotropic and does not perform spherical averaging of the results.
+
+The result of this calculation is equivalent to a diffraction pattern. By running
+a simulation on a large enough supercell, it is possible to include the effects
+of diffuse scattering in the results.
+
+Inputs:
+
+- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
+- frames: :ref:`configurator-analysis-FramesConfigurator` default=N/A
+- q_vectors: :ref:`configurator-analysis-QVectors3DConfigurator` default=N/A
 - grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
 - atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
 - atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A

@@ -1,3 +1,5 @@
+import numpy as np
+
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Converters.Converter import Converter
@@ -8,6 +10,7 @@ from MDANSE.MolecularDynamics.UnitCell import UnitCell
 configurators = sorted(IConfigurator.available_names())
 converters = sorted(Converter.available_names())
 jobs = sorted(IJob.available_names())
+vector_generators = sorted(IQVectors.available_names())
 
 job_inputs = {}
 converter_inputs = {}
@@ -83,7 +86,7 @@ for job in converters:
     converter_page.append(result)
 
 
-for qvecs in generators:
+for qvecs in vector_generators:
     result = ""
     temp: IQVectors = IQVectors.create(qvecs, unit_cell=UnitCell(np.eye(3)))
     if not temp.enabled:

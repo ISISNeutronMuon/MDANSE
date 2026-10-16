@@ -36,6 +36,16 @@ from MDANSE.Mathematics.Arithmetic import assign_weights, get_weights, weighted_
 
 @IJob.register("StaticStructureFactor3D")
 class StaticStructureFactor3D(IJob):
+    """Calculates the static structure factor of the system resolved in q.
+
+    As opposed to the StaticStructureFactor analysis, this one does not assume the system
+    to be isotropic and does not perform spherical averaging of the results.
+
+    The result of this calculation is equivalent to a diffraction pattern. By running
+    a simulation on a large enough supercell, it is possible to include the effects
+    of diffuse scattering in the results.
+    """
+
     label = "Static Structure Factor 3D"
 
     enabled = ssf3d_available

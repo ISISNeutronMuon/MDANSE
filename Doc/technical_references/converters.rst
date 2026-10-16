@@ -21,6 +21,7 @@ standard input file names.
 Inputs:
 
 - trajectory_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - time_unit: :ref:`configurator-converter-SingleChoiceConfigurator` default=fs
@@ -39,6 +40,7 @@ Converts a Castep Trajectory into an MDT trajectory file.
 Inputs:
 
 - castep_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.md
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -55,6 +57,7 @@ Inputs:
 
 - pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
 - dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
@@ -74,6 +77,7 @@ Inputs:
 - vel_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=
 - force_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=
 - cell_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.cell
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -90,6 +94,7 @@ Inputs:
 
 - pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
 - dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
@@ -107,6 +112,7 @@ Inputs:
 
 - xtd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.xtd
 - trj_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.trj
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -123,6 +129,7 @@ Inputs:
 
 - field_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
 - history_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -139,14 +146,15 @@ Inputs:
 
 - xtd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.xtd
 - trj_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.trj
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
 
 
-.. _converter-reference-Gromacs:
+.. _converter-reference-GROMACS:
 
-Gromacs
+GROMACS
 ~~~~~~~
 
 Converts a Gromacs trajectory to an MDT trajectory.
@@ -155,6 +163,7 @@ Inputs:
 
 - pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
 - xtc_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.xtc
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
 - output_files: :ref:`configurator-converter-OutputTrajectoryConfigurator` default=N/A
@@ -172,6 +181,7 @@ Inputs:
 - config_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.config
 - trajectory_file: :ref:`configurator-converter-InputFileConfigurator` default=INPUT_FILENAME.lammps
 - trajectory_format: :ref:`configurator-converter-SingleChoiceConfigurator` default=custom
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - lammps_units: :ref:`configurator-converter-SingleChoiceConfigurator` default=real
 - atom_type: :ref:`configurator-converter-SingleChoiceConfigurator` default=From config
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
@@ -201,6 +211,7 @@ Inputs:
 
 - topology_file: :ref:`configurator-converter-MDAnalysisTopologyFileConfigurator` default=INPUT_FILENAME
 - coordinate_files: :ref:`configurator-converter-MDAnalysisCoordinateFileConfigurator` default=
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-MDAnalysisTimeStepConfigurator` default=0.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
@@ -223,6 +234,7 @@ Inputs:
 
 - coordinate_files: :ref:`configurator-converter-MDTrajTrajectoryFileConfigurator` default=["INPUT_FILENAME"]
 - topology_file: :ref:`configurator-converter-MDTrajTopologyFileConfigurator` default=
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-MDTrajTimeStepConfigurator` default=0.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
@@ -241,6 +253,7 @@ Inputs:
 
 - pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
 - dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
@@ -280,6 +293,7 @@ atom coordinates below.
 Inputs:
 
 - xdatcar_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False
@@ -297,6 +311,7 @@ Inputs:
 
 - pdb_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.pdb
 - dcd_file: :ref:`configurator-converter-FileWithAtomDataConfigurator` default=INPUT_FILENAME.dcd
+- unit_cell: :ref:`configurator-converter-UnitCellConfigurator` default=N/A
 - atom_aliases: :ref:`configurator-converter-AtomMappingConfigurator` default={}
 - time_step: :ref:`configurator-converter-FloatConfigurator` default=1.0
 - fold: :ref:`configurator-converter-BooleanConfigurator` default=False

@@ -87,8 +87,9 @@ a trajectory (:ref:`analysis-reference-CenterOfMassesTrajectory`,
 | precision    | int     | 64      | Number of bits used for writing out floating point     |
 |              |         |         | numbers. 64, 32 and 16 are possible                    |
 +--------------+---------+---------+--------------------------------------------------------+
-| chunk size   | int     | 128     | Number of atoms to be included in a single chunk of    |
-|              |         |         | the HDF5 datasets in the output trajectory.            |
+| chunk size   | int     | (1, 128)| Size of a single chunk of the atom position data set   |
+|              |         |         | in the output HDF5 trajectory file.                    |
+|              |         |         | Chunk size is the number of frames and number of atoms |
 |              |         |         | An entire chunk must be loaded to access any number    |
 |              |         |         | in that chunk. Smaller number means faster analysis,   |
 |              |         |         | but also larger files. There rarely any advantage to   |

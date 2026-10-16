@@ -42,7 +42,7 @@ source mdanse_env/bin/activate
 ```
 in a bash console, or
 ```
-mdanse_end\Scripts\activate.bat
+mdanse_env\Scripts\activate.bat
 ```
 if you are using cmd.exe on Windows.
 
@@ -67,7 +67,24 @@ pip install --upgrade pip
 ```
 and try again.
 
-### Optional dependencies
+## Additional installation options
+
+MDANSE has optional dependencies, which are not installed unless they are
+requested by the user. It is possible to install all the optional dependencies
+by running
+```
+pip install mdanse[all]
+```
+
+The alternative is to install specific dependencies individually. This is described
+in the subsections below.
+
+It is also possible to install several optional dependencies at the same time, as in
+```
+pip install mdanse[cli,ase,finufft]
+```
+
+### Command-line progress bar (tqdm)
 
 Most users prefer to install [MDANSE_GUI](https://pypi.org/project/MDANSE-GUI/) alongside MDANSE,
 and use the GUI to convert, analyse and view trajectories and to visualise results.
@@ -77,8 +94,90 @@ by installing MDANSE with
 ```
 pip install mdanse[cli]
 ```
-This will install [tqdm](https://pypi.org/project/tqdm/), which will then be used to display
+Currently, this will install [tqdm](https://pypi.org/project/tqdm/), which will then be used to display
 a progress bar when an MDANSE script is running in the shell.
+
+### ASE
+
+Used by:
+
+- ASE trajectory converter,
+- AverageStructure analysis.
+
+Atomic Simulations Environment [ASE](https://ase-lib.org) is used by MDANSE in the ASE trajectory
+converter and in the AverageStructure analysis. These will only be available if ASE is installed
+in the same virtual environment as MDANSE.
+
+To install MDANSE with ASE, replace the normal installation command with
+```
+pip install mdanse[ase]
+```
+
+### MDTraj
+
+Used by:
+
+- MDTraj trajectory converter,
+- GROMACS trajectory converter.
+
+[MDTraj](https://www.mdtraj.org) can be used in MDANSE to enable additional
+trajectory converters. MDTraj converter is a general-purpose converter that aims
+to work with many different trajectory formats. GROMACS converter works with
+GROMACS .trr and .xtc formats.
+
+To install MDANSE with MDTraj, replace the normal installation command with
+```
+pip install mdanse[mdtraj]
+```
+
+### MDAnalysis
+
+Used by:
+
+- MDAnalysis trajectory converter.
+
+[MDAnalysis](https://www.mdanalysis.org) can be used in MDANSE to enable an additional
+trajectory converter. MDAnalysis converter is a general-purpose converter that aims
+to work with many different trajectory formats.
+
+To install MDANSE with MDAnalysis, replace the normal installation command with
+```
+pip install mdanse[mdanalysis]
+```
+
+### pymixbox
+
+Used by:
+
+- CenterOfMassesTrajectory.
+
+An optional dependency, [pymixbox](https://github.com/scrtwpns/mixbox) can be
+installed to enable an alternative mechanism of colour mixing. It is be used
+in the MDANSE CenterOfMassesTrajectory analysis, where is generates the colours
+of the artificial atoms that replace individual molecules. It is still possible
+to run the CentreOfMassesTrajectory analysis without pymixbox, but the colours
+assigned to the new atoms will then be different.
+
+To install MDANSE with pymixbox, replace the normal installation command with
+```
+pip install mdanse[pymixbox]
+```
+
+### finufft
+
+Used by:
+
+- StaticStructureFactor3D.
+
+An optional dependency, [FINUFFT](https://finufft.readthedocs.io/en/latest/) provides
+a nonuniform fast Fourier transform used by the StaticStructureFactor3D analysis.
+If FINUFFT is not installed, the StaticStructureFactor3D calculation will not
+be available.
+
+To install MDANSE with FINUFFT, replace the normal installation command with
+```
+pip install mdanse[finufft]
+```
 
 ## Quick start: workflow
 

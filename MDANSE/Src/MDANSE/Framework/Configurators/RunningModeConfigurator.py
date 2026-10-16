@@ -24,7 +24,7 @@ from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 class RunningModeConfigurator(IConfigurator):
     """Specifies how many CPU cores will be used by this task.
 
-    MDANSE currently support single-core or multicore (SMP) running modes.
+    MDANSE currently supports single-core or multicore (SMP) running modes.
     In the latter case, you have to specify the number of slots used for
     running the analysis.
     """
