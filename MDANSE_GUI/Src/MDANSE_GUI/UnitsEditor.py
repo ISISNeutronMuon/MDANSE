@@ -141,6 +141,7 @@ class UnitsEditor(QDialog):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle("MDANSE Physical Units Editor")
+        self.setModal(True)
 
         self.model = UnitModel()
 

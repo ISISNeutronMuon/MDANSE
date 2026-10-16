@@ -326,6 +326,7 @@ class NewElementDialog(QDialog):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.setModal(True)
 
         layout = QVBoxLayout(self)
         edit = QLineEdit(self)
@@ -789,6 +790,7 @@ class ElementsDatabaseEditor(QDialog):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle("MDANSE Chemical Elements Database Editor")
+        self.setModal(True)
 
         layout = QVBoxLayout(self)
 

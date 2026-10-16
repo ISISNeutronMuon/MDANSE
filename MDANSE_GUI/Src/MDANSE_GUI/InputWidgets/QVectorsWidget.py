@@ -347,6 +347,7 @@ class VectorViewer(QDialog):
         self.last_vec_params = {}
         self.setWindowTitle(self._helper_title)
         self.setWindowFlags(Qt.Window)
+        self.setModal(True)
         layout = QVBoxLayout()
         self.main_widget = QTabWidget(self)
         layout.addWidget(self.main_widget)

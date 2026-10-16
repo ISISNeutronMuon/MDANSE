@@ -79,6 +79,7 @@ class UserSettingsEditor(QDialog):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle("MDANSE User Settings Editor")
+        self.setModal(True)
 
         layout = QVBoxLayout(self)
 

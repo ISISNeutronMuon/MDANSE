@@ -30,6 +30,7 @@ class ResolutionDialog(QDialog):
         super().__init__(*args, **kwargs)
 
         self.setLayout(QVBoxLayout(self))
+        self.setModal(True)
         self._panel = ResolutionWidget()
         self.layout().addWidget(self._panel)
 
