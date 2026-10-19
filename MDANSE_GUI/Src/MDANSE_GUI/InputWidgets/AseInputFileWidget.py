@@ -15,9 +15,8 @@
 #
 from __future__ import annotations
 
-import os
 from contextlib import suppress
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QComboBox, QFileDialog, QLineEdit, QPushButton
@@ -40,13 +39,13 @@ class AseInputFileWidget(WidgetBase):
 
         try:
             parent = kwargs.get("parent")
-            self.default_path = PurePath(parent.default_path)
-        except KeyError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error("KeyError in InputFileWidget - can't get default path.")
-        except AttributeError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error("AttributeError in InputFileWidget - can't get default path.")
+            self.default_path = Path(parent.default_path)
+        except (KeyError, AttributeError) as err:
+            self.default_path = Path.cwd()
+            LOG.error(
+                f"{type(err).__name__} in {type(self).__name__} - can't get default path."
+            )
+
         default_value = kwargs.get("default", "")
 
         tooltip_text = self._tooltip or "Specify a path to an existing file."
@@ -83,7 +82,7 @@ class AseInputFileWidget(WidgetBase):
             self._qt_file_association,  # text string specifying the file name filter.
         )
         if new_value is not None:
-            self._field.setText(str(PurePath(new_value[0])))
+            self._field.setText(str(Path(new_value[0])))
             self.updateValue()
             try:
                 type_guess = filetype(new_value[0])

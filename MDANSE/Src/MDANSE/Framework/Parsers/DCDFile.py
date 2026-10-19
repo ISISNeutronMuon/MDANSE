@@ -62,7 +62,7 @@ class DCDFile(Parser):
     def get_byte_order(filename: Path | str) -> Literal[">", "<"]:
         """Identity the byte order of the file by trial-and-error."""
 
-        with open(filename, "rb") as in_file:
+        with Path(filename).open("rb") as in_file:
             data = in_file.read(4)
 
         # Check for low and big endianness byte orders.

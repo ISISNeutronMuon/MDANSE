@@ -25,7 +25,7 @@ from more_itertools import chunked, consume, prepend, take
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
-from .FortranUnformat import binary_file_reader
+from .FortranUnformat import FortranBinaryReader, binary_file_reader
 from .Parser import Parser
 
 
@@ -78,7 +78,7 @@ class TrjFile(Parser):
         self.parse_header()
 
     def parse_header(self):
-        with open(self.filename, "rb") as trjfile:
+        with self.filename.open("rb") as trjfile:
             parser = binary_file_reader(trjfile)
 
             rec = next(parser)
@@ -205,7 +205,7 @@ class TrjFile(Parser):
         ),
     }
 
-    def read_frame(self, parser: binary_file_reader):
+    def read_frame(self, parser: FortranBinaryReader):
         accum = {}
         iter = zip(self.frame_data, parser, strict=False)
         for typ, rec in iter:
@@ -225,7 +225,7 @@ class TrjFile(Parser):
 
     @property
     def frames(self):
-        with open(self.filename, "rb") as trjfile:
+        with self.filename.open("rb") as trjfile:
             parser = binary_file_reader(trjfile)
             consume(parser, self._header_size)
             while frame := self.read_frame(parser):

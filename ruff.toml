@@ -28,7 +28,7 @@ select = [
     "Q",   # Flake8 Quotes
     # "RET", # Flake8 return
     # "ARG", # Flake8 unused args
-    # "PTH", # Flake8 use pathlib
+    "PTH", # Flake8 use pathlib
     "I",   # Isort
     "RUF", # Ruff specific
     "FURB",# Refurb

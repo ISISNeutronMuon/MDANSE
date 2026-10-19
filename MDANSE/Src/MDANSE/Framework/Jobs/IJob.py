@@ -336,7 +336,7 @@ class IJob(Configurable, RegisterFactory["IJob"], ABC):
 
     @classmethod
     def save(
-        cls, jobFile: Path | str, parameters: dict[str, Any] | None = None
+        cls, job_file: Path | str, parameters: dict[str, Any] | None = None
     ) -> None:
         """Save a job file for a given job.
 
@@ -350,24 +350,24 @@ class IJob(Configurable, RegisterFactory["IJob"], ABC):
         if parameters is None:
             parameters = cls.get_default_parameters()
 
+        job_file = Path(job_file)
+
         parameters = {
             key: (val, label) if not isinstance(val, Path) else (str(val), label)
             for key, (val, label) in sorted(parameters.items())
         }
 
-        with open(jobFile, "w") as f:
-            f.write(
-                RUNSCRIPT.format(
-                    executable=sys.executable,
-                    import_line=cls.runscript_import_line,
-                    param_str=_format_params(parameters),
-                    parent=cls.runscript_import_line.split(" ")[-1],
-                    var_name=cls.__name__.lower(),
-                    job_name=cls.__name__,
-                )
+        job_file.write_text(
+            RUNSCRIPT.format(
+                executable=sys.executable,
+                import_line=cls.runscript_import_line,
+                param_str=_format_params(parameters),
+                parent=cls.runscript_import_line.split(" ")[-1],
+                var_name=cls.__name__.lower(),
+                job_name=cls.__name__,
             )
-
-        os.chmod(jobFile, stat.S_IRWXU)
+        )
+        job_file.chmod(stat.S_IRWXU)
 
     def combine(self):
         if self._status is not None:

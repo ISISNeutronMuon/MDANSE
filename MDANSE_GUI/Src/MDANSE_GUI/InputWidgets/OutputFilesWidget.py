@@ -39,7 +39,7 @@ class OutputFilesWidget(WidgetBase):
             self._parent = kwargs.get("parent")
             self.default_path = Path(self._parent._default_path)
         except (KeyError, AttributeError) as e:
-            self.default_path = Path(".").absolute()
+            self.default_path = Path.cwd()
             LOG.error("%s in OutputFilesWidget - can't get default path.", str(e))
         else:
             self._session: Session = self._parent._parent_tab._session
@@ -109,7 +109,7 @@ class OutputFilesWidget(WidgetBase):
         try:
             self.default_path = Path(self._parent._default_path)
         except AttributeError:
-            self.default_path = Path(".").absolute()
+            self.default_path = Path.cwd()
         new_value = QFileDialog.getSaveFileName(
             self._base,  # the parent of the dialog
             "Save files",  # the label of the window

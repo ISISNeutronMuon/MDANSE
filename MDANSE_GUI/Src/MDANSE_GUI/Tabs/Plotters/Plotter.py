@@ -19,6 +19,7 @@ import copy
 import csv
 import enum
 import math
+from pathlib import Path
 
 try:
     import mixbox
@@ -409,7 +410,7 @@ class Plotter(RegisterFactory["Plotter"]):
         while True:
             new_file = self.save_name(out_file, new_axis, new_line)
             LOG.info("Saving plot data to %s.", new_file)
-            with open(new_file, "w", encoding="utf-8") as file:
+            with Path(new_file).open("w", encoding="utf-8") as file:
                 old_axis, old_line = new_axis, new_line
                 while (new_axis, new_line) == (old_axis, old_line):
                     new_axis, new_line = yield file

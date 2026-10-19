@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import html
 import os
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtWidgets import (
     QCheckBox,
@@ -49,14 +49,15 @@ class HDFTrajectoryWidget(WidgetBase):
             filename = trajectory_instance.filename
         elif filename is not None:
             self._configurator.configure(str(filename))
+
         if not filename:
             label = QLabel("No Trajectory available", self._base)
             self._layout.addWidget(label)
         else:
             label = QLabel(html.escape(str(filename)), self._base)
             self._layout.addWidget(label)
-            trajectory_path, _ = os.path.split(filename)
-            self.default_path = PurePath(trajectory_path)
+            self.default_path = Path(filename).parent
+
         visibility_switch = QCheckBox("Show advanced settings")
         self._layout.addWidget(visibility_switch)
         self.build_fields(

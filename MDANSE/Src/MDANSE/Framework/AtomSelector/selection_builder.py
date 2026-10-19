@@ -425,7 +425,7 @@ class SelectionBuilder:
             All the operations of this selection, encoded as string
 
         """
-        with open(filename, "w") as target:
+        with Path(filename).open("w") as target:
             json.dump(self.as_dict, target, indent=2)
 
     def __str__(self) -> str:

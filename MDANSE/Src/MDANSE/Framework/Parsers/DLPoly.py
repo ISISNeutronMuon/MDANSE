@@ -62,12 +62,10 @@ class HistoryFile(Parser):
     def __init__(self, filename: Path | str):
         super().__init__(filename)
 
-        self.filename = filename
-
         self._first_step = None
         self._time_step = None
 
-        with open(self.filename, encoding="utf-8") as file:
+        with self.filename.open(encoding="utf-8") as file:
             tmp = split_before(file, lambda line: line.startswith("timestep"))
             self.read_header(next(tmp))
 
@@ -128,7 +126,7 @@ class HistoryFile(Parser):
 
     @property
     def frames(self):
-        with open(self.filename, encoding="utf-8") as file:
+        with self.filename.open(encoding="utf-8") as file:
             drop(file, 2)
 
             steps = split_before(file, lambda line: line.startswith("timestep"))
@@ -138,10 +136,10 @@ class HistoryFile(Parser):
 class FieldFile:
     """The DL_POLY field file configurator."""
 
-    def __init__(self, filename):
+    def __init__(self, filename: Path | str):
         # The FIELD file is opened for reading, its contents stored into |lines| and then closed.
-        self.filename = filename
-        with open(self.filename, encoding="utf-8") as unit:
+        self.filename = Path(filename)
+        with self.filename.open(encoding="utf-8") as unit:
             lines = strip_comments(unit)
 
             self.title = next(lines)

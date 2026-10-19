@@ -36,7 +36,7 @@ class OutputStructureWidget(WidgetBase):
             parent = kwargs.get("parent")
             self.default_path = Path(parent.default_path)
         except (KeyError, AttributeError) as e:
-            self.default_path = Path(".").absolute()
+            self.default_path = Path.cwd()
             LOG.error("%s in OutputTrajectoryWidget - can't get default path.", str(e))
         try:
             parent = kwargs.get("parent")

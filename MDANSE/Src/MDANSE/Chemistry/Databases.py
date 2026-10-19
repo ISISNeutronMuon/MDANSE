@@ -165,7 +165,7 @@ class _Database(metaclass=Singleton):
         This database will then be used in the future.
         If the user database already exists, calling this function will overwrite it.
         """
-        with open(self._USER_DATABASE, "w") as f:
+        with self._USER_DATABASE.open("w") as f:
             json.dump(dict(self.data.maps[0]), f, indent=4)
 
 
@@ -213,7 +213,7 @@ class AtomsDatabase(_Database):
     """
 
     _DEFAULT_DATABASE = Path(__file__).parent / "atoms.json"
-    _LOCAL_PATH = "atoms_extended.json"
+    _LOCAL_PATH = Path("atoms_extended.json")
 
     # The user path
     @property
@@ -692,7 +692,7 @@ class AtomsDatabase(_Database):
             "atoms": self.data.maps[0],
         }
 
-        with open(self._user_database, "w") as fout:
+        with self._user_database.open("w") as fout:
             json.dump(d, fout, indent=4, cls=MDANSEEncoder)
 
     def get_atom_property(

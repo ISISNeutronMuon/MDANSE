@@ -46,10 +46,10 @@ class XDATCARFile(Parser):
     """Inputs an XDATCAR file (for the VASP converter)."""
 
     def __init__(self, filename: Path | str):
-        self.filename = filename
+        super().__init__(filename)
         self.fixed_cell, self.frame_numbers = self.check_trajectory(filename)
 
-        with open(self.filename, encoding="utf-8") as file:
+        with self.filename.open(encoding="utf-8") as file:
             header = self.read_header(file)
 
             self._init_cell = header.unit_cell
@@ -60,8 +60,8 @@ class XDATCARFile(Parser):
     n_atoms = None
 
     @staticmethod
-    def check_trajectory(filename: str) -> tuple[bool, bool]:
-        with open(filename, encoding="utf-8") as source:
+    def check_trajectory(filename: Path | str) -> tuple[bool, bool]:
+        with Path(filename).open(encoding="utf-8") as source:
             header = XDATCARFile.read_header(source)
 
             total_atom_number = np.sum(header.atom_counts)
@@ -112,7 +112,7 @@ class XDATCARFile(Parser):
 
     @property
     def frames(self):
-        with open(self.filename, encoding="utf-8") as file:
+        with self.filename.open(encoding="utf-8") as file:
             self.read_header(file)
 
             for i in count():

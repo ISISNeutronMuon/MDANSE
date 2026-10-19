@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import tomlkit
@@ -228,16 +228,15 @@ class InstrumentList(QListView):
                 new_instrument._name_is_fixed = True
 
     @Slot()
-    def save_to_file(self, filename: str | None = None):
+    def save_to_file(self, filename: Path | str | None = None):
         if not self.all_names_are_unique():
             LOG.error(
                 "Instruments will NOT be saved. Some instruments have conflicting names."
             )
             return
         if filename is None:
-            filename = os.path.join(
-                PLATFORM.application_directory, "InstrumentDefinitions.toml"
-            )
+            filename = PLATFORM.application_directory / "InstrumentDefinitions.toml"
+
         LOG.debug(f"save to file: {filename}")
         target_file = TOMLFile(filename)
         newdoc = tomlkit.document()

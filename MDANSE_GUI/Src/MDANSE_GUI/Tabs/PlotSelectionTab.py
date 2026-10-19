@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 from functools import partial
-from pathlib import PurePath
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QSettings, Slot
@@ -76,20 +76,20 @@ class PlotSelectionTab(GeneralTab):
             str(self.get_path("plot_selection")),
             "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
         )
-        if fnames is None:
+        if fnames is None or not fnames[0]:
             return
-        if len(fnames[0]) < 1:
-            return
+
         for fname in fnames[0]:
-            self.load_results(str(PurePath(fname)))
-            last_path = str(PurePath(os.path.split(fname)[0]))
+            pth = Path(fname)
+            self.load_results(str(pth))
+            last_path = str(pth.parent)
         self.set_path("plot_selection", last_path)
 
     @Slot(str)
-    def load_results(self, some_fname: str):
-        fname = PurePath(some_fname)
+    def load_results(self, some_fname: Path | str):
+        fname = Path(some_fname)
         if len(str(fname)) > 0:
-            fname = os.path.abspath(fname)
+            fname = fname.resolve()
             self._model.add_file(str(fname))
             self._session.protect_filename(fname)
 

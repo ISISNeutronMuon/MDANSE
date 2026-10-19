@@ -72,7 +72,7 @@ class CASTEPMDFile(Parser):
 
     @property
     def frames(self) -> Iterator:
-        with open(self.filename, encoding="utf-8") as castep_file:
+        with self.filename.open(encoding="utf-8") as castep_file:
             file = map(str.strip, castep_file)
 
             # Skip header

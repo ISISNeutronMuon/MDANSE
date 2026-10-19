@@ -326,8 +326,8 @@ class LAMMPSConfigFile(Parser, dict):
     trajectory.
     """
 
-    def __init__(self, filename: Path | str | None = None):
-        self.filename = filename
+    def __init__(self, filename: Path | str):
+        Parser.__init__(self, filename)
         self.parse()
 
     @staticmethod
@@ -691,7 +691,7 @@ class LAMMPSConfigFile(Parser, dict):
         list[str]
             Blocks present in file.
         """
-        with open(filename, encoding="utf-8") as source_file:
+        with Path(filename).open(encoding="utf-8") as source_file:
             return [
                 line.strip()
                 for line in strip_comments(source_file)
@@ -700,11 +700,11 @@ class LAMMPSConfigFile(Parser, dict):
 
     def parse(self, filename: Path | str | None = None) -> None:
         """Parse file and store data in self."""
-        self.filename = self.filename if filename is None else filename
+        self.filename = self.filename if filename is None else Path(filename)
 
         self._known_blocks = self.scan(self.filename)
 
-        with open(self.filename, encoding="utf-8") as source_file:
+        with self.filename.open(encoding="utf-8") as source_file:
             lines = map(str.strip, source_file)
 
             comment = next(lines)
