@@ -80,11 +80,12 @@ class MDAnalysisTopologyFileConfigurator(FileWithAtomDataConfigurator):
         AtomLabel
             An atom label.
         """
-        args = []
-        for arg in ["element", "name", "type", "resname", "mass"]:
-            if hasattr(self.atoms[0], arg):
-                args.append(arg)
-        if len(args) == 0:
+        args = [
+            arg
+            for arg in ["element", "name", "type", "resname", "mass"]
+            if hasattr(self.atoms[0], arg)
+        ]
+        if not args:
             yield from []
             return
 

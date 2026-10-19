@@ -107,10 +107,7 @@ class MplStyleCombo(QItemDelegate):
 
     def createEditor(self, parent, option, index):
         combo = QComboBox(parent)
-        li = []
-        for item in self._items:
-            li.append(item)
-        combo.addItems(li)
+        combo.addItems(list(self._items))
         combo.currentIndexChanged.connect(self.currentIndexChanged)
         return combo
 

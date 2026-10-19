@@ -97,9 +97,11 @@ class CenterOfMassesTrajectory(IJob):
                         ]
                     new_element_list.append(cluster_name)
                     used_up_atoms.update(set(cluster))
-        for index in selected_indices:
-            if index not in used_up_atoms:
-                new_element_list.append(chemical_system.atom_list[index])
+
+        new_element_list.extend(
+            chemical_system.atom_list[index]
+            for index in selected_indices - used_up_atoms
+        )
         self._used_up_atoms = used_up_atoms
         new_chemical_system.initialise_atoms(new_element_list)
 

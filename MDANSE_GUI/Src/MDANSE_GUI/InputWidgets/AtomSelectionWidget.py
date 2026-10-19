@@ -651,8 +651,7 @@ class SelectionHelper(QDialog):
         """
         num_sel = num_atoms_3dview or len(self.selected)
         text = [f"Number of atoms selected:\n{num_sel}\n\nSelected atoms:\n"]
-        for idx in self.selected:
-            text.append(f"{idx}  ({self.atm_full_names[idx]})\n")
+        text.extend(f"{idx}  ({self.atm_full_names[idx]})\n" for idx in self.selected)
         self.selection_textbox.setPlainText("".join(text))
 
     def reset(self) -> None:

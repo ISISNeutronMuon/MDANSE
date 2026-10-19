@@ -75,8 +75,10 @@ def atom_info(atom: str, database: AtomsDatabase | Trajectory | None = None) -> 
     ]
 
     # The values for all element's properties
-    for pname in sorted(prop for prop in properties if prop.strip()):
-        info.append(tab_fmt.format(pname, property_dict.get(pname), units.get(pname)))
+    info.extend(
+        tab_fmt.format(pname, property_dict.get(pname), units.get(pname))
+        for pname in sorted(prop for prop in properties if prop.strip())
+    )
 
     info.append(delimiter)
     info = "\n".join(info)

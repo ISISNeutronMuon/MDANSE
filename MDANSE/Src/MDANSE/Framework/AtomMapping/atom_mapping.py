@@ -251,10 +251,9 @@ def mapping_to_labels(mapping: dict[str, dict[str, str]]) -> list[AtomLabel]:
     for grp_label, atm_map in mapping.items():
         kwargs = {}
         if grp_label:
-            for k, v in [i.split("=") for i in grp_label.split(";")]:
-                kwargs[k] = v
-        for atm_label in atm_map:
-            labels.append(AtomLabel(atm_label, **kwargs))
+            kwargs = dict([i.split("=") for i in grp_label.split(";")])
+
+        labels.extend(AtomLabel(atm_label, **kwargs) for atm_label in atm_map)
     return labels
 
 
