@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 from enum import Enum, auto
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
 from MDANSE.IO.IOUtils import json_handler
@@ -177,17 +177,17 @@ class SelectionBuilder:
         """
         return {key: val for key, val in args.items() if val}
 
-    def select_all(self) -> None:
+    def select_all(self) -> Self:
         """Select all the atoms in the trajectory."""
         self.ops.append(("select_all", {}))
         return self
 
-    def select_none(self) -> None:
+    def select_none(self) -> Self:
         """Set an empty selection."""
         self.ops.append(("select_none", {}))
         return self
 
-    def invert_selection(self) -> None:
+    def invert_selection(self) -> Self:
         """Invert the current selection for the input trajectory.
 
         Return a set of all the indices that are present in the trajectory
@@ -205,7 +205,7 @@ class SelectionBuilder:
         index_slice: Sequence[int] | None = None,
         atom_types: Sequence[str] = (),
         atom_names: Sequence[str] = (),
-    ) -> None:
+    ) -> Self:
         """Select specific atoms in the trajectory.
 
         Atoms can be selected based
@@ -247,7 +247,7 @@ class SelectionBuilder:
         self,
         *,
         operation_type: OperationType = OperationType.UNION,
-    ) -> None:
+    ) -> Self:
         """Select all atoms with the dummy property.
 
         Parameters
@@ -257,13 +257,14 @@ class SelectionBuilder:
         """
         operation_type = OperationType(operation_type).name.lower()
         self.ops.append(("select_dummy", {"operation_type": operation_type}))
+        return self
 
     def select_molecules(
         self,
         *,
         operation_type: OperationType = OperationType.UNION,
         molecule_names: Sequence[str],
-    ) -> None:
+    ) -> Self:
         """Selects all the atoms belonging to the specified molecule types.
 
         Parameters
@@ -290,7 +291,7 @@ class SelectionBuilder:
         *,
         operation_type: OperationType = OperationType.UNION,
         atom_labels: Sequence[str],
-    ) -> None:
+    ) -> Self:
         """Select atoms with a specific label in the trajectory.
 
         A residue name can be used as a label by MDANSE.
@@ -319,7 +320,7 @@ class SelectionBuilder:
         *,
         operation_type: OperationType = OperationType.UNION,
         rdkit_pattern: str,
-    ) -> None:
+    ) -> Self:
         """Select atoms according to the SMARTS string given as input.
 
         This will only work if molecules and bonds have been detected in the system.
@@ -352,7 +353,7 @@ class SelectionBuilder:
         frame_number: int = 0,
         position_minimum: Sequence[float] | None = None,
         position_maximum: Sequence[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Select atoms based on their positions at a specified frame number.
 
         Lower and upper limits of x, y and z coordinates can be given as input.
@@ -386,7 +387,7 @@ class SelectionBuilder:
         frame_number: int = 0,
         sphere_centre: tuple[float, float, float],
         sphere_radius: float,
-    ) -> None:
+    ) -> Self:
         """Select atoms within a sphere.
 
         Selects atoms at a given distance from a fixed point in space,
