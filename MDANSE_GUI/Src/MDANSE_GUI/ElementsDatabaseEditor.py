@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-from itertools import repeat
-
 from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import (
     QBrush,

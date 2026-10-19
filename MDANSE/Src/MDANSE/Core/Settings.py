@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import copy
-from collections import ChainMap, UserDict, defaultdict
+from collections import ChainMap, defaultdict
 from collections.abc import Callable, Generator, Mapping
 from contextlib import contextmanager
 from functools import partial

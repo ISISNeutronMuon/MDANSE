@@ -19,8 +19,7 @@ from itertools import islice
 from itertools import product as cart_prod
 from typing import TYPE_CHECKING
 
-import numpy as np
-from more_itertools import collapse, prepend, transpose, unzip
+from more_itertools import collapse, prepend, transpose
 
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG

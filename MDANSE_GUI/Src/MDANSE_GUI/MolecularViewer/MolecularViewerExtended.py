@@ -20,7 +20,6 @@ from pathlib import Path
 import numpy as np
 import vtk
 from qtpy.QtCore import QTimer, Signal
-from vtk.util import numpy_support
 
 from MDANSE.Core.Settings import Option, Settings
 from MDANSE.MLogging import LOG

@@ -29,7 +29,6 @@ from MDANSE.Core.Settings import Option, Settings
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session
-from MDANSE_GUI.Session.Settings import GUISettings
 
 
 @Settings.parametrise(

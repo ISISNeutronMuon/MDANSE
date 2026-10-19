@@ -16,16 +16,15 @@
 from __future__ import annotations
 
 import csv
-import math
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 from itertools import islice
-from typing import TYPE_CHECKING, Any, NamedTuple, TextIO
+from typing import TYPE_CHECKING, Any, TextIO
 
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.pyplot import colorbar as mpl_colorbar
-from more_itertools import ilen, nth
+from more_itertools import ilen
 from scipy.interpolate import interp1d
 
 from MDANSE.MLogging import LOG

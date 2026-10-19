@@ -32,7 +32,6 @@ from qtpy.QtWidgets import (
 
 from MDANSE.Framework.Configurators.HDFTrajectoryConfigurator import (
     HDF5_DRIVERS,
-    PRIMES,
     guess_hdf5_trajectory_parameters,
 )
 from MDANSE.MolecularDynamics.Trajectory import Trajectory

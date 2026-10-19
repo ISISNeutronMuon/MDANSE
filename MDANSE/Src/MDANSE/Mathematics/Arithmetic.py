@@ -23,8 +23,6 @@ from MDANSE.util_types import FloatArray
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    import numpy as np
-
 
 def get_weights(
     selected_props: dict[str, float | complex],

@@ -20,14 +20,12 @@ import json
 import math
 import numbers
 from collections import ChainMap, defaultdict
-from collections.abc import Generator, Mapping
 from functools import singledispatchmethod
 from pathlib import Path
-from typing import ClassVar, NamedTuple, Self, TypedDict
+from typing import ClassVar
 
 from MDANSE.Chemistry.Databases import _Database
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Core.Singleton import Singleton
 
 _UNAMES = ["kg", "m", "s", "K", "mol", "A", "cd", "rad", "sr"]
 _PREFIXES = {

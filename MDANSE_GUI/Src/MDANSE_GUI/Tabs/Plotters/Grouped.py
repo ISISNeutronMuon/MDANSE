@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import contextlib
-import math
 from itertools import islice
 from typing import TYPE_CHECKING, Any
 
@@ -27,7 +26,6 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:
-    import numpy.typing as npt
     from matplotlib.axes import Axes
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from matplotlib.figure import Figure
