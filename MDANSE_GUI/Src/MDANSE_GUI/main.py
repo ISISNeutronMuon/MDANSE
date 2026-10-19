@@ -30,7 +30,6 @@ from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory, QSystemTr
 import MDANSE_GUI
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Core.Settings import Option
 from MDANSE.Framework.Units import UNITS_MANAGER
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Session.Settings import GUISettings

@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Collection, Iterable, Iterator
+from collections.abc import Collection, Iterator
 from itertools import count, islice
 from pathlib import Path
 from typing import NamedTuple
@@ -23,7 +23,6 @@ from typing import NamedTuple
 import numpy as np
 from more_itertools import run_length
 
-from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 from MDANSE.util_types import IntArray

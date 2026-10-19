@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import json
-import os
 from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -42,11 +41,9 @@ from qtpy.QtWidgets import (
     QMessageBox,
     QSystemTrayIcon,
     QToolBar,
-    QWidget,
 )
 
-from MDANSE.Core.Platform import PLATFORM, version_summary
-from MDANSE.Core.Settings import Settings
+from MDANSE.Core.Platform import version_summary
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer

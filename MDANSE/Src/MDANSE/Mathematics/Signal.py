@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import json
 from abc import ABC, abstractmethod
-from collections import namedtuple
 from copy import copy
 from enum import Enum
 from typing import TYPE_CHECKING, Any, ClassVar, Final, Literal, NamedTuple

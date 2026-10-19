@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Generic, Literal, TypeVar
+from typing import Generic, Literal, TypeVar
 
 from more_itertools import first_true
 from qtpy.QtCore import QObject, Signal, Slot

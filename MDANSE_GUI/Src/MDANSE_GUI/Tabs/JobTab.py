@@ -31,7 +31,6 @@ from qtpy.QtWidgets import (
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
-from MDANSE_GUI.Tabs.Models.JobHolder import JobHolder
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
