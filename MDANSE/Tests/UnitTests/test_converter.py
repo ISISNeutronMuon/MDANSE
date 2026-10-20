@@ -288,6 +288,18 @@ ONE_TEST_EACH = (
         ),
         (
             "cp2k",
+            "cp2k_velocity.mdt",
+            (
+                "/configuration/coordinates",
+                "/configuration/velocities",
+                "/time",
+                "/unit_cell",
+                "/charge",
+            ),
+            {"pos_file": cp2k_pos, "vel_file": cp2k_vel, "unit_cell": (np.diag(3*[2.0]), True)},
+        ),
+        (
+            "cp2k",
             "cp2k.mdt",
             ("/configuration/coordinates", "/time", "/charge"),
             {"pos_file": cp2k_pos, "cell_file": cp2k_cell, "vel_file": ""},
