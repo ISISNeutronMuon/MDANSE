@@ -91,7 +91,7 @@ class LinearQVectors(IQVectors):
     def _generate(self):
         rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
-        axis = self._configuration["axis"]["vector"].array
+        axis = self._configuration["axis"]["vector"]
 
         width = self._configuration["width"]["value"]
 

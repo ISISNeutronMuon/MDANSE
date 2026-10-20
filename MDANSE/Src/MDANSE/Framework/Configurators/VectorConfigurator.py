@@ -18,7 +18,6 @@ from __future__ import annotations
 import numpy as np
 
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
-from MDANSE.Mathematics.LinearAlgebra import Vector
 
 
 @IConfigurator.register("VectorConfigurator")
@@ -112,12 +111,12 @@ class VectorConfigurator(IConfigurator):
             )
             return
 
-        vector = Vector(np.array(value, dtype=self.valueType))
+        vector = np.array(value, dtype=self.valueType)
 
         if self.normalize:
-            vector = vector.normal()
+            vector /= np.linalg.norm(vector)
 
-        if self.notNull and vector.length() == 0.0:
+        if self.notNull and np.allclose(vector, 0.0):
             self.error_status = "The vector is null."
             return
 
