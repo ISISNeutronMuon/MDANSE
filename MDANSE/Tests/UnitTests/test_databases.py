@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from collections import ChainMap
+from pathlib import Path
 
 import unittest
 from unittest.mock import patch, mock_open, ANY
@@ -259,11 +260,11 @@ class TestAtomsDatabase(unittest.TestCase):
 
     def test_save(self):
         with (
-            patch("builtins.open", new_callable=mock_open) as op,
+            patch.object(Path, "open", new_callable=mock_open) as op,
             patch("json.dump") as dump,
         ):
             ATOMS_DATABASE.save()
-            op.assert_called_with(ATOMS_DATABASE._user_database, "w")
+            op.assert_called_with("w")
             dump.assert_called_with(
                 {"properties": self.properties, "units": self.units, "atoms": self.data}, ANY, indent=4, cls=MDANSEEncoder
             )
