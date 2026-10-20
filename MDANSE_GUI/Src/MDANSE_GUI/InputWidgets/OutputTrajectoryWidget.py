@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import NamedTuple
+from typing import TYPE_CHECKING, Literal, NamedTuple
 
 from qtpy.QtCore import Qt, Slot
 from qtpy.QtWidgets import (
@@ -33,8 +33,12 @@ from MDANSE.Framework.Configurators.OutputTrajectoryConfigurator import (
 )
 from MDANSE.IO.IOUtils import unused_standard_output_filename
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.InputWidgets.OutputFilesWidget import OutputHandler
+from MDANSE_GUI.InputWidgets.WidgetBase import Layouts, WidgetBase
 from MDANSE_GUI.Session.Session import Session
+
+if TYPE_CHECKING:
+    from MDANSE_GUI.InputWidgets import InputFileWidget
 
 dtype_lookup = {"float16": 16, "float32": 32, "float64": 64}
 
@@ -69,38 +73,43 @@ SPIN_BOX_SETTINGS = {
 }
 
 
-class OutputTrajectoryWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, layout_type="QGridLayout", **kwargs)
+class OutputTrajectoryWidget(OutputHandler):
+    EXTENSION = ".mdt"
+
+    def __init__(
+        self,
+        *args,
+        layout_type: Layouts = "QGridLayout",
+        parent: WidgetBase | None = None,
+        **kwargs,
+    ):
+        super().__init__(parent, *args, layout_type=layout_type, **kwargs)
         default_value = self._configurator.default
-        try:
-            self._parent = kwargs.get("parent")
-            self.default_path = Path(self._parent._default_path)
-        except (KeyError, AttributeError) as e:
-            self.default_path = Path(".").absolute()
-            LOG.error("%s in OutputTrajectoryWidget - can't get default path.", str(e))
-        else:
-            self._session: Session = self._parent._parent_tab._session
-        try:
-            self._parent = kwargs.get("parent")
-            jobname = str(self._parent._job_instance.label).replace(" ", "")
-        except Exception:
-            jobname = "converted_trajectory"
-            LOG.error("It was not possible to get the job name from the parent")
-        self.default_path = self.default_path / "trajectory"
-        guess_name = unused_standard_output_filename(
-            self.default_path, jobname, extra_text="_trajectory", extension=".mdt"
-        )
+        self._parent = parent
+
+        self._session: Session = self._parent._parent_tab._session
+
+        self.default_path = self._pdefault_path / "trajectory"
+
         self.file_association = "MDT trajectory (*.mdt)"
         self._value = default_value
-        self._field = QLineEdit(str(guess_name), self._base)
-        self._field.setPlaceholderText(str(guess_name))
+
+        guess_name = self.get_name()
+        self._field = QLineEdit(guess_name, self._base)
+        self._field.setPlaceholderText(guess_name)
+
+        trajectory_widget: InputFileWidget = self.get_dep("trajectory")
+        trajectory_widget._field.textChanged.connect(self.update_name)
+
         self.dtype_box = QComboBox(self._base)
         self.dtype_box.addItems(["float16", "float32", "float64"])
         self.dtype_box.setCurrentText("float64")
+
         self.chunk_atom_box = QSpinBox(self._base)
         self.chunk_frame_box = QSpinBox(self._base)
+
         self.meta_block_box = QSpinBox(self._base)
+
         for typ, chunk_box in zip(
             ("atoms", "frames", "meta_block"),
             (self.chunk_atom_box, self.chunk_frame_box, self.meta_block_box),
@@ -112,25 +121,33 @@ class OutputTrajectoryWidget(WidgetBase):
             chunk_box.setValue(settings.start_value)
             chunk_box.setSingleStep(settings.step)
             chunk_box.setToolTip(settings.tooltip)
+
         self.compression_box = QComboBox(self._base)
         self.compression_box.addItems(["none", "gzip"])
         self.compression_box.setCurrentText("gzip")
+
         # self.type_box.setCurrentText(default_value[1])
         browse_button = QPushButton("Browse", self._base)
         browse_button.clicked.connect(self.file_dialog)
+
         label = QLabel("Log file output:")
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
         label2 = QLabel("Atoms per chunk")
         label2.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         label2.setToolTip(SPIN_BOX_SETTINGS["atoms"].tooltip)
+
         label3 = QLabel("Frames per chunk")
         label3.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         label3.setToolTip(SPIN_BOX_SETTINGS["frames"].tooltip)
+
         label4 = QLabel("HDF5 meta_block_size")
         label4.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         label4.setToolTip(SPIN_BOX_SETTINGS["meta_block"].tooltip)
+
         self.logs_combo = QComboBox(self._base)
         self.logs_combo.addItems(OutputTrajectoryConfigurator.log_options)
+
         self._layout.addWidget(self._field, 0, 0)
         self._layout.addWidget(self.dtype_box, 0, 1)
         self._layout.addWidget(self.compression_box, 0, 2)
@@ -143,10 +160,13 @@ class OutputTrajectoryWidget(WidgetBase):
         self._layout.addWidget(self.meta_block_box, 2, 1)
         self._layout.addWidget(label, 2, 2)
         self._layout.addWidget(self.logs_combo, 2, 3)
+
         self._default_value = default_value
         self._field.textChanged.connect(self.updateValue)
+
         self.default_labels()
         self.update_labels()
+
         self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip

@@ -33,7 +33,7 @@ class IFormat(RegisterFactory["IFormat"]):
     and redefine the "type", "extension" and "extensions" class attributes.
     """
 
-    registry: ClassVar[UCDict[str, IFormat]] = UCDict()
+    registry: ClassVar[UCDict[str, type[IFormat]]] = UCDict()
 
     @classmethod
     def write(cls, filename, data, header="", run_instance: IJob | None = None):

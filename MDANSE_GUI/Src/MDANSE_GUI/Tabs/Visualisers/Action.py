@@ -15,10 +15,14 @@
 #
 from __future__ import annotations
 
+import re
 import traceback
 from pathlib import Path
+from typing import Any
 
 import numpy as np
+from more_itertools import first
+from PyQt6.QtCore import QObject
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
@@ -79,6 +83,7 @@ from MDANSE_GUI.InputWidgets import (
     UnitCellWidget,
     VectorWidget,
     WeightsWidget,
+    WidgetBase,
 )
 from MDANSE_GUI.Tabs.Visualisers.InstrumentInfo import SimpleInstrument
 from MDANSE_GUI.Utils import block_signals
@@ -149,7 +154,7 @@ class Action(QWidget):
         self._default_path = None
         self._input_traj_path = None
         self._parent_tab = None
-        self._trajectory_configurator = None
+        self._trajectory_configurator: HDFTrajectoryConfigurator | None = None
         self._trajectory_instance = None
         self._settings = None
         self._job_name = None
@@ -165,11 +170,28 @@ class Action(QWidget):
 
         self.layout = QVBoxLayout(self)
         self.handlers = {}
-        self._widgets = []
+        self._widgets: list[WidgetBase] = []
         self._widgets_in_layout = {}
 
     def set_settings(self, settings):
         self._settings = settings
+
+    @property
+    def _output_file_widget(self) -> OutputFilesWidget | OutputTrajectoryWidget | None:
+        return first(
+            (
+                w
+                for w in self._widgets
+                if isinstance(w, (OutputFilesWidget, OutputTrajectoryWidget))
+            ),
+            None,
+        )
+
+    @property
+    def _traj_stem(self) -> str:
+        if self._input_traj_path is not None:
+            return Path(self._input_traj_path).stem
+        return ""
 
     def set_trajectory(self, trajectory: Trajectory | None) -> None:
         """Set the trajectory path and filename.
@@ -179,29 +201,39 @@ class Action(QWidget):
         trajectory : Trajectory
             An instance of the trajectory class
         """
+
         if trajectory is None:
-            self._trajectory_configurator = None
             self._trajectory_instance = None
             self._input_traj_path = None
             self._has_been_initialised = False
             return
         new_path = trajectory.filename
+
+        nf = {}
+        if self._traj_stem:
+            nf["old_filename"] = self._traj_stem
+
         if new_path == self._input_traj_path:
             LOG.debug("Skipping set_trajectory, no change.")
             return
-        self._job_instance = Dummy()
+
         self._trajectory_instance = trajectory
-        self._trajectory_configurator = HDFTrajectoryConfigurator(
-            "Input Trajectory", instance=trajectory
-        )
-        self._trajectory_configurator.configure_from_instance()
-        self._input_traj_path = new_path
-        if self._input_traj_path is not None:
-            self._default_path = Path(self._input_traj_path).parent
+        if self._trajectory_configurator is None:
+            self._trajectory_configurator = HDFTrajectoryConfigurator(
+                "Input Trajectory", instance=trajectory
+            )
         else:
-            self._default_path = Path().absolute()
+            self._trajectory_configurator.extract_information(trajectory)
+        self._trajectory_configurator.configure_from_instance()
+
+        self._input_traj_path = new_path
+        self._default_path = Path(self._input_traj_path).parent
+
         if self._job_name is not None:
             self._parent_tab.set_path(self._job_name, str(self._default_path))
+            nf["old_jobname"] = self._job_name
+            if ow := self._output_file_widget:
+                ow.update_name(**nf)
 
     def set_instrument(self, instrument: SimpleInstrument) -> None:
         self._current_instrument = instrument
@@ -234,9 +266,11 @@ class Action(QWidget):
         job_name : str | None
             The job name. If None, re-use the last name. If empty string, clear panel and return.
         """
+        old_job_name = type(self._job_instance).__name__
+        old_filename = self._traj_stem
         LOG.debug(
             "Old job type %s, new job type %s",
-            type(self._job_instance).__name__,
+            old_job_name,
             job_name,
         )
         if job_name is None:
@@ -250,6 +284,7 @@ class Action(QWidget):
                 return
             if self._default_path is None or Path(self._default_path).samefile(Path()):
                 self._default_path = str(Path(self._parent_tab.get_path(job_name)))
+
             try:
                 job_instance = IJob.create(job_name)
             except ValueError as e:
@@ -283,23 +318,21 @@ class Action(QWidget):
         else:
             job_instance = self._job_instance
             settings = self._job_instance.settings
+
         LOG.info(f"Configuration {job_instance.configuration}")
         LOG.debug(f"{self._input_traj_path} loaded as {self._trajectory_instance}")
+
         if "trajectory" in settings:
             if self._input_traj_path is None:
                 return
-            key, value = "trajectory", settings["trajectory"]
-            dtype = value[0]
-            ddict = value[1]
+            key, (dtype, ddict) = "trajectory", settings["trajectory"]
             configurator = job_instance.configuration[key]
+
             if key not in self._widgets_in_layout:
-                if "label" not in ddict and hasattr(configurator, "label"):
-                    ddict["label"] = configurator.label
-                if "tooltip" not in ddict and hasattr(configurator, "tooltip"):
-                    ddict["tooltip"] = configurator.tooltip
-                ddict.setdefault("label", key)
                 ddict["configurator"] = configurator
                 ddict["source_object"] = self._input_traj_path
+                ddict.setdefault("label", getattr(configurator, "label", key))
+                ddict.setdefault("tooltip", getattr(configurator, "tooltip", None))
                 widget_class = widget_lookup[dtype]
                 input_widget = widget_class(
                     parent=self, trajectory_instance=self._trajectory_instance, **ddict
@@ -309,46 +342,30 @@ class Action(QWidget):
                 self._widgets_in_layout[key] = widget
                 self._widgets.append(input_widget)
                 self._trajectory_configurator = input_widget._configurator
+
             LOG.debug("Set up input trajectory")
-        for key, value in settings.items():
+
+        for key, (dtype, ddict) in settings.items():
             if key in self._widgets_in_layout:
                 continue
-            dtype = value[0]
-            ddict = value[1]
+
             configurator = job_instance.configuration[key]
-            if "label" not in ddict and hasattr(configurator, "label"):
-                ddict["label"] = configurator.label
-            if "tooltip" not in ddict and hasattr(configurator, "tooltip"):
-                ddict["tooltip"] = configurator.tooltip
             ddict.setdefault("label", key)
             ddict["configurator"] = configurator
             ddict["source_object"] = self._input_traj_path
             ddict["trajectory_configurator"] = self._trajectory_configurator
+            ddict.setdefault("label", getattr(configurator, "label", key))
+            ddict.setdefault("tooltip", getattr(configurator, "tooltip", None))
+
             if dtype not in widget_lookup:
-                ddict["tooltip"] = (
-                    "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
-                )
-                placeholder = BackupWidget(parent=self, **ddict)
-                widget = placeholder._base
-                self.layout.addWidget(widget, stretch=placeholder._relative_size)
-                self._widgets_in_layout[key] = widget
-                self._widgets.append(placeholder)
-                LOG.warning(f"Could not find the right widget for {key}")
+                widget = self._dummy_widget(key, dtype, ddict)
             else:
-                widget_class = widget_lookup[dtype]
-                # expected = {key: ddict[key] for key in widget_class.__init__.__code__.co_varnames}
-                input_widget = widget_class(parent=self, **ddict)
-                widget = input_widget._base
-                self.layout.addWidget(widget, stretch=input_widget._relative_size)
-                self._widgets_in_layout[key] = widget
-                self._widgets.append(input_widget)
-                input_widget.value_changed.connect(self.allow_execution)
-                has_preview = callable(
-                    getattr(input_widget._configurator, "preview_output_axis", False)
-                )
-                if self._use_preview and has_preview:
-                    input_widget.value_changed.connect(self.show_output_prediction)
-                LOG.debug(f"Set up the right widget for {key}")
+                widget = self._new_widget(key, dtype, ddict)
+
+            self.layout.addWidget(widget._base, stretch=widget._relative_size)
+            self._widgets_in_layout[key] = widget
+            self._widgets.append(widget)
+
             # self.handlers[key] = data_handler
         self._has_been_initialised = True
         self.check_inputs()
@@ -368,11 +385,14 @@ class Action(QWidget):
             buttonbase = QWidget(self)
             buttonlayout = QHBoxLayout(buttonbase)
             buttonbase.setLayout(buttonlayout)
+
             self.save_button = QPushButton("Save as script", buttonbase)
             self.execute_button = DelayedButton("RUN!", buttonbase, delay=3000)
+
             font = self.execute_button.font()
             font.setBold(True)
             self.execute_button.setFont(font)
+
             self.post_execute_checkbox = QCheckBox("Auto-load results", buttonbase)
             self.post_execute_checkbox.setChecked(self.auto_load)
 
@@ -386,30 +406,54 @@ class Action(QWidget):
 
             self.layout.addWidget(buttonbase)
             self._widgets_in_layout["button_base"] = buttonbase
+
         self.apply_instrument()
         self.allow_execution()
 
+        if ow := self._output_file_widget:
+            ow.update_name(
+                old_filename=old_filename,
+                old_jobname=old_job_name,
+            )
+
+    def _dummy_widget(self, key: str, _dtype: str, ddict: dict[str, Any]) -> WidgetBase:
+        ddict["tooltip"] = (
+            "This is not implemented in the MDANSE GUI at the moment, and it MUST BE!"
+        )
+        placeholder = BackupWidget(parent=self, **ddict)
+        LOG.warning(f"Could not find the right widget for {key}")
+        return placeholder
+
+    def _new_widget(self, key: str, dtype: str, ddict: dict[str, Any]) -> WidgetBase:
+        widget_class = widget_lookup[dtype]
+        input_widget = widget_class(parent=self, **ddict)
+        input_widget.value_changed.connect(self.allow_execution)
+        has_preview = callable(
+            getattr(input_widget._configurator, "preview_output_axis", False)
+        )
+        if self._use_preview and has_preview:
+            input_widget.value_changed.connect(self.show_output_prediction)
+        LOG.debug(f"Set up the right widget for {key}")
+        return input_widget
+
     def check_inputs(self) -> bool:
-        configured = False
-        iterations = 0
-        while not configured:
+        for _ in range(3):
             configured = True
             for widget in self._widgets:
                 widget.value_from_configurator()
                 configured = configured and widget._configurator.is_configured()
-            iterations += 1
-            if iterations > 3:
-                break
-        return configured
+            if configured:
+                return True
+
+        return False
 
     @Slot()
     def test_file_outputs(self):
         if not self._has_been_initialised:
             return
         self.check_inputs()
-        for widget in self._widgets:
-            if isinstance(widget, OutputFilesWidget | OutputTrajectoryWidget):
-                widget.updateValue()
+        if ow := self._output_file_widget:
+            ow.updateValue()
         self.allow_execution()
 
     def apply_instrument(self):

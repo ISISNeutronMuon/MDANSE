@@ -78,7 +78,7 @@ class Forcite(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "xtd_file",
+            "dependencies": {"trajectory": "xtd_file"},
         },
     )
 

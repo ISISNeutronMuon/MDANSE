@@ -64,7 +64,7 @@ class CASTEP(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "castep_file",
+            "dependencies": {"trajectory": "castep_file"},
         },
     )
 

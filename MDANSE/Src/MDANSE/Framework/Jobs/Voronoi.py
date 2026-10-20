@@ -89,7 +89,10 @@ class Voronoi(IJob):
             "tooltip": "Only atoms within this distance from the unit cell wall will be included in the periodic copies",
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
 
     def initialize(self):
         super().initialize()

@@ -481,7 +481,11 @@ def get_next_name(
 
 
 def unused_standard_output_filename(
-    path_stem: Path, job_name: str, extra_text: str = "_result", extension: str = ".mda"
+    path_stem: Path,
+    traj_stem: str,
+    job_name: str,
+    extra_text: str = "_result",
+    extension: str = ".mda",
 ) -> Path | None:
     """Return the first unused output file name following the default naming pattern.
 
@@ -506,9 +510,12 @@ def unused_standard_output_filename(
         The first file name which does not exist. None if all names are taken.
     """
     name = get_next_name(
-        f"{path_stem / job_name}{extra_text}{{trial}}",
+        "{root}_{job_name}{extra_text}{trial}",
         max_tries=MAX_FILE_COUNT,
         exists=lambda x: Path(x).with_suffix(extension).exists(),
+        root=path_stem / traj_stem,
+        job_name=job_name,
+        extra_text=extra_text,
     )
 
     return Path(name) if name else None

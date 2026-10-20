@@ -61,7 +61,10 @@ class Temperature(IJob):
             "dependencies": {"trajectory": "trajectory", "frames": "frames"},
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):

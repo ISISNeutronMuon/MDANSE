@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import html
 import os
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtWidgets import (
     QCheckBox,
@@ -40,44 +40,57 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class HDFTrajectoryWidget(WidgetBase):
-    def __init__(self, *args, trajectory_instance: Trajectory | None = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        trajectory_instance: Trajectory | None = None,
+        source_object: Path | str | None = None,
+        **kwargs,
+    ):
         super().__init__(*args, layout_type="QVBoxLayout", **kwargs)
-        filename = kwargs.get("source_object")
+        filename = source_object
+
         if trajectory_instance:
             self._configurator._instance = trajectory_instance
             self._configurator.configure_from_instance()
             filename = trajectory_instance.filename
         elif filename is not None:
             self._configurator.configure(str(filename))
+
         if not filename:
             label = QLabel("No Trajectory available", self._base)
             self._layout.addWidget(label)
         else:
             label = QLabel(html.escape(str(filename)), self._base)
             self._layout.addWidget(label)
-            trajectory_path, _ = os.path.split(filename)
-            self.default_path = PurePath(trajectory_path)
+            self.default_path = Path(filename).parent
+
         visibility_switch = QCheckBox("Show advanced settings")
         self._layout.addWidget(visibility_switch)
         self.build_fields(
             init_guess=guess_hdf5_trajectory_parameters(self._configurator["value"])
         )
+
         hdf5_info_text = QLabel(
             "Check https://docs.h5py.org/en/stable/high/file.html#chunk-cache for parameter details.\n"
             "Uncheck the boxes to use the default values (old behaviour)."
         )
         hdf5_info_text.setWordWrap(True)
         self._layout.addWidget(hdf5_info_text)
+
         visibility_switch.stateChanged.connect(self.extra_bar.setVisible)
         visibility_switch.stateChanged.connect(hdf5_info_text.setVisible)
         self.extra_bar.setVisible(False)
         hdf5_info_text.setVisible(False)
+
         self.default_labels()
         self.update_labels()
+
         if self._tooltip:
             tooltip_text = self._tooltip
         else:
             tooltip_text = "A single logical value that can be True of False"
+
         label.setToolTip(tooltip_text)
         self._label = label
 
@@ -109,6 +122,7 @@ class HDFTrajectoryWidget(WidgetBase):
             ),
             ("rdcc_w0", 1.0, QDoubleSpinBox, 0, 1.0, 0.05),
         ]
+
         for label, init_value in combobox_inputs:
             sublayout = QVBoxLayout()
             sublayout.addWidget(QLabel(label))
@@ -119,6 +133,7 @@ class HDFTrajectoryWidget(WidgetBase):
             sublayout.addWidget(widget)
             bar_layout.addLayout(sublayout)
             self._driver_widget = widget
+
         for label, init_value, widget_type, minval, maxval, step in spinbox_inputs:
             sublayout = QVBoxLayout()
             sublayout.addWidget(QLabel(label))
@@ -151,20 +166,35 @@ class HDFTrajectoryWidget(WidgetBase):
             self._tooltip = "The input trajectory to be processed"
 
     def get_value(self):
-        return self._configurator["value"]
-
-    def get_widget_value(self):
-        result = self.get_value()
         if not self._configurator.valid:
             self.mark_error(self._configurator.error_status)
         elif self._configurator.warning_status:
             self._label.setToolTip(self._configurator.warning_status)
         else:
             self._label.setToolTip(self._tooltip)
+        return self._configurator["value"]
+
+    def value_from_configurator(self):
+        result = self.get_value()
+        self._label.setText(str(result))
+        return super().value_from_configurator()
+
+    def get_widget_value(self):
+        result = self.get_value()
+
+        if not self._configurator.valid:
+            self.mark_error(self._configurator.error_status)
+        elif self._configurator.warning_status:
+            self._label.setToolTip(self._configurator.warning_status)
+        else:
+            self._label.setToolTip(self._tooltip)
+
         hdf5_driver = self._driver_widget.currentText()
         rdcc = {}
+
         for name, widget in self._extra_widgets.items():
             rdcc[name] = widget.value() if widget.isEnabled() else None
+
         return (
             str(result),
             hdf5_driver,

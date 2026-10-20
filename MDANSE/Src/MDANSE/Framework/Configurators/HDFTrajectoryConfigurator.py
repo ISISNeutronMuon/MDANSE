@@ -195,7 +195,8 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             )
 
     def extract_information(self, trajectory_instance: Trajectory):
-        self["instance"] = trajectory_instance
+
+        self._instance = self["instance"] = trajectory_instance
 
         self["filename"] = PLATFORM.get_path(trajectory_instance.filename)
 

@@ -72,7 +72,10 @@ class StructureFactorFromScatteringFunction(IJob):
             }
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
 
     def initialize(self):
         """

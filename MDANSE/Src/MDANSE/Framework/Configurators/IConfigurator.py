@@ -89,7 +89,6 @@ class IConfigurator(dict, RegisterFactory["IConfigurator"], abc.ABC):
         name: str,
         *,
         configurable: Configurable | None = None,
-        root: None = None,
         dependencies: dict[str, str] | None = None,
         default: Any | None = None,
         label: str | None = None,
@@ -121,8 +120,6 @@ class IConfigurator(dict, RegisterFactory["IConfigurator"], abc.ABC):
         ]
 
         self.configurable = configurable
-
-        self.root = root
 
         self.dependencies = dependencies or {}
         self.dependents = set()

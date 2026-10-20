@@ -86,7 +86,7 @@ class DL_POLY(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "history_file",
+            "dependencies": {"trajectory": "history_file"},
         },
     )
 
