@@ -170,6 +170,7 @@ class JobTab(GeneralTab):
             return
         self.action.set_trajectory(trajectory=traj_instance)
         self.action.update_panel()
+        self.action.check_inputs()
 
     @Slot(int)
     def set_current_instrument(self, index: int):

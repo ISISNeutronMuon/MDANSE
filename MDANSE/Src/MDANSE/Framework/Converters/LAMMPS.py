@@ -160,7 +160,7 @@ class LAMMPS(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "config_file",
+            "dependencies": {"trajectory": "config_file"},
         },
     )
 

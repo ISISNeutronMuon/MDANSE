@@ -425,7 +425,10 @@ class SolventAccessibleSurface(IJob):
             "tooltip": "Calculate which atoms are blocking the surface of the selection (expensive)",
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):

@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, TypeVar
 
 from more_itertools import first_true
 from qtpy.QtCore import QObject, Signal, Slot
@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 
 Layouts = Literal["QHBoxLayout", "QVBoxLayout", "QGridLayout"]
 Bases = Literal["QWidget", "QGroupBox"]
+T = TypeVar("T")
 
 
 class WidgetBase(QObject):
@@ -236,7 +237,7 @@ class WidgetBase(QObject):
     def default_path(self, value: str) -> None:
         self._parent_dialog.default_path = value
 
-    def get_dep(self, dependency: str, default=None):
+    def get_dep(self, dependency: str, default: T = None) -> WidgetBase | T:
         return first_true(
             self.parent()._widgets,
             pred=lambda x: (
@@ -245,4 +246,5 @@ class WidgetBase(QObject):
                     self._configurator.dependencies[dependency]
                 ]
             ),
+            default=default,
         )

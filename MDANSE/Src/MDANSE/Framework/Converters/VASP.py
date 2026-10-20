@@ -93,7 +93,7 @@ class VASP(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "xdatcar_file",
+            "dependencies": {"trajectory": "xdatcar_file"},
         },
     )
 

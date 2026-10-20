@@ -59,7 +59,10 @@ class Eccentricity(IJob):
         "AtomSelectionConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
 
     def initialize(self):
         super().initialize()

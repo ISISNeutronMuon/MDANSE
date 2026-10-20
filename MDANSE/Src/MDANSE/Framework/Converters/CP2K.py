@@ -109,7 +109,7 @@ class CP2K(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "pos_file",
+            "dependencies": {"trajectory": "pos_file"},
         },
     )
 

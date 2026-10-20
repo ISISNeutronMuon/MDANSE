@@ -108,7 +108,7 @@ class MDAnalysis(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "config_file",
+            "dependencies": {"trajectory": "config_file"},
         },
     )
 

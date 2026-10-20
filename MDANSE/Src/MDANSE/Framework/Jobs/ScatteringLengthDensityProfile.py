@@ -94,7 +94,10 @@ class ScatteringLengthDensityProfile(IJob):
             "prediction_label": "bin centres along axis",
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
     settings["running_mode"] = ("RunningModeConfigurator", {})
 
     def initialize(self):

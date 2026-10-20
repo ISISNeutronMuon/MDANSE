@@ -116,7 +116,7 @@ class ASE(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "trajectory_file",
+            "dependencies": {"trajectory": "trajectory_file"},
         },
     )
 

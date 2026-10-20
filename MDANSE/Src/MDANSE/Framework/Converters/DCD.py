@@ -80,7 +80,7 @@ class DCD(Converter):
         "OutputTrajectoryConfigurator",
         {
             "formats": ["MDTFormat"],
-            "root": "pdb_file",
+            "dependencies": {"trajectory": "pdb_file"},
         },
     )
 

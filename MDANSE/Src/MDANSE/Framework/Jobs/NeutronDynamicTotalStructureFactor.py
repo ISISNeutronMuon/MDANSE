@@ -92,7 +92,10 @@ class NeutronDynamicTotalStructureFactor(IJob):
             }
         },
     )
-    settings["output_files"] = ("OutputFilesConfigurator", {})
+    settings["output_files"] = (
+        "OutputFilesConfigurator",
+        {"dependencies": {"trajectory": "trajectory"}},
+    )
 
     def _get_data_from_files(self, props: str):
         out = {}
