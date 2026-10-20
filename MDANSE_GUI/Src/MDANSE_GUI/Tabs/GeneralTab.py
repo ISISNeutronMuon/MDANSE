@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 from abc import abstractmethod
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QObject, QSettings, Signal, Slot

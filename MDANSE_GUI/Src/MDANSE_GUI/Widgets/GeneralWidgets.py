@@ -16,8 +16,7 @@
 from __future__ import annotations
 
 import copy
-from pathlib import PurePath
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import (

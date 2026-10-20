@@ -377,7 +377,7 @@ class LAMMPScustom(LAMMPSReader):
         int
             Number of timesteps found.
         """
-        with open(filename, encoding="utf-8") as file:
+        with Path(filename).open(encoding="utf-8") as file:
             return ilen(filter(lambda line: line.startswith("ITEM: TIMESTEP"), file))
 
     def open_file(self, filename: Path | str) -> None:
@@ -388,7 +388,7 @@ class LAMMPScustom(LAMMPSReader):
         filename : Path | str
             File to open for reading.
         """
-        self._file = open(filename, encoding="utf-8")  # noqa: SIM115
+        self._file = Path(filename).open(encoding="utf-8")  # noqa: SIM115
         self._start = 0
         self._first_origin = None
 
@@ -696,7 +696,7 @@ class LAMMPSxyz(LAMMPSReader):
         int
             Number of timesteps found.
         """
-        with open(filename, encoding="utf-8") as file:
+        with Path(filename).open(encoding="utf-8") as file:
             return sum(1 for line in file if len(line.split()) == 1)
 
     def open_file(self, filename: Path | str) -> None:
@@ -707,7 +707,7 @@ class LAMMPSxyz(LAMMPSReader):
         filename : Path | str
             File to open for reading.
         """
-        self._file = open(filename, encoding="utf-8")  # noqa: SIM115
+        self._file = Path(filename).open(encoding="utf-8")  # noqa: SIM115
 
     def read_step(self) -> tuple[int, IntArray, FloatArray]:
         """Read an XYZ file step.

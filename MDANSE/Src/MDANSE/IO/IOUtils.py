@@ -136,9 +136,9 @@ def _(value: Path) -> dict[Any, Any]:
         with value.open(encoding="utf-8") as file:
             return json.load(file)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Unable to open ({value}) as json file .") from _
+        raise FileNotFoundError(f"Unable to open ({value}) as json file.") from None
     except Exception as err:
-        raise ValueError("Unable to load JSON string.") from err
+        raise ValueError(f"Unable to load JSON string from {value}.") from err
 
 
 def standardise_name(

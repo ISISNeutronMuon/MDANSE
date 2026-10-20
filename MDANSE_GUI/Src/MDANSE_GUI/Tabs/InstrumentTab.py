@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QSettings, Slot
@@ -52,17 +53,15 @@ class InstrumentTab(GeneralTab):
         self._core.add_button("Create Instrument", self._view.add_instrument)
         self._core.add_button("Save Instruments", self._view.save_to_file, upper=False)
         self._view.introduce_empty_instrument()
-        current_path = os.path.dirname(os.path.abspath(__file__))
-        builtin_file = os.path.join(
-            current_path, "..", "Resources", "InstrumentDefinitions.toml"
-        )
+        current_path = Path(__file__).parent
+        builtin_file = current_path.parent / "Resources/InstrumentDefinitions.toml"
+
         try:
             self._view.load_from_file(builtin_file, keep_backups=True)
         except Exception as e:
             LOG.error(f"Could not load instruments from {builtin_file}: {e}")
-        filename = os.path.join(
-            PLATFORM.application_directory, "InstrumentDefinitions.toml"
-        )
+        filename = PLATFORM.application_directory / "InstrumentDefinitions.toml"
+
         try:
             self._view.load_from_file(filename)
         except Exception as e:

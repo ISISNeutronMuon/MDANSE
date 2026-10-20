@@ -128,7 +128,7 @@ class PDBFile(Parser):
         """Get the atom data from the PDB file."""
         self.atoms: list[PDBAtom] = []
 
-        with open(self.filename, encoding="utf-8") as source:
+        with self.filename.open(encoding="utf-8") as source:
             for line in source:
                 if line.startswith("END"):
                     break

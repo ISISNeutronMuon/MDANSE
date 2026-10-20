@@ -1058,7 +1058,7 @@ class UnitsManager(_Database):
 
     def save(self):
         """Write self to custom user database."""
-        with open(self._user_database, "w") as fout:
+        with self._user_database.open("w") as fout:
             json.dump(
                 UnitsManager._UNITS.maps[0], fout, indent=4, cls=UnitsManagerEncoder
             )

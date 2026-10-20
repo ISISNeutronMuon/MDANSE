@@ -77,7 +77,7 @@ class OutputTrajectoryWidget(WidgetBase):
             self._parent = kwargs.get("parent")
             self.default_path = Path(self._parent._default_path)
         except (KeyError, AttributeError) as e:
-            self.default_path = Path(".").absolute()
+            self.default_path = Path.cwd()
             LOG.error("%s in OutputTrajectoryWidget - can't get default path.", str(e))
         else:
             self._session: Session = self._parent._parent_tab._session

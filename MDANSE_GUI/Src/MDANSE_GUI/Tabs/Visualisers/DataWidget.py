@@ -187,7 +187,7 @@ class DataWidget(QWidget):
 
         PLATFORM.create_directory(target_path.parent)
         try:
-            with open(target_path, "w", newline="") as target:
+            with target_path.open("w", newline="") as target:
                 writer = csv.writer(
                     target,
                     dialect=self._dialect_combo.currentText,

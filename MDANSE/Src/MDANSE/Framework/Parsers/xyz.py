@@ -47,7 +47,7 @@ class XYZFile(Parser):
     def __init__(self, filename: Path | str):
         super().__init__(filename)
 
-        with open(self.filename, encoding="utf-8") as xyz_file:
+        with self.filename.open(encoding="utf-8") as xyz_file:
             self._n_atoms = int(next(xyz_file))
             comment = next(xyz_file)  # Comment line
             atom_block = islice(xyz_file, self.n_atoms)
@@ -67,7 +67,7 @@ class XYZFile(Parser):
 
     @property
     def n_frames(self) -> int:
-        with open(self.filename, encoding="utf-8") as xyz_file:
+        with self.filename.open(encoding="utf-8") as xyz_file:
             file = map(str.strip, xyz_file)
 
             file = split_at(file, str.isnumeric)
@@ -77,7 +77,7 @@ class XYZFile(Parser):
 
     @property
     def frames(self) -> Iterator[FloatArray]:
-        with open(self.filename, encoding="utf-8") as xyz_file:
+        with self.filename.open(encoding="utf-8") as xyz_file:
             file = map(str.strip, xyz_file)
 
             file = split_at(file, str.isnumeric)

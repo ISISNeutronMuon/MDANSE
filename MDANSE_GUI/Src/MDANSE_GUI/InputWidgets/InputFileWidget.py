@@ -15,8 +15,7 @@
 #
 from __future__ import annotations
 
-import os
-from pathlib import PurePath
+from pathlib import Path
 
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QLineEdit, QPushButton
@@ -35,15 +34,16 @@ class InputFileWidget(WidgetBase):
         if parent is not None:
             self._job_name = parent._job_name
             self._settings = parent._settings
+
         try:
             parent = kwargs.get("parent")
-            self.default_path = PurePath(parent._default_path)
-        except KeyError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error("KeyError in OutputFilesWidget - can't get default path.")
-        except AttributeError:
-            self.default_path = PurePath(os.path.abspath("."))
-            LOG.error("AttributeError in OutputFilesWidget - can't get default path.")
+            self.default_path = Path(parent._default_path)
+        except (KeyError, AttributeError) as err:
+            self.default_path = Path.cwd()
+            LOG.error(
+                f"{type(err).__name__} in {type(self).__name__} - can't get default path."
+            )
+
         default_value = kwargs.get("default", "")
         if self._tooltip:
             self._tooltip_text = self._tooltip
@@ -90,19 +90,16 @@ class InputFileWidget(WidgetBase):
             self._qt_file_association,  # text string specifying the file name filter.
         )
         if new_value is not None and new_value[0]:
-            self._field.setText(str(PurePath(new_value[0])))
+            new_path = Path(new_value[0])
+            self._field.setText(str(new_path))
             self.updateValue()
             try:
-                LOG.info(
-                    f"Settings path of {self._job_name} to {os.path.split(new_value[0])[0]}"
-                )
+                LOG.info(f"Settings path of {self._job_name} to {new_path.parent}")
                 if self._parent is not None:
-                    self._parent._default_path = str(
-                        PurePath(os.path.split(new_value[0])[0])
-                    )
+                    self._parent._default_path = str(new_path.parent)
             except Exception:
                 LOG.error(
-                    f"session.set_path failed for {self._job_name}, {os.path.split(new_value[0])[0]}"
+                    f"session.set_path failed for {self._job_name}, {new_path.parent}"
                 )
 
     def get_widget_value(self):
