@@ -66,20 +66,19 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
 
         try:
             if len(self["filenames"]) <= 1 or self["format"] is None:
-                _ = mda.Universe(
+                self["instance"] = mda.Universe(
                     topology_configurator["filename"],
                     *self["filenames"],
                     format=self["format"],
                     topology_format=topology_configurator["format"],
-                ).trajectory
+                )
             else:
                 coord_files = [(i, self["format"]) for i in self["filenames"]]
-                _ = mda.Universe(
+                self["instance"] = mda.Universe(
                     topology_configurator["filename"],
                     coord_files,
                     topology_format=topology_configurator["format"],
-                ).trajectory
-
+                )
         except Exception as e:
             self.error_status = f"Unable to create MDAnalysis universe: {e}"
             return

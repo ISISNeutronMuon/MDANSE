@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from more_itertools import first
+
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
@@ -116,25 +118,8 @@ class MDAnalysis(Converter):
         """Load the trajectory using MDAnalysis and create the
         trajectory writer.
         """
-        coord_format = self.configuration["coordinate_files"]["format"]
-        coord_files = self.configuration["coordinate_files"]["filenames"]
 
-        if len(coord_files) <= 1 or coord_format is None:
-            self.u = mda.Universe(
-                self.configuration["topology_file"]["filename"],
-                *coord_files,
-                continuous=self.configuration["continuous"]["value"],
-                format=coord_format,
-                topology_format=self.configuration["topology_file"]["format"],
-            )
-        else:
-            coord_files = [(i, coord_format) for i in coord_files]
-            self.u = mda.Universe(
-                self.configuration["topology_file"]["filename"],
-                coord_files,
-                continuous=self.configuration["continuous"]["value"],
-                topology_format=self.configuration["topology_file"]["format"],
-            )
+        self.u = self.configuration["coordinate_files"]["instance"]
 
         self.numberOfSteps = len(self.u.trajectory)
 
@@ -144,36 +129,34 @@ class MDAnalysis(Converter):
         label_dict = {}
 
         for at_number, at in enumerate(self.u.atoms):
-            kwargs = {}
-            for arg in ["element", "name", "type", "resname", "mass"]:
-                if hasattr(at, arg):
-                    kwargs[arg] = getattr(at, arg)
+            kwargs = {
+                arg: getattr(at, arg)
+                for arg in ("element", "name", "type", "resname", "mass")
+                if hasattr(at, arg)
+            }
             # the first out of the list above will be the main label
             (k, main_label) = next(iter(kwargs.items()))
             # label_list will be populated too
-            if "resname" in kwargs:
-                tag = kwargs["resname"]
-            elif "type" in kwargs:
-                tag = kwargs["type"]
-            elif "name" in kwargs:
-                tag = kwargs["name"]
-            else:
-                tag = None
-            if tag:
-                if tag in label_dict:
-                    label_dict[tag] += [at_number]
-                else:
-                    label_dict[tag] = [at_number]
+            tag = first(
+                (kwargs[key] for key in ("resname", "type", "name") if key in kwargs),
+                default=None,
+            )
+            if tag is not None:
+                label_dict.setdefault(tag, []).append(at_number)
+
             kwargs.pop(k)
             element = get_element_from_mapping(
                 self.configuration["atom_aliases"]["value"], main_label, **kwargs
             )
 
-            name = None
-            for arg in ["name", "type", "element"]:
-                if hasattr(at, arg):
-                    name = getattr(at, arg)
-                    break
+            name = first(
+                (
+                    getattr(at, arg)
+                    for arg in ("name", "type", "element")
+                    if hasattr(at, arg)
+                ),
+                default=None,
+            )
             element_list.append(element)
             name_list.append(name)
         if None in name_list:

@@ -15,41 +15,48 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from MDANSE.Framework.Configurators import MDAnalysisTimeStepConfigurator
+
 from .FloatWidget import FloatWidget
 
+if TYPE_CHECKING:
+    from MDANSE_GUI.InputWidgets import (
+        MDAnalysisCoordinateFileWidget,
+        MDAnalysisTopologyFileWidget,
+    )
 
-class MDAnalysisMDTrajTimeStepWidget(FloatWidget):
+
+class MDAnalysisMDTrajTimeStepWidget(FloatWidget[MDAnalysisTimeStepConfigurator]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._last = None
         # file input widgets should be loaded into the _widgets list
         # before this one
-        for widget in self.parent()._widgets:
-            if (
-                widget._configurator
-                is self._configurator.configurable[
-                    self._configurator.dependencies["topology_file"]
-                ]
-            ):
-                self._topology_file_widget = widget
-                self._topology_file_widget.value_changed.connect(self.update_from_files)
-            if (
-                widget._configurator
-                is self._configurator.configurable[
-                    self._configurator.dependencies["coordinate_files"]
-                ]
-            ):
-                self._coordinates_file_widget = widget
-                self._coordinates_file_widget.value_changed.connect(
-                    self.update_from_files
-                )
+        if widget := self.get_dep("topology_file"):
+            self._topology_file_widget: MDAnalysisTopologyFileWidget = widget
+            self._topology_file_widget.value_changed.connect(self.update_from_files)
+        if widget := self.get_dep("coordinate_files"):
+            self._coordinates_file_widget: MDAnalysisCoordinateFileWidget = widget
+            self._coordinates_file_widget.value_changed.connect(self.update_from_files)
 
     def update_from_files(self) -> None:
         """Updates the time step field from the topology and coordinates
         files if possible else set it back to the default value.
         """
+        if (
+            current := (
+                self._topology_file_widget._field.text(),
+                self._coordinates_file_widget._field.text(),
+            )
+        ) == self._last:
+            return
+
         self._configurator.configure(None)
         if self._configurator.valid:
             self._field.setText(str(self._configurator["value"]))
         else:
             self._field.setText(str(self._default_value))
+        self._last = current

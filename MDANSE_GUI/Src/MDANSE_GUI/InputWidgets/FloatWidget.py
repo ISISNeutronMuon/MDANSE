@@ -15,13 +15,18 @@
 #
 from __future__ import annotations
 
+from typing import TypeVar
+
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import QDoubleSpinBox, QLineEdit
 
+from MDANSE.Framework.Configurators import FloatConfigurator
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
+FloatConfig = TypeVar("FloatConfig", bound=FloatConfigurator)
 
-class FloatWidget(WidgetBase):
+
+class FloatWidget(WidgetBase[FloatConfig]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         try:
