@@ -30,7 +30,11 @@ from tomlkit.toml_file import TOMLFile
 from MDANSE.MLogging import LOG
 
 T = TypeVar("T")
-X = TypeVar("X")
+X = TypeVar("X", bound=type)
+
+In = TypeVar("In")
+Out = TypeVar("Out")
+TypeMap: TypeAlias = Mapping[type[In], Callable[[In], Out]]
 
 
 class Option(NamedTuple, Generic[T]):
@@ -114,6 +118,8 @@ class Settings:
             "The momentum (transfer) unit preferred by the user",
         ),
     }
+
+    SAVE_TYPE_MAPPING: TypeMap = {Path: str}
 
     @classmethod
     def __call__(cls):
@@ -210,7 +216,12 @@ class Settings:
 
             LOG.debug("Group: %s", grp_key)
             for key, val in grp.items():
-                item = tomlkit.item(val.value)
+                if new_type := cls.SAVE_TYPE_MAPPING.get(type(val.value)):
+                    to_write = new_type(val.value)
+                else:
+                    to_write = val.value
+
+                item = tomlkit.item(to_write)
                 if val.comment is not None:
                     item.comment(val.comment)
                 table[key] = item
@@ -442,7 +453,7 @@ class Settings:
         cls.initialised = False
 
     @classmethod
-    def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[type[X]], type[X]]:
+    def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[X], X]:
         """Add settings to decorated class.
 
         For x = val, x will be the property on the class
