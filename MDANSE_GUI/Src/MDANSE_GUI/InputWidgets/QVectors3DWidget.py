@@ -26,10 +26,11 @@ from qtpy.QtWidgets import (
     QTableView,
 )
 
+from MDANSE.Framework.Configurators import QVectors3DConfigurator
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
-class QVectors3DWidget(WidgetBase):
+class QVectors3DWidget(WidgetBase[QVectors3DConfigurator]):
     def __init__(self, *args, **kwargs):
         kwargs["layout_type"] = "QVBoxLayout"
         super().__init__(*args, **kwargs)
@@ -59,11 +60,13 @@ class QVectors3DWidget(WidgetBase):
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
         self._view.horizontalHeader().hide()
-        self._view.setSizeAdjustPolicy(
-            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
-        )
 
+        self._view.resizeColumnsToContents()
         self._model.itemChanged.connect(self.updateValue)
+
+    def updateValue(self):
+        self._view.resizeColumnsToContents()
+        super().updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
