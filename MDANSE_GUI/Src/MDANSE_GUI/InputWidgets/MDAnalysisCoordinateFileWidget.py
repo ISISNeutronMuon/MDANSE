@@ -36,11 +36,6 @@ class MDAnalysisCoordinateFileWidget(
             format_options=sorted(mda._READERS.keys()),
             **kwargs,
         )
-        for widget in self.parent()._widgets:
-            if (
-                widget._configurator
-                is self._configurator.configurable[
-                    self._configurator.dependencies["input_file"]
-                ]
-            ):
-                widget.value_changed.connect(self.updateValue)
+
+        if widget := self.get_dep("input_file"):
+            widget.value_changed.connect(self.updateValue)

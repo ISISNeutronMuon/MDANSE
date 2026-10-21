@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 from contextlib import suppress
+from typing import SupportsFloat
 
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -34,7 +35,7 @@ class MDAnalysisTimeStepConfigurator(FloatConfigurator):
 
     _default = 0.0
 
-    def configure(self, value):
+    def configure(self, value: SupportsFloat | None) -> None:
         # if the value is not valid then we use the MDAnalysis
         # default values which maybe the time step in the input
         # files or 1 ps
@@ -45,35 +46,14 @@ class MDAnalysisTimeStepConfigurator(FloatConfigurator):
             value = float(value)
 
         if value in {None, "", 0.0}:
-            file_configurator = self.configurable[self.dependencies["topology_file"]]
             files_configurator = self.configurable[
                 self.dependencies["coordinate_files"]
             ]
-            if file_configurator.valid and files_configurator.valid:
-                try:
-                    coord_format = files_configurator["format"]
-                    coord_files = files_configurator["filenames"]
-                    if len(coord_files) <= 1 or coord_format is None:
-                        value = mda.Universe(
-                            file_configurator["filename"],
-                            *coord_files,
-                            format=coord_format,
-                            topology_format=file_configurator["format"],
-                        ).trajectory.ts.dt
-                    else:
-                        coord_files = [(i, coord_format) for i in coord_files]
-                        value = mda.Universe(
-                            file_configurator["filename"],
-                            coord_files,
-                            topology_format=file_configurator["format"],
-                        ).trajectory.ts.dt
-                except Exception as e:
-                    self.error_status = (
-                        f"Unable to determine a time step from MDAnalysis: {e}"
-                    )
-                    return
-            else:
+
+            if not files_configurator.valid:
                 self.error_status = "Unable to determine a time step from MDAnalysis."
                 return
+
+            value = files_configurator["instance"].trajectory.ts.dt
 
         super().configure(value)

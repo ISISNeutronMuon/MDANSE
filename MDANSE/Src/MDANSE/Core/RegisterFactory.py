@@ -120,8 +120,10 @@ class RegisterFactory(Generic[T]):
     def registered(cls):
         return cls.registry.copy()
 
+    V = TypeVar("V", bound=type)
+
     @classmethod
-    def register(cls, names: str | Iterable[str]) -> Callable[type[T], type[T]]:
+    def register(cls, names: str | Iterable[str]) -> Callable[[V], V]:
         """
         A class level decorator for registering classes.
 
