@@ -59,6 +59,12 @@ class VASP(Converter):
 
     label = "VASP"
 
+    UNITS = {
+        "coordinates": "ang",
+        "time": "fs",
+        "unit_cell": "ang",
+    }
+
     settings = {}
     settings["xdatcar_file"] = (
         "FileWithAtomDataConfigurator",
@@ -162,14 +168,13 @@ class VASP(Converter):
         time = (
             frame["step"]
             * self.configuration["time_step"]["value"]
-            * self.trajectory_file.UNIT_CONV["time"]
         )
 
         # Dump the configuration to the output trajectory
         self._trajectory.dump_configuration(
             real_conf,
             time,
-            units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
+            units=self.UNITS,
         )
 
         return index, None

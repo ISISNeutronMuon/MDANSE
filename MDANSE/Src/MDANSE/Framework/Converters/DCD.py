@@ -37,6 +37,8 @@ class DCD(Converter):
 
     label = "DCD"
 
+    UNITS = {"time": "akma_time", "coordinates": "ang", "unit_cell": "ang"}
+
     settings = {}
     settings["pdb_file"] = (
         "FileWithAtomDataConfigurator",
@@ -69,8 +71,12 @@ class DCD(Converter):
         },
     )
     settings["time_step"] = (
-        "FloatConfigurator",
-        {"default": 1.0, "label": "Time step (ps)"},
+        "OptionalFloatConfigurator",
+        {
+            "default": [False, 1.0],
+            "label": "Time step (ps)",
+            "tooltip": "Override for time-step.",
+        },
     )
     settings["fold"] = (
         "BooleanConfigurator",
@@ -91,10 +97,10 @@ class DCD(Converter):
         super().initialize()
 
         # The number of steps of the analysis.
-        instance: DCDFile = self.configuration["dcd_file"].instance
-        self.numberOfSteps = instance.n_frames
+        self.parser_instance: DCDFile = self.configuration["dcd_file"].instance
+        self.numberOfSteps = self.parser_instance.n_frames
 
-        self.frames = instance.frames
+        self.frames = self.parser_instance.frames
 
         # Create all chemical entities from the PDB file.
         self._chemical_system = self.configuration[
@@ -125,6 +131,8 @@ class DCD(Converter):
         # The x, y and z values of the current frame.
         unit_cell, config = next(self.frames)
 
+        units = self.UNITS
+
         if self.configuration["unit_cell"]["apply"]:
             conf = PeriodicAbsoluteConfiguration(
                 config, self.configuration["unit_cell"]["value"]
@@ -135,13 +143,15 @@ class DCD(Converter):
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()
 
-        # The current time.
-        time = index * self.configuration["time_step"]["value"]
+        if self.configuration["time_step"]["use_it"]:
+            # The current time.
+            time = index * self.configuration["time_step"]["value"]
+            units["time"] = "ps"
+        else:
+            time = index * self.parser_instance.time_step
 
         # Store a snapshot of the current configuration in the output trajectory.
-        self._trajectory.dump_configuration(
-            conf, time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
-        )
+        self._trajectory.dump_configuration(conf, time, units=units)
 
         return index, None
 

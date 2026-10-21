@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
-from functools import singledispatchmethod
 
 import copy
 import html
@@ -23,13 +22,20 @@ from collections import Counter, defaultdict
 from enum import auto
 from operator import itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import h5py
 import numpy as np
+from more_itertools import always_iterable, first
 
-from MDANSE.Framework.Units import measure, _Unit
+from MDANSE import PLATFORM
+from MDANSE.Chemistry import ATOMS_DATABASE
+from MDANSE.Framework.Formats.HDFFormat import check_metadata
+from MDANSE.IO.IOUtils import UCEnum, str_to_num, summarise_array
 from MDANSE.MolecularDynamics.Configuration import _PeriodicConfiguration
+from MDANSE.Trajectory.FileTrajBase import TrajDataArray
+from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
+from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 from MDANSE.util_types import FloatArray
 
 try:
@@ -39,23 +45,13 @@ try:
 except ImportError:
     mixbox_available = False
 
-from more_itertools import always_iterable, first
-
-from MDANSE import PLATFORM
-from MDANSE.Chemistry import ATOMS_DATABASE
-
-from MDANSE.Framework.Formats.HDFFormat import check_metadata
-from MDANSE.IO.IOUtils import UCEnum, summarise_array, str_to_num
-from MDANSE.Trajectory.FileTrajBase import TrajDataArray
-from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
-from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
-from MDANSE.util_types import FloatArray
-
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
-    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.Chemistry.AtomsDatabase import AtomsDatabase
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
+    from MDANSE.Chemistry.Databases import AtomsDatabase
+    from MDANSE.Framework.Units import _Unit
     from MDANSE.MolecularDynamics.Configuration import _Configuration
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -1071,7 +1067,7 @@ class TrajectoryWriterError(Exception):
 class TrajectoryWriter:
     allowed_compression = ["gzip", "lzf"]
 
-    MDT_UNITS: ClassVar = {
+    MDT_UNITS: ClassVar[dict[str, str]] = {
         "time": "ps",
         "unit_cell": "nm",
         "coordinates": "nm",
@@ -1464,7 +1460,6 @@ class TrajectoryWriter:
             atom_indices = slice(None)
         dset[frame_indices, atom_indices, :] = data
 
-    @singledispatchmethod
     def _process_unit(self, unit: _Unit | str | float, key: str) -> tuple[float, str]:
         """Get conversion factor for units.
 
@@ -1489,21 +1484,21 @@ class TrajectoryWriter:
         NotImplementedError
             If passing invalid type.
         """
-        raise NotImplementedError(f"Cannot convert {type(unit).__name__} as unit")
+        from MDANSE.Framework.Units import _Unit, measure
 
-    @_process_unit.register
-    def _(self, unit: _Unit, key: str) -> tuple[float, str]:
-        if key in self.MDT_UNITS:
-            return unit.toval(self.MDT_UNITS[key]), self.MDT_UNITS[key]
-        return unit.factor, unit._uname
-
-    @_process_unit.register
-    def _(self, unit: float, key: str) -> tuple[float, str]:
-        return unit, "au"
-
-    @_process_unit.register
-    def _(self, unit: str, key: str) -> tuple[float, str]:
-        return self._process_unit(measure(1.0, unit), key)
+        match unit:
+            case _Unit():
+                if key in self.MDT_UNITS:
+                    return unit.toval(self.MDT_UNITS[key]), self.MDT_UNITS[key]
+                return unit.factor, unit._uname
+            case float():
+                return unit, "au"
+            case str():
+                return self._process_unit(measure(1.0, unit), key)
+            case _:
+                raise NotImplementedError(
+                    f"Cannot convert {type(unit).__name__} as unit"
+                )
 
     def dump_configuration(
         self,

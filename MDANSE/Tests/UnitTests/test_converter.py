@@ -132,7 +132,7 @@ ONE_TEST_EACH = (
             "dcd_file": hem_cam_dcd,
             "fold": False,
             "pdb_file": hem_cam_pdb,
-            "time_step": 1.0,
+            "time_step": [True, 1.0],
         },
     ),
     (
@@ -166,7 +166,7 @@ ONE_TEST_EACH = (
             "dcd_file": apoferritin_dcd,
             "fold": False,
             "pdb_file": apoferritin_pdb,
-            "time_step": "1.0",
+            "time_step": [True, "1.0"],
         },
     ),
     (

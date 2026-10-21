@@ -88,13 +88,8 @@ class XDATCARFile(Parser):
 
         return fixed_cell, frame_numbers
 
-    UNIT_CONV = {
-        "length": measure(1.0, "ang").toval("nm"),
-        "time": measure(1.0, "fs").toval("ps"),
-    }
-
     @staticmethod
-    def read_header(source: Iterator[str]) -> HeaderInfo:
+    def read_header(source: Iterator[str]) -> HeaderInfo | None:
         test = next(source, None)
         if test is None:
             return None
@@ -103,7 +98,6 @@ class XDATCARFile(Parser):
         cell = (
             np.array(list(map(str.split, islice(source, 3))), dtype=float)
             * scale_factor
-            * XDATCARFile.UNIT_CONV["length"]
         )
         unit_cell = UnitCell(cell)
         atoms = next(source).split()
