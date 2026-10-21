@@ -406,7 +406,7 @@ class VectorViewer(QDialog):
             self.shell_panel_3D.update_plot()
 
 
-class QVectorsWidget(WidgetBase):
+class QVectorsWidget(WidgetBase[QVectorsConfigurator]):
     """Input widget defining the vector generator type and its parameters."""
 
     new_shell_number = Signal(int)
@@ -452,9 +452,7 @@ class QVectorsWidget(WidgetBase):
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
         self._view.horizontalHeader().hide()
-        self._view.setSizeAdjustPolicy(
-            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
-        )
+        self._view.resizeColumnsToContents()
         self.value_changed.connect(self.preview_vectors)
 
     @Slot()
@@ -530,6 +528,7 @@ class QVectorsWidget(WidgetBase):
         """Use the current inputs to configure the q vector generator."""
         temp = super().updateValue()
         is_valid = self._configurator.error_status == "OK"
+        self._view.resizeColumnsToContents()
         self._preview_button.setEnabled(is_valid)
         if is_valid:
             self.new_shell_number.emit(self._configurator["n_shells"])
