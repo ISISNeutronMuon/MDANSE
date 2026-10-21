@@ -1,4 +1,3 @@
-
 .. _weighting-scheme:
 
 Weighting Scheme
@@ -15,12 +14,12 @@ scattering functions scaled with weight factors are
 .. math::
    :label: partial1
 
-   \mathcal{F}_{\text{coh},\alpha\beta}(\mathbf{q},t) =  \frac{W_{\alpha\beta}}{N \sqrt{c_{\alpha}c_{\beta}}} \sum\limits_{j \in \alpha} \sum\limits_{k \in \beta} \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right],
+   \mathcal{F}_{\text{coh},\alpha\beta}(\mathbf{q},t) =  \frac{W_{\alpha\beta}}{N \sqrt{c_{\alpha}c_{\beta}}} \sum\limits_{j \in N_{\alpha}} \sum\limits_{k \in N_{\beta}} \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right],
 
 .. math::
    :label: partial2
 
-   \mathcal{F}_{\text{inc},\alpha}(\mathbf{q},t ) = \frac{W_{\alpha}}{Nc_{\alpha}} \sum\limits_{j \in \alpha} \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right],
+   \mathcal{F}_{\text{inc},\alpha}(\mathbf{q},t ) = \frac{W_{\alpha}}{Nc_{\alpha}} \sum\limits_{j \in N_{\alpha}} \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right],
 
 .. math::
    :label: partial2_1
@@ -42,7 +41,7 @@ and :math:`-\mathbf{q}`. The total is now a sum of the partial terms
 .. math::
    :label: partial3
 
-    F_{\text{coh}}(\mathbf{q},t) = \sum_{\alpha}\sum_{\beta \geq \alpha} \mathcal{F}_{\text{coh},\alpha\beta}(\mathbf{q},t), \qquad F_{\text{inc}}(\mathbf{q},t) = \sum_{\alpha} \mathcal{F}_{\text{inc},\alpha}(\mathbf{q},t).
+    F_{\text{coh}}(\mathbf{q},t) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha} \mathcal{F}_{\text{coh},\alpha\beta}(\mathbf{q},t), \qquad F_{\text{inc}}(\mathbf{q},t) = \sum\limits_{\alpha} \mathcal{F}_{\text{inc},\alpha}(\mathbf{q},t).
 
 For summation involving two atom-types only the unique pairs are included up,
 since the averaging over :math:`+\mathbf{q}` and :math:`-\mathbf{q}` will mean that
@@ -64,19 +63,21 @@ The partial properties can also be scaled without the weights
 .. math::
    :label: partial4
 
-   F_{\text{coh},\alpha\beta}(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\alpha}c_{\beta}}} \sum\limits_{j \in \alpha} \sum\limits_{k \in \beta} \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right],
+   F_{\text{coh},\alpha\beta}(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\alpha}c_{\beta}}} \sum\limits_{j \in N_{\alpha}} \sum\limits_{k \in N_{\beta}} \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right],
 
 .. math::
    :label: partial5
 
-   F_{\text{inc},\alpha}(\mathbf{q},t ) = \frac{1}{Nc_{\alpha}} \sum\limits_{j \in \alpha} \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right],
+   F_{\text{inc},\alpha}(\mathbf{q},t ) = \frac{1}{Nc_{\alpha}} \sum\limits_{j \in N_{\alpha}} \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right],
 
 so the total will now be a weighted sum of these partial terms
 
 .. math::
    :label: partial6
 
-    F_{\text{coh}}(\mathbf{q},t) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{coh},\alpha\beta}(\mathbf{q},t), \qquad F_{\text{inc}}(\mathbf{q},t) = \sum_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t).
+    F_{\text{coh}}(\mathbf{q},t) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{coh},\alpha\beta}(\mathbf{q},t),
+    \qquad
+    F_{\text{inc}}(\mathbf{q},t) = \sum\limits_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t).
 
 In the MDANSE_GUI you have the option to plot either weighted (e.g. :math:`\mathcal{F}_{\text{coh},\alpha\beta}(\mathbf{q},t)`
 and :math:`\mathcal{F}_{\text{inc},\alpha}(\mathbf{q},t)`) or unweighted (e.g. :math:`F_{\text{coh},\alpha\beta}(\mathbf{q},t)`
@@ -108,7 +109,7 @@ MDANSE weights are rescaled so that weights for DISF calculation using the ``b_i
 .. math::
    :label: single1
 
-   W_{\alpha} = \frac{c_{\alpha} \vert b_{\mathrm{inc},\alpha} \vert^2}{\sum_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2}
+   W_{\alpha} = \frac{c_{\alpha} \vert b_{\mathrm{inc},\alpha} \vert^2}{\sum\limits_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2}
 
 where :math:`\vert b_{\mathrm{inc},\alpha} \vert^2` is the squared incoherent
 scattering length of the atom type :math:`\alpha`. Note that the
@@ -119,7 +120,7 @@ scattering functions becomes
 .. math::
    :label: single2
 
-   F_{\text{inc}}(\mathbf{q},t ) = \frac{1}{\sum_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2 } \frac{1}{N} \sum\limits_{j} \vert b_{\mathrm{inc},\alpha} \vert^2 \ \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right]
+   F_{\text{inc}}(\mathbf{q},t ) = \frac{1}{\sum\limits_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2 } \frac{1}{N} \sum\limits_{j} \vert b_{\mathrm{inc},\alpha} \vert^2 \ \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right]
 
 Notice that by using this weight scheme the total DISF has the property that
 
@@ -136,7 +137,7 @@ For the DCSF calculation using ``b_coherent``, the weights are
 .. math::
    :label: doubledcsf1
 
-   W_{\alpha\beta} = \left[2 - \delta_{\alpha\beta}\right] \frac{\sqrt{c_{\alpha}c_{\beta}}\ \mathrm{Re} \left[b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta} \right]}{\sum_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}}
+   W_{\alpha\beta} = \left[2 - \delta_{\alpha\beta}\right] \frac{\sqrt{c_{\alpha}c_{\beta}}\ \mathrm{Re} \left[b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta} \right]}{\sum\limits_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}}
 
 
 where :math:`b_{\mathrm{coh},\alpha}^{\dagger}` and :math:`b_{\mathrm{coh},\beta}` are
@@ -148,7 +149,7 @@ The total coherent intermediate scattering functions becomes
 .. math::
    :label: doubledcsf2
 
-   F_{\text{coh}}(\mathbf{q},t) = \frac{\sqrt{c_{\alpha}c_{\beta}}}{\sum_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}} \frac{1}{N} \sum\limits_{jk} \mathrm{Re} \left[  b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta} \right]  \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right]
+   F_{\text{coh}}(\mathbf{q},t) = \frac{\sqrt{c_{\alpha}c_{\beta}}}{\sum\limits_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}} \frac{1}{N} \sum\limits_{jk} \mathrm{Re} \left[  b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta} \right]  \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right]
 
 where :math:`b_{\mathrm{coh},j}^{\dagger}` and
 :math:`b_{\mathrm{coh},k}` are the coherent scattering lengths of
@@ -176,14 +177,14 @@ where
 .. math::
     :label: doubleother2
 
-    g_{\alpha\beta}(r) = \frac{1}{N c_{\alpha} c_{\beta}}\frac{1}{4 \pi r^2} \frac{1}{\rho} \sum_{j \in \alpha} \sum_{\substack{k \in \beta \\ k \neq j}}  \left\langle \delta(r - \vert \mathbf{r}_{k} + \mathbf{r}_{j} \vert ) \right\rangle
+    g_{\alpha\beta}(r) = \frac{1}{N c_{\alpha} c_{\beta}}\frac{1}{4 \pi r^2} \frac{1}{\rho} \sum\limits_{j \in N_{\alpha}} \sum\limits_{\substack{k \in N_{\beta} \\ k \neq j}}  \left\langle \delta(r - \vert \mathbf{r}_{k} + \mathbf{r}_{j} \vert ) \right\rangle
 
 are the partial PDFs. Using ``b_coherent`` the weights are
 
 .. math::
    :label: doubleother3
 
-   W_{\alpha\beta} = \left[2 - \delta_{\alpha\beta}\right] \frac{c_{\alpha}c_{\beta} \ \mathrm{Re} \left[b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta} \right]}{\sum_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}}
+   W_{\alpha\beta} = \left[2 - \delta_{\alpha\beta}\right] \frac{c_{\alpha}c_{\beta} \ \mathrm{Re} \left[b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta} \right]}{\sum\limits_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}}
 
 notice that the concentrations :math:`c_{\alpha}c_{\beta}` are not
 square-rooted, this is because the the partial SSF has a prefactor of
@@ -204,13 +205,13 @@ with single atom-type weights will be
 .. math::
    :label: squared1
 
-   W_{\alpha} = \mathrm{Re} \left[ \frac{c_{\alpha} w_{\alpha}}{\sum_{\gamma} c_{\gamma} w_{\gamma}} \right]
+   W_{\alpha} = \mathrm{Re} \left[ \frac{c_{\alpha} w_{\alpha}}{\sum\limits_{\gamma} c_{\gamma} w_{\gamma}} \right]
 
 while in some cases when the weight are squared
 
 .. math::
    :label: squared2
 
-   W_{\alpha} = \frac{c_{\alpha} \vert w_{\alpha} \vert^2}{\sum_{\gamma} c_{\gamma} \vert w_{\gamma} \vert^2}
+   W_{\alpha} = \frac{c_{\alpha} \vert w_{\alpha} \vert^2}{\sum\limits_{\gamma} c_{\gamma} \vert w_{\gamma} \vert^2}
 
 where :math:`w_{\alpha}` is some weight parameter for the atom-type :math:`\alpha`.

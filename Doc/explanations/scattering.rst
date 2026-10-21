@@ -1,4 +1,3 @@
-
 .. |modq| replace:: :math:`|\mathbf{q}|`
 .. |q| replace:: :math:`\mathbf{q}`
 
@@ -67,7 +66,7 @@ incident :math:`k_{\mathrm{i}}` neutrons. They are related to the corresponding 
 
 .. math::
    :label: scattering2
-   
+
    E_{\mathrm{f}} = \hbar^{2} k_{\mathrm{f}}^{2} / 2m_{\mathrm{n}} \qquad \text{and} \qquad E_{\mathrm{i}} = \hbar^{2}k_{\mathrm{i}}^{2} / 2m_{\mathrm{n}}.
 
 These equations relate the neutron energies, :math:`E_{\mathrm{f}}` and :math:`E_{\mathrm{i}}`,
@@ -222,7 +221,7 @@ is the correlation function of the Fourier components of the particle current
 .. math::
    :label: ccf1
 
-    J_{\mu\nu}(\mathbf{q}, t) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} \mathrm{Re} \left[ J_{\alpha\beta\mu\nu}(\mathbf{q}, t) \right],
+    J_{\mu\nu}(\mathbf{q}, t) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha} W_{\alpha\beta} \mathrm{Re} \left[ J_{\alpha\beta\mu\nu}(\mathbf{q}, t) \right],
 
 .. math::
    :label: ccf2
@@ -235,7 +234,7 @@ where :math:`\mu` and  :math:`\nu` are the cartesian directions
 .. math::
    :label: ccf3
 
-   j_{\alpha\mu}(\mathbf{q}, t) = \sum_{k \in \alpha} v_{k\mu}(t) \exp(i\mathbf{q} \cdot \mathbf{r}_{k}(t)).
+   j_{\alpha\mu}(\mathbf{q}, t) = \sum\limits_{k \in N_{\alpha}} v_{k\mu}(t) \exp(i\mathbf{q} \cdot \mathbf{r}_{k}(t)).
 
 The particle currents can be projected onto
 longitudinal and transverse components of the |q|-vector. The
@@ -244,12 +243,12 @@ longitudinal and transverse particle current are
 .. math::
    :label: ccf4
 
-    \mathbf{j}^{\mathrm{L}}_{\alpha}(\mathbf{q}, t) = \sum_{k \in \alpha} \hat{\mathbf{q}} \left[\mathbf{v}_{k}(t) \cdot \hat{\mathbf{q}}\right]\exp(i \mathbf{q}\cdot \mathbf{r}_k(t)),
+    \mathbf{j}^{\mathrm{L}}_{\alpha}(\mathbf{q}, t) = \sum\limits_{k \in N_{\alpha}} \hat{\mathbf{q}} \left[\mathbf{v}_{k}(t) \cdot \hat{\mathbf{q}}\right]\exp(i \mathbf{q}\cdot \mathbf{r}_k(t)),
 
 .. math::
    :label: ccf5
 
-    \mathbf{j}^{\mathrm{T}}_{\alpha}(\mathbf{q}, t) = \sum_{k \in \alpha} \left\{\mathbf{v}_{k}(t) - \hat{\mathbf{q}}\left[\mathbf{v}_{k}(t) \cdot \hat{\mathbf{q}}\right] \right\}\exp(i \mathbf{q}\cdot \mathbf{r}_k(t))
+    \mathbf{j}^{\mathrm{T}}_{\alpha}(\mathbf{q}, t) = \sum\limits_{k \in N_{\alpha}} \left\{\mathbf{v}_{k}(t) - \hat{\mathbf{q}}\left[\mathbf{v}_{k}(t) \cdot \hat{\mathbf{q}}\right] \right\}\exp(i \mathbf{q}\cdot \mathbf{r}_k(t))
 
 where :math:`\hat{\mathbf{q}}` are unit vectors of |q|. The
 partial longitudinal and transverse current correlation functions are
@@ -283,19 +282,19 @@ intermediate scattering function is a weighted sum of the partial term
 .. math::
    :label: dcsf1
 
-    S_{\text{coh}}(\mathbf{q},\omega) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} S_{\text{coh},\alpha\beta}(\mathbf{q},\omega),
+    S_{\text{coh}}(\mathbf{q},\omega) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha} W_{\alpha\beta} S_{\text{coh},\alpha\beta}(\mathbf{q},\omega),
 
 .. math::
    :label: dcsf2
 
-    F_{\text{coh}}(\mathbf{q},t) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{coh},\alpha\beta}(\mathbf{q},t)
+    F_{\text{coh}}(\mathbf{q},t) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{coh},\alpha\beta}(\mathbf{q},t)
 
 where
 
 .. math::
    :label: dcsf3
 
-   F_{\text{coh},\alpha\beta}{(\mathbf{q},t) = \frac{1}{N \sqrt{c_{\alpha} c_{\beta}}}}{\sum\limits_{j \in \alpha}{\sum\limits_{k \in \beta}  \mathrm{Re} \left[ \left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{k}\left( t \right)} \right\rbrack} \right\rangle \right]}}
+   F_{\text{coh},\alpha\beta}{(\mathbf{q},t) = \frac{1}{N \sqrt{c_{\alpha} c_{\beta}}}}{\sum\limits_{j \in N_{\alpha}}{\sum\limits_{k \in N_{\beta}}  \mathrm{Re} \left[ \left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{k}\left( t \right)} \right\rbrack} \right\rangle \right]}}
 
 and
 
@@ -319,19 +318,19 @@ intermediate scattering function is a weighted sum of the partial term
 .. math::
    :label: disf1
 
-    S_{\text{inc}}(\mathbf{q},\omega) = \sum_{\alpha} W_{\alpha} S_{\text{inc},\alpha}(\mathbf{q},\omega),
+    S_{\text{inc}}(\mathbf{q},\omega) = \sum\limits_{\alpha} W_{\alpha} S_{\text{inc},\alpha}(\mathbf{q},\omega),
 
 .. math::
    :label: disf2
 
-    F_{\text{inc}}(\mathbf{q},t) = \sum_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t)
+    F_{\text{inc}}(\mathbf{q},t) = \sum\limits_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t)
 
 where
 
 .. math::
    :label: disf3
 
-   F_{\text{inc},\alpha}{(\mathbf{q},t) = \frac{1}{N c_{\alpha} }}{\sum\limits_{j \in \alpha}{ \mathrm{Re} \left[\left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{j}\left( t \right)} \right\rbrack} \right\rangle \right]}}
+   F_{\text{inc},\alpha}{(\mathbf{q},t) = \frac{1}{N c_{\alpha} }}{\sum\limits_{j \in N_{\alpha}}{ \mathrm{Re} \left[\left\langle {\exp\left\lbrack {{- i}\mathbf{q}\cdot\mathbf{r}_{j}\left( 0 \right)} \right\rbrack\exp\left\lbrack {i\mathbf{q}\cdot\mathbf{r}_{j}\left( t \right)} \right\rbrack} \right\rangle \right]}}
 
 and
 
@@ -415,7 +414,7 @@ representation of the EISF
 .. math::
    :label: eisf6
 
-   \mathrm{EISF}(\mathbf{q}) = \sum\limits_{\alpha} W_{\alpha} \mathrm{EISF}_{\alpha}(\mathbf{q}), \qquad \mathrm{EISF}_{\alpha}(\mathbf{q}) = \frac{1}{Nc_{\alpha}} \sum\limits_{j \in \alpha}  \left\vert \left\langle \exp[i \mathbf{q} \cdot \mathbf{r}_{j}] \right\rangle \right\vert^{2}
+   \mathrm{EISF}(\mathbf{q}) = \sum\limits_{\alpha} W_{\alpha} \mathrm{EISF}_{\alpha}(\mathbf{q}), \qquad \mathrm{EISF}_{\alpha}(\mathbf{q}) = \frac{1}{Nc_{\alpha}} \sum\limits_{j \in N_{\alpha}}  \left\vert \left\langle \exp[i \mathbf{q} \cdot \mathbf{r}_{j}] \right\rangle \right\vert^{2}
 
 where :math:`\mathrm{EISF}_{\alpha}(\mathbf{q})` is the EISF of atom-types :math:`\alpha`. This
 expression is derived from definition Eq. :math:numref:`eisf1`
@@ -425,7 +424,7 @@ relation
 
 .. math::
    :label: eisf7
-   
+
    \lim\limits_{t\rightarrow\infty}{\left\langle {\exp\left\lbrack {{- i\mathbf{q}}\cdot \mathbf{r}_{j}(0)} \right\rbrack\exp\left\lbrack { i\mathbf{q}\cdot \mathbf{r}_{j}(t)} \right\rbrack} \right\rangle = \left\langle \exp[-i \mathbf{q} \cdot \mathbf{r}_{j}(0)] \right\rangle \left\langle \exp[i \mathbf{q} \cdot \mathbf{r}_{j}(t)] \right\rangle}
 
 holds. In this way the computation of the EISF is reduced to the
@@ -450,7 +449,7 @@ function via the cumulant expansion [Ref11]_, [Ref22]_
 .. math::
    :label: gdisf2
 
-   F_{\text{inc},\alpha}(\mathbf{q},t) = \frac{1}{N c_{\alpha} } \sum\limits_{j \in \alpha} \exp\left[ -q^2 p_{1,j}(t) + q^4 p_{2,j}(t) + \cdots \right].
+   F_{\text{inc},\alpha}(\mathbf{q},t) = \frac{1}{N c_{\alpha} } \sum\limits_{j \in N_{\alpha}} \exp\left[ -q^2 p_{1,j}(t) + q^4 p_{2,j}(t) + \cdots \right].
 
 The cumulants :math:`p_{n,j}(t)` are identified as
 
@@ -481,7 +480,7 @@ approximation the above expansion is truncated after the
 .. math::
    :label: gdisf6
 
-   F_{\text{inc},\alpha}(\mathbf{q},t) \approx F_{\text{inc},\alpha}^{\text{G}}(\mathbf{q},t) = \frac{1}{N c_{\alpha} } \sum\limits_{j \in \alpha} \exp\left[ -q^2 p_{1,j}(\hat{\mathbf{q}}, t) \right].
+   F_{\text{inc},\alpha}(\mathbf{q},t) \approx F_{\text{inc},\alpha}^{\text{G}}(\mathbf{q},t) = \frac{1}{N c_{\alpha} } \sum\limits_{j \in N_{\alpha}} \exp\left[ -q^2 p_{1,j}(\hat{\mathbf{q}}, t) \right].
 
 For certain model systems like the ideal gas, the
 harmonic oscillator, and a particle undergoing Einstein diffusion, this
@@ -508,17 +507,17 @@ In this analysis the total incoherent, total coherent and total
 
 .. math::
    :label: ndtsf1
-   
-   F_{\mathrm{inc}}(\mathbf{q},t) = \sum_{\alpha} c_{\alpha}\vert b_{\text{inc},\alpha} \vert^{2} F_{\mathrm{inc},\alpha}(\mathbf{q},t),
+
+   F_{\mathrm{inc}}(\mathbf{q},t) = \sum\limits_{\alpha} c_{\alpha}\vert b_{\text{inc},\alpha} \vert^{2} F_{\mathrm{inc},\alpha}(\mathbf{q},t),
 
 .. math::
    :label: ndtsf2
-   
-   F_{\mathrm{coh}}(\mathbf{q},t) = \sum_{\alpha\beta} \sqrt{c_{\alpha}c_{\beta}}\ \mathrm{Re} \left[ b_{\text{coh},\alpha}^{\dagger}b_{\text{coh},\beta} \right] F_{\mathrm{coh},\alpha\beta}(\mathbf{q},t),
+
+   F_{\mathrm{coh}}(\mathbf{q},t) = \sum\limits_{\alpha\beta} \sqrt{c_{\alpha}c_{\beta}}\ \mathrm{Re} \left[ b_{\text{coh},\alpha}^{\dagger}b_{\text{coh},\beta} \right] F_{\mathrm{coh},\alpha\beta}(\mathbf{q},t),
 
 .. math::
    :label: ndtsf3
-   
+
    F(\mathbf{q},t) = F_{\mathrm{inc}}(\mathbf{q},t) + F_{\mathrm{coh}}(\mathbf{q},t).
 
 These expressions correspond to the formalism and equations given in
@@ -570,7 +569,7 @@ atomic positions.
 .. math::
   :label: ssf3d1
 
-  S_{\alpha\beta}(\mathbf{q}') = \frac{1}{N c_{\alpha} c_{\beta}} \sum_{j \in \alpha}\sum_{k \in \beta} \langle  \exp[i \mathbf{q} \mathbf{T} (\mathbf{r}_{k} - \mathbf{r}_{j})] \rangle
+  S_{\alpha\beta}(\mathbf{q}') = \frac{1}{N c_{\alpha} c_{\beta}} \sum\limits_{j \in N_{\alpha}}\sum\limits_{k \in N_{\beta}} \langle  \exp[i \mathbf{q} \mathbf{T} (\mathbf{r}_{k} - \mathbf{r}_{j})] \rangle
 
 Where :math:`\mathbf{q}' =  \mathbf{q} \mathbf{T}` are q-vector transformed
 along a new user defined set of basis vectors and :math:`\mathbf{q}` is the

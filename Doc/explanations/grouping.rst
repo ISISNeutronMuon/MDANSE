@@ -1,4 +1,3 @@
-
 .. _grouping:
 
 
@@ -21,7 +20,7 @@ intermediate scattering functions is
 .. math::
    :label: atompartial1
 
-   F_{\text{coh},\text{CH}}(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\text{C}}c_{\text{H}}}} \sum\limits_{j \in \text{C}} \sum\limits_{k \in \text{H}} \mathrm{Re}\left[F_{jk}(\mathbf{q},t)\right],
+   F_{\text{coh},\text{CH}}(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\text{C}}c_{\text{H}}}} \sum\limits_{j \in N_{\text{C}}} \sum\limits_{k \in N_{\text{H}}} \mathrm{Re}\left[F_{jk}(\mathbf{q},t)\right],
 
 .. math::
    :label: atompartial1_1
@@ -44,7 +43,7 @@ intermediate scattering functions is
 .. math::
    :label: atompartial3
 
-   F_{\text{inc},\text{C}}(\mathbf{q},t ) = \frac{1}{Nc_{\text{C}}} \sum\limits_{j \in \text{C}} \mathrm{Re}\left[F_{jj}(\mathbf{q},t)\right]
+   F_{\text{inc},\text{C}}(\mathbf{q},t ) = \frac{1}{Nc_{\text{C}}} \sum\limits_{j \in N_{\text{C}}} \mathrm{Re}\left[F_{jj}(\mathbf{q},t)\right]
 
 so the summation run over all carbon atoms and the total is a weight sum
 of all partial components
@@ -72,7 +71,7 @@ partial coherent intermediate scattering function is
 .. math::
    :label: moleculepartial1
 
-   F_{\text{coh},\text{HO}}^{[\text{EtOH}][\text{H2O}]}{(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\text{H}}^{\text{EtOH}}c_{\text{O}}^{\text{H2O}}}}} \sum\limits_{j \in (\text{EtOH}\, \cap\, \text{H})} \sum\limits_{k \in (\text{H2O}\, \cap\, \text{O})} \mathrm{Re}\left[F_{jk}(\mathbf{q},t)\right]
+   F_{\text{coh},\text{HO}}^{[\text{EtOH}][\text{H2O}]}{(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\text{H}}^{\text{EtOH}}c_{\text{O}}^{\text{H2O}}}}} \sum\limits_{j \in N^{\text{EtOH}}_{\text{H}}} \sum\limits_{k \in N^{\text{H2O}}_{\text{O}}} \mathrm{Re}\left[F_{jk}(\mathbf{q},t)\right]
 
 where :math:`c_{\text{H}}^{\text{EtOH}} = N_{\text{H}}^{\text{EtOH}} / N` and
 :math:`c_{\text{O}}^{\text{H2O}} = N_{\text{O}}^{\text{H2O}} / N`. Here,
@@ -85,12 +84,12 @@ proportional to the weighted sum of the partial terms
 .. math::
    :label: moleculepartial2
 
-   \sqrt{c_{\text{EtOH}} c_{\text{H2O}}}F_{\text{coh}}^{[\text{EtOH}][\text{H2O}]}(\mathbf{q},t) =  &W_{\text{CH}}^{[\text{EtOH}][\text{H2O}]} F_{\text{coh},\text{CH}}^{[\text{EtOH}][\text{H2O}]}(\mathbf{q},t) \\\\
+   \sqrt{c^{\text{EtOH}} c^{\text{H2O}}}F_{\text{coh}}^{[\text{EtOH}][\text{H2O}]}(\mathbf{q},t) =  &W_{\text{CH}}^{[\text{EtOH}][\text{H2O}]} F_{\text{coh},\text{CH}}^{[\text{EtOH}][\text{H2O}]}(\mathbf{q},t) \\\\
     &+ W_{\text{CO}}^{[\text{EtOH}][\text{H2O}]} F_{\text{coh},\text{CO}}^{[\text{EtOH}][\text{H2O}]}(\mathbf{q},t) + \cdots
 
-where :math:`c_{\text{EtOH}} = N_{\text{EtOH}} / N` and
-:math:`c_{\text{H2O}} = N_{\text{H2O}} / N`. Here, :math:`N_{\text{EtOH}}`
-and :math:`N_{\text{H2O}}` are the total number of atoms in ethanol and
+where :math:`c^{\text{EtOH}} = N^{\text{EtOH}} / N` and
+:math:`c^{\text{H2O}} = N^{\text{H2O}} / N`. Here, :math:`N^{\text{EtOH}}`
+and :math:`N^{\text{H2O}}` are the total number of atoms in ethanol and
 water respectively. For coherent scattering lengths
 
 .. math::
@@ -118,7 +117,7 @@ carbon atoms is
 .. math::
    :label: moleculepartial5
 
-   F_{\text{inc},\text{C}}^{\text{EtOH}}(\mathbf{q},t ) = \frac{1}{Nc_{\text{C}}^{\text{EtOH}}} \sum\limits_{j \in (\text{EtOH}\, \cap \, \text{C})} \mathrm{Re}\left[F_{jj}(\mathbf{q},t)\right]
+   F_{\text{inc},\text{C}}^{\text{EtOH}}(\mathbf{q},t ) = \frac{1}{Nc_{\text{C}}^{\text{EtOH}}} \sum\limits_{j \in N^{\text{EtOH}}_{\text{C}}} \mathrm{Re}\left[F_{jj}(\mathbf{q},t)\right]
 
 and the molecular incoherent intermediate scattering functions for ethanol
 is
@@ -172,14 +171,14 @@ the RMSD of water is
 .. math::
     :label: RMSDPart1
 
-    \text{RMSD}_{\text{H2O}}(t) = \sqrt{ \frac{1}{Nc_{\text{H2O}}} \sum\limits_{j \in \text{H2O}} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }
+    \text{RMSD}^{\text{H2O}}(t) = \sqrt{ \frac{1}{Nc^{\text{H2O}}} \sum\limits_{j \in N^{\text{H2O}}} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }
 
 and RMSD of the hydrogen atoms in water is
 
 .. math::
     :label: RMSDPart2
 
-    \text{RMSD}^{\text{H2O}}_{\text{H}}(t) = \sqrt{ \frac{1}{Nc^{\text{H2O}}_{\text{H}}} \sum\limits_{j \in (\text{H}\, \cap \, \text{H2O})} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }.
+    \text{RMSD}^{\text{H2O}}_{\text{H}}(t) = \sqrt{ \frac{1}{Nc^{\text{H2O}}_{\text{H}}} \sum\limits_{j \in N_{\text{H}}^{\text{H2O}}} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }.
 
 
 .. _grouping-rmsf:

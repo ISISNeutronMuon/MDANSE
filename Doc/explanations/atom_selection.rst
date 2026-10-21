@@ -286,12 +286,12 @@ with selection is
 .. math::
    :label: selection1
 
-   F_{\text{coh},\alpha\beta}(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\alpha\, \cap\, s}c_{\beta\, \cap\, s}}} \sum\limits_{j \in (\alpha\, \cap\, s)} \sum\limits_{k \in (\beta\, \cap\, s)} \mathrm{Re}\left[ F_{jk}{(\mathbf{q},t)} \right]
+   F_{\text{coh},\alpha\beta}^{s}(\mathbf{q},t) =  \frac{1}{N \sqrt{c_{\alpha}^{s}c_{\beta}^{s}}} \sum\limits_{j \in N_{\alpha}^{s}} \sum\limits_{k \in N_{\beta}^{s}} \mathrm{Re}\left[ F_{jk}{(\mathbf{q},t)} \right]
 
 .. math::
    :label: selection2
 
-   F_{\text{inc},\alpha}(\mathbf{q},t ) = \frac{1}{N c_{\alpha\, \cap\, s}} \sum\limits_{j \in (\alpha\, \cap\, s)} \mathrm{Re}\left[ F_{jj}{(\mathbf{q},t)} \right]
+   F_{\text{inc},\alpha}^{s}(\mathbf{q},t ) = \frac{1}{N c_{\alpha}^{s}} \sum\limits_{j \in N_{\alpha}^{s}} \mathrm{Re}\left[ F_{jj}{(\mathbf{q},t)} \right]
 
 .. math::
    :label: atompartial2_1
@@ -300,21 +300,21 @@ with selection is
 
 
 where :math:`N` is the total number of all atoms,
-:math:`c_{\alpha\, \cap\, s} = N_{\alpha\, \cap\, s} / N`, and :math:`N_{\alpha\, \cap\, s}`
+:math:`c_{\alpha}^{s} = N_{\alpha}^{s} / N`, and :math:`N_{\alpha}^{s}`
 is the total number of :math:`\alpha` atoms in the selection. With selection,
 the DCSF and DISF weights are
 
 .. math::
    :label: selection4
 
-   W_{\alpha\beta} = \left[2 - \delta_{\alpha\beta}\right]\frac{\sqrt{c_{\alpha\, \cap\, s}c_{\beta\, \cap\, s}}\ \mathrm{Re} \left[ b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta}\right]}{\sum_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}}
+   W_{\alpha\beta}^{s} = \left[2 - \delta_{\alpha\beta}\right]\frac{\sqrt{c_{\alpha}^{s}c_{\beta}^{s}}\ \mathrm{Re} \left[ b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta}\right]}{\sum\limits_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}}
 
 and
 
 .. math::
    :label: selection5
 
-   W_{\alpha} = \frac{c_{\alpha\, \cap\, s} \vert b_{\mathrm{inc},\alpha} \vert^2}{\sum_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2}
+   W_{\alpha}^{s} = \frac{c_{\alpha}^{s} \vert b_{\mathrm{inc},\alpha} \vert^2}{\sum\limits_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2}
 
 so that the normalisation factors on the weights do not depend on the selection.
 The total DCSF and DISF results are a weighted sum of the partial terms
@@ -322,7 +322,7 @@ The total DCSF and DISF results are a weighted sum of the partial terms
 .. math::
    :label: selection3
 
-    F_{\text{coh}}(\mathbf{q},t) = \frac{N}{N_{s}} \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{coh},\alpha\beta}(\mathbf{q},t), \quad  F_{\text{inc}}(\mathbf{q},t) = \frac{N}{N_{s}} \sum_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t).
+    F_{\text{coh}}(\mathbf{q},t) = \frac{N}{N_{s}} \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha} W_{\alpha\beta} F_{\text{coh},\alpha\beta}(\mathbf{q},t), \quad  F_{\text{inc}}(\mathbf{q},t) = \frac{N}{N_{s}} \sum\limits_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t).
 
 where :math:`N_s` is the total number of selected atoms. This way the
 total results are equivalent to the a system which only contains those
@@ -333,4 +333,4 @@ of the total results with all atoms selected
 .. math::
    :label: selection6
 
-    \mathcal{F}_{\text{coh}}(\mathbf{q},t) = \frac{N_{s}}{N} F_{\text{coh}}(\mathbf{q},t), \qquad  \mathcal{F}_{\text{inc}}(\mathbf{q},t) = \frac{N_{s}}{N} \sum_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t).
+    \mathcal{F}_{\text{coh}}(\mathbf{q},t) = \frac{N_{s}}{N} F_{\text{coh}}(\mathbf{q},t), \qquad  \mathcal{F}_{\text{inc}}(\mathbf{q},t) = \frac{N_{s}}{N} \sum\limits_{\alpha} W_{\alpha} F_{\text{inc},\alpha}(\mathbf{q},t).

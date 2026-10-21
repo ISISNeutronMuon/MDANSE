@@ -1,4 +1,3 @@
-
 .. _correlation-frames:
 
 Time Series
@@ -52,7 +51,7 @@ function
 .. math::
    :label: fourier1
 
-   P_{AB}\left(m \Delta \omega \right) = \frac{\Delta t}{2 \pi}\sum_{n=-(n_{\mathrm{c}}-1)}^{n_{\mathrm{c}}-1}
+   P_{AB}\left(m \Delta \omega \right) = \frac{\Delta t}{2 \pi}\sum\limits_{n=-(n_{\mathrm{c}}-1)}^{n_{\mathrm{c}}-1}
    \exp\left[- 2 \pi i \frac{n \Delta t }{2n_{\mathrm{c}} - 1} m \Delta \omega \right] \frac{W(n \Delta t)}{W(0)} C_{AB}( \vert n \Delta t \vert )
 
 here :math:`m = -(n_{\mathrm{c}}-1), \ldots, n_{\mathrm{c}}-1` and :math:`\Delta \omega` is the
@@ -67,7 +66,7 @@ function in the time domain via a Fourier transform
 .. math::
    :label: fourier2
 
-   W(n \Delta t) = \frac{1}{2n_{\mathrm{c}} - 1} \frac{1}{ \Delta t} \sum_{m=-(n_{\mathrm{c}}-1)}^{n_{\mathrm{c}}-1} \exp\left[ 2 \pi i \frac{m \Delta \omega}{2n_{\mathrm{c}} - 1} n \Delta t \right] W(m \Delta \omega)
+   W(n \Delta t) = \frac{1}{2n_{\mathrm{c}} - 1} \frac{1}{ \Delta t} \sum\limits_{m=-(n_{\mathrm{c}}-1)}^{n_{\mathrm{c}}-1} \exp\left[ 2 \pi i \frac{m \Delta \omega}{2n_{\mathrm{c}} - 1} n \Delta t \right] W(m \Delta \omega)
 
 where :math:`n = -(n_{\mathrm{c}}-1), \ldots, n_{\mathrm{c}}-1`.
 
