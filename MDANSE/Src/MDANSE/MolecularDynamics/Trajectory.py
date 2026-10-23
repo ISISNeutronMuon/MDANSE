@@ -14,7 +14,6 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
-from MDANSE.util_types import FloatArray
 
 import copy
 import html
@@ -37,21 +36,21 @@ from more_itertools import always_iterable, first
 
 from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.Databases import str_to_num
+
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
-from MDANSE.IO.IOUtils import UCEnum, summarise_array
+from MDANSE.IO.IOUtils import UCEnum, summarise_array, str_to_num
 from MDANSE.Trajectory.FileTrajBase import TrajDataArray
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
+from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-    from MDANSE.Chemistry.Databases import AtomsDatabase
+    from MDANSE.Chemistry.AtomsDatabase import AtomsDatabase
     from MDANSE.MolecularDynamics.Configuration import _Configuration
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
-
 
 available_formats = {
     "MDANSE": MdanseTrajectory,
@@ -1117,7 +1116,7 @@ class TrajectoryWriter:
         else:
             frame_chunks = 1
             atom_chunks = chunking_limit
-        
+
         self.frame_chunks = min(frame_chunks, self._n_steps)
         self.atom_chunks = min(atom_chunks, self._n_atoms)
 
@@ -1376,7 +1375,7 @@ class TrajectoryWriter:
             constant_charge_dset[:] = new_charge[: self._n_atoms]
             if variable_charge_dset is not None:
                 del self._h5_file[variable_charge_dset.name]
-    
+
     def write_array_fragment(self,
                              data: FloatArray,
                              dataset: str,
@@ -1400,8 +1399,8 @@ class TrajectoryWriter:
                     dtype=self._dtype,)
         dset.attrs["units"] = units.get(dataset, "")
         dset[frame_indices] = data
-        
-    
+
+
     def write_configuration_data(self,
                              data: FloatArray,
                              dataset: str,

@@ -1,7 +1,7 @@
 from contextlib import nullcontext as success
 
 import pytest
-from MDANSE.Chemistry.Databases import AtomsDatabaseError
+from MDANSE.Chemistry.AtomsDatabase import AtomsDatabaseError
 from MDANSE.Framework.AtomMapping.atom_mapping import (
     AtomLabel, check_mapping_valid, fill_remaining_labels,
     get_element_from_mapping, guess_element)

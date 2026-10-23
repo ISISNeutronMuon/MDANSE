@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-from MDANSE.Chemistry.Databases import (
-    AtomsDatabase,
-)
+from MDANSE.Chemistry.AtomsDatabase import AtomsDatabase
 
 ATOMS_DATABASE = AtomsDatabase()
