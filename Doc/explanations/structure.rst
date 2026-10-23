@@ -1,4 +1,3 @@
-
 This section is dealing with specific types of analysis performed by
 MDANSE. If you are not sure where these fit into the general workflow
 of data analysis, please read :ref:`workflow-of-analysis`.
@@ -134,7 +133,7 @@ Mathematically, the PDF can be computed using the following formula:
 .. math::
    :label: pdf1
 
-   g(\mathbf{r}) = \sum_{\alpha}\sum_{\beta \geq \alpha}  W_{\alpha\beta} g_{\alpha\beta}(\mathbf{r}), \qquad g_{\alpha\beta}(\mathbf{r}) = \frac{1}{Nc_{\alpha}c_{\beta}}\frac{1}{\rho} \frac{\mathrm{d} N_{\alpha\beta}(\mathbf{r})}{ \mathrm{d} \mathbf{r}}
+   g(\mathbf{r}) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha}  W_{\alpha\beta} g_{\alpha\beta}(\mathbf{r}), \qquad g_{\alpha\beta}(\mathbf{r}) = \frac{1}{Nc_{\alpha}c_{\beta}}\frac{1}{\rho} \frac{\mathrm{d} N_{\alpha\beta}(\mathbf{r})}{ \mathrm{d} \mathbf{r}}
 
 where :math:`g_{\alpha\beta}(\mathbf{r})` is the partial PDF for :math:`\alpha`
 and :math:`\beta` atom-types, :math:`N(\mathbf{r})`
@@ -147,7 +146,7 @@ For isotropic system we can define the PDF as a function of distance
 .. math::
    :label: pdf2
 
-   g(r) = \sum_{\alpha}\sum_{\beta \geq \alpha}  W_{\alpha\beta} g_{\alpha\beta}(r), \qquad g_{\alpha\beta}(r) = \frac{1}{Nc_{\alpha}c_{\beta}} \frac{1}{\rho} \frac{1}{4 \pi r^2}  \frac{\mathrm{d} N(r)}{ \mathrm{d} r}
+   g(r) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha}  W_{\alpha\beta} g_{\alpha\beta}(r), \qquad g_{\alpha\beta}(r) = \frac{1}{Nc_{\alpha}c_{\beta}} \frac{1}{\rho} \frac{1}{4 \pi r^2}  \frac{\mathrm{d} N(r)}{ \mathrm{d} r}
 
 where :math:`N(r)` is the average number of particles in the
 volume :math:`4 \pi r^2 \mathrm{d} r` at a distance :math:`r`
@@ -200,7 +199,7 @@ calculated relative to the systems centre of mass. It can be defined as
 .. math::
    :label: rog1
 
-    \mathrm{ROG}(t) = \sqrt{ \frac{\sum_{j}m_{j} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{\mathrm{COM}}(t) \vert^{2}}{\sum_{j} m_{j}} }
+    \mathrm{ROG}(t) = \sqrt{ \frac{\sum\limits_{j}m_{j} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{\mathrm{COM}}(t) \vert^{2}}{\sum\limits_{j} m_{j}} }
 
 where :math:`m_j` is the mass and :math:`\mathbf{r}_{j}(t)` are the positions
 of the atom :math:`j`, :math:`\mathbf{r}_{\mathrm{COM}}(t)` is the centre of mass of

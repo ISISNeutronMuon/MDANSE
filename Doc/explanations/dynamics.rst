@@ -1,4 +1,3 @@
-
 This section is dealing with specific types of analysis performed by
 MDANSE. If you are not sure where these fit into the general workflow
 of data analysis, please read :ref:`workflow-of-analysis`.
@@ -35,7 +34,7 @@ the Fourier transform of the time correlation between the :math:`x` and
 .. math::
    :label: dos1
 
-   C_{v_x v_y\alpha\alpha}(\omega) = \frac{1}{Nc_{\alpha}} \sum_{j \in \alpha} \frac{1}{2\pi} \int\mathrm{d}t \, \left\langle v_{x,j}\left( 0 \right)\cdot v_{y,j}\left( t \right) \right\rangle e^{-i\omega t}
+   C_{v_x v_y\alpha\alpha}(\omega) = \frac{1}{Nc_{\alpha}} \sum\limits_{j \in N_{\alpha}} \frac{1}{2\pi} \int\mathrm{d}t \, \left\langle v_{x,j}\left( 0 \right)\cdot v_{y,j}\left( t \right) \right\rangle e^{-i\omega t}
 
 where :math:`C_{v_x v_y\alpha\alpha}\left( \omega \right)`
 is the Fourier transform of the of the velocity correlation function average
@@ -55,7 +54,7 @@ vibrational DOS
 .. math::
    :label: dos3
 
-   C_{\mathbf{vv}\alpha\alpha}(\omega) = \frac{1}{Nc_{\alpha}} \sum_{j \in \alpha} \frac{1}{6\pi} \int\mathrm{d}t \, \left\langle \mathbf{v}_{j}\left( 0 \right)\cdot \mathbf{v}_{j}\left( t \right) \right\rangle e^{-i\omega t}.
+   C_{\mathbf{vv}\alpha\alpha}(\omega) = \frac{1}{Nc_{\alpha}} \sum\limits_{j \in N_{\alpha}} \frac{1}{6\pi} \int\mathrm{d}t \, \left\langle \mathbf{v}_{j}\left( 0 \right)\cdot \mathbf{v}_{j}\left( t \right) \right\rangle e^{-i\omega t}.
 
 where :math:`W_{\alpha}` is the weighting factor of atom type :math:`\alpha`.
 Since the DOS is computed from the unnormalized velocity autocorrelation function,
@@ -150,7 +149,7 @@ velocity autocorrelation function. One can show (see e.g. [Ref11]_) that
 
 .. math::
    :label: msd4
-   
+
    \mathbf{d}_{j}{(t) = {\int\limits_{0}^{t}{\mathrm{d}t' \, \mathbf{v}_{j}(t')}}} \qquad \text{and} \qquad \mathrm{\Delta}_{j}^{2}{(t) = 6}{\int\limits_{0}^{t}{\mathrm{d}t' \, ( t - t' )C_{\mathbf{vv}jj}(t')}}
 
 where :math:`C_{\mathbf{vv}jj}(t)` is the velocity autocorrelation function of the particle :math:`j`.
@@ -188,7 +187,7 @@ diagonal terms of the PCF) of atom type :math:`\alpha` is
 .. math::
    :label: pcf1
 
-   \mathrm{PACF}_{\alpha}(t) = \frac{1}{3}\frac{1}{Nc_{\alpha}} \sum_{j \in \alpha}  \left\langle {\Delta \mathbf{r}_{j}(0)\cdot \Delta  \mathbf{r}_{j}(t)} \right\rangle
+   \mathrm{PACF}_{\alpha}(t) = \frac{1}{3}\frac{1}{Nc_{\alpha}} \sum\limits_{j \in N_{\alpha}}  \left\langle {\Delta \mathbf{r}_{j}(0)\cdot \Delta  \mathbf{r}_{j}(t)} \right\rangle
 
 where
 
@@ -252,7 +251,7 @@ where :math:`P_{l}[x]` is the Legendre polynomial of the order :math:`l`.
 
 Root Mean Square Deviation
 ''''''''''''''''''''''''''
-                         
+
 The root mean-square deviation (RMSD) is perhaps the most popular estimator
 of structural similarity. It quantifies differences between two structures by
 measuring the root mean-square of atomic position differences, revealing
@@ -266,7 +265,7 @@ The RMSD for the atom of type :math:`\alpha` can be defined as
 .. math::
    :label: rmsd1
 
-   \mathrm{RMSD}_{\alpha}(t) = \sqrt{ \frac{1}{Nc_{\alpha}} \sum\limits_{j \in \alpha} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }
+   \mathrm{RMSD}_{\alpha}(t) = \sqrt{ \frac{1}{Nc_{\alpha}} \sum\limits_{j \in N_{\alpha}} \vert \mathbf{r}_{j}(t) - \mathbf{r}_{j}(t_{\mathrm{ref}}) \vert^{2} }
 
 where :math:`\mathbf{r}_{j}(t)` and :math:`\mathbf{r}_{j}(t_{\mathrm{ref}})`
 are respectively the position of atom :math:`j` at time :math:`t`
@@ -312,12 +311,12 @@ written as a weighted sum of partial terms which are divided by the density
 .. math::
    :label: vanhove1
 
-    G(\mathbf{r}, t) = \sum_{\alpha}\sum_{\beta \geq \alpha} W_{\alpha\beta}G_{\alpha\beta}(\mathbf{r}, t),
+    G(\mathbf{r}, t) = \sum\limits_{\alpha}\sum\limits_{\beta \geq \alpha} W_{\alpha\beta}G_{\alpha\beta}(\mathbf{r}, t),
 
 .. math::
    :label: vanhove2
 
-    G_{\alpha\beta}(\mathbf{r}, t) = \frac{1}{Nc_{\alpha}c_{\beta}}  \frac{1}{\rho} \sum_{j \in \alpha} \sum_{k \in \beta} \left\langle \delta [\mathbf{r} - \mathbf{r}_{k}(t) + \mathbf{r}_{j}(0)] \right\rangle.
+    G_{\alpha\beta}(\mathbf{r}, t) = \frac{1}{Nc_{\alpha}c_{\beta}}  \frac{1}{\rho} \sum\limits_{j \in N_{\alpha}} \sum\limits_{k \in N_{\beta}} \left\langle \delta [\mathbf{r} - \mathbf{r}_{k}(t) + \mathbf{r}_{j}(0)] \right\rangle.
 
 The van Hove function is related to the intermediate scattering
 function via a Fourier transform and the dynamic structure factor
@@ -338,12 +337,12 @@ and can be split into distinct and self parts where
 .. math::
    :label: vanhove5
 
-    G_{\alpha\beta}^{\mathrm{d}}(\mathbf{r}, t) = \frac{1}{Nc_{\alpha}c_{\beta}}  \frac{1}{\rho} \sum_{j \in \alpha} \sum_{\substack{k \in \beta \\ k \neq j}} \left\langle \delta [\mathbf{r} - \mathbf{r}_{k}(t) + \mathbf{r}_{j}(0)] \right\rangle,
+    G_{\alpha\beta}^{\mathrm{d}}(\mathbf{r}, t) = \frac{1}{Nc_{\alpha}c_{\beta}}  \frac{1}{\rho} \sum\limits_{j \in N_{\alpha}} \sum\limits_{\substack{k \in N_{\beta} \\ k \neq j}} \left\langle \delta [\mathbf{r} - \mathbf{r}_{k}(t) + \mathbf{r}_{j}(0)] \right\rangle,
 
 .. math::
    :label: vanhove6
 
-    G^{\mathrm{s}}_{\alpha}(\mathbf{r}, t) = \frac{1}{Nc_{\alpha}}  \frac{1}{\rho} \sum_{j \in \alpha} \left\langle \delta [\mathbf{r} - \mathbf{r}_{j}(t) + \mathbf{r}_{j}(0)] \right\rangle.
+    G^{\mathrm{s}}_{\alpha}(\mathbf{r}, t) = \frac{1}{Nc_{\alpha}}  \frac{1}{\rho} \sum\limits_{j \in N_{\alpha}} \left\langle \delta [\mathbf{r} - \mathbf{r}_{j}(t) + \mathbf{r}_{j}(0)] \right\rangle.
 
 At :math:`t = 0` distinct-part of the van Hove function reduces to the
 pair distribution function while the self-part of the van Hove function
@@ -452,14 +451,14 @@ the projected VACF
 .. math::
    :label: vacf5
 
-   {C_{\mathbf{vv}\alpha\alpha}{(\hat{\mathbf{q}}, \omega) = \frac{1}{2\pi}} \frac{1}{Nc_{\alpha}}\sum_{j \in \alpha} {\int\mathrm{d} t \,} C_{\mathbf{vv}jj}(\hat{\mathbf{q}}, t) e^{-i \omega t}}.
+   {C_{\mathbf{vv}\alpha\alpha}{(\hat{\mathbf{q}}, \omega) = \frac{1}{2\pi}} \frac{1}{Nc_{\alpha}}\sum\limits_{j \in N_{\alpha}} {\int\mathrm{d} t \,} C_{\mathbf{vv}jj}(\hat{\mathbf{q}}, t) e^{-i \omega t}}.
 
 Provided the VACF decays to zero at long time, the function may be
 integrated mathematically to calculate the diffusion coefficient :math:`D`, as in:
 
-.. math:: 
+.. math::
    :label: vacf6
-   
+
    D = \frac{1}{3}\int\limits_{0}^{\infty}\mathrm{d} t \, \langle \mathbf{v}(0) \cdot \mathbf{v}(t) \rangle.
 
 This is a special case of a more general relationship between the VACF and the

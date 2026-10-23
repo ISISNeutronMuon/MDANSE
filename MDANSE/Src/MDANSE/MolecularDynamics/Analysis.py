@@ -76,7 +76,7 @@ def mean_square_fluctuation(
 ) -> float:
     """Computes the mean-square fluctuation, or the root-mean-square fluctuation if root is set to True. The following
     equation is used:
-    .. math:: MSF = \\frac{\\sum_{i=0} ^{n} \\sum_{x=1} ^{3}(coords_{i,x} - \\frac{\\sum_{j=0} ^{n}coords_{j,x}}{n})^2}{n}
+    .. math:: MSF = \\frac{\\sum\\limits_{i=0} ^{n} \\sum\\limits_{x=1} ^{3}(coords_{i,x} - \\frac{\\sum\\limits_{j=0} ^{n}coords_{j,x}}{n})^2}{n}
     where n is the number of particles in the system and coords are is the array of coordinates.
 
     Parameters
@@ -110,7 +110,7 @@ def radius_of_gyration(
     """Computes the radius of gyration for a set of coordinates and their corresponding masses. If no masses are provided,
     all masses are set to 1, in which case the ROG is equivalent to the centre of gravity. The following equation is
     used:
-    .. math:: ROG = \\frac{\\sum_{i=0} ^{n}((\\sum_{x=1} ^{3} (coords_{i,x} - com_x)^2) * m_i)}{\\sum_{i=0} ^{n} m_i}
+    .. math:: ROG = \\frac{\\sum\\limits_{i=0} ^{n}((\\sum\\limits_{x=1} ^{3} (coords_{i,x} - com_x)^2) * m_i)}{\\sum\\limits_{i=0} ^{n} m_i}
     where n is the number of particles (i.e. the length of the arrays), x is the axis (x, y, or z), coords is the
     provided coordinate array, com are the coordinates of the centre of mass as calculated by
     :func: `MDANSE.Mathematics.Geometry.center_of_mass`, and m is the provided array of masses.
