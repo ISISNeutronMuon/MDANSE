@@ -447,6 +447,7 @@ class SelectionHelper(QDialog):
         or JSON text files.
         """
         self.selection_model.finalise_manual_selection()
+        self.view_3d.stop_animation()
         fname = QFileDialog.getSaveFileName(
             self,
             "Save current selection to a JSON file",
