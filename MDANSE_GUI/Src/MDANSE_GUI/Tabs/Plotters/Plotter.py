@@ -39,7 +39,7 @@ from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator, Iterator
+    from collections.abc import Generator, Iterator
 
     from matplotlib.axes import Axes
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar

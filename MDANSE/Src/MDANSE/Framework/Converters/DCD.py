@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 import numpy as np
 
 from MDANSE.Framework.Converters.Converter import Converter

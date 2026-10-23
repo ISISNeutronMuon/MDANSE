@@ -26,7 +26,6 @@ import numpy.typing as npt
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.TrajectoryUtils import (
-    atomic_trajectory,
     atomic_trajectory_many,
 )
 from MDANSE.MolecularDynamics.UnitCell import (

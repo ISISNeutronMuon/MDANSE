@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-import html
 import logging
 from logging import Handler, LogRecord
 from typing import TYPE_CHECKING, ClassVar, Self

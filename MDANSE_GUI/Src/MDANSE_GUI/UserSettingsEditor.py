@@ -17,10 +17,9 @@ from __future__ import annotations
 
 from contextlib import suppress
 
-from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
+from qtpy.QtCore import QSortFilterProxyModel, Qt, Slot
 from qtpy.QtWidgets import (
     QApplication,
-    QComboBox,
     QDialog,
     QMenu,
     QPushButton,
@@ -28,7 +27,6 @@ from qtpy.QtWidgets import (
     QVBoxLayout,
 )
 
-from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session
 
 

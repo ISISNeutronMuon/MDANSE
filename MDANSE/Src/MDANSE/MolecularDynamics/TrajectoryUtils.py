@@ -20,7 +20,6 @@ from itertools import pairwise
 from typing import TYPE_CHECKING
 
 import numpy as np
-import numpy.typing as npt
 from more_itertools import chunked_even, flatten
 
 from MDANSE.util_types import FloatArray

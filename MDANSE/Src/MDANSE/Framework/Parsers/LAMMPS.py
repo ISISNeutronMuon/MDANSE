@@ -20,7 +20,7 @@ from collections import defaultdict
 from enum import auto
 from itertools import count
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal
 
 import numpy as np
 from more_itertools import consume as drop
