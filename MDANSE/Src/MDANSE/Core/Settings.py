@@ -605,8 +605,8 @@ class RecentData(Setting[tuple[T, ...]]):
         )
         Settings._parameters.add(value)
 
-    def __set__(self, obj: object, value: Sequence[T] | T) -> None:
-        if not isinstance(value, str) and isinstance(value, Sequence):
+    def __set__(self, obj: object, value: list[T] | T) -> None:
+        if isinstance(value, list):
             new_val = tuple(value)
         else:
             lc = list(self.__get__(obj))

@@ -34,6 +34,7 @@ from qtpy.QtWidgets import (
 )
 from rdkit.Chem import MolFromSmarts
 
+from MDANSE.Core.Settings import RecentData
 from MDANSE_GUI.InputWidgets.CheckableComboBox import CheckableComboBox
 
 if TYPE_CHECKING:
@@ -468,6 +469,10 @@ class LabelSelection(BasicSelectionWidget):
 class PatternSelection(BasicSelectionWidget):
     """GUI frontend for select_pattern."""
 
+    custom_smarts = RecentData[tuple[str, str]](
+        group="smarts", comment="Custom smarts strings"
+    )
+
     def __init__(
         self,
         parent=None,
@@ -493,22 +498,35 @@ class PatternSelection(BasicSelectionWidget):
             "thiol": "[#16X2H1][H]",
             "unfused benzene": "[cR1r6]([H]).[cR1r6]",
             "water": "[OX2H2]([H])[H]",
+            **dict(self.custom_smarts),
         }
         super().__init__(parent, widget_label=widget_label)
+        self.commit_button.clicked.connect(self._store_smarts)
 
     def add_specific_widgets(self):
         """Create the pattern text field."""
         layout = self.layout()
+
         layout.addWidget(QLabel("Pick a group"))
         self.selection_field = QComboBox(self)
         layout.addWidget(self.selection_field)
         self.selection_field.addItems(self.pattern_dictionary.keys())
+        self.selection_field.setEditable(True)
+
         layout.addWidget(QLabel("pattern:"))
         self.input_field = QLineEdit(first(self.pattern_dictionary.values()), self)
         self.input_field.setPlaceholderText("can be edited")
+
         layout.addWidget(self.input_field)
         self.selection_field.currentTextChanged.connect(self.update_string)
         self.input_field.textChanged.connect(self.check_inputs)
+
+    @Slot()
+    def _store_smarts(self) -> None:
+        key, val = self.selection_field.currentText(), self.input_field.text()
+        self.custom_smarts = (key, val)
+        self.pattern_dictionary[key] = val
+        self.selection_field.addItem(key)
 
     @Slot()
     def check_inputs(self):
@@ -525,6 +543,8 @@ class PatternSelection(BasicSelectionWidget):
         """Fill the input field with pre-defined text."""
         if key_string in self.pattern_dictionary:
             self.input_field.setText(self.pattern_dictionary[key_string])
+        else:
+            self.input_field.setText("")
 
     def parameter_dictionary(self):
         """Collect and return selection function parameters."""
