@@ -591,3 +591,23 @@ def str_to_num(numstr: SupportsComplex) -> float | complex:
     if abs(return_value.imag) < TOLERANCE_IMAG:
         return_value = return_value.real
     return return_value
+
+
+def ordinal_suffix(index: int) -> str:
+    """Return the text ordinal suffix for the input number.
+
+    For numbers ending with 1 is will return 'st' for 'first',
+    except for numbers ending with 11 where it will be 'th' for 'eleventh'.
+    The same reasoning follows for 2nd and 3rd.
+    """
+    if 10 <= index % 100 <= 20:
+        return "th"
+    match index % 10:
+        case 1:
+            return "st"
+        case 2:
+            return "nd"
+        case 3:
+            return "rd"
+        case _:
+            return "th"

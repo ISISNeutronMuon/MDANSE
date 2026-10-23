@@ -18,15 +18,8 @@ from __future__ import annotations
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QLabel, QSpinBox
 
+from MDANSE.IO.IOUtils import ordinal_suffix
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-
-suffix_dict = {
-    "1": "st order",
-    "2": "nd order",
-    "3": "rd order",
-    "4": "th order",
-    "5": "th order",
-}
 
 
 class DerivativeOrderWidget(WidgetBase):
@@ -75,8 +68,7 @@ class DerivativeOrderWidget(WidgetBase):
 
     @Slot(int)
     def adjust_numerator_and_update(self, order: int):
-        text_order = str(order)
-        new_numerator = suffix_dict.get(text_order[-1])
+        new_numerator = ordinal_suffix(order) + " order"
         self.numerator.setText(new_numerator)
         self.updateValue()
 
