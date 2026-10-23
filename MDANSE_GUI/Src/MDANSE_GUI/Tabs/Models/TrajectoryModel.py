@@ -33,9 +33,9 @@ from qtpy.QtCore import (
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Core.Platform import PLATFORM
+from MDANSE.Core.Settings import RecentFiles
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import Trajectory, check_hdf5_driver
-from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
 
 class LoadStatus(Enum):
@@ -97,9 +97,7 @@ class TrajectoryModel(QStandardItemModel):
     """Like GeneralModel, but should implement trajectory
     loading in the background."""
 
-    DEFAULT_JSON_FILENAME = "recent_trajectory_file.json"
-    MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
-    PLACEHOLDER_STRING = "Recently used trajectory files (.mdt, .h5)"
+    recent_files = RecentFiles("Recently used trajectory files (.mdt, .h5)")
 
     error = Signal(str)
     all_elements = Signal(object)
@@ -116,16 +114,6 @@ class TrajectoryModel(QStandardItemModel):
         self._loading_threads = {}
         self._next_number = itertools.count()
         self.running_loaders = 0
-
-        self.recent_files = RecentFiles(
-            PLATFORM.application_directory / self.DEFAULT_JSON_FILENAME,
-            self.MAX_NUMBER_RECENT_FILES,
-            self.PLACEHOLDER_STRING,
-        )
-
-    @property
-    def recent_files_path(self) -> Path:
-        return self.recent_files.json_file_path
 
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:
@@ -176,7 +164,7 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_status[index] = LoadStatus.READY
         self.finished_loading.emit(index)
         filename = self._trajectory_paths[index]
-        self.recent_files.store_recently_used_filename(str(filename))
+        self.recent_files = str(filename)
         self._loading_threads[index].quit()
         self._loading_threads[index].wait()
         self.running_loaders -= 1
