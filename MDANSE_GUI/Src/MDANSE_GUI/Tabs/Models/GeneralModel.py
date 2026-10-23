@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from typing import Any
 
 from qtpy.QtCore import QModelIndex, QMutex, QObject, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
@@ -66,7 +67,7 @@ class GeneralModel(QStandardItemModel):
         self.summarise_items()
         return retval
 
-    def summarise_items(self):
+    def get_items(self) -> list[list[str | Any]]:
         result = []
         self.mutex.lock()
         for nrow in range(self.rowCount()):
@@ -74,6 +75,10 @@ class GeneralModel(QStandardItemModel):
             item = self.itemFromIndex(index)
             result.append([item.text(), item.data()])
         self.mutex.unlock()
+        return result
+
+    def summarise_items(self) -> None:
+        result = self.get_items()
         self.all_elements.emit(result)
 
     def removeRow(self, row: int, parent: QModelIndex = None):
