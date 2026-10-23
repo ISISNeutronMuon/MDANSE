@@ -18,18 +18,17 @@ from __future__ import annotations
 from abc import abstractmethod
 from pathlib import Path
 from traceback import format_exc
-from typing import TypeVar
+from typing import Self, TypeVar
 
 import h5py
 from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Core.Platform import PLATFORM
+from MDANSE.Core.Settings import RecentFiles
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
-Self = TypeVar("Self", bound="BasicPlotDataItem")
 EXCLUDE = {"metadata"}
 
 
@@ -165,9 +164,7 @@ class PlotDataModel(QStandardItemModel):
     It stores elements and emits them to the ItemVisualiser.
     """
 
-    DEFAULT_JSON_FILENAME = "recent_plot_selection_file.json"
-    MAX_NUMBER_RECENT_FILES = 10  # maximum number of recent files to store
-    PLACEHOLDER_STRING = "Recently used result files (.mda)"
+    recent_files = RecentFiles("Recently used result files (.mda)")
 
     error = Signal(str)
     all_elements = Signal(object)
@@ -178,16 +175,6 @@ class PlotDataModel(QStandardItemModel):
         self.mutex = QMutex()
         self._nodes = {}
         self._next_number = 0
-
-        self.recent_files = RecentFiles(
-            PLATFORM.application_directory / self.DEFAULT_JSON_FILENAME,
-            self.MAX_NUMBER_RECENT_FILES,
-            self.PLACEHOLDER_STRING,
-        )
-
-    @property
-    def recent_files_path(self) -> Path:
-        return self.recent_files.json_file_path
 
     @Slot(str)
     def add_file(self, filename: str):
@@ -211,7 +198,7 @@ class PlotDataModel(QStandardItemModel):
             self.appendRow(new_item)
             new_item.populate(new_datafile._file)
             self.finished_loading.emit(self._next_number)
-            self.recent_files.store_recently_used_filename(filename)
+            self.recent_files = filename
             self._next_number += 1
 
     def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:

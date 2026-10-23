@@ -71,7 +71,7 @@ from MDANSE_GUI.Widgets.NotificationTabWidget import NotificationTabWidget
 from MDANSE_GUI.Widgets.StyleDialog import StyleDatabase, StyleDialog
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
 MDANSE_EXAMPLES_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE-Examples")
@@ -90,8 +90,8 @@ class RecentFileAction(QAction):
     def __init__(
         self,
         *args,
-        file_path: str | None = None,
-        external_function: Callable | None = None,
+        file_path: str,
+        external_function: Callable[[str], None],
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -463,8 +463,8 @@ class MDANSEMainWindow(QMainWindow):
     def populate_recent_menu(
         self,
         menu: QMenu,
-        recent_filepath: Path,
-        open_recent_file_function: Callable,
+        recent_files: Sequence[str],
+        open_function: Callable[[str], None],
         placeholder_string: str,
     ):
         """Generic helper for populating 'recent files' menus.
@@ -473,35 +473,28 @@ class MDANSEMainWindow(QMainWindow):
         ----------
         menu : QMenu
             The QMenu to which file loading actions will be added.
-        recent_filepath : Path
-            Path to the JSON file that stores recent items.
-        open_recent_file_function : Callable
+        recent_files : Sequence[str]
+            Recent files.
+        open_function : Callable[[str], None]
             Function to call when an item is clicked.
         placeholder_string : str
             Text to show on an inactive entry if the file list was empty.
 
         """
         menu.clear()
-        filepath = Path(recent_filepath)
 
-        if not filepath.is_file():
+        if not recent_files:
+            action = QAction(placeholder_string, menu)
+            action.setDisabled(True)
+            menu.addAction(action)
             return
 
-        with filepath.open(encoding="utf-8") as file:
-            data = json.load(file)
-
-        if not isinstance(data, list):
-            raise ValueError(f"{filepath} JSON is not a list")
-
-        if len(data) > 1 and placeholder_string in data:
-            data.remove(placeholder_string)
-
-        for file in data[::-1]:
+        for file in recent_files:
             action = RecentFileAction(
                 file,
                 menu,
                 file_path=file,
-                external_function=open_recent_file_function,
+                external_function=open_function,
             )
             menu.addAction(action)
 
@@ -510,9 +503,9 @@ class MDANSEMainWindow(QMainWindow):
         """Populate the recent trajectory files menu in the File menu."""
         self.populate_recent_menu(
             self.recent_trajectory_file_menu,
-            self._trajectory_model.recent_files_path,
+            self._trajectory_model.recent_files,
             self.open_recent_trajectory_file,
-            placeholder_string=self._trajectory_model.PLACEHOLDER_STRING,
+            placeholder_string=TrajectoryModel.recent_files.placeholder,
         )
 
     @Slot()
@@ -526,9 +519,9 @@ class MDANSEMainWindow(QMainWindow):
         plot_data_model: PlotDataModel = self._tabs["Plot Creator"]._model
         self.populate_recent_menu(
             self.recent_plot_selection_file_menu,
-            plot_data_model.recent_files_path,
+            plot_data_model.recent_files,
             self.open_recent_plot_selection_file,
-            placeholder_string=plot_data_model.PLACEHOLDER_STRING,
+            placeholder_string=PlotDataModel.recent_files.placeholder,
         )
 
     @Slot()
