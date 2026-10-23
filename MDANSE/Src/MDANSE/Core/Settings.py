@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import copy
 from collections import ChainMap, UserDict, defaultdict
-from collections.abc import Callable, Generator, Mapping
+from collections.abc import Callable, Generator, Mapping, Sequence
 from contextlib import contextmanager
 from functools import partial
 from pathlib import Path
@@ -580,8 +580,57 @@ class Setting(Generic[T]):
             self._group, self._name, self._default, self._comment, self._visible
         )
 
-    def __set__(self, _obj: object, value: T) -> None:
+    def __set__(self, obj: object, value: T) -> None:
         Settings.set_opt(self._group, self._name, value)
 
     def __delete__(self, _obj: object) -> None:
         Settings.del_opt(self._group, self._name)
+
+
+class RecentData(Setting[tuple[T, ...]]):
+    def __init__(self, group: str, comment: str, max_store: int = 10, **kwargs):
+        self._max_store = max_store
+        super().__init__(
+            (),
+            group=group,
+            comment=comment,
+            visible=False,
+            **kwargs,
+        )
+
+    def __set_name__(self, owner: type, name: str):
+        self._name = owner.__name__
+        value = Option(
+            self._default, self._name, self._group, self._comment, self._visible
+        )
+        Settings._parameters.add(value)
+
+    def __set__(self, obj: object, value: Sequence[T] | T) -> None:
+        if not isinstance(value, str) and isinstance(value, Sequence):
+            new_val = tuple(value)
+        else:
+            lc = list(self.__get__(obj))
+            if value in lc:
+                lc.remove(value)
+
+            new_val = (value, *lc)
+
+        Settings.set_opt(self._group, self._name, new_val[: self._max_store])
+
+
+class RecentFiles(RecentData[str]):
+    def __init__(
+        self,
+        placeholder: str = "Recently used files...",
+        **kwargs,
+    ):
+        self._placeholder = placeholder
+        super().__init__(
+            group="recent_files",
+            comment="Recently used files.",
+            **kwargs,
+        )
+
+    @property
+    def placeholder(self) -> str:
+        return self._placeholder
