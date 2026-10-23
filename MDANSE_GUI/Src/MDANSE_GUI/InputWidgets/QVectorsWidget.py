@@ -39,6 +39,7 @@ from qtpy.QtWidgets import (
 from MDANSE.Framework.Configurators.BooleanConfigurator import BOOL_MAPPING
 from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
 from MDANSE.Framework.QVectors.IQVectors import IQVectors
+from MDANSE.IO.IOUtils import ordinal_suffix
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
@@ -50,26 +51,6 @@ from MDANSE_GUI.Tabs.Views.PlotDataView import (
 )
 from MDANSE_GUI.Tabs.Visualisers.PlotWidget import PlotWidget
 from MDANSE_GUI.Utils import block_signals
-
-
-def numerator_suffix(index: int) -> str:
-    """Return the text numerator suffix for the input number.
-
-    For numbers ending with 1 is will return 'st' for 'first',
-    except for numbers ending with 11 where it will be 'th' for 'eleventh'.
-    The same reasoning follows for 2nd and 3rd.
-    """
-    if 10 <= index % 100 <= 20:
-        return "th"
-    match index % 10:
-        case 1:
-            return "st"
-        case 2:
-            return "nd"
-        case 3:
-            return "rd"
-        case _:
-            return "th"
 
 
 def parameters_have_changed(qvec_configurator, plotting_object) -> bool:
@@ -239,7 +220,7 @@ class ShellPanel(QWidget):
         """Set the GUI label text to the current shell number and q value."""
         vec_dict = self.qvec_config["q_vectors"]
         self.shell_information.setText(
-            f"{numerator_suffix(shell_index)} shell, |q| = {nth(vec_dict, shell_index)}",
+            f"{ordinal_suffix(shell_index)} shell, |q| = {nth(vec_dict, shell_index)}",
         )
 
     @Slot(int)
