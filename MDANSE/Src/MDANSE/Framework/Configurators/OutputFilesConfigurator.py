@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from more_itertools import first_true
+
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 from MDANSE.Framework.Formats.IFormat import IFormat
@@ -93,6 +95,11 @@ class OutputFilesConfigurator(IConfigurator):
             if not root:
                 raise Exception("Empty root name for the output file.")
 
+            if conflict := first_true(root.parents, default=None, pred=Path.is_file):
+                raise Exception(
+                    f"Cannot create folder due to conflict with file ({conflict})."
+                )
+
             if not PLATFORM.is_file_writable(root):
                 raise Exception(f"The file {root} is not writable.")
 
@@ -110,7 +117,7 @@ class OutputFilesConfigurator(IConfigurator):
                         f"the output file format {fmt} is not registered as a valid file format."
                     )
         except Exception as err:
-            self.err_status = str(err)
+            self.error_status = str(err)
             return
 
         self["root"] = root

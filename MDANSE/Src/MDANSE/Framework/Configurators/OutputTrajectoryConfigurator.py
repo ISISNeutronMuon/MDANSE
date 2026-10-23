@@ -18,6 +18,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import numpy as np
+from more_itertools import first_true
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
@@ -67,6 +68,11 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self._original_input = value
 
         root, dtype, chunk_size, compression, logs = value[:5]
+
+        if not root:
+            self.error_status = "empty root name for the output file."
+            return
+
         root = Path(root)
 
         try:
@@ -78,8 +84,10 @@ class OutputTrajectoryConfigurator(IConfigurator):
             self.error_status = "log level option not recognised"
             return
 
-        if not root:
-            self.error_status = "empty root name for the output file."
+        if conflict := first_true(root.parents, default=None, pred=Path.is_file):
+            self.error_status = (
+                f"Cannot create folder due to conflict with file ({conflict})."
+            )
             return
 
         if not PLATFORM.is_file_writable(root):
