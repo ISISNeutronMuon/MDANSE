@@ -196,9 +196,7 @@ class SliderPack(QWidget):
     @Slot()
     def collect_values(self):
         """Get and emit current values from all sliders/spinboxes."""
-        result = []
-        for box in self._spinboxes:
-            result.append(box.value())
+        result = [box.value() for box in self._spinboxes]
         self._current_values = result
         self.new_values.emit(result)
 

@@ -329,9 +329,11 @@ class IJob(Configurable, RegisterFactory["IJob"], ABC):
         axes = []
         for predictor in self.PREDICTORS:
             configurator = self._configuration[predictor]
-            for prediction in configurator.preview_output_axis():
-                if prediction is not None:
-                    axes.append(prediction)
+            axes.extend(
+                prediction
+                for prediction in configurator.preview_output_axis()
+                if prediction is not None
+            )
         return axes
 
     @classmethod
