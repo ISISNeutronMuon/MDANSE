@@ -21,7 +21,7 @@ from unittest.mock import patch, mock_open, ANY
 from MDANSE.Chemistry import (
     ATOMS_DATABASE,
 )
-from MDANSE.Chemistry.Databases import (
+from MDANSE.Chemistry.AtomsDatabase import (
     AtomsDatabaseError
 )
 from MDANSE.IO.IOUtils import MDANSEEncoder
@@ -115,7 +115,7 @@ class TestAtomsDatabase(unittest.TestCase):
     def test_add_atom_valid(self):
         with (
             patch("json.dump") as m,
-            patch("MDANSE.Chemistry.Databases.AtomsDatabase.save") as n,
+            patch("MDANSE.Chemistry.AtomsDatabase.AtomsDatabase.save") as n,
         ):
             ATOMS_DATABASE.add_atom("new_atom")
             self.assertDictEqual({

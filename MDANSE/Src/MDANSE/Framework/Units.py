@@ -20,14 +20,12 @@ import json
 import math
 import numbers
 from collections import ChainMap, defaultdict
-from collections.abc import Generator, Mapping
 from functools import singledispatchmethod
 from pathlib import Path
-from typing import ClassVar, NamedTuple, Self, TypedDict
+from typing import ClassVar
 
-from MDANSE.Chemistry.Databases import _Database
+from MDANSE.Core.Database import Database
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Core.Singleton import Singleton
 
 _UNAMES = ["kg", "m", "s", "K", "mol", "A", "cd", "rad", "sr"]
 _PREFIXES = {
@@ -1006,13 +1004,13 @@ def _str_to_unit(s: str) -> _Unit:
     return unit
 
 
-class UnitsManager(_Database):
+class UnitsManager(Database):
     """Database dictionary for handling units."""
 
     _UNITS: ClassVar[ChainMap[str, _Unit]] = ChainMap()
 
     _DEFAULT_DATABASE = PLATFORM.base_directory / "MDANSE" / "Framework" / "units.json"
-    _LOCAL_PATH = "units.json"
+    _LOCAL_PATH = Path("units.json")
 
     def __init__(self):
         self._load()

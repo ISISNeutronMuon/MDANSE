@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-from itertools import repeat
-
 from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import (
     QBrush,
@@ -40,7 +38,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Chemistry.Databases import AtomsDatabase, AtomsDatabaseError
+from MDANSE.Chemistry.AtomsDatabase import AtomsDatabase, AtomsDatabaseError
 from MDANSE.IO.IOUtils import get_next_name
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker

@@ -27,8 +27,8 @@ from more_itertools import first, flatten
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-from MDANSE.Chemistry.Databases import str_to_num
 from MDANSE.Framework.Units import measure
+from MDANSE.IO.IOUtils import str_to_num
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     AbsoluteConfiguration,

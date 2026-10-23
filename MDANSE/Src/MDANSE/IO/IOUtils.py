@@ -24,7 +24,7 @@ from enum import Enum
 from functools import singledispatch
 from itertools import count, filterfalse, islice
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Protocol, SupportsComplex, TypeVar, overload
 
 import numpy as np
 from more_itertools import first_true, last, take, value_chain
@@ -38,6 +38,7 @@ K = TypeVar("K", str, bytes)
 V = TypeVar("V")
 
 MAX_FILE_COUNT = 2048
+TOLERANCE_IMAG = 1e-13
 
 
 class SupportsStr(Protocol):
@@ -570,3 +571,23 @@ Status:
   Started on: {start_time_str}
   Estimated remaining time: {sec_fmt(comp_time)}
 """
+
+
+def str_to_num(numstr: SupportsComplex) -> float | complex:
+    """Convert the number from string format to float or complex.
+
+    Parameters
+    ----------
+    numstr : SupportsComplex
+        Input to be converted or stripped of imaginary part.
+
+    Returns
+    -------
+    Union[float, complex]
+        the input number as complex, or float if there is no imaginary part
+
+    """
+    return_value = complex(numstr)
+    if abs(return_value.imag) < TOLERANCE_IMAG:
+        return_value = return_value.real
+    return return_value
