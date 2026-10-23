@@ -120,7 +120,7 @@ scattering functions becomes
 .. math::
    :label: single2
 
-   F_{\text{inc}}(\mathbf{q},t ) = \frac{1}{\sum\limits_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2 } \frac{1}{N} \sum\limits_{j} \vert b_{\mathrm{inc},\alpha} \vert^2 \ \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right]
+   F_{\text{inc}}(\mathbf{q},t ) = \frac{1}{\sum\limits_{\gamma} c_{\gamma} \vert b_{\mathrm{inc},\gamma} \vert^2 } \frac{1}{N} \sum\limits_{j} \vert b_{\mathrm{inc},j} \vert^2 \ \mathrm{Re} \left[ F_{jj}(\mathbf{q},t) \right]
 
 Notice that by using this weight scheme the total DISF has the property that
 
@@ -149,7 +149,7 @@ The total coherent intermediate scattering functions becomes
 .. math::
    :label: doubledcsf2
 
-   F_{\text{coh}}(\mathbf{q},t) = \frac{\sqrt{c_{\alpha}c_{\beta}}}{\sum\limits_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}} \frac{1}{N} \sum\limits_{jk} \mathrm{Re} \left[  b_{\mathrm{coh},\alpha}^{\dagger}b_{\mathrm{coh},\beta} \right]  \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right]
+   F_{\text{coh}}(\mathbf{q},t) = \frac{1}{\sum\limits_{\gamma\delta} c_{\gamma}c_{\delta}  b_{\mathrm{coh},\gamma}^{\dagger}b_{\mathrm{coh},\delta}} \frac{1}{N} \sum\limits_{jk} \mathrm{Re} \left[  b_{\mathrm{coh},j}^{\dagger}b_{\mathrm{coh},k} \right]  \mathrm{Re} \left[ F_{jk}(\mathbf{q},t) \right]
 
 where :math:`b_{\mathrm{coh},j}^{\dagger}` and
 :math:`b_{\mathrm{coh},k}` are the coherent scattering lengths of
