@@ -193,7 +193,7 @@ class SingleDataset:
     def _(
         self,
         _source: None,
-        data: FloatArray,
+        data: FloatArray | None = None,
         *,
         data_unit: str = "none",
         scaling_factor: float = 1.0,
@@ -210,8 +210,8 @@ class SingleDataset:
 
         Parameters
         ----------
-        data : FloatArray
-            The data to be plotted. An N-dimensional array, N<=3
+        data : FloatArray | None, optional
+            The data to be plotted. An N-dimensional array, N<=3, by default None
         data_unit : str, optional
             Physical unit of the values in the data array
         scaling_factor : float, optional
@@ -235,7 +235,12 @@ class SingleDataset:
             "medium": self._name,
             "full": self._name,
         }
-        if uneven_array:
+        if data is None:
+            self._data = None
+            self._use_scaling = False
+            self._data_shape = next(iter(plot_axes.values())).shape
+            self._n_dim = 1
+        elif uneven_array:
             self._data = data
             self._n_dim = 1
             self._data_shape = (len(data),)
