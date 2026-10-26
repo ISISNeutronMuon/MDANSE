@@ -240,16 +240,15 @@ class SingleDataset:
             self._use_scaling = False
             self._data_shape = next(iter(plot_axes.values())).shape
             self._n_dim = 1
+        elif uneven_array:
+            self._data = data
+            self._n_dim = 1
+            self._data_shape = (len(data),)
+            self._use_scaling = False
         else:
-            if uneven_array:
-                self._data = data
-                self._n_dim = 1
-                self._data_shape = (len(data),)
-                self._use_scaling = False
-            else:
-                self._data = np.real(data)
-                self._n_dim = len(self._data.shape)
-                self._data_shape = self._data.shape
+            self._data = np.real(data)
+            self._n_dim = len(self._data.shape)
+            self._data_shape = self._data.shape
 
         self._scaling_factor = scaling_factor
         self._xerror = xerror
