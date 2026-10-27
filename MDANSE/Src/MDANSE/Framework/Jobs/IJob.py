@@ -80,6 +80,16 @@ os.environ.update(
     NUMEXPR_NUM_THREADS = '1'
 )
 
+
+########################################################
+# Initialise settings                                  #
+########################################################
+
+## uncomment to use MDANSE settings from the given path instead of global settings
+# from MDANSE.Core.Settings import Settings
+# local_settings = Path.cwd()
+# Settings.change_settings_directory(local_settings)
+
 ########################################################
 # This is an automatically generated MDANSE run script #
 ########################################################

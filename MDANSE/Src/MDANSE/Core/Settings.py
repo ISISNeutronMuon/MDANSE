@@ -132,6 +132,47 @@ class Settings:
         raise NotImplementedError("Cannot subclass Settings")
 
     @classmethod
+    def change_settings_directory(
+        cls,
+        path: Path | str,
+        /,
+        *,
+        reload_settings: bool = True,
+        reload_atoms: bool = True,
+        reload_units: bool = True,
+    ) -> None:
+        """Change the settings directory and update.
+
+        FIXME: Long description.
+
+        Parameters
+        ----------
+        new_path : Path
+            New settings directory.
+        reload_settings : bool
+            Clear and reload settings.
+        reload_atoms : bool
+            Clear and reload atoms database.
+        reload_units : bool
+            Clear and reload units database.
+        """
+
+        path = Path(path)
+        from MDANSE.Core.Platform import PLATFORM
+
+        PLATFORM._application_directory = path
+        if reload_atoms:
+            from MDANSE.Chemistry import ATOMS_DATABASE
+
+            ATOMS_DATABASE._load()
+        if reload_units:
+            from MDANSE.Framework.Units import UNITS_MANAGER
+
+            UNITS_MANAGER._load()
+        if reload_settings:
+            Settings.init(PLATFORM.main_settings, save=cls.auto_save)
+
+    @classmethod
     def init(
         cls,
         settings: Path | SettingsRaw | None = None,

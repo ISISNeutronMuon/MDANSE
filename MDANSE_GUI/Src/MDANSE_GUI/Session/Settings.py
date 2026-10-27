@@ -36,17 +36,24 @@ class GUISettings(QStandardItemModel):
     def __init__(
         self,
         *args,
-        settings: Path | SettingsRaw | None = None,
         save: bool = True,
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-        Settings.init(settings, save=save)
+        self.auto_save = save
         self.settings = Settings.settings
 
         self.populate_model()
 
         self.itemChanged.connect(self.on_value_changed)
+
+    @property
+    def auto_save(self) -> bool:
+        return Settings.auto_save
+
+    @auto_save.setter
+    def auto_save(self, value: bool) -> None:
+        Settings.auto_save = value
 
     def __getitem__(self, key: tuple[str, str]) -> Any:
         return Settings.get_opt(*key)
