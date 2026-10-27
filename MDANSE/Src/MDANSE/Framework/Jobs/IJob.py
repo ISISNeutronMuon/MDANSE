@@ -85,19 +85,10 @@ os.environ.update(
 # Initialise settings                                  #
 ########################################################
 
-from MDANSE.Chemistry import ATOMS_DATABASE
-from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Core.Settings import Settings
-from MDANSE.Framework.Units import UNITS_MANAGER
-
-# uncomment this line to use MDANSE settings from the current path
-# instead of global settings from the home directory
-# you can also introduce a specific path instead of Path.cwd()
-# PLATFORM._application_directory = Path.cwd()
-
-ATOMS_DATABASE._load()
-UNITS_MANAGER._load()
-Settings.init(PLATFORM._application_directory / "mdanse.toml", save=False)
+## uncomment to use MDANSE settings from the given path instead of global settings
+# from MDANSE.Core.Settings import Settings
+# local_settings = Path.cwd()
+# Settings.change_settings_directory(local_settings)
 
 ########################################################
 # This is an automatically generated MDANSE run script #

@@ -30,7 +30,7 @@ from qtpy.QtWidgets import QApplication, QSplashScreen, QStyleFactory, QSystemTr
 import MDANSE_GUI
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Core.Settings import Option
+from MDANSE.Core.Settings import Settings
 from MDANSE.Framework.Units import UNITS_MANAGER
 from MDANSE.MLogging import FMT, LOG
 from MDANSE_GUI.Session.Settings import GUISettings
@@ -148,18 +148,15 @@ def startGUI(some_args):
     args = pars.parse_args(some_args)
 
     # Override settings directories.
+    new_path = PLATFORM._application_directory
     if args.local:
-        PLATFORM._application_directory = Path.cwd()
+        new_path = Path.cwd()
     if args.settings:
-        PLATFORM._application_directory = Path(args.settings)
+        new_path = Path(args.settings)
 
-    # Reload databases with new paths.
-    ATOMS_DATABASE._load()
-    UNITS_MANAGER._load()
+    Settings.change_settings_directory(new_path)
 
-    settings = GUISettings(
-        settings=PLATFORM.main_settings, save=not args.no_save_settings
-    )
+    settings = GUISettings(save=not args.no_save_settings)
     use_splash = args.splash if args.splash is not None else settings.splash
     use_systray = args.systray if args.systray is not None else settings.systray
 
