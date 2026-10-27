@@ -23,6 +23,7 @@ from qtpy.QtCore import QMessageLogger, QSettings, Slot
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
+from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 from MDANSE_GUI.Tabs.Models.JobTree import JobTree
 from MDANSE_GUI.Tabs.Views.ActionsTree import ActionsTree
 from MDANSE_GUI.Tabs.Visualisers.Action import Action
@@ -84,6 +85,7 @@ class ConverterTab(GeneralTab):
         session: Session,
         qt_settings: QSettings | None,
         logger: QMessageLogger,
+        model: GeneralModel | None = None,
         **kwargs,
     ):
         action = Action()
@@ -93,7 +95,7 @@ class ConverterTab(GeneralTab):
             session=session,
             qt_settings=qt_settings,
             logger=logger,
-            model=kwargs.get("model", JobTree(parent_class=Converter, hidden_levels=1)),
+            model=model or JobTree(parent_class=Converter, hidden_levels=1),
             view=ActionsTree(),
             visualiser=action,
             layout=partial(
