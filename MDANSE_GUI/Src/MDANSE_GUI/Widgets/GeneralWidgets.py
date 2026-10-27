@@ -15,9 +15,7 @@
 #
 from __future__ import annotations
 
-import copy
-from pathlib import PurePath
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtGui import (
@@ -27,20 +25,15 @@ from qtpy.QtGui import (
     QValidator,
 )
 from qtpy.QtWidgets import (
-    QCheckBox,
     QComboBox,
     QDialog,
-    QFileDialog,
     QFormLayout,
     QHBoxLayout,
-    QLabel,
     QLineEdit,
     QPushButton,
     QVBoxLayout,
     QWidget,
 )
-
-from MDANSE.MLogging import LOG
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

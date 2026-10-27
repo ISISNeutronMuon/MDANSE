@@ -17,20 +17,12 @@ from __future__ import annotations
 
 import json
 from abc import abstractmethod
-from multiprocessing.spawn import _main
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
 
-from qtpy.QtCore import QObject, Signal, Slot
+from qtpy.QtCore import QObject, Slot
 
-from MDANSE import PLATFORM
 from MDANSE.Core.Settings import Settings
-from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Settings import GUISettings
-
-if TYPE_CHECKING:
-    from MDANSE_GUI.TabbedWindow import MDANSEMainWindow
-    from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 
 json_encoder = json.encoder.JSONEncoder()
 json_decoder = json.decoder.JSONDecoder()

@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
 from more_itertools import all_equal
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem

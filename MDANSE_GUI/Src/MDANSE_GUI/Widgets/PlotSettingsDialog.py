@@ -17,8 +17,8 @@ from __future__ import annotations
 import traceback
 from typing import Any
 
-from matplotlib import rc, rc_file, rcdefaults, rcParams, rcParamsDefault
-from qtpy.QtCore import QObject, QSortFilterProxyModel, Qt, Signal, Slot
+from matplotlib import rc_file, rcdefaults, rcParams, rcParamsDefault
+from qtpy.QtCore import QSortFilterProxyModel, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
     QApplication,

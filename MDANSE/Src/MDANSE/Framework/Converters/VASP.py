@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter

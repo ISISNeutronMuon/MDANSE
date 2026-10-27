@@ -24,8 +24,6 @@ from MDANSE.MolecularDynamics.Trajectory import GroupingLevels, Trajectory
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
-    import numpy.typing as npt
-
     from MDANSE.Framework.OutputVariables.IOutputVariable import OutputData
     from MDANSE.util_types import NumArray
 

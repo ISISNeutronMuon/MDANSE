@@ -16,11 +16,10 @@
 from __future__ import annotations
 
 import contextlib
-import math
 from itertools import islice
 from typing import TYPE_CHECKING, Any
 
-from more_itertools import flatten, ilen
+from more_itertools import flatten
 
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter

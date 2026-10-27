@@ -26,7 +26,6 @@ from typing import TYPE_CHECKING, NamedTuple
 import h5py
 import matplotlib.pyplot as mpl
 import numpy as np
-import numpy.typing as npt
 from matplotlib import rcParams
 from matplotlib.colors import to_hex as mpl_to_hex
 from matplotlib.colors import to_rgb
@@ -39,10 +38,10 @@ from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 from MDANSE.Core.Settings import Option, Settings
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
-from MDANSE.util_types import ComplexArray, FloatArray, IntArray
+from MDANSE.util_types import FloatArray, IntArray
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable, Iterator, Sequence
+    from collections.abc import Generator, Iterable, Sequence
 
     import h5py
 
