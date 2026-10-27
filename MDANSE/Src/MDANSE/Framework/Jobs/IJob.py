@@ -98,7 +98,7 @@ from MDANSE.Framework.Units import UNITS_MANAGER
 
 ATOMS_DATABASE._load()
 UNITS_MANAGER._load()
-Settings.init(PLATFORM._application_directory / "mdanse.toml", save=False)
+Settings.init(PLATFORM.main_settings, save=False)
 
 ########################################################
 # This is an automatically generated MDANSE run script #
