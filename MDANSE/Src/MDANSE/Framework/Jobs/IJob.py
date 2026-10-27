@@ -72,6 +72,7 @@ RUNSCRIPT = """\
 #!{executable}
 
 import os
+from pathlib import Path
 os.environ.update(
     OMP_NUM_THREADS = '1',
     OPENBLAS_NUM_THREADS = '1',
