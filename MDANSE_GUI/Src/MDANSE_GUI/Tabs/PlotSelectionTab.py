@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING
 from qtpy.QtCore import QMessageLogger, QSettings, Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
+from MDANSE.Core.Settings import Setting
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
 from MDANSE_GUI.Tabs.Models.PlotDataModel import PlotDataModel
@@ -49,12 +50,36 @@ will <b>appear in the next tab.</b>
 
 
 class PlotSelectionTab(GeneralTab):
+    reopen_results = Setting(
+        True, group="startup", comment="Reopen analysis results on starting MDANSE."
+    )
+    open_results = Setting[tuple[str, ...]](
+        (),
+        group="analysis",
+        comment="Previously opened analysis results",
+        visible=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDA results", self.load_files)
         self._visualiser._settings = self._settings
         self._visualiser._unit_lookup = self
         self._model.finished_loading.connect(self.tab_notification)
+
+        self._model.finished_loading.connect(self._update_mda)
+        self._model.free_name.connect(self._update_mda)
+
+        if self.reopen_results:
+            for result in self.open_results:
+                self.load_results(result)
+
+    @Slot()
+    def _update_mda(self):
+        if self.reopen_results:
+            self.open_results = tuple(
+                node._file.filename for node in self._core._model._nodes.values()
+            )
 
     def grouped_settings(self):
         return super().grouped_settings() | {

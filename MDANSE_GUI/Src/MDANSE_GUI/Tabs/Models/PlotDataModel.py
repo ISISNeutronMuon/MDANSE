@@ -172,6 +172,7 @@ class PlotDataModel(QStandardItemModel):
     error = Signal(str)
     all_elements = Signal(object)
     finished_loading = Signal(int)
+    free_name = Signal()
 
     def __init__(self, parent: QObject | None = None):
         super().__init__(parent=parent)
@@ -256,7 +257,7 @@ class PlotDataModel(QStandardItemModel):
         number = model_item.file_number()
         return self._nodes[number]
 
-    def removeRow(self, row: int, parent: QModelIndex = None):
+    def removeRow(self, row: int, parent: QModelIndex | None = None):
         """Delete a row from the model."""
         self.mutex.lock()
         try:
@@ -264,6 +265,7 @@ class PlotDataModel(QStandardItemModel):
         except AttributeError:
             return
         data_object = self._nodes.pop(node_number)
+        self.free_name.emit()
         data_object.close()
         if parent is None:
             super().removeRow(row)
