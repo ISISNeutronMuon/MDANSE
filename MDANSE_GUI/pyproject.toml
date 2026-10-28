@@ -8,7 +8,8 @@ description = 'MDANSE GUI package - the graphical interface for MDANSE'
 dynamic = ["version"]
 readme = "README.md"
 requires-python = ">=3.11"
-license = {file = "LICENSE"}
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 keywords = ["molecular dynamics", "science", "simulation", "analysis"]
 maintainers = [
   {name = "Maciej Bartkowiak", email = "maciej.bartkowiak@stfc.ac.uk"},
@@ -29,7 +30,6 @@ classifiers = [
         'Programming Language :: Python :: 3.13',
         'Programming Language :: Python :: 3.14',
         'Programming Language :: Python :: 3 :: Only',
-        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Operating System :: OS Independent'
 ]
 dependencies = [
