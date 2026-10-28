@@ -79,7 +79,7 @@ from MDANSE.Mathematics.Signal import (
 )
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
-from MDANSE_GUI.PlotUtils import MDANSEMatPlotLibNavBar
+from MDANSE_GUI.Plots.PlotUtils import MDANSEMatPlotLibNavBar
 from MDANSE_GUI.Utils import block_signals
 from MDANSE_GUI.Widgets.StepValidator import ConstrainedSnapSpinBox
 
