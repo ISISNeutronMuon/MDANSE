@@ -406,7 +406,7 @@ class VectorViewer(QDialog):
             self.shell_panel_3D.update_plot()
 
 
-class QVectorsWidget(WidgetBase):
+class QVectorsWidget(WidgetBase[QVectorsConfigurator]):
     """Input widget defining the vector generator type and its parameters."""
 
     new_shell_number = Signal(int)
@@ -425,20 +425,31 @@ class QVectorsWidget(WidgetBase):
         self._selector = QComboBox(self._base)
         self._selector.addItems(IQVectors.raw_names())
         self._model = VectorModel(self._base, trajectory=trajectory)
+
         self._view = QTableView(self._base)
+        policy = self._view.sizePolicy()
+        policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
+        self._view.setSizePolicy(policy)
+        self._view.horizontalHeader().hide()
+        self._view.setModel(self._model)
+
         self._preview_button = QPushButton("Preview vector distribution")
         self._preview_button.clicked.connect(self.helper_dialog)
+
         top_bar_layout.addWidget(self._selector, stretch=1)
         top_bar_layout.addStretch(1)
         top_bar_layout.addWidget(self._preview_button)
+
         self._layout.addLayout(top_bar_layout)
         self._layout.addWidget(self._view)
-        self._view.setModel(self._model)
+
         self._selector.currentTextChanged.connect(self._model.switch_qvector_type)
         self._selector.setCurrentText("SphericalLatticeQVectors")
+
         self._model.itemChanged.connect(self.updateValue)
         self._model.type_changed.connect(self.updateValue)
         self._model.unit_cell_missing.connect(self.fail_early)
+
         self.updateValue()
         if self._tooltip:
             tooltip_text = self._tooltip
@@ -448,13 +459,10 @@ class QVectorsWidget(WidgetBase):
         self._selector.setToolTip(
             "The q vectors will be generated using the method chosen here.",
         )
-        policy = self._view.sizePolicy()
-        policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
-        self._view.setSizePolicy(policy)
-        self._view.horizontalHeader().hide()
-        self._view.setSizeAdjustPolicy(
-            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
-        )
+
+        self._view.resizeColumnsToContents()
+        for col_num in range(1, 3):
+            self._view.setColumnWidth(col_num, 200)
         self.value_changed.connect(self.preview_vectors)
 
     @Slot()
@@ -530,6 +538,7 @@ class QVectorsWidget(WidgetBase):
         """Use the current inputs to configure the q vector generator."""
         temp = super().updateValue()
         is_valid = self._configurator.error_status == "OK"
+        self._view.resizeColumnsToContents()
         self._preview_button.setEnabled(is_valid)
         if is_valid:
             self.new_shell_number.emit(self._configurator["n_shells"])
