@@ -17,13 +17,23 @@ from __future__ import annotations
 
 import copy
 from collections import ChainMap, UserDict, defaultdict
-from collections.abc import Callable, Generator, Mapping
+from collections.abc import Callable, Generator, Mapping, Sequence
 from contextlib import contextmanager
 from functools import partial
 from pathlib import Path
-from typing import Any, ClassVar, Generic, NamedTuple, TypeAlias, TypeVar
+from typing import (
+    Any,
+    ClassVar,
+    Generic,
+    NamedTuple,
+    Self,
+    TypeAlias,
+    TypeVar,
+    overload,
+)
 
 import tomlkit
+from tomlkit.items import Item
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
 
@@ -224,7 +234,10 @@ class Settings:
                 item = tomlkit.item(to_write)
                 if val.comment is not None:
                     item.comment(val.comment)
-                table[key] = item
+
+                t_key = "_" + key if not val.visible else key
+
+                table[t_key] = item
                 LOG.debug("Elem (%s) = %s  # %s", key, val.value, val.comment)
 
             newdoc.add(grp_key, table)
@@ -294,15 +307,22 @@ class Settings:
                         cls._defaults.get(grp_key, {}).get(val_key, NULLOPTION).comment
                     )
 
-                out[grp_key][val_key] = cls._process_val(
-                    val_key, grp_key, val, add_comment=comment
+                visible = not val_key.startswith("_")
+                key = val_key.removeprefix("_")
+                out[grp_key][key] = cls._process_val(
+                    key, grp_key, val, add_comment=comment, visible=visible
                 )
 
         return out
 
     @staticmethod
     def _process_val(
-        key: str, grp_key: str, val: Option[T] | T, *, add_comment: str | None = None
+        key: str,
+        grp_key: str,
+        val: Option[T] | T,
+        *,
+        add_comment: str | None = None,
+        visible: bool = True,
     ) -> Option[T]:
         """Return Option from either value or Option."""
         match val:
@@ -314,8 +334,12 @@ class Settings:
                     comment=comment or add_comment,
                     visible=visible,
                 )
+            case Item():
+                return Option(
+                    val.unwrap(), key, grp_key, comment=add_comment, visible=visible
+                )
             case _:
-                return Option(val, key, grp_key, comment=add_comment)
+                return Option(val, key, grp_key, comment=add_comment, visible=visible)
 
     @classmethod
     def _check_init(cls) -> None:
@@ -333,6 +357,11 @@ class Settings:
         return cls.settings[grp][key].value
 
     @classmethod
+    def _del_opt(cls, _, grp: str, key: str) -> None:
+        cls._check_init()
+        del cls.settings[grp][key]
+
+    @classmethod
     def _set_opt(cls, _, value: T, grp: str, key: str) -> None:
         cls._check_init()
         cls.settings[grp].setdefault(key, Option(value, key, grp))
@@ -347,7 +376,12 @@ class Settings:
 
     @classmethod
     def get_opt_w_default(
-        cls, grp: str, key: str, default: T, comment: str | None = None
+        cls,
+        grp: str,
+        key: str,
+        default: T,
+        comment: str | None = None,
+        visible: bool = True,
     ) -> Any:
         """Get value and if not present create one in "_defaults".
 
@@ -369,7 +403,7 @@ class Settings:
         """
         cls._check_init()
         if key not in cls.settings[grp]:
-            cls.set_item(Option(default, key, grp, comment=comment))
+            cls.set_item(Option(default, key, grp, comment=comment, visible=visible))
         return cls.get_opt(grp, key)
 
     @classmethod
@@ -389,6 +423,19 @@ class Settings:
             Value of parameter.
         """
         return cls._get_opt(None, grp, key)
+
+    @classmethod
+    def del_opt(cls, grp: str, key: str) -> None:
+        """Delete a setting.
+
+        Parameters
+        ----------
+        grp : str
+            Group containing setting.
+        key : str
+            Setting key.
+        """
+        cls._del_opt(None, grp, key)
 
     @classmethod
     def set_opt(cls, grp: str, key: str, value: T) -> None:
@@ -452,55 +499,6 @@ class Settings:
             cls._parameters.clear()
         cls.initialised = False
 
-    @classmethod
-    def parametrise(cls, **kwargs: Option[T] | T) -> Callable[[X], X]:
-        """Add settings to decorated class.
-
-        For x = val, x will be the property on the class
-        and can be accessed directly via . notation.
-
-        Assigning to this value will update the value in Settings.
-
-        If val is an :ref:`Option`, these settings should be defined there,
-        if not provided or val is just a value they will be inferred as
-        ``(Option(value=val, group=type(class).__name__, name=x, comment=None))``.
-
-        Returns
-        -------
-        Callable[[type], type]
-            Class decorator.
-
-        Examples
-        --------
-        ..
-            @Settings.parametrise(favourite=Option("pike", group="fish"))
-            class Test:
-                def __init__(self):
-                    print(self.favourite) # => "pike"
-                    self.favourite = "trout"
-                    print(Settings.get_opt("fish", "favourite")) # "trout"
-        """
-
-        def wrapped(target: type) -> type:
-            targ_key = target.__name__
-
-            for key, val in kwargs.items():
-                value = cls._process_val(key, targ_key, val)
-
-                setattr(
-                    target,
-                    key,
-                    property(
-                        partial(cls._get_opt, grp=value.group, key=value.name),
-                        partial(cls._set_opt, grp=value.group, key=value.name),
-                        doc=value.comment,
-                    ),
-                )
-                cls._parameters.add(value)
-            return target
-
-        return wrapped
-
     @staticmethod
     @contextmanager
     def temporary(**kwargs: Option[T] | T):
@@ -542,3 +540,97 @@ def temp_settings(**kwargs: Option[T] | T) -> Generator[None]:
         Settings.auto_save = save
         Settings._init_dicts(defaults, settings)
         Settings._filename = filename
+
+
+class Setting(Generic[T]):
+    """Descriptor managing settings."""
+
+    def __init__(
+        self,
+        default: T,
+        name: str = "",
+        group: str = "",
+        comment: str | None = None,
+        visible: bool = True,
+    ):
+        self._default = default
+        self._name = name
+        self._group = group
+        self._comment = comment
+        self._visible = visible
+
+    def __set_name__(self, owner: type, name: str):
+        if not self._name:
+            self._name = name
+        if not self._group:
+            self._group = owner.__name__
+        value = Option(
+            self._default, self._name, self._group, self._comment, self._visible
+        )
+        Settings._parameters.add(value)
+
+    @overload
+    def __get__(self, obj: object, _objtype: type | None = None) -> T: ...
+    @overload
+    def __get__(self, obj: None, _objtype: type | None = None) -> Self: ...
+    def __get__(self, obj: object | None, _objtype: type | None = None) -> T | Self:
+        if obj is None:
+            return self
+        return Settings.get_opt_w_default(
+            self._group, self._name, self._default, self._comment, self._visible
+        )
+
+    def __set__(self, obj: object, value: T) -> None:
+        Settings.set_opt(self._group, self._name, value)
+
+    def __delete__(self, _obj: object) -> None:
+        Settings.del_opt(self._group, self._name)
+
+
+class RecentData(Setting[tuple[T, ...]]):
+    def __init__(self, group: str, comment: str, max_store: int = 10, **kwargs):
+        self._max_store = max_store
+        super().__init__(
+            (),
+            group=group,
+            comment=comment,
+            visible=False,
+            **kwargs,
+        )
+
+    def __set_name__(self, owner: type, name: str):
+        self._name = owner.__name__
+        value = Option(
+            self._default, self._name, self._group, self._comment, self._visible
+        )
+        Settings._parameters.add(value)
+
+    def __set__(self, obj: object, value: list[T] | T) -> None:
+        if isinstance(value, list):
+            new_val = tuple(value)
+        else:
+            lc = list(self.__get__(obj))
+            if value in lc:
+                lc.remove(value)
+
+            new_val = (value, *lc)
+
+        Settings.set_opt(self._group, self._name, new_val[: self._max_store])
+
+
+class RecentFiles(RecentData[str]):
+    def __init__(
+        self,
+        placeholder: str = "Recently used files...",
+        **kwargs,
+    ):
+        self._placeholder = placeholder
+        super().__init__(
+            group="recent_files",
+            comment="Recently used files.",
+            **kwargs,
+        )
+
+    @property
+    def placeholder(self) -> str:
+        return self._placeholder
