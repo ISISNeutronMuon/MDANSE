@@ -26,6 +26,7 @@ from qtpy.QtWidgets import (
     QDialog,
     QGridLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QPushButton,
     QSizePolicy,
@@ -430,7 +431,16 @@ class QVectorsWidget(WidgetBase[QVectorsConfigurator]):
         policy = self._view.sizePolicy()
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
-        self._view.horizontalHeader().hide()
+        header = self._view.horizontalHeader()
+        header.hide()
+        # Let Qt fit the columns to their contents whenever the view is laid out,
+        # so the widths are right on first display (using the final font and style),
+        # after editing a value, and after switching the generator type.
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        # Make the view tall enough to show all the rows without scrolling.
+        self._view.setSizeAdjustPolicy(
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
+        )
         self._view.setModel(self._model)
 
         self._preview_button = QPushButton("Preview vector distribution")
@@ -460,9 +470,6 @@ class QVectorsWidget(WidgetBase[QVectorsConfigurator]):
             "The q vectors will be generated using the method chosen here.",
         )
 
-        self._view.resizeColumnsToContents()
-        for col_num in range(1, 3):
-            self._view.setColumnWidth(col_num, 200)
         self.value_changed.connect(self.preview_vectors)
 
     @Slot()
@@ -538,7 +545,6 @@ class QVectorsWidget(WidgetBase[QVectorsConfigurator]):
         """Use the current inputs to configure the q vector generator."""
         temp = super().updateValue()
         is_valid = self._configurator.error_status == "OK"
-        self._view.resizeColumnsToContents()
         self._preview_button.setEnabled(is_valid)
         if is_valid:
             self.new_shell_number.emit(self._configurator["n_shells"])
