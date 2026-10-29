@@ -218,7 +218,7 @@ class TrajectoryModel(QStandardItemModel):
         thread: LoaderThread = self._loading_threads.pop(node_number)
         try:
             thread.quit()
-            timer = QDeadlineTimer(300, Qt.TimerType.CoarseTimer)
+            timer = QDeadlineTimer(3000, Qt.TimerType.CoarseTimer)
             thread.wait(deadline=timer)
         except Exception as e:
             LOG.error("While removing a loader thread, an exception occured: %s", e)
