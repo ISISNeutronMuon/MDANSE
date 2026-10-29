@@ -218,7 +218,6 @@ class TrajectoryModel(QStandardItemModel):
         thread: LoaderThread = self._loading_threads.pop(node_number)
         try:
             thread.quit()
-            thread.terminate()
             timer = QDeadlineTimer(300, Qt.TimerType.CoarseTimer)
             thread.wait(deadline=timer)
         except Exception as e:
