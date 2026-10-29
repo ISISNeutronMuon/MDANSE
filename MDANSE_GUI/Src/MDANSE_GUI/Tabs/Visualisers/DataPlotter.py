@@ -15,12 +15,12 @@
 #
 from __future__ import annotations
 
+import matplotlib.pyplot as mpl
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
-    QMessageBox,
     QPushButton,
     QTableView,
     QVBoxLayout,
@@ -31,7 +31,11 @@ from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Models.PlottingContext import (
     PlottingContext,
     SingleDataset,
+    get_mpl_lines,
+    get_mpl_markers,
 )
+from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MainAxisCombo, MplStyleCombo
+from MDANSE_GUI.Tabs.Views.PlotDetailsView import set_plot_table_delegates
 
 WIDGET_DESCRIPTIONS = {"DataWidget": "text view", "PlotWidget": "plot view"}
 
@@ -62,6 +66,14 @@ class DataPlotter(QWidget):
         selection_bar = QWidget(self)
         upper_bar_layout = QHBoxLayout(selection_bar)
         self._selection_viewer = QTableView(self)
+        self._delegates = {
+            "colour 1": ColourPicker(),
+            "colour 2": ColourPicker(),
+            "axis": MainAxisCombo(),
+            "colour map": MplStyleCombo(mpl_items=mpl.colormaps()),
+            "line": MplStyleCombo(mpl_items=get_mpl_lines()),
+            "marker": MplStyleCombo(mpl_items=get_mpl_markers()),
+        }
         button_bar1, button_bar2 = self.create_buttons()
         plotter_preview = self.create_preview()
         layout.addWidget(selection_bar)
@@ -74,6 +86,7 @@ class DataPlotter(QWidget):
             unit_lookup=self._unit_lookup,
         )
         self._selection_viewer.setModel(self._model)
+        set_plot_table_delegates(self._selection_viewer, self._delegates)
         self.hide_columns()
 
     def create_buttons(self) -> QWidget:
@@ -118,6 +131,7 @@ class DataPlotter(QWidget):
         self.preview_table = QTableView(previewer)
         previewer_layout.addWidget(self.preview_table)
         self.update_target_plot_label()
+        set_plot_table_delegates(self.preview_table, self._delegates)
         return previewer
 
     def update_target_plot_label(self):
@@ -172,7 +186,7 @@ class DataPlotter(QWidget):
 
     def hide_columns(self):
         """Only show the first four columns of plotting_column_labels."""
-        for col_num in range(4, 10):
+        for col_num in range(4, 12):
             self._selection_viewer.hideColumn(col_num)
 
     @Slot()
