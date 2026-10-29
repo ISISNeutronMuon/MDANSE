@@ -22,6 +22,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtGui import QBrush, QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import (
     QAbstractScrollArea,
+    QHeaderView,
     QSizePolicy,
     QTableView,
 )
@@ -59,14 +60,18 @@ class QVectors3DWidget(WidgetBase[QVectors3DConfigurator]):
         policy = self._view.sizePolicy()
         policy.setVerticalPolicy(QSizePolicy.Policy.Minimum)
         self._view.setSizePolicy(policy)
-        self._view.horizontalHeader().hide()
+        header = self._view.horizontalHeader()
+        header.hide()
+        # Let Qt fit the columns to their contents whenever the view is laid out,
+        # so the widths are right on first display (using the final font and style)
+        # and after editing a value.
+        header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        # Make the view tall enough to show all the rows without scrolling.
+        self._view.setSizeAdjustPolicy(
+            QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents,
+        )
 
-        self._view.resizeColumnsToContents()
         self._model.itemChanged.connect(self.updateValue)
-
-    def updateValue(self):
-        self._view.resizeColumnsToContents()
-        super().updateValue()
 
     def get_widget_value(self):
         """Collect the results from the input widgets and return the value."""
