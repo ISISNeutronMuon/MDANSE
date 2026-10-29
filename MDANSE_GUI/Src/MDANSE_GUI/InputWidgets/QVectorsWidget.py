@@ -461,7 +461,8 @@ class QVectorsWidget(WidgetBase[QVectorsConfigurator]):
         )
 
         self._view.resizeColumnsToContents()
-        self._view.setColumnWidth(2, 150)
+        for col_num in range(1, 3):
+            self._view.setColumnWidth(col_num, 200)
         self.value_changed.connect(self.preview_vectors)
 
     @Slot()
