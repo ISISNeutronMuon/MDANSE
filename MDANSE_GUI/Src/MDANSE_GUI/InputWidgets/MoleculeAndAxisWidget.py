@@ -90,6 +90,7 @@ class MoleculeAndAxisWidget(MoleculeWidget):
             cbox.setEnabled(True)
         if self.index_combo_boxes[0].currentText() == "None":
             self.index_combo_boxes[1].setEnabled(False)
+        self.updateValue()
 
     @staticmethod
     def parse_combo_box(cbox: QComboBox) -> int | None:
