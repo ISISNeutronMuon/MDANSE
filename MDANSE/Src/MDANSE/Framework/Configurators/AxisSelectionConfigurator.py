@@ -70,6 +70,8 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
             f"Axis in molecule {molecule_name} determined from moment of inertia"
         )
         super().configure(molecule_name)
+        if self.error_status != "OK":
+            return
         try:
             val1 = int(value[1])
         except (TypeError, ValueError, IndexError):
@@ -88,9 +90,16 @@ class AxisSelectionConfigurator(MoleculeSelectionConfigurator):
                     f"Axis in molecule {molecule_name} from atom {val1!s} to {val2!s}"
                 )
         if len(value) == 3:
+            if val1 is not None and val1 == val2:
+                self.error_status = (
+                    "It seems that you picked the same atom twice."
+                    " Either change one of them, or set the last one to None."
+                )
+                return
             self["index1"] = val1
             self["index2"] = val2
         elif len(value) == 2:
             self["index1"] = val1
+            self.error_status = "OK"
         elif len(value) > 3:
             raise ValueError(f"Too many items in input: {value}")
