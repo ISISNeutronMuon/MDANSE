@@ -40,7 +40,12 @@ You can adjust the logging level using the combo box below.
 
 
 class GuiLogHandler(Handler):
-    """Log handler to send message to GUI logger."""
+    """Log handler to send message to GUI logger.
+
+    Records may be logged in any thread, e.g. in the threads which pass on
+    the log messages of running jobs, so the messages are sent to the
+    visualiser with a signal, which Qt delivers in the thread of the widget.
+    """
 
     new_log = Signal(int)
 
@@ -54,13 +59,20 @@ class GuiLogHandler(Handler):
 
     def emit(self, record: LogRecord) -> None:
         if self._visualiser is not None:
-            self._visualiser.append_log(self.formatter.format(record), record)
+            self._visualiser.log_received.emit(self.formatter.format(record), record)
 
 
 class LogInfo(TextInfo):
-    """Extended TextInfo for handling error logs."""
+    """Extended TextInfo for handling error logs.
+
+    Messages may come from any thread, but the widget must only be changed
+    in its own thread. Emitting ``log_received`` or ``text_received`` adds
+    a message to the widget in its own thread.
+    """
 
     new_log = Signal(object)
+    log_received = Signal(str, object)
+    text_received = Signal(str)
 
     colours: ClassVar[dict[int, str | None]] = {
         logging.WARNING: "orange",
@@ -69,6 +81,14 @@ class LogInfo(TextInfo):
     }
     MESSAGE_FMT: ClassVar[str] = '<span style="color:{colour};">{message}</span>'
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        # Qt calls the slots at once when the signals are emitted in the
+        # thread of the widget, and queues the calls there otherwise.
+        self.log_received.connect(self.append_log)
+        self.text_received.connect(self.append_text)
+
+    @Slot(str, object)
     def append_log(self, message: str, record: LogRecord) -> None:
         if (colour := self.colours.get(record.levelno)) is not None:
             message = self.MESSAGE_FMT.format(colour=colour, message=message)
@@ -156,7 +176,9 @@ class LoggingTab(GeneralTab):
             self.tab_notification()
 
     def log_qt_handler(self, m_type, m_context, m_text):
-        self._visualiser.append_text(f"Qt log message (type={m_type})=" + m_text)
+        # Qt may call this in any thread.
+        message = f"Qt log message (type={m_type})=" + m_text
+        self._visualiser.text_received.emit(message)
 
     @classmethod
     def gui_instance(
