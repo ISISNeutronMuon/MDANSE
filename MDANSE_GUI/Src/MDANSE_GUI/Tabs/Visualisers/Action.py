@@ -414,6 +414,8 @@ class Action(QWidget):
         self.allow_execution()
 
     def apply_instrument(self):
+        if self._job_instance is None or isinstance(self._job_instance, Dummy):
+            return
         if self._current_instrument is not None:
             initial_configuration = self._trajectory_configurator[
                 "instance"
