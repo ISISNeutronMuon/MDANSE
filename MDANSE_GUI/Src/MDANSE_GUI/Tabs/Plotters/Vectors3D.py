@@ -97,7 +97,7 @@ class Vectors3D(Plotter):
         shared_axes = self._figure.add_subplot(gs[0])
         self._axes = [shared_axes]
 
-        for databundle in plotting_context.datasets().values():
+        for ds_index, databundle in enumerate(plotting_context.datasets().values()):
             dataset = databundle.dataset
             plotlabel = databundle.legend_label
 
@@ -105,10 +105,8 @@ class Vectors3D(Plotter):
 
             bins = dataset.x_axis(databundle.main_axis)
 
-            if "angle" in plotlabel:
-                axes = self._figure.add_subplot(
-                    gs[2 + plotlabel.startswith("Azimuthal")]
-                )
+            if ds_index in {4, 5}:
+                axes = self._figure.add_subplot(gs[ds_index - 2])
 
                 axes.bar(
                     bins,
@@ -130,7 +128,7 @@ class Vectors3D(Plotter):
                 self._axes.append(axes)
                 axes.set_xlabel(", ".join(x_axis_labels))
                 axes.set_title(dataset._name)
-            elif "vs" in plotlabel:
+            elif ds_index in {0, 1, 2}:
                 x_label, y_label = dataset._axes_units.keys()
                 [curve] = shared_axes.plot(
                     dataset.x_axis(x_label),
@@ -160,7 +158,7 @@ class Vectors3D(Plotter):
                     shared_axes.set_ylabel(y_axis_label)
                 shared_axes.set_title("q-vectors in 2D")
 
-            elif "in 3D" in plotlabel:
+            else:
                 axes = self._figure.add_subplot(gs[1], projection="3d")
                 axes.set_box_aspect((1, 1, 1))
                 all_coords = np.concatenate(
