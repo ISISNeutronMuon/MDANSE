@@ -207,7 +207,7 @@ class TrajectoryModel(QStandardItemModel):
             node_number = self.item(row).data()
         except AttributeError:
             return False
-        retcode = super().removeRow(row, parent)
+        super().removeRow(row, parent)
         instance = self._trajectory_instances.pop(node_number)
         filename = self._trajectory_paths.pop(node_number)
         self._trajectory_status.pop(node_number)
@@ -215,12 +215,4 @@ class TrajectoryModel(QStandardItemModel):
             instance.close()
         self.free_name.emit(str(filename))
         self._node_numbers.pop(self._node_numbers.index(node_number))
-        thread: LoaderThread = self._loading_threads.pop(node_number)
-        try:
-            thread.quit()
-            thread.terminate()
-            timer = QDeadlineTimer(300, Qt.TimerType.CoarseTimer)
-            thread.wait(deadline=timer)
-        except Exception as e:
-            LOG.error("While removing a loader thread, an exception occured: %s", e)
-        return retcode
+        self._loading_threads.pop(node_number)
