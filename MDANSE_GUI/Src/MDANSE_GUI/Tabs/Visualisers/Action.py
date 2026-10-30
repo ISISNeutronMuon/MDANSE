@@ -414,6 +414,8 @@ class Action(QWidget):
         self.allow_execution()
 
     def apply_instrument(self):
+        if self._job_instance is None or isinstance(self._job_instance, Dummy):
+            return
         if self._current_instrument is not None:
             initial_configuration = self._trajectory_configurator[
                 "instance"
@@ -469,6 +471,8 @@ class Action(QWidget):
 
     @Slot()
     def allow_execution(self):
+        if self._job_instance is None or isinstance(self._job_instance, Dummy):
+            return
         allow = True
         has_warning = False
         for widget in self._widgets:
