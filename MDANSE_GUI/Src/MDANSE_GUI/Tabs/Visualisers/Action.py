@@ -471,6 +471,8 @@ class Action(QWidget):
 
     @Slot()
     def allow_execution(self):
+        if self._job_instance is None or isinstance(self._job_instance, Dummy):
+            return
         allow = True
         has_warning = False
         for widget in self._widgets:
