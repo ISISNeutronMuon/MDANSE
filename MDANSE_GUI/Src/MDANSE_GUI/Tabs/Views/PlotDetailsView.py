@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import matplotlib.pyplot as mpl
 from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QTreeView
@@ -25,6 +27,41 @@ from MDANSE_GUI.Tabs.Models.PlottingContext import (
     plotting_column_index,
 )
 from MDANSE_GUI.Tabs.Views.Delegates import ColourPicker, MainAxisCombo, MplStyleCombo
+
+if TYPE_CHECKING:
+    from qtpy.QtWidgets import QItemDelegate, QTableView
+
+
+def set_plot_table_delegates(
+    view: QTreeView | QTableView, delegates: dict[str, QItemDelegate]
+):
+    """Attach delegates to specific columns of a Qt view.
+
+    This is used to simplify the input and validation of dataset attributes
+    used in the MDANSE_GUI plotter. By applying the same delegates to views
+    in different tabs, we ensure that the same inputs will be considered valid.
+
+    Parameters
+    ----------
+    view : QTreeView | QTableView
+        View containing plottable datasets.
+    delegates : dict[str, QItemDelegate]
+        A dictionary of QItemDelegate subclasses.
+    """
+    view.setItemDelegateForColumn(
+        plotting_column_index["Colour 1"], delegates["colour 1"]
+    )
+    view.setItemDelegateForColumn(
+        plotting_column_index["Colour 2"], delegates["colour 2"]
+    )
+    view.setItemDelegateForColumn(
+        plotting_column_index["Colour map"], delegates["colour map"]
+    )
+    view.setItemDelegateForColumn(
+        plotting_column_index["Line style"], delegates["line"]
+    )
+    view.setItemDelegateForColumn(plotting_column_index["Marker"], delegates["marker"])
+    view.setItemDelegateForColumn(plotting_column_index["Main axis"], delegates["axis"])
 
 
 class PlotDetailsView(QTreeView):
@@ -40,24 +77,7 @@ class PlotDetailsView(QTreeView):
             "line": MplStyleCombo(mpl_items=get_mpl_lines()),
             "marker": MplStyleCombo(mpl_items=get_mpl_markers()),
         }
-        self.setItemDelegateForColumn(
-            plotting_column_index["Colour 1"], self._delegates["colour 1"]
-        )
-        self.setItemDelegateForColumn(
-            plotting_column_index["Colour 2"], self._delegates["colour 2"]
-        )
-        self.setItemDelegateForColumn(
-            plotting_column_index["Colour map"], self._delegates["colour map"]
-        )
-        self.setItemDelegateForColumn(
-            plotting_column_index["Line style"], self._delegates["line"]
-        )
-        self.setItemDelegateForColumn(
-            plotting_column_index["Marker"], self._delegates["marker"]
-        )
-        self.setItemDelegateForColumn(
-            plotting_column_index["Main axis"], self._delegates["axis"]
-        )
+        set_plot_table_delegates(self, self._delegates)
 
     def connect_to_visualiser(self, visualiser) -> None:
         """Dummy method. The PlottingContext model is connected to the plotter directly."""
