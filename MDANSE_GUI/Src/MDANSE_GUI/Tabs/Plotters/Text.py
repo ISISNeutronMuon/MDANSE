@@ -38,6 +38,8 @@ if TYPE_CHECKING:
         SingleDataset,
     )
 
+FIXED_UNITS = {"rlu"}
+
 
 class DatasetFormatter:
     """Converts a plotting dataset into text.
@@ -327,16 +329,18 @@ class DatasetFormatter:
 
     def process_ND_data(
         self,
-        dataset: SingleDataset,
+        databundle: PlotArgs,
+        *,
+        main_axis: str | None = None,
     ) -> tuple[list[str], Iterator[Iterator[float]]]:
-        """Convert an N-dimensional array into text.
+        """Convert an N-dimensional data array into text.
 
         Parameters
         ----------
-        dataset : SingleDataset
-            input dataset
-        is_preview : bool, optional
-            if True, limit the number of output rows and columns, by default False
+        dataset : PlotArgs
+            A SingleDataset with the GUI parameters.
+        main_axis : str or None
+            Main axis to plot.
 
         Returns
         -------
@@ -346,6 +350,8 @@ class DatasetFormatter:
             Data table of x,y,z,... data
 
         """
+        dataset = databundle.dataset
+
         header_lines, comment_char = self.make_dataset_header(
             dataset, comment_character=self._comment
         )
@@ -356,7 +362,11 @@ class DatasetFormatter:
         for n, ax_key in enumerate(dataset.available_x_axes()):
             axis_unit = dataset._axes_units[ax_key]
             new_unit = self._plotting_context.get_conversion_factor(axis_unit)
-            conv_factor = measure(1.0, axis_unit, equivalent=True).toval(new_unit)
+            conv_factor = (
+                measure(1.0, axis_unit, equivalent=True).toval(new_unit)
+                if axis_unit not in FIXED_UNITS
+                else 1.0
+            )
 
             axis = dataset._axes[ax_key]
             new_axes[ax_key] = conv_factor * axis
