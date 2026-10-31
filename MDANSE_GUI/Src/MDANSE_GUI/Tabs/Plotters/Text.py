@@ -333,14 +333,14 @@ class DatasetFormatter:
         *,
         main_axis: str | None = None,
     ) -> tuple[list[str], Iterator[Iterator[float]]]:
-        """Convert an N-dimensional array into text.
+        """Convert an N-dimensional data array into text.
 
         Parameters
         ----------
-        dataset : SingleDataset
-            input dataset
-        is_preview : bool, optional
-            if True, limit the number of output rows and columns, by default False
+        dataset : PlotArgs
+            A SingleDataset with the GUI parameters.
+        main_axis : str or None
+            Main axis to plot.
 
         Returns
         -------
