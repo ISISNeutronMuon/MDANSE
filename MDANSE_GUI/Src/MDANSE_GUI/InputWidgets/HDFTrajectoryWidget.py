@@ -40,9 +40,15 @@ from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class HDFTrajectoryWidget(WidgetBase):
-    def __init__(self, *args, trajectory_instance: Trajectory | None = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        trajectory_instance: Trajectory | None = None,
+        source_object: str | None = None,
+        **kwargs,
+    ):
         super().__init__(*args, layout_type="QVBoxLayout", **kwargs)
-        filename = kwargs.get("source_object")
+        filename = source_object
         if trajectory_instance:
             self._configurator._instance = trajectory_instance
             self._configurator.configure_from_instance()

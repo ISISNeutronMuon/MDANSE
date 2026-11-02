@@ -32,14 +32,20 @@ with suppress(ImportError):
     from ase.io.formats import filetype
 
 
-class AseInputFileWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator")
+class AseInputFileWidget(WidgetBase[AseInputFileConfigurator]):
+    def __init__(
+        self,
+        *args,
+        parent: WidgetBase | None = None,
+        configurator: AseInputFileConfigurator | None = None,
+        default: str = "",
+        wildcard: str = "",
+        **kwargs,
+    ):
+        super().__init__(*args, configurator=configurator, **kwargs)
         default_value = configurator.default if configurator is not None else ""
 
         try:
-            parent = kwargs.get("parent")
             self.default_path = PurePath(parent.default_path)
         except KeyError:
             self.default_path = PurePath(os.path.abspath("."))
@@ -47,10 +53,10 @@ class AseInputFileWidget(WidgetBase):
         except AttributeError:
             self.default_path = PurePath(os.path.abspath("."))
             LOG.error("AttributeError in InputFileWidget - can't get default path.")
-        default_value = kwargs.get("default", "")
+        default_value = default
 
         tooltip_text = self._tooltip or "Specify a path to an existing file."
-        self._qt_file_association = kwargs.get("wildcard", "")
+        self._qt_file_association = wildcard
         combo = QComboBox(self._base)
         combo.addItems(AseInputFileConfigurator._allowed_formats)
         combo.setEditable(False)

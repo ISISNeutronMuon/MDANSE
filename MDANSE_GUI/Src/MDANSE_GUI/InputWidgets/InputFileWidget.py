@@ -21,22 +21,29 @@ from pathlib import PurePath
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QFileDialog, QLineEdit, QPushButton
 
+from MDANSE.Framework.Configurators import IConfigurator
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class InputFileWidget(WidgetBase):
-    def __init__(self, *args, file_dialog=QFileDialog.getOpenFileName, **kwargs):
-        super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator")
+    def __init__(
+        self,
+        *args,
+        parent: WidgetBase | None = None,
+        configurator: IConfigurator | None = None,
+        file_dialog=QFileDialog.getOpenFileName,
+        default: str = "",
+        wildcard: str = "",
+        **kwargs,
+    ):
+        super().__init__(*args, configurator=configurator, **kwargs)
         default_value = configurator.default if configurator is not None else ""
-        parent = kwargs.get("parent")
         self._parent = parent
         if parent is not None:
             self._job_name = parent._job_name
             self._settings = parent._settings
         try:
-            parent = kwargs.get("parent")
             self.default_path = PurePath(parent._default_path)
         except KeyError:
             self.default_path = PurePath(os.path.abspath("."))
@@ -44,7 +51,7 @@ class InputFileWidget(WidgetBase):
         except AttributeError:
             self.default_path = PurePath(os.path.abspath("."))
             LOG.error("AttributeError in OutputFilesWidget - can't get default path.")
-        default_value = kwargs.get("default", "")
+        default_value = default
         if self._tooltip:
             self._tooltip_text = self._tooltip
         else:
@@ -52,7 +59,7 @@ class InputFileWidget(WidgetBase):
         try:
             file_association = configurator.wildcard
         except AttributeError:
-            file_association = kwargs.get("wildcard", "")
+            file_association = wildcard
         self._qt_file_association = file_association
         self._default_value = default_value
         self.add_widgets_to_layout()

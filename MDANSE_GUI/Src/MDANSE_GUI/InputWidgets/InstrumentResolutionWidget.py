@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import Literal
+
 from qtpy.QtCore import Slot
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (
@@ -49,9 +51,8 @@ init_parameters = {
 
 
 class InstrumentResolutionWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        kwargs["layout_type"] = "QGridLayout"
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, layout_type: Literal["QGridLayout"] = "QGridLayout", **kwargs):
+        super().__init__(*args, layout_type=layout_type, **kwargs)
         # self._layout.addWidget(QLabel("Resolution function", self._base), 0, 0)
         self._type_combo = QComboBox(parent=self._base)
         self._dialog_button = QPushButton("Helper Dialog", self._base)

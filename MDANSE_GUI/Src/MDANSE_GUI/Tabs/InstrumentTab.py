@@ -100,6 +100,7 @@ class InstrumentTab(GeneralTab):
         session: Session,
         qt_settings: QSettings | None,
         logger: QMessageLogger,
+        model: GeneralModel | None = None,
         **kwargs,
     ):
         the_tab = cls(
@@ -108,7 +109,7 @@ class InstrumentTab(GeneralTab):
             session=session,
             qt_settings=qt_settings,
             logger=logger,
-            model=kwargs.get("model", GeneralModel()),
+            model=model or GeneralModel(),
             view=InstrumentList(),
             visualiser=InstrumentDetails(),
             layout=DoublePanel,

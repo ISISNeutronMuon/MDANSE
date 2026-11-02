@@ -16,9 +16,11 @@
 from __future__ import annotations
 
 import time
-from logging.handlers import QueueHandler
-from multiprocessing import Event, Process, Queue
+from logging.handlers import QueueHandler, _QueueLike
+from multiprocessing import Process, Queue
 from multiprocessing.connection import Connection
+from multiprocessing.synchronize import Event
+from typing import Any
 
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.MLogging import LOG
@@ -26,18 +28,21 @@ from MDANSE_GUI.Subprocess.JobStatusProcess import JobStatusProcess
 
 
 class Subprocess(Process):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        *,
+        job_name: str,
+        job_parameters: dict[str, Any] | None = None,
+        pipe: Connection,
+        pause_event: Event,
+        log_queue: _QueueLike,
+    ):
         super().__init__()
-        job_name = kwargs.get("job_name")
-        self._job_parameters = kwargs.get("job_parameters")
-        sending_pipe = kwargs.get("pipe")
+        self._job_parameters = job_parameters
         self.queue_0 = Queue()
         self.queue_1 = Queue()
-        pause_event = kwargs.get("pause_event")
-        self.log_queue = kwargs.get("log_queue")
-        self.construct_job(
-            job_name, sending_pipe, self.queue_0, self.queue_1, pause_event
-        )
+        self.log_queue = log_queue
+        self.construct_job(job_name, pipe, self.queue_0, self.queue_1, pause_event)
 
     def construct_job(
         self,

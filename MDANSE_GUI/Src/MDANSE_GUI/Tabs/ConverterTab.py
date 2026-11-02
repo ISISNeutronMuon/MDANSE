@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from MDANSE_GUI.Tabs.Models.GeneralModel import GeneralModel
 
 from functools import partial
 from typing import TYPE_CHECKING
@@ -84,6 +85,7 @@ class ConverterTab(GeneralTab):
         session: Session,
         qt_settings: QSettings | None,
         logger: QMessageLogger,
+        model: GeneralModel | None = None,
         **kwargs,
     ):
         action = Action()
@@ -93,7 +95,7 @@ class ConverterTab(GeneralTab):
             session=session,
             qt_settings=qt_settings,
             logger=logger,
-            model=kwargs.get("model", JobTree(parent_class=Converter, hidden_levels=1)),
+            model=model or JobTree(parent_class=Converter, hidden_levels=1),
             view=ActionsTree(),
             visualiser=action,
             layout=partial(

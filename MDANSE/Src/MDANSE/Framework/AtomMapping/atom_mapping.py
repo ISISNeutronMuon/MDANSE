@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import re
-from typing import TypeVar
+from typing import SupportsFloat, TypeVar
 
 import numpy as np
 
@@ -26,7 +26,7 @@ AtLabel = TypeVar("AtLabel", bound="AtomLabel")
 
 
 class AtomLabel:
-    def __init__(self, atm_label: str, **kwargs):
+    def __init__(self, atm_label: str, *, mass: SupportsFloat | None = None, **kwargs):
         """Creates an atom label object which is used for atom mapping
         and atom type guessing.
 
@@ -46,7 +46,7 @@ class AtomLabel:
             for k, v in kwargs.items():
                 self.grp_label += f"{k}={str(v).translate(translation)};"
             self.grp_label = self.grp_label[:-1]
-        self.mass = kwargs.get("mass")
+        self.mass = mass
         if self.mass is not None:
             self.mass = float(self.mass)
 

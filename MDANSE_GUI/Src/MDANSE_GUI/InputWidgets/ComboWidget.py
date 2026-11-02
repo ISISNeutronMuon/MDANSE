@@ -15,18 +15,20 @@
 #
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from qtpy.QtWidgets import QComboBox
 
+from MDANSE.Framework.Configurators import IConfigurator
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 from MDANSE_GUI.Widgets.DefaultCombobox import highlight_default_value
 
 
 class ComboWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        configurator = kwargs.get("configurator")
+    def __init__(self, *args, configurator: IConfigurator | None = None, choices: Sequence = (), **kwargs):
+        super().__init__(*args, configurator=configurator, **kwargs)
         if configurator is None:
-            option_list = kwargs.get("choices", [])
+            option_list = choices
         else:
             option_list = configurator.choices
             default_option = configurator.default

@@ -18,7 +18,7 @@ from __future__ import annotations
 from qtpy.QtCore import Slot
 from qtpy.QtWidgets import QLabel, QSpinBox
 
-from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
+from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase, Layouts
 
 suffix_dict = {
     "1": "st order",
@@ -30,8 +30,8 @@ suffix_dict = {
 
 
 class DerivativeOrderWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, layout_type="QHBoxLayout", **kwargs)
+    def __init__(self, *args, layout_type: Layouts = "QHBoxLayout", **kwargs):
+        super().__init__(*args, layout_type=layout_type, **kwargs)
         self._field = QSpinBox(self._base)
         self._field.setMaximum(5)
         self._field.setMinimum(1)
