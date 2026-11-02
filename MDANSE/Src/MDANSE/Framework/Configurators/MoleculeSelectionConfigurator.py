@@ -45,7 +45,7 @@ class MoleculeSelectionConfigurator(IConfigurator):
         :type choices: list
         """
 
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.choices = []
 

@@ -123,7 +123,7 @@ class IQVectors(Configurable, RegisterFactory["IQVectors"], abc.ABC):
     is_lattice = False
 
     def __init__(self, unit_cell: UnitCell | None, status=None):
-        Configurable.__init__(self)
+        super().__init__()
 
         self._unit_cell = unit_cell
 

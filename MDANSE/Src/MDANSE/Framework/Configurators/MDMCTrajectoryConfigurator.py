@@ -40,8 +40,7 @@ class MDMCTrajectoryConfigurator(IConfigurator):
         :type wildcard: str
         """
 
-        # The base class constructor.
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self._wildcard = wildcard
 

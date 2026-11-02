@@ -47,7 +47,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         :type name: str.
         """
 
-        IntegerConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
     def configure(self, value):
         """
@@ -69,7 +69,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
         if value is None or value == "":
             value = self._default
 
-        IntegerConfigurator.configure(self, value)
+        super().configure(value)
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]
         traj_has_velocities = trajConfig["instance"].has_variable("velocities")

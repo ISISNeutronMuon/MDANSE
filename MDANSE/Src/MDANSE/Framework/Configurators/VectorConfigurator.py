@@ -59,8 +59,7 @@ class VectorConfigurator(IConfigurator):
             The maximum value of the vectors values.
         """
 
-        # The base class constructor.
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.valueType = valueType
 

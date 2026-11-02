@@ -41,7 +41,7 @@ class FramesConfigurator(RangeConfigurator):
         :type name: str
         """
 
-        RangeConfigurator.__init__(self, name, sort=True, **kwargs)
+        super().__init__(name, sort=True, **kwargs)
         self.prediction = PredictionSettings(key="time", label="Time", unit="ps")
 
     def configure(self, value):
@@ -94,7 +94,7 @@ class FramesConfigurator(RangeConfigurator):
         self._mini = 0
         self._maxi = trajConfig["length"]
 
-        RangeConfigurator.configure(self, value)
+        super().configure(value)
         if not self.valid:
             return
 

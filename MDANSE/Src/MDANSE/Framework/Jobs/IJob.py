@@ -236,7 +236,7 @@ class IJob(Configurable, RegisterFactory["IJob"], ABC):
         The base class constructor.
         """
 
-        Configurable.__init__(self, trajectory_input=trajectory_input)
+        super().__init__(trajectory_input=trajectory_input)
 
         self._outputData = OutputData()
 

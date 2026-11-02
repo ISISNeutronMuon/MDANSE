@@ -68,7 +68,7 @@ class JobInfo:
 
 class JobStatus(Status):
     def __init__(self, job):
-        Status.__init__(self)
+        super().__init__()
 
         self._state = JobInfo(
             name=job.name,

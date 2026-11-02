@@ -44,8 +44,7 @@ class AseInputFileConfigurator(InputFileConfigurator):
         :type wildcard: str
         """
 
-        # The base class constructor.
-        InputFileConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.wildcard = wildcard
         self["format"] = kwargs.get("format")

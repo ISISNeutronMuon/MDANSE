@@ -63,7 +63,7 @@ class RangeConfigurator(IConfigurator):
             If not None, all values generated over maxi will be discarded.
         """
 
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.valueType = valueType
 
