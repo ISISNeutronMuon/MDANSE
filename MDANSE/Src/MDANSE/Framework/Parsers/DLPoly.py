@@ -50,12 +50,6 @@ class FieldFileError(Exception):
 
 
 class HistoryFile(Parser):
-    UNIT_CONV = {
-        "length": measure(1.0, "ang").toval("nm"),
-        "positions": measure(1.0, "ang").toval("nm"),
-        "velocities": measure(1.0, "ang/ps").toval("nm/ps"),
-        "gradients": measure(1.0, "Da ang / ps2").toval("Da nm / ps2"),
-    }
 
     n_frames = None
 
@@ -94,7 +88,6 @@ class HistoryFile(Parser):
 
         if self.imcon:
             cell = np.array([line.split() for line in step[1:4]], dtype=np.float64).T
-            cell *= self.UNIT_CONV["length"]
             accum["unit_cell"] = UnitCell(cell)
         else:
             accum["unit_cell"] = None
@@ -118,7 +111,7 @@ class HistoryFile(Parser):
 
         ref = accum["ind"] - 1
         for key in keys:
-            accum[key] = accum[key][ref, :] * self.UNIT_CONV[key]
+            accum[key] = accum[key][ref, :]
 
         return accum
 

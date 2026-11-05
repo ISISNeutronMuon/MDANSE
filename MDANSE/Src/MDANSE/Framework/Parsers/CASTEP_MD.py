@@ -58,18 +58,6 @@ class CASTEPMDFile(Parser):
         "F": atom_prop_handler,
     }
 
-    UNIT_CONV = defaultdict(
-        lambda: 1.0,
-        h=BOHR,
-        hv=BOHR / AUT,
-        E=HARTREE,
-        F=HARTREE / BOHR,
-        S=HARTREE / BOHR**3,
-        P=HARTREE / BOHR**3,
-        V=BOHR / AUT,
-        R=BOHR,
-    )
-
     @property
     def frames(self) -> Iterator:
         with open(self.filename, encoding="utf-8") as castep_file:

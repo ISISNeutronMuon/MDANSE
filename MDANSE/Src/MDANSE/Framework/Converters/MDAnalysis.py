@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from typing import ClassVar
 
 from more_itertools import first
 
@@ -21,7 +22,7 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Units import measure
+from MDANSE.Framework.Units import measure, _Unit
 from MDANSE.MolecularDynamics.Configuration import (
     AbsoluteConfiguration,
     PeriodicAbsoluteConfiguration,
@@ -51,6 +52,14 @@ class MDAnalysis(Converter):
     For topology and coordinate files supported by MDAnalysis see
     <a href="https://userguide.mdanalysis.org/stable/formats/index.html#formats">formats</a>.
     """
+
+    UNITS: ClassVar[dict[str, _Unit | str | float]] = {
+        "unit_cell": "ang",
+        "coordinates": "ang",
+        "velocities": "ang/ps",
+        "gradients": measure(1.0, "kJ/mol ang", equivalent=True),
+        "time": "ps",
+    }
 
     enabled = mda_available
     requires_extras = ("mdanalysis",)
@@ -197,26 +206,26 @@ class MDAnalysis(Converter):
         """
         self.u.trajectory[index]
 
+        units = self.UNITS.copy()
+
         # convert from MDAnalysis units to MDANSE units
         # see https://userguide.mdanalysis.org/stable/units.html for
         # default units in MDAnalysis
         if self.configuration["unit_cell"]["apply"]:
             unit_cell = self.configuration["unit_cell"]["value"]
+            units["unit_cell"] = "nm"
         elif self.u.trajectory.ts.triclinic_dimensions is not None:
-            unit_cell = UnitCell(
-                self.u.trajectory.ts.triclinic_dimensions
-                * measure(1.0, "ang").toval("nm")
-            )
+            unit_cell = UnitCell(self.u.trajectory.ts.triclinic_dimensions)
         else:
             unit_cell = None
 
         if unit_cell is None:
             conf = AbsoluteConfiguration(
-                self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
+                self.u.trajectory.ts.positions,
             )
         else:
             conf = PeriodicAbsoluteConfiguration(
-                self.u.trajectory.ts.positions * measure(1.0, "ang").toval("nm"),
+                self.u.trajectory.ts.positions,
                 unit_cell,
             )
 
@@ -224,29 +233,17 @@ class MDAnalysis(Converter):
                 conf.fold_coordinates()
 
         if (vel := getattr(self.u.trajectory.ts, "velocities", None)) is not None:
-            conf["velocities"] = vel * measure(1.0, "ang/ps").toval("nm/ps")
+            conf["velocities"] = vel
 
         if (force := getattr(self.u.trajectory.ts, "forces", None)) is not None:
-            conf["gradients"] = force * measure(
-                1.0, "kJ/mol ang", equivalent=True
-            ).toval("Da nm/ps2")
+            conf["gradients"] = force
 
         if float(self.configuration["time_step"]["value"]) == 0.0:
             time = index * self.u.trajectory.ts.dt
         else:
             time = index * float(self.configuration["time_step"]["value"])
 
-        self._trajectory.dump_configuration(
-            conf,
-            time,
-            units={
-                "time": "ps",
-                "unit_cell": "nm",
-                "coordinates": "nm",
-                "velocities": "nm/ps",
-                "gradients": "Da nm/ps2",
-            },
-        )
+        self._trajectory.dump_configuration(conf, time, units=units)
 
         return index, None
 

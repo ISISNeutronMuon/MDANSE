@@ -132,7 +132,7 @@ ONE_TEST_EACH = (
             "dcd_file": hem_cam_dcd,
             "fold": False,
             "pdb_file": hem_cam_pdb,
-            "time_step": 1.0,
+            "time_step": [True, 1.0],
         },
     ),
     (
@@ -166,7 +166,7 @@ ONE_TEST_EACH = (
             "dcd_file": apoferritin_dcd,
             "fold": False,
             "pdb_file": apoferritin_pdb,
-            "time_step": "1.0",
+            "time_step": [True, "1.0"],
         },
     ),
     (
@@ -298,7 +298,7 @@ ONE_TEST_EACH = (
             (
                 "/configuration/coordinates",
                 "/configuration/velocities",
-                "/configuration/forces",
+                "/configuration/gradients",
                 "/time",
             ),
             {
@@ -311,7 +311,7 @@ ONE_TEST_EACH = (
         (
             "cp2k",
             "cp2k_srtio3.mdt",
-            ("/configuration/coordinates", "/configuration/forces", "/time"),
+            ("/configuration/coordinates", "/configuration/gradients", "/time"),
             {
                 "pos_file": cp2k_srtio3_pos,
                 "cell_file": cp2k_srtio3_cell,
@@ -471,7 +471,8 @@ def test_convert_with_uc(
     converter.run(parameters, status=True)
 
     with h5py.File(op.with_suffix(".mdt")) as result:
-        assert all(np.allclose(unit_cell, parameters["unit_cell"][0]) for unit_cell in result["/unit_cell"][:])
+        for unit_cell in result["/unit_cell"][:]:
+            assert np.allclose(unit_cell, parameters["unit_cell"][0])
 
 
 @pytest.mark.parametrize(

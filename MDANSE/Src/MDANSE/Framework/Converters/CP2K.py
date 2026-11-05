@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 from more_itertools import all_equal
@@ -25,7 +25,7 @@ from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
-from MDANSE.Framework.Units import measure
+from MDANSE.Framework.Units import _Unit, measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -40,12 +40,12 @@ class CP2KConverterError(Exception):
 class CP2K(Converter):
     """Converts a CP2K trajectory to an MDT trajectory."""
 
-    UNITS = {
-        "coordinates": measure(1.0, iunit="ang").toval("nm"),
-        "cell": measure(1.0, iunit="ang").toval("nm"),
-        "velocities": measure(1.0, iunit="ang/fs").toval("nm/ps"),
-        "forces": measure(1.0, iunit="Da ang / fs2").toval("Da nm / ps2"),
-        "time": measure(1.0, iunit="fs").toval("ps"),
+    UNITS: ClassVar[dict[str, _Unit | str]] = {
+        "coordinates": measure(1.0, iunit="ang"),
+        "unit_cell": measure(1.0, iunit="ang"),
+        "velocities": measure(1.0, iunit="ang/fs"),
+        "gradients": measure(1.0, iunit="Da ang / fs2"),
+        "time": "fs",
     }
 
     label = "CP2K"
@@ -129,7 +129,7 @@ class CP2K(Converter):
             self.files["velocities"] = vfile
 
         if ffile := self.configuration["force_file"].instance:
-            self.files["forces"] = ffile
+            self.files["gradients"] = ffile
 
         for attr in ("time_step", "n_frames"):
             if not all_equal(getattr(file, attr) for file in self.files.values()):
@@ -164,8 +164,8 @@ class CP2K(Converter):
         data_to_be_written = ["configuration", "time"]
         if "velocities" in self.files:
             data_to_be_written.append("velocities")
-        if "forces" in self.files:
-            data_to_be_written.append("forces")
+        if "gradients" in self.files:
+            data_to_be_written.append("gradients")
 
     def run_step(self, index):
         """Runs a single step of the job.
@@ -176,11 +176,12 @@ class CP2K(Converter):
         @note: the argument index is the index of the loop not the index of the frame.
         """
 
-        data = {
-            key: next(frames) * self.UNITS[key] for key, frames in self.frames.items()
-        }
+        data = {key: next(frames) for key, frames in self.frames.items()}
+        units = self.UNITS.copy()
+
         if self.configuration["unit_cell"]["apply"]:
             data["cell"] = self.configuration["unit_cell"]["value"]
+            units["unit_cell"] = "nm"
         else:
             data["cell"] = UnitCell(data["cell"])
 
@@ -193,18 +194,13 @@ class CP2K(Converter):
         if self.configuration["fold"]["value"]:
             real_conf.fold_coordinates()
 
-        time = index * self.files["coordinates"].time_step * self.UNITS["time"]
+        time = index * self.files["coordinates"].time_step
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(
             real_conf,
             time,
-            units={
-                "time": "ps",
-                "unit_cell": "nm",
-                "coordinates": "nm",
-                "velocities": "nm/ps",
-            },
+            units=units,
         )
 
         return index, None

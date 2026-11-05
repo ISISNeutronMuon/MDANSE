@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from typing import ClassVar
+from MDANSE.Framework.Units import _Unit
 
 import collections
 
@@ -36,6 +38,12 @@ class DCD(Converter):
     """Converts a DCD trajectory to an MDT trajectory."""
 
     label = "DCD"
+
+    UNITS: ClassVar[dict[str, _Unit | str]] = {
+        "time": "akma_time",
+        "coordinates": "ang",
+        "unit_cell": "ang",
+    }
 
     settings = {}
     settings["pdb_file"] = (
@@ -69,8 +77,12 @@ class DCD(Converter):
         },
     )
     settings["time_step"] = (
-        "FloatConfigurator",
-        {"default": 1.0, "label": "Time step (ps)"},
+        "OptionalFloatConfigurator",
+        {
+            "default": [False, 1.0],
+            "label": "Time step (ps)",
+            "tooltip": "Override for time-step.",
+        },
     )
     settings["fold"] = (
         "BooleanConfigurator",
@@ -91,10 +103,10 @@ class DCD(Converter):
         super().initialize()
 
         # The number of steps of the analysis.
-        instance: DCDFile = self.configuration["dcd_file"].instance
-        self.numberOfSteps = instance.n_frames
+        self.parser_instance: DCDFile = self.configuration["dcd_file"].instance
+        self.numberOfSteps = self.parser_instance.n_frames
 
-        self.frames = instance.frames
+        self.frames = self.parser_instance.frames
 
         # Create all chemical entities from the PDB file.
         self._chemical_system = self.configuration[
@@ -125,23 +137,28 @@ class DCD(Converter):
         # The x, y and z values of the current frame.
         unit_cell, config = next(self.frames)
 
+        units = self.UNITS.copy()
+
         if self.configuration["unit_cell"]["apply"]:
             conf = PeriodicAbsoluteConfiguration(
                 config, self.configuration["unit_cell"]["value"]
             )
+            units["unit_cell"] = "nm"
         else:
             conf = PeriodicAbsoluteConfiguration(config, unit_cell)
 
         if self.configuration["fold"]["value"]:
             conf.fold_coordinates()
 
-        # The current time.
-        time = index * self.configuration["time_step"]["value"]
+        if self.configuration["time_step"]["use_it"]:
+            # The current time.
+            time = index * self.configuration["time_step"]["value"]
+            units["time"] = "ps"
+        else:
+            time = index * self.parser_instance.time_step
 
         # Store a snapshot of the current configuration in the output trajectory.
-        self._trajectory.dump_configuration(
-            conf, time, units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"}
-        )
+        self._trajectory.dump_configuration(conf, time, units=units)
 
         return index, None
 

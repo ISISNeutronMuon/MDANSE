@@ -18,6 +18,7 @@ from __future__ import annotations
 import collections
 from contextlib import suppress
 from math import sqrt
+from typing import ClassVar
 
 import numpy as np
 from more_itertools import ilen
@@ -26,7 +27,7 @@ from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, measure
+from MDANSE.Framework.Units import INTERNAL_UNITS, UnitError, _Unit, measure
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Configuration import (
     AbsoluteConfiguration,
@@ -41,11 +42,9 @@ try:
 
     from MDANSE.Framework.Parsers import ASEParser
 
-    vel_conv = ase_units.fs / ase_units.Ang
     ase_available = True
 except ImportError:
     ASEParser = object()
-    vel_conv = np.nan
     ase_available = False
 
 
@@ -120,12 +119,12 @@ class ASE(Converter):
         },
     )
 
-    UNIT_CONV = {
-        "energy": measure(1.0, "eV").toval("Da nm2 / ps2"),
-        "forces": measure(1.0, "eV/ang").toval("Da nm / ps2"),
-        "time": measure(1.0, "fs").toval("ps"),
-        "velocities": measure(vel_conv, "ang/fs").toval("nm/ps"),
-        "length": measure(1.0, "ang").toval("nm"),
+    UNITS: ClassVar[dict[str, str]] = {
+        "unit_cell": "ang",
+        "coordinates": "ang",
+        "velocities": "ang/fs",
+        "gradients": "eV/ang",
+        "energy": "eV",
     }
 
     def initialize(self):
@@ -144,9 +143,7 @@ class ASE(Converter):
         # The number of steps of the analysis.
         self.numberOfSteps = self.configuration["n_steps"]["value"]
 
-        self._timestep = float(self.configuration["time_step"]["value"]) * measure(
-            1.0, self.configuration["time_unit"]["value"]
-        ).toval("ps")
+        self._timestep = float(self.configuration["time_step"]["value"])
 
         self.parse_first_step(self._atomicAliases)
         LOG.info(f"isPeriodic after parse_first_step: {self._isPeriodic}")
@@ -209,15 +206,13 @@ class ASE(Converter):
                     index,
                     self._backup_cell,
                 )
-                unit_cell = self._backup_cell * self.units["length"]
-            else:
-                unit_cell *= self.units["length"]
+                unit_cell = self._backup_cell
+
             unit_cell = UnitCell(unit_cell)
         else:
             unit_cell = None
 
         coords = frame.get_positions()
-        coords *= self.units["length"]
 
         if (momenta := frame.arrays.get("momenta")) is not None:
             masses = (
@@ -227,11 +222,7 @@ class ASE(Converter):
                     self._chemical_system.atom_property("atomic_weight")
                 ).reshape((len(momenta), 1))
             )
-            variables["velocities"] = (
-                (momenta * self.units["momenta"]) / masses
-                if "momenta" in self.units
-                else (momenta / masses) * self.units["velocities"]
-            )
+            variables["velocities"] = momenta / masses
 
         try:
             if unit_cell is not None:
@@ -251,11 +242,8 @@ class ASE(Converter):
             return index, None
 
         # A snapshot is created out of the current configuration.
-        self._trajectory.dump_configuration(
-            real_conf,
-            time,
-            units={"time": "ps", "unit_cell": "nm", "coordinates": "nm"},
-        )
+        print(self.units)
+        self._trajectory.dump_configuration(real_conf, time, units=self.units)
 
         charges = None
         if "charges" in frame.arrays:
@@ -315,16 +303,19 @@ class ASE(Converter):
         if "units" in first_frame.info:
             for key, val in first_frame.info["units"].items():
                 if (key, val) == ("momenta", "(eV*u)^0.5"):
-                    unit_conv["momenta"] = sqrt(
-                        measure(1.0, "eV Da").toval("Da2 nm2/ps2")
+                    unit_conv["velocities"] = measure(1.0, "eV Da").sqrt() / measure(
+                        1.0, "Da"
                     )
-
-                if key not in INTERNAL_UNITS:
                     continue
 
                 with suppress(UnitError, KeyError):
-                    unit_conv[key] = measure(1.0, val).toval(INTERNAL_UNITS[key])
-        self.units = collections.ChainMap(unit_conv, self.UNIT_CONV)
+                    unit_conv[key] = val
+
+        unit_conv["time"] = self.configuration["time_unit"]["value"]
+        if self.configuration["unit_cell"]["apply"]:
+            unit_conv["unit_cell"] = "nm"
+
+        self.units = collections.ChainMap(unit_conv, self.UNITS)
 
         self._timeaxis = self._timestep * np.arange(self._total_number_of_steps)
 
