@@ -16,12 +16,14 @@
 from __future__ import annotations
 
 import collections
+from typing import ClassVar
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import XDATCARFile
+from MDANSE.Framework.Units import _Unit
 from MDANSE.MolecularDynamics.Configuration import PeriodicFractionalConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 
@@ -59,7 +61,7 @@ class VASP(Converter):
 
     label = "VASP"
 
-    UNITS = {
+    UNITS: ClassVar[dict[str, _Unit | str]] = {
         "coordinates": "ang",
         "time": "fs",
         "unit_cell": "ang",
@@ -147,11 +149,13 @@ class VASP(Converter):
 
         frame = next(self.frames)
 
+        units = self.UNITS.copy()
         # Read the current step in the xdatcar file.
         coords = frame["coords"]
 
         if self.configuration["unit_cell"]["apply"]:
             unitCell = self.configuration["unit_cell"]["value"]
+            units["unit_cell"] = "nm"
         else:
             unitCell = frame["unit_cell"]
 
@@ -165,16 +169,13 @@ class VASP(Converter):
             real_conf.fold_coordinates()
 
         # Compute the actual time
-        time = (
-            frame["step"]
-            * self.configuration["time_step"]["value"]
-        )
+        time = frame["step"] * self.configuration["time_step"]["value"]
 
         # Dump the configuration to the output trajectory
         self._trajectory.dump_configuration(
             real_conf,
             time,
-            units=self.UNITS,
+            units=units,
         )
 
         return index, None

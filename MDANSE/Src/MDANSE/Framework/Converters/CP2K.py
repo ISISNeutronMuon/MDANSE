@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 import numpy as np
 from more_itertools import all_equal
@@ -25,7 +25,7 @@ from MDANSE.Framework.AtomMapping import get_element_from_mapping
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
-from MDANSE.Framework.Units import measure
+from MDANSE.Framework.Units import _Unit, measure
 from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -40,7 +40,7 @@ class CP2KConverterError(Exception):
 class CP2K(Converter):
     """Converts a CP2K trajectory to an MDT trajectory."""
 
-    UNITS = {
+    UNITS: ClassVar[dict[str, _Unit | str]] = {
         "coordinates": measure(1.0, iunit="ang"),
         "unit_cell": measure(1.0, iunit="ang"),
         "velocities": measure(1.0, iunit="ang/fs"),
@@ -176,11 +176,12 @@ class CP2K(Converter):
         @note: the argument index is the index of the loop not the index of the frame.
         """
 
-        data = {
-            key: next(frames) for key, frames in self.frames.items()
-        }
+        data = {key: next(frames) for key, frames in self.frames.items()}
+        units = self.UNITS.copy()
+
         if self.configuration["unit_cell"]["apply"]:
             data["cell"] = self.configuration["unit_cell"]["value"]
+            units["unit_cell"] = "nm"
         else:
             data["cell"] = UnitCell(data["cell"])
 
@@ -199,7 +200,7 @@ class CP2K(Converter):
         self._trajectory.dump_configuration(
             real_conf,
             time,
-            units=self.UNITS,
+            units=units,
         )
 
         return index, None

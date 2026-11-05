@@ -31,6 +31,7 @@ from more_itertools import always_iterable, first
 from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
+from MDANSE.Framework.Units import INTERNAL_UNITS
 from MDANSE.IO.IOUtils import UCEnum, str_to_num, summarise_array
 from MDANSE.MolecularDynamics.Configuration import _PeriodicConfiguration
 from MDANSE.Trajectory.FileTrajBase import TrajDataArray
@@ -50,7 +51,6 @@ if TYPE_CHECKING:
 
     from MDANSE.Chemistry.AtomsDatabase import AtomsDatabase
     from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
-    from MDANSE.Chemistry.Databases import AtomsDatabase
     from MDANSE.Framework.Units import _Unit
     from MDANSE.MolecularDynamics.Configuration import _Configuration
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
@@ -1067,13 +1067,6 @@ class TrajectoryWriterError(Exception):
 class TrajectoryWriter:
     allowed_compression = ["gzip", "lzf"]
 
-    MDT_UNITS: ClassVar[dict[str, str]] = {
-        "time": "ps",
-        "unit_cell": "nm",
-        "coordinates": "nm",
-        "velocities": "nm/ps",
-        "gradients": "Da nm/ps2",
-    }
 
     def __init__(
         self,
@@ -1488,8 +1481,8 @@ class TrajectoryWriter:
 
         match unit:
             case _Unit():
-                if key in self.MDT_UNITS:
-                    return unit.toval(self.MDT_UNITS[key]), self.MDT_UNITS[key]
+                if key in INTERNAL_UNITS:
+                    return unit.toval(INTERNAL_UNITS[key]), INTERNAL_UNITS[key]
                 return unit.factor, unit._uname
             case float():
                 return unit, "au"
@@ -1504,7 +1497,7 @@ class TrajectoryWriter:
         self,
         configuration: _Configuration | None,
         time: float,
-        units: dict[str, _Unit | float | str] | None = None,
+        units: Mapping[str, _Unit | float | str] | None = None,
     ):
         """Dump the chemical system configuration at a given time.
 
@@ -1539,58 +1532,54 @@ class TrajectoryWriter:
             unit_conv[key], out_units[key] = self._process_unit(unit, key)
 
         # Out units are MDT_UNITS by default otherwise dumped as incoming.
-        out_units |= self.MDT_UNITS
+        out_units |= INTERNAL_UNITS
 
         # Write the configuration variables
         configuration_grp = self._h5_file["/configuration"]
+
+        compression_kwarg = (
+            {"compression": self._compression}
+            if self._compression in TrajectoryWriter.allowed_compression
+            else {}
+        )
+
         for k, v in configuration.variables.items():
-            data = np.empty(v.shape)
-            data[:] = np.nan
+            data = np.full(v.shape, np.nan)
             data[self._selected_atoms, :] = v[self._selected_atoms, :] * unit_conv[k]
-            dset = configuration_grp.get(k, None)
-            if dset is None:
-                if self._compression in TrajectoryWriter.allowed_compression:
-                    dset = configuration_grp.create_dataset(
-                        k,
-                        shape=(self._n_steps, self._n_atoms, 3),
-                        chunks=(self.frame_chunks, self.atom_chunks, 3),
-                        dtype=self._dtype,
-                        compression=self._compression,
-                    )
-                else:
-                    dset = configuration_grp.create_dataset(
-                        k,
-                        shape=(self._n_steps, self._n_atoms, 3),
-                        chunks=(self.frame_chunks, self.atom_chunks, 3),
-                        dtype=self._dtype,
-                    )
-                dset.attrs["units"] = out_units.get(k, "au")
+
+            dset = configuration_grp.require_dataset(
+                k,
+                shape=(self._n_steps, self._n_atoms, 3),
+                chunks=(self.frame_chunks, self.atom_chunks, 3),
+                dtype=self._dtype,
+                exact=True,
+                **compression_kwarg,
+            )
+            dset.attrs.setdefault("units", out_units.get(k, "au"))
             dset[self._current_index, : self._n_atoms] = data
 
         # Write the unit cell
         if isinstance(configuration, _PeriodicConfiguration):
             unit_cell = configuration.unit_cell
-            unit_cell_dset = self._h5_file.get("unit_cell", None)
-            if unit_cell_dset is None:
-                unit_cell_dset = self._h5_file.create_dataset(
-                    "unit_cell",
-                    shape=(self._n_steps, 3, 3),
-                    dtype=np.float64,
-                )
-                unit_cell_dset.attrs["units"] = out_units["unit_cell"]
+            unit_cell_dset = self._h5_file.require_dataset(
+                "unit_cell",
+                shape=(self._n_steps, 3, 3),
+                dtype=np.float64,
+                exact=True,
+            )
+            unit_cell_dset.attrs.setdefault("units", out_units["unit_cell"])
             unit_cell_dset[self._current_index] = (
                 unit_cell.direct * unit_conv["unit_cell"]
             )
 
         # Write the time
-        time_dset = self._h5_file.get("time", None)
-        if time_dset is None:
-            time_dset = self._h5_file.create_dataset(
-                "time",
-                shape=(self._n_steps,),
-                dtype=np.float64,
-            )
-            time_dset.attrs["units"] = out_units["time"]
+        time_dset = self._h5_file.require_dataset(
+            "time",
+            shape=(self._n_steps,),
+            dtype=np.float64,
+            exact=True,
+        )
+        time_dset.attrs.setdefault("units", out_units["time"])
         time_dset[self._current_index] = time * unit_conv["time"]
 
         self._current_index += 1

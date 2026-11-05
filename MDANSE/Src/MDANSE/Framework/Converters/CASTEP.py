@@ -26,11 +26,27 @@ from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
+HBAR = measure(1.05457182e-34, "kg m2 / s")
+HARTREE = measure(27.2113845, "eV")
+BOHR = measure(5.29177210903e-11, "m")
+AUT = measure(2.4188843265864e-17, "s")
+
 
 @IJob.register("CASTEP")
 @Converter.register("CASTEP")
 class CASTEP(Converter):
     """Converts a Castep Trajectory into an MDT trajectory file."""
+
+
+    UNITS = {
+        "coordinates": BOHR,
+        "cell_velocity": BOHR / AUT,
+        "energy": HARTREE,
+        "gradients": HARTREE / BOHR,
+        "stresses": HARTREE / BOHR**3,
+        "velocities": BOHR / AUT,
+        "unit_cell": BOHR,
+    }
 
     label = "CASTEP"
 
@@ -117,12 +133,14 @@ class CASTEP(Converter):
         tuple[int, None]
         """
         frame = next(self.frames)
+        units = self.UNITS.copy()
 
         # Read the information in the frame
         time_step = frame["time"]
 
         if self.configuration["unit_cell"]["apply"]:
             unit_cell = self.configuration["unit_cell"]["value"]
+            units["unit_cell"] = "nm"
         else:
             unit_cell = UnitCell(np.vstack(frame["h"]))
         coords = np.vstack(tuple(arr[1] for arr in frame["R"]))
@@ -139,13 +157,7 @@ class CASTEP(Converter):
         self._trajectory.dump_configuration(
             conf,
             time_step,
-            units={
-                "time": "ps",
-                "coordinates": "nm",
-                "unit_cell": "nm",
-                "velocities": "nm/ps",
-                "gradients": "Da nm/ps2",
-            },
+            units=units,
         )
 
         return index, None

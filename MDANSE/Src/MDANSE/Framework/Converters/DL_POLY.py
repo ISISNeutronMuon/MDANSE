@@ -44,6 +44,14 @@ class DL_POLYConverterError(Exception):
 class DL_POLY(Converter):
     """Converts a DL_POLY trajectory to an MDT trajectory."""
 
+    UNITS = {
+        "time": "ps",
+        "unit_cell": "ang",
+        "coordinates": "ang",
+        "velocities": "ang/ps",
+        "gradients": "Da ang / ps2",
+    }
+
     label = "DL-POLY"
 
     settings = {}
@@ -142,8 +150,11 @@ class DL_POLY(Converter):
 
         frame = next(self.frames)
 
+        units = self.UNITS.copy()
+
         if self.configuration["unit_cell"]["apply"]:
             unit_cell = self.configuration["unit_cell"]["value"]
+            units["unit_cell"] = "nm"
         elif self.history_file.imcon:
             unit_cell = frame["unit_cell"]
         else:
@@ -162,17 +173,7 @@ class DL_POLY(Converter):
         if "gradients" in frame:
             conf["gradients"] = frame["gradients"]
 
-        self._trajectory.dump_configuration(
-            conf,
-            frame["time"],
-            units={
-                "time": "ps",
-                "unit_cell": "nm",
-                "coordinates": "nm",
-                "velocities": "nm/ps",
-                "gradients": "Da nm/ps2",
-            },
-        )
+        self._trajectory.dump_configuration(conf, frame["time"], units=units)
 
         self._trajectory.write_charges(frame["charge"], index)
 

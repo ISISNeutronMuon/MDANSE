@@ -471,7 +471,8 @@ def test_convert_with_uc(
     converter.run(parameters, status=True)
 
     with h5py.File(op.with_suffix(".mdt")) as result:
-        assert all(np.allclose(unit_cell, parameters["unit_cell"][0]) for unit_cell in result["/unit_cell"][:])
+        for unit_cell in result["/unit_cell"][:]:
+            assert np.allclose(unit_cell, parameters["unit_cell"][0])
 
 
 @pytest.mark.parametrize(

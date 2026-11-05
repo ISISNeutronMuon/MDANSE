@@ -14,6 +14,8 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from typing import ClassVar
+from MDANSE.Framework.Units import _Unit
 
 import collections
 
@@ -37,7 +39,11 @@ class DCD(Converter):
 
     label = "DCD"
 
-    UNITS = {"time": "akma_time", "coordinates": "ang", "unit_cell": "ang"}
+    UNITS: ClassVar[dict[str, _Unit | str]] = {
+        "time": "akma_time",
+        "coordinates": "ang",
+        "unit_cell": "ang",
+    }
 
     settings = {}
     settings["pdb_file"] = (
@@ -131,12 +137,13 @@ class DCD(Converter):
         # The x, y and z values of the current frame.
         unit_cell, config = next(self.frames)
 
-        units = self.UNITS
+        units = self.UNITS.copy()
 
         if self.configuration["unit_cell"]["apply"]:
             conf = PeriodicAbsoluteConfiguration(
                 config, self.configuration["unit_cell"]["value"]
             )
+            units["unit_cell"] = "nm"
         else:
             conf = PeriodicAbsoluteConfiguration(config, unit_cell)
 

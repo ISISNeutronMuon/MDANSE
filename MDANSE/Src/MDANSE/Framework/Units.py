@@ -29,7 +29,7 @@ from typing import (
     Literal,
     NamedTuple,
     Self,
-    TypedDict,
+    TypedDict, Final,
 )
 
 from more_itertools import one
@@ -134,12 +134,14 @@ unit_lookup = {
     "N/A": "arbitrary",
 }
 
-INTERNAL_UNITS = {
-    "energy": "Da nm2 / ps2",
-    "velocities": "nm/ps",
-    "gradients": "Da nm / ps2",
+INTERNAL_UNITS: Final[dict[str, str]] = {
     "time": "ps",
     "length": "nm",
+    "unit_cell": "nm",
+    "coordinates": "nm",
+    "velocities": "nm/ps",
+    "gradients": "Da nm/ps2",
+    "energy": "Da nm2 / ps2",
 }
 
 
