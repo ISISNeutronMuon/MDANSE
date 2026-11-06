@@ -15,9 +15,8 @@
 #
 from __future__ import annotations
 
-import copy
 import json
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from enum import auto
 from typing import (
     TYPE_CHECKING,
@@ -25,7 +24,6 @@ from typing import (
     Final,
     Generic,
     NamedTuple,
-    SupportsFloat,
     TypedDict,
     TypeVar,
     overload,
@@ -34,11 +32,8 @@ from typing import (
 import h5py
 import matplotlib.pyplot as mpl
 import numpy as np
-import numpy.typing as npt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from more_itertools import first_true, nth, numeric_range
-from qtpy.QtCore import QObject, Qt, QThread, Signal, Slot
-from qtpy.QtGui import QColor, QDoubleValidator, QIntValidator
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -63,19 +58,14 @@ from scipy.interpolate import interp1d
 from MDANSE.Framework.Configurators.TrajectoryFilterConfigurator import (
     TrajectoryFilterConfigurator,
 )
-from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Jobs.PositionPowerSpectrum import PositionPowerSpectrum
 from MDANSE.IO.IOUtils import UCEnum, standardise_name
 from MDANSE.Mathematics.Signal import (
     DEFAULT_FILTER_CUTOFF,
-    DEFAULT_N_STEPS,
-    DEFAULT_TIME_STEP,
     FILTER_MAP,
     Filter,
     FrequencyDomain,
     RationalPolynomial,
-    filter_default_attributes,
-    filter_description_string,
 )
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
@@ -87,9 +77,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
     from pathlib import Path
 
-    from MDANSE.Framework.Configurators.HDFInputFileConfigurator import (
-        HDFInputFileConfigurator,
-    )
     from MDANSE.util_types import FloatArray
 
 # Default maximum value for a float spinbox

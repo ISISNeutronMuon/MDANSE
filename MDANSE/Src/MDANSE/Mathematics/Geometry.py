@@ -15,10 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Sequence
-
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 from MDANSE.Mathematics.LinearAlgebra import Vector
 from MDANSE.util_types import FloatArray

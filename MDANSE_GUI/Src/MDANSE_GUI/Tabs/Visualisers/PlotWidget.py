@@ -45,10 +45,6 @@ from MDANSE_GUI.Widgets.NormalisationWidget import NormalisationWidget
 from MDANSE_GUI.Widgets.RestrictedSlider import RestrictedSlider
 
 if TYPE_CHECKING:
-    from matplotlib.backends.backend_qt5agg import (
-        NavigationToolbar2QT as Toolbar,
-    )
-
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 
 

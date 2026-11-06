@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy import fft
-from scipy.signal import correlate
 
 from MDANSE.Mathematics.Geometry import center_of_mass
 

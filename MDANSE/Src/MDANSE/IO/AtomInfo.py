@@ -15,7 +15,6 @@
 #
 from __future__ import annotations
 
-from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from MDANSE.Chemistry import ATOMS_DATABASE, AtomsDatabase

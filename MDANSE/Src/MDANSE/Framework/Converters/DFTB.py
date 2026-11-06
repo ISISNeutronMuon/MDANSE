@@ -15,8 +15,6 @@
 #
 from __future__ import annotations
 
-import collections
-
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Converters.Forcite import Forcite
 from MDANSE.Framework.Jobs.IJob import IJob

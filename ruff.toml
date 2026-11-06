@@ -40,8 +40,6 @@ select = [
 ]
 ignore = [
     "E501",     # Line too long
-    "F401",     # Unused import in init
-    "E402",     # Import not at top
     "PLR2004",  # Magic number in comparison
     "PLR0912",  # Too many branches
     "PLR0913",  # Too many arguments
@@ -50,6 +48,8 @@ ignore = [
     "PLC0415",  # Top-level imports
     "RUF012",   # Unannotated ClassVar
 ]
+[lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]
 
 [lint.isort]
 known-first-party = ["MDANSE", "MDANSE_GUI"]
