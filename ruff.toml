@@ -20,7 +20,7 @@ select = [
     "SIM", # Flake8 Simplify
     # "A",   # Flake8 builtins
     # "COM", # Flake8 commas
-    # "ISC", # Flake8 implicit string concat
+    "ISC", # Flake8 implicit string concat
     # "RSE", # Flake8 raise
     # "FA",  # Flake8 future
     # "FBT", # Flake8 boolean trap
