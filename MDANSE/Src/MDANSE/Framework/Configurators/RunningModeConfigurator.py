@@ -17,7 +17,10 @@ from __future__ import annotations
 
 import multiprocessing
 
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import (
+    IConfigurator,
+    PredictionSettings,
+)
 
 
 @IConfigurator.register("RunningModeConfigurator")
@@ -34,6 +37,13 @@ class RunningModeConfigurator(IConfigurator):
     _default = ("single-core", 1)
     label = "Parallelisation options"
     tooltip = "Run the job on a single core or parallelise over multiple cores."
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.prediction = PredictionSettings(
+            key="total_ram", label="Expected total RAM", unit="MB"
+        )
+        self["total_ram"] = "?"
 
     def configure(self, value):
         """
@@ -70,4 +80,14 @@ class RunningModeConfigurator(IConfigurator):
         self["mode"] = mode
 
         self["slots"] = slots
+        if "memory" in self.dependencies:
+            ram_per_process = self.configurable[self.dependencies["memory"]][
+                "memory_per_step"
+            ]
+            try:
+                self["total_ram"] = [slots * ram_per_process]
+            except Exception:
+                self.warning_status = (
+                    "Could not calculate the expected memory requirements."
+                )
         self.error_status = "OK"
