@@ -65,7 +65,7 @@ class LinearLatticeQVectors(LatticeQVectors):
         rng = np.random.default_rng(self._configuration["seed"]["value"] or None)
 
         width = self._configuration["width"]["value"]
-        axis = self._configuration["axis"]["vector"].array
+        axis = self._configuration["axis"]["vector"]
 
         nvecs_per_shell = self._configuration["n_vectors"]["value"]
         n_samples = self._configuration["n_samples"]["value"]
