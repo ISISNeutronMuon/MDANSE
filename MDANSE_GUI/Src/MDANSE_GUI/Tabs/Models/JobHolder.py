@@ -21,6 +21,7 @@ from itertools import count
 from logging import Handler
 from logging.handlers import QueueListener
 from multiprocessing import Event, Pipe, Process, Queue
+from multiprocessing.connection import wait
 from typing import Any, NamedTuple
 
 from qtpy.QtCore import QMutex, QObject, Qt, QThread, QTimer, Signal, Slot
@@ -37,8 +38,22 @@ from MDANSE_GUI.Subprocess.JobStatusProcess import JobCommunicator
 from MDANSE_GUI.Subprocess.Subprocess import Connection, Subprocess
 from MDANSE_GUI.Tabs.Views.Delegates import OSCILLATOR_STEPS, ProgressDelegate
 
+FINAL_STATES = frozenset({JobStates.ABORTED, JobStates.FAILED, JobStates.FINISHED})
+
 
 class JobThread(QThread):
+    """Pass the status updates of a job subprocess on to the GUI.
+
+    The thread passes on the status updates sent by the subprocess
+    until the job reaches a final state. If the subprocess exits
+    without reporting a final state (e.g. it crashed, or it was
+    terminated), the job is reported as failed.
+
+    All the status updates of a job, including the final one, are sent
+    from this thread, so that the GUI receives them in the same order
+    as they were sent by the subprocess.
+    """
+
     def __init__(
         self,
         job_comm: JobCommunicator,
@@ -49,44 +64,37 @@ class JobThread(QThread):
         self._job_comm = job_comm
         self._pipe_end = receiving_end
         self._subprocess = subprocess_reference
-        self._keep_running = True
-        self._timer = QTimer()
-        self._timer.timeout.connect(self.check_if_alive)
-        self._timer.setInterval(2000)
-
-    def start(self, *args, **kwargs) -> None:
-        retval = super().start(*args, **kwargs)
-        self._timer.start()
-        return retval
-
-    def fail(self):
-        self._job_comm.status_update(JobInfo(state=JobStates.FAILED))
-        self._keep_running = False
-        self._timer.stop()
-        self.terminate()
-
-    @Slot()
-    def check_if_alive(self):
-        if self._subprocess._closed:
-            # The subprocess was closed probably by the user, don't need
-            # to keep checking that the subprocess is alive anymore.
-            # Also, no need to send out a status update since it should
-            # already have been updated already when it got terminated.
-            self._keep_running = False
-            self._timer.stop()
-            self.terminate()
-            return
-        if not self._subprocess.is_alive():
-            self.fail()
 
     def run(self):
-        while self._keep_running:
-            try:
-                status_update = self._pipe_end.recv()
-            except Exception:
-                self.fail()
-            else:
-                self._job_comm.status_update(status_update)
+        try:
+            sentinel = self._subprocess.sentinel
+            while True:
+                # Wait for a status update or for the subprocess to exit.
+                # The timeout is a safeguard, as the sentinel may not be
+                # ready when the subprocess exits if its own subprocesses
+                # outlive it.
+                wait([self._pipe_end, sentinel], timeout=1)
+                # The subprocess sends all its status updates before it
+                # exits, so checking whether it has exited before checking
+                # for status updates ensures that none of them is missed.
+                has_exited = not self._subprocess.is_alive()
+                if self._pipe_end.poll():
+                    status_update = self._pipe_end.recv()
+                    self._job_comm.status_update(status_update)
+                    if status_update.state in FINAL_STATES:
+                        return
+                elif has_exited:
+                    LOG.warning(
+                        "Job subprocess exited with code "
+                        f"{self._subprocess.exitcode} "
+                        "without reporting a final job state."
+                    )
+                    break
+        except Exception:
+            LOG.error(
+                f"Lost contact with the job subprocess:\n{traceback.format_exc()}"
+            )
+        self._job_comm.status_update(JobInfo(state=JobStates.FAILED))
 
 
 class JobLogHandler(Handler):
@@ -210,7 +218,8 @@ Parameters:
             if self._load_afterwards:
                 self.for_loading.emit(file_name)
             self.finish_job()
-        else:
+        elif self.job.state is not JobStates.ABORTED:
+            # A job terminated by the user is aborted, not failed.
             self.fail_job()
 
         self.job_finished.emit((self._command, self.job.state.name))
@@ -352,7 +361,6 @@ class JobHolder(QStandardItemModel):
         communicator = JobCommunicator()
         watcher_thread = JobThread(communicator, main_pipe, subprocess_ref)
         communicator.moveToThread(watcher_thread)
-        entry_number = next(self.job_number)
         item_th.parameters = job_params
         item_th.free_filename.connect(self.unprotect_filename)
         if load_afterwards:
@@ -371,8 +379,6 @@ class JobHolder(QStandardItemModel):
         communicator.finished.connect(item_th.on_finished)  # bool
         item_th.job_finished.connect(self.job_finished)
 
-        LOG.debug("Watcher thread ready to start!")
-        watcher_thread.start()
         try:
             task_name = str(job_name)
         except Exception:
@@ -400,7 +406,14 @@ class JobHolder(QStandardItemModel):
         )
 
         LOG.debug("Subprocess ready to start!")
-        subprocess_ref.start()
+        try:
+            subprocess_ref.start()
+        finally:
+            # The watcher thread waits for the subprocess to exit, so it
+            # has to be started after the subprocess. If the subprocess
+            # could not be started, the watcher thread reports the job
+            # as failed.
+            watcher_thread.start()
 
     def startProcessAndLoad(self, job_vars: list):
         self.startProcess(job_vars, load_afterwards=True)
@@ -408,9 +421,7 @@ class JobHolder(QStandardItemModel):
     @property
     def jobs_still_running(self):
         return any(
-            job.entry.job.state
-            not in {JobStates.ABORTED, JobStates.FAILED, JobStates.FINISHED}
-            for job in self.jobs.values()
+            job.entry.job.state not in FINAL_STATES for job in self.jobs.values()
         )
 
 
