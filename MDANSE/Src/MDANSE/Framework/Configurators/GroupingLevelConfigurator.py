@@ -57,7 +57,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
         if choices is None:
             choices = usual_choices
 
-        SingleChoiceConfigurator.__init__(self, name, choices=choices, **kwargs)
+        super().__init__(name, choices=choices, **kwargs)
 
     def configure(self, value: str):
         """
@@ -76,7 +76,7 @@ class GroupingLevelConfigurator(SingleChoiceConfigurator):
 
         value = str(value)
 
-        SingleChoiceConfigurator.configure(self, value)
+        super().configure(value)
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]
         if (

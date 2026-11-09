@@ -35,7 +35,7 @@ class IInstrumentResolution(
     registry: ClassVar[UCDict[str, type[IInstrumentResolution]]] = UCDict()
 
     def __init__(self):
-        Configurable.__init__(self)
+        super().__init__()
 
         self._omegaWindow = None
 

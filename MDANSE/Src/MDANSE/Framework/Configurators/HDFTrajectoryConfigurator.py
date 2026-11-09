@@ -142,7 +142,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
             return
         self._original_input = value
 
-        InputFileConfigurator.configure(self, value)
+        super().configure(value)
 
         self.extract_information(traj_instance)
 
@@ -171,7 +171,7 @@ class HDFTrajectoryConfigurator(InputFileConfigurator):
         self["rdcc_nslots"] = rdcc_nslots
         self["rdcc_w0"] = rdcc_w0
         self["reopen_trajectory"] = True
-        InputFileConfigurator.configure(self, file_name)
+        super().configure(file_name)
         self._original_input = value
         if "instance" in self and isinstance(self["instance"], Trajectory):
             trajectory_instance = self["instance"]

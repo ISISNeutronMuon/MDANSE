@@ -37,7 +37,7 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
             The name of the configurator as it will appear in the
             configuration.
         """
-        IntegerConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
     def configure(self, value: int | None) -> None:
         """Configure the input interpolation order.
@@ -59,7 +59,7 @@ class DerivativeOrderConfigurator(IntegerConfigurator):
         if value is None:
             value = self._default
 
-        IntegerConfigurator.configure(self, value)
+        super().configure(value)
 
         if value <= 0 or value > 5:
             self.error_status = (

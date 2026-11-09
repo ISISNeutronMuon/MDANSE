@@ -45,7 +45,6 @@ class HDFInputFileConfigurator(InputFileConfigurator):
         :type variables: list of str or None
         """
 
-        # The base class constructor.
         super().__init__(name, **kwargs)
 
         self.variables = variables if variables is not None else []

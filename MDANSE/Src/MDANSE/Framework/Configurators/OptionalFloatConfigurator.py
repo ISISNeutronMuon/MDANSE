@@ -38,8 +38,7 @@ class OptionalFloatConfigurator(IConfigurator):
         :type choices: list of float or None
         """
 
-        # The base class constructor.
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.mini = float(mini) if mini is not None else None
 

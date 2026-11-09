@@ -39,7 +39,7 @@ class MultipleChoicesConfigurator(IConfigurator):
         :type nChoices: int or None
         """
 
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.choices = choices
 

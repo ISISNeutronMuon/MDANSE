@@ -28,7 +28,7 @@ class MultiInputFileConfigurator(IConfigurator):
     _default = ""
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
         self.wildcard = wildcard
 
     def configure(self, setting: str | list[str]):

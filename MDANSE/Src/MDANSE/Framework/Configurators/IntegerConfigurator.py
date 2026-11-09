@@ -42,8 +42,7 @@ class IntegerConfigurator(IConfigurator):
         :type choices: int-list or None
         """
 
-        # The base class constructor.
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.mini = int(mini) if mini is not None else None
 

@@ -36,8 +36,7 @@ class MDAnalysisCoordinateFileConfigurator(MultiInputFileConfigurator):
     _default = ("", "AUTO")
 
     def __init__(self, name, wildcard="All files (*)", **kwargs):
-        IConfigurator.__init__(self, name, **kwargs)
-        self.wildcard = wildcard
+        super().__init__(name, wildcard=wildcard, **kwargs)
 
     def configure(self, setting: tuple[str | list[str], str]):
         """

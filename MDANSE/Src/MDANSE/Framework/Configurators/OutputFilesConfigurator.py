@@ -68,7 +68,7 @@ class OutputFilesConfigurator(IConfigurator):
             remaining keyword arguments for the parent class
 
         """
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.formats = (
             formats if formats is not None else OutputFilesConfigurator._default[1]

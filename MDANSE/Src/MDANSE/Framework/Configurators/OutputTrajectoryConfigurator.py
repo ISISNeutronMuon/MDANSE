@@ -56,7 +56,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
         :param formats: the list of output file formats supported.
         :type formats: list of str
         """
-        IConfigurator.__init__(self, name, **kwargs)
+        super().__init__(name, **kwargs)
 
         self.format = "MDTFormat"
         self._dtype = np.float64
