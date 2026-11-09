@@ -25,7 +25,10 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
 from MDANSE.Framework.Units import measure
-from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
+from MDANSE.MolecularDynamics.Configuration import (
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
+)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -135,8 +138,6 @@ class CP2K(Converter):
 
         if "coordinates" not in self.files:
             raise CP2KConverterError("No coordinates file provided.")
-        if "cell" not in self.files and not self.configuration["unit_cell"]["apply"]:
-            raise CP2KConverterError("No cell information provided.")
 
         for attr in ("time_step", "n_frames"):
             if not all_equal(getattr(file, attr) for file in self.files.values()):
@@ -188,23 +189,29 @@ class CP2K(Converter):
         }
         if self.configuration["unit_cell"]["apply"]:
             data["cell"] = self.configuration["unit_cell"]["value"]
-        else:
+        elif "cell" in data:
             data["cell"] = UnitCell(data["cell"])
+        else:
+            data["cell"] = None
 
-        real_conf = PeriodicAbsoluteConfiguration(
-            data.pop("coordinates"),
-            data.pop("cell"),
-            **data,
-        )
+        if data["cell"] is not None:
+            conf = PeriodicAbsoluteConfiguration(
+                data.pop("coordinates"),
+                data.pop("cell"),
+                **data,
+            )
+        else:
+            data.pop("cell")
+            conf = AbsoluteConfiguration(data.pop("coordinates"), **data)
 
         if self.configuration["fold"]["value"]:
-            real_conf.fold_coordinates()
+            conf.fold_coordinates()
 
         time = index * self.files["coordinates"].time_step * self.UNITS["time"]
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(
-            real_conf,
+            conf,
             time,
             units={
                 "time": "ps",
