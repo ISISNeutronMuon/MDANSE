@@ -367,6 +367,72 @@ Inputs:
 - running_mode: :ref:`configurator-analysis-RunningModeConfigurator` default=N/A
 
 
+.. _analysis-reference-McStasSqwExport:
+
+McStasSqwExport
+~~~~~~~~~~~~~~~
+
+Exports dynamic structure factors to the McStas ``Isotropic_Sqw`` format.
+
+Converts the results of the Dynamic Coherent Structure Factor (DCSF)
+and Dynamic Incoherent Structure Factor (DISF) analyses into the text
+files read by the ``Isotropic_Sqw`` sample component of the McStas
+neutron ray-tracing package. At least one of the two results is needed.
+The trajectory, atom selection, atom transmutation and grouping level
+must be the same as in the DCSF and DISF runs.
+
+The coherent part is written to ``OUTPUT_coh.sqw`` and the incoherent
+part to ``OUTPUT_inc.sqw``, where OUTPUT is the output file name without
+extension. The ``.sqw`` files are written whichever output formats are
+selected. The exported data are also saved in the MDANSE output file,
+under ``mcstas/``.
+
+The scattering unit is one atom, averaged over the selected atoms. The
+partial spectra are weighted with the neutron scattering lengths b and
+divided by the average of b squared, so that the energy integral of the
+coherent S(q,w) tends to 1 at large q and the incoherent S(q,w)
+integrates to 1 over energy. The coherent part is therefore not the same
+as the total DCSF of MDANSE, which is divided by the square of the
+average b. The file headers give the matching cross-sections per atom,
+the absorption cross-section, the temperature, the number density of
+atoms (from the average unit cell volume) and the mass density. The q
+values are converted to 1/Angstrom, the energies to meV and S(q,w) to
+1/meV. Points at q = 0 are removed, rows with NaN or infinite values are
+removed or interpolated, axes that are not evenly spaced are
+interpolated on an evenly spaced grid and negative values are set to
+zero.
+
+MD simulations give a classical, symmetric S(q,w). The files are marked
+as classical and contain the sample temperature, so that McStas can
+apply the detailed balance factor.
+
+By default, the spectra calculated without the MDANSE instrument
+resolution are exported when the input files contain them, so that only
+the simulated McStas instrument adds a resolution.
+
+In McStas, use the files in an ``Isotropic_Sqw`` component with
+``norm=0`` to keep the absolute normalisation. A complete component
+definition is written to the job log. The format follows the McStas
+documentation, but please check the values reported by McStas the first
+time you use the files.
+
+The ``.sqw`` files have Windows (CRLF) line endings. McStas on Windows
+misreads large files with Unix (LF) line endings, while McStas on Linux
+and macOS reads both.
+
+Inputs:
+
+- trajectory: :ref:`configurator-analysis-HDFTrajectoryConfigurator` default=N/A
+- dcsf_input_file: :ref:`configurator-analysis-HDFInputFileConfigurator` default=
+- disf_input_file: :ref:`configurator-analysis-HDFInputFileConfigurator` default=
+- grouping_level: :ref:`configurator-analysis-GroupingLevelConfigurator` default=N/A
+- atom_selection: :ref:`configurator-analysis-AtomSelectionConfigurator` default=N/A
+- atom_transmutation: :ref:`configurator-analysis-AtomTransmutationConfigurator` default=N/A
+- temperature: :ref:`configurator-analysis-FloatConfigurator` default=300.0
+- use_ideal_spectra: :ref:`configurator-analysis-BooleanConfigurator` default=True
+- output_files: :ref:`configurator-analysis-OutputFilesConfigurator` default=N/A
+
+
 .. _analysis-reference-MeanSquareDisplacement:
 
 MeanSquareDisplacement

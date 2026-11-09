@@ -19,6 +19,7 @@ ALL_JOBS = [
     "ElasticIncoherentStructureFactor",
     "PositionPowerSpectrum",
     "GaussianDynamicIncoherentStructureFactor",
+    "McStasSqwExport",
     "MeanSquareDisplacement",
     "MolecularTrace",
     "NeutronDynamicTotalStructureFactor",
