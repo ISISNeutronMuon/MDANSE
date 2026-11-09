@@ -20,7 +20,6 @@ from collections.abc import Sequence
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from MDANSE.Mathematics.LinearAlgebra import Vector
 from MDANSE.util_types import FloatArray
 
 
@@ -28,47 +27,50 @@ class GeometryError(Exception):
     pass
 
 
-def get_basis_vectors_from_cell_parameters(parameters):
+def get_basis_vectors_from_cell_parameters(
+    parameters: tuple[float, float, float, float, float, float],
+) -> tuple[FloatArray, FloatArray, FloatArray]:
     """Returns the basis vectors for the simulation cell from the six crystallographic parameters.
 
-    :param parameters: the a, b, c, alpha, bete and gamma of the simulation cell.
-    :type: parameters: list of 6 floats
+    Parameters
+    ----------
+    parameters : tuple[float, float, float, float, float, float]
+        The a, b, c, alpha, beta and gamma of the simulation cell.
 
-    :return: a list of three Scientific.Geometry.Vector objects representing respectively a, b and c basis vectors.
-    :rtype: list
+    Returns
+    -------
+    tuple[FloatArray, FloatArray, FloatArray]
+        A list of three vectors representing respectively a, b and c basis vectors.
     """
 
     # The simulation cell parameters.
     a, b, c, alpha, beta, gamma = parameters
 
     # By construction the a vector is aligned with the x axis.
-    e1 = Vector(a, 0.0, 0.0)
+    e1 = np.array([a, 0.0, 0.0])
 
     # By construction the b vector is in the xy plane.
-    e2 = b * Vector(np.cos(gamma), np.sin(gamma), 0.0)
+    e2 = np.dot(b, [np.cos(gamma), np.sin(gamma), 0.0])
 
-    e3_x = np.cos(beta)
-    e3_y = (np.cos(alpha) - np.cos(beta) * np.cos(gamma)) / np.sin(gamma)
-    e3_z = np.sqrt(1.0 - e3_x**2 - e3_y**2)
-    e3 = c * Vector(e3_x, e3_y, e3_z)
+    ex = np.cos(beta)
+    ey = (np.cos(alpha) - np.cos(beta) * np.cos(gamma)) / np.sin(gamma)
+    e3 = np.dot(c, [ex, ey, np.sqrt(1.0 - ex**2 - ey**2)])
 
     return (e1, e2, e3)
 
 
-def center_of_mass(coords, masses=None):
-    """Computes the center of massfor a set of coordinates and masses
-    :param coords: the n input coordinates.
-    :type coords: (n,3)-np.array
-    :param masses: it not None, the n input masses. If None, the center of gravity is computed.
-    :type masses: (n,)-np.array
-    :return: the center of mass.
-    :rtype: (3,)-np.array
+def center_of_mass(coords: FloatArray, masses: FloatArray | None = None):
+    """Computes the center of mass for a set of coordinates and masses
+
+    Parameters
+    ----------
+    coords : FloatArray
+        The input coordinates as an n x 3-array.
+    masses : FloatArray, optional
+        If not None, the input masses as an n-array.
+        If None, the center of gravity is computed.
     """
-
     return np.average(coords, weights=masses, axis=0)
-
-
-center = center_of_mass
 
 
 def moment_of_inertia(

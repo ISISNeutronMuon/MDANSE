@@ -16,23 +16,24 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.typing as npt
 
 from MDANSE.Framework.Projectors.IProjector import IProjector, ProjectorError
-from MDANSE.Mathematics.LinearAlgebra import Vector
+from MDANSE.util_types import FloatArray
 
 
 @IProjector.register("PlanarProjector")
 class PlanarProjector(IProjector):
-    def set_axis(self, axis):
+    def set_axis(self, axis: npt.ArrayLike):
         try:
-            self._axis = Vector(axis)
+            self._axis: FloatArray = np.array(axis)
         except (TypeError, ValueError) as err:
             raise ProjectorError(
                 "Wrong axis definition: must be a sequence of 3 floats"
             ) from err
 
         try:
-            self._axis = self._axis.normal()
+            self._axis /= np.linalg.norm(self._axis)
         except ZeroDivisionError as err:
             raise ProjectorError("The axis vector can not be the null vector") from err
 

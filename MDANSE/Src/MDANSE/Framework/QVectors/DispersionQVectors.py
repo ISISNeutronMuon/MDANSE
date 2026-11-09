@@ -93,8 +93,8 @@ class DispersionQVectors(IQVectors):
     )
 
     def _generate(self):
-        q_start = self._configuration["q_start"]["value"].array
-        q_end = self._configuration["q_end"]["value"].array
+        q_start = self._configuration["q_start"]["value"]
+        q_end = self._configuration["q_end"]["value"]
         q_step = self._configuration["q_step"]["value"]
         if np.allclose(q_start, q_end):
             self._configuration[
