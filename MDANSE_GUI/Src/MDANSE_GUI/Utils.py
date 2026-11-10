@@ -17,8 +17,21 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from contextlib import contextmanager
-from typing import TYPE_CHECKING
+from enum import Enum
+from typing import TYPE_CHECKING, Any, overload
+
+from qtpy.QtCore import Signal
+from qtpy.QtWidgets import (
+    QCheckBox,
+    QComboBox,
+    QDoubleSpinBox,
+    QLabel,
+    QLineEdit,
+    QSpinBox,
+    QWidget,
+)
 
 if TYPE_CHECKING:
     from qtpy.QtCore import QObject
@@ -41,3 +54,170 @@ def block_signals(*objs: QObject):
     finally:
         for obj in objs:
             obj.blockSignals(False)
+
+
+@overload
+def from_param(name: str, typ: type[float]) -> tuple[QLabel, QDoubleSpinBox]: ...
+@overload
+def from_param(name: str, typ: type[int]) -> tuple[QLabel, QSpinBox]: ...
+@overload
+def from_param(name: str, typ: type[bool]) -> tuple[QLabel, QCheckBox]: ...
+@overload
+def from_param(name: str, typ: type[Enum]) -> tuple[QLabel, QComboBox]: ...
+@overload
+def from_param(name: str, typ: type[str]) -> tuple[QLabel, QLineEdit]: ...
+def from_param(name: str, typ: type) -> tuple[QLabel, QWidget]:
+    """Get a Widget to set a param.
+
+    Parameters
+    ----------
+    name : str
+        Name of parameter for label.
+    typ : type
+        Type of data in parameter.
+
+    Returns
+    -------
+    tuple[QLabel, QWidget]
+        Label and Widget entities.
+
+    Raises
+    ------
+    TypeError
+        No widget assigned for type.
+    """
+    label = QLabel(f"{name.title()}:")
+    if typ is float:
+        val_widget = QDoubleSpinBox()
+        val_widget.setRange(-1e6, 1e6)
+        val_widget.setDecimals(6)
+    elif typ is int:
+        val_widget = QSpinBox()
+        val_widget.setRange(-1_000_000, 1_000_000)
+    elif typ is bool:
+        val_widget = QCheckBox()
+    elif issubclass(typ, Enum):
+        val_widget = QComboBox()
+        val_widget.addItems([x.name for x in typ])
+    elif typ is str:
+        val_widget = QLineEdit()
+    else:
+        raise TypeError(f"Cannot process {typ.__name__}.")
+
+    val_widget.setObjectName(name)
+    return label, val_widget
+
+
+@overload
+def get_value(widget: QDoubleSpinBox) -> float: ...
+@overload
+def get_value(widget: QSpinBox) -> int: ...
+@overload
+def get_value(widget: QCheckBox) -> bool: ...
+@overload
+def get_value(widget: QComboBox) -> str: ...
+@overload
+def get_value(widget: QLineEdit) -> str: ...
+def get_value(widget: QWidget) -> Any:
+    """Get a value from a widget.
+
+    Parameters
+    ----------
+    widget : QWidget
+        Widget to pull value from.
+
+    Returns
+    -------
+    Any
+        Data in Python type.
+
+    Raises
+    ------
+    TypeError
+        No defined way to extract value.
+    """
+    match widget:
+        case QDoubleSpinBox() | QSpinBox():
+            return widget.value()
+        case QCheckBox():
+            return widget.isChecked()
+        case QComboBox():
+            return widget.currentText()
+        case QLineEdit():
+            return widget.text()
+        case _:
+            raise TypeError(f"Cannot handle {type(widget).__name__} widget.")
+
+
+def get_main_signal(widget: QWidget) -> Signal:
+    """Get main value change signal from a widget.
+
+    Parameters
+    ----------
+    widget : QWidget
+        Widget to pull signal from.
+
+    Returns
+    -------
+    Signal
+        Main signal associated with value change.
+
+    Raises
+    ------
+    TypeError
+        No defined way to extract value.
+    """
+    match widget:
+        case QDoubleSpinBox() | QSpinBox():
+            return widget.valueChanged
+        case QCheckBox():
+            return widget.checkStateChanged
+        case QComboBox():
+            return widget.currentTextChanged
+        case QLineEdit():
+            return widget.textChanged
+        case _:
+            raise TypeError(f"Cannot handle {type(widget).__name__} widget.")
+
+
+def parse_token(token: str, max_len: int) -> Iterable[int]:
+    """Parse a slice token component into an appropriate value for dimension slicing.
+
+    Parameters
+    ----------
+    token : str
+        Token to parse.
+    max_len : int
+        Size of array for un-ended slices.
+
+    Returns
+    -------
+    Iterable[int]
+        Parsed values.
+
+    Examples
+    --------
+    >>> parse_token("3:5", 10)
+    range(3, 5)
+    >>> parse_token("3:60:2", 5)
+    range(3, 5, 2)
+    >>> parse_token("8", 10)
+    (8, )
+    >>> parse_token("6-8", 10)
+    range(6, 8)
+    """
+    if ":" in token:
+        slice_parts = map(int, token.split(":"))
+        slc = slice(*slice_parts).indices(max_len)
+        return range(*slc)
+
+    if "-" in token:
+        start, stop = map(int, token.split("-"))
+        return range(start, stop + 1)
+
+    return (int(token),)
+
+
+def HTML_wrap(tag: str, content: str, **kwargs) -> str:
+    kw = " ".join(f"{k}={v}" for k, v in kwargs.items())
+    return f"<{tag} {kw}>{content}</{tag}>"
