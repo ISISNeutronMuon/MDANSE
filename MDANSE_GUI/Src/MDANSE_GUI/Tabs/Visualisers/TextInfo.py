@@ -24,9 +24,7 @@ class TextInfo(QTextBrowser):
     error = Signal(str)
     default_header = ""
     default_footer = (
-        "Look up our "
-        + '<a href="https://mdanse.readthedocs.io/">Read The Docs</a>'
-        + " page."
+        'Look up our <a href="https://mdanse.readthedocs.io/">Read The Docs</a> page.'
     )
 
     def __init__(
