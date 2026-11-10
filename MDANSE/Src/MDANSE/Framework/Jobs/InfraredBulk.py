@@ -190,7 +190,7 @@ class InfraredBulk(IJob):
             ddipole_i[:, axis] = differentiate(
                 ddipole_i[:, axis],
                 order=self.configuration["derivative_order"]["value"],
-                dt=step_frame,
+                dt=self.configuration["frames"]["time_step"],
             )
 
         cutoff = np.zeros(n_atms, dtype=bool)
@@ -239,7 +239,7 @@ class InfraredBulk(IJob):
             ddipole_j[:, axis] = differentiate(
                 ddipole_j[:, axis],
                 order=self.configuration["derivative_order"]["value"],
-                dt=step_frame,
+                dt=self.configuration["frames"]["time_step"],
             )
 
         ddipole_ij = correlate(ddipole_i, ddipole_j[:n_configs], mode="valid") / (
