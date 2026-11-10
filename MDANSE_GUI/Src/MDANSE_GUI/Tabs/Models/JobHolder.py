@@ -66,34 +66,33 @@ class JobThread(QThread):
         self._subprocess = subprocess_reference
 
     def run(self):
-        try:
-            sentinel = self._subprocess.sentinel
-            while True:
-                # Wait for a status update or for the subprocess to exit.
-                # The timeout is a safeguard, as the sentinel may not be
-                # ready when the subprocess exits if its own subprocesses
-                # outlive it.
-                wait([self._pipe_end, sentinel], timeout=1)
-                # The subprocess sends all its status updates before it
-                # exits, so checking whether it has exited before checking
-                # for status updates ensures that none of them is missed.
-                has_exited = not self._subprocess.is_alive()
-                if self._pipe_end.poll():
+        sentinel = self._subprocess.sentinel
+        while True:
+            # Wait for a status update or for the subprocess to exit.
+            # The timeout is a safeguard, as the sentinel may not be
+            # ready when the subprocess exits if its own subprocesses
+            # outlive it.
+            wait([self._pipe_end, sentinel], timeout=1)
+            # The subprocess sends all its status updates before it
+            # exits, so checking whether it has exited before checking
+            # for status updates ensures that none of them is missed.
+            has_exited = not self._subprocess.is_alive()
+            if self._pipe_end.poll():
+                try:
                     status_update = self._pipe_end.recv()
-                    self._job_comm.status_update(status_update)
-                    if status_update.state in FINAL_STATES:
-                        return
-                elif has_exited:
-                    LOG.warning(
-                        "Job subprocess exited with code "
-                        f"{self._subprocess.exitcode} "
-                        "without reporting a final job state."
-                    )
+                except (EOFError, OSError):
+                    LOG.error("Lost contact with the job subprocess")
                     break
-        except Exception:
-            LOG.error(
-                f"Lost contact with the job subprocess:\n{traceback.format_exc()}"
-            )
+                self._job_comm.status_update(status_update)
+                if status_update.state in FINAL_STATES:
+                    return
+            elif has_exited:
+                LOG.warning(
+                    "Job subprocess exited with code "
+                    f"{self._subprocess.exitcode} "
+                    "without reporting a final job state."
+                )
+                break
         self._job_comm.status_update(JobInfo(state=JobStates.FAILED))
 
 
