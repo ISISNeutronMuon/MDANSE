@@ -249,8 +249,10 @@ class Action(QWidget):
             if not job_name:
                 self._job_instance = Dummy()
                 return
-            if self._default_path is None or Path(self._default_path).samefile(Path()):
-                self._default_path = str(Path(self._parent_tab.get_path(job_name)))
+
+            new_path = Path(self._parent_tab.get_path(job_name))
+            self._default_path = str(new_path) if new_path.is_dir() else str(Path.cwd())
+
             try:
                 job_instance = IJob.create(job_name)
             except ValueError as e:
