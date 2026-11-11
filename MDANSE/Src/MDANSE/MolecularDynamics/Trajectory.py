@@ -22,12 +22,14 @@ from collections import Counter, defaultdict
 from enum import auto
 from operator import itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal, overload
 
 import h5py
 import numpy as np
+
 try:
     import mixbox
+
     mixbox_available = True
 except ImportError:
     mixbox_available = False
@@ -36,10 +38,9 @@ from more_itertools import always_iterable, first
 
 from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
-
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
-from MDANSE.IO.IOUtils import UCEnum, summarise_array, str_to_num
-from MDANSE.Trajectory.FileTrajBase import TrajDataArray
+from MDANSE.IO.IOUtils import UCEnum, str_to_num, summarise_array
+from MDANSE.Trajectory.FileTrajBase import TrajDataArray, TrajectoryFile
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 from MDANSE.util_types import FloatArray
@@ -47,17 +48,17 @@ from MDANSE.util_types import FloatArray
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
-    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.Chemistry.AtomsDatabase import AtomsDatabase
+    from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
     from MDANSE.MolecularDynamics.Configuration import _Configuration
     from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
-available_formats = {
+ValidFormats = Literal["MDANSE", "H5MD"]
+available_formats: Final[dict[ValidFormats, type[TrajectoryFile]]] = {
     "MDANSE": MdanseTrajectory,
     "H5MD": H5MDTrajectory,
 }
-ValidFormats = Literal["MDANSE", "H5MD"]
-SLICE_ALL = np.s_[:]
+SLICE_ALL: Final[slice[None]] = np.s_[:]
 
 
 def check_hdf5_driver() -> bool:
@@ -101,7 +102,6 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
     str
         A multi-line text string summarising the trajectory contents.
     """
-    head = []
     val = []
     try:
         time_axis = traj.time()
@@ -114,18 +114,18 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
             timeline = f"[{summarise_array(time_axis, maxlen=5, arr_fmt='5.4f')}]\n"
 
     filename = html.escape(f"{traj.filename}")
-    if use_html:
-        head = f"Path: <pre>{filename}</pre>"
-    else:
-        head = f"Path:\n{filename}\n"
+
+    head = f"Path: <pre>{filename}</pre>" if use_html else f"Path:\n{filename}\n"
     val.append("Number of steps:")
     val.append(f"{len(traj)}\n")
     val.append("Configuration:")
     val.append(f"\tIs periodic: {traj.unit_cell(0) is not None}\n")
-    try:
-        val.append(f"First unit cell (nm):\n{traj.unit_cell(0)._unit_cell}\n")
-    except Exception:
+
+    if (cell := traj.unit_cell(0)) is not None:
+        val.append(f"First unit cell (nm):\n{cell._unit_cell}\n")
+    else:
         val.append("No unit cell information\n")
+
     val.append("Frame times (1st, 2nd, ..., last) in ps:")
     val.append(timeline)
     val.append("Variables:")
@@ -177,38 +177,39 @@ class Trajectory:
     such as the atom selection, atom transmutation and grouping.
     """
 
-    def __init__(self,
-                 filename,
-                 trajectory_format: ValidFormats | None = None,
-                 hdf5_driver: str | None = None,
-                 *,
-                 rdcc_nbytes: int | None = None,
-                 rdcc_nslots: int | None = None,
-                 rdcc_w0: float | None = None,
-                 fast_load: bool = False):
+    def __init__(
+        self,
+        filename: Path | str,
+        trajectory_format: ValidFormats | None = None,
+        hdf5_driver: str | None = None,
+        *,
+        rdcc_nbytes: int | None = None,
+        rdcc_nslots: int | None = None,
+        rdcc_w0: float | None = None,
+        fast_load: bool = False,
+    ):
         self._filename = filename
         self._hdf5_driver = hdf5_driver
         self._rdcc_nbytes = rdcc_nbytes
         self._rdcc_w0 = rdcc_w0
         self._rdcc_nslots = rdcc_nslots
-        self._format = (
-            trajectory_format if trajectory_format else self.guess_correct_format()
-        )
+        self._format = trajectory_format or self.guess_correct_format()
 
-        self._trajectory = self.open_trajectory(self._format,
-                                                    self._hdf5_driver,
-                                                    rdcc_nbytes=self._rdcc_nbytes,
-                                                    rdcc_w0=self._rdcc_w0,
-                                                    rdcc_nslots=self._rdcc_nslots,
-                                                    fast_load = fast_load
-                                                    )
+        self._trajectory = self.open_trajectory(
+            self._format,
+            self._hdf5_driver,
+            rdcc_nbytes=self._rdcc_nbytes,
+            rdcc_w0=self._rdcc_w0,
+            rdcc_nslots=self._rdcc_nslots,
+            fast_load=fast_load,
+        )
         self._min_span = None
         self._max_span = None
         self._grouping_level = GroupingLevels.ATOM
-        self._atom_cache = {}
-        self._selection = []
-        self.selection_getter = None
-        self._transmutation = {}
+        self._atom_cache: dict[tuple[str, str], int | float | complex | str] = {}
+        self._selection: list[int] = []
+        self.selection_getter: itemgetter[tuple[int, ...]] | None = None
+        self._transmutation: dict[int, str] = {}
 
     @property
     def atom_indices(self) -> list[int]:
@@ -471,26 +472,36 @@ class Trajectory:
 
         return "MDANSE"
 
-    def open_trajectory(self,
-                        trajectory_format,
-                        hdf5_driver,
-                        *,
-                        rdcc_nbytes: int | None = None,
-                        rdcc_w0: float | None = None,
-                        rdcc_nslots: int | None = None,
-                        fast_load: bool = False
-                        ):
+    @overload
+    def open_trajectory(
+        self, trajectory_format: Literal["MDANSE"], *_, **__
+    ) -> MdanseTrajectory: ...
+    @overload
+    def open_trajectory(
+        self, trajectory_format: Literal["H5MD"], *_, **__
+    ) -> H5MDTrajectory: ...
+    def open_trajectory(
+        self,
+        trajectory_format: ValidFormats,
+        hdf5_driver,
+        *,
+        rdcc_nbytes: int | None = None,
+        rdcc_w0: float | None = None,
+        rdcc_nslots: int | None = None,
+        fast_load: bool = False,
+    ) -> TrajectoryFile:
         trajectory_class = available_formats[trajectory_format]
-        trajectory = trajectory_class(self._filename,
-                                      hdf5_driver=hdf5_driver,
-                                    rdcc_nbytes = rdcc_nbytes,
-                                    rdcc_w0 = rdcc_w0,
-                                    rdcc_nslots = rdcc_nslots,
-                                    fast_load = fast_load
-                                      )
+        trajectory = trajectory_class(
+            self._filename,
+            hdf5_driver=hdf5_driver,
+            rdcc_nbytes=rdcc_nbytes,
+            rdcc_w0=rdcc_w0,
+            rdcc_nslots=rdcc_nslots,
+            fast_load=fast_load,
+        )
         return trajectory
 
-    def close(self):
+    def close(self) -> None:
         """Close the trajectory."""
         self._trajectory.close()
 
@@ -509,21 +520,23 @@ class Trajectory:
         """
         return self._trajectory[frame]
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict[str, Any]:
         d = self.__dict__.copy()
         del d["_trajectory"]
         return d
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: dict[str, Any]) -> None:
         self.__dict__ = state
-        self._trajectory = self.open_trajectory(self._format,
-                                                self._hdf5_driver,
-                                                rdcc_nbytes=self._rdcc_nbytes,
-                                                rdcc_w0=self._rdcc_w0,
-                                                rdcc_nslots=self._rdcc_nslots,
-                                                fast_load=True)
+        self._trajectory = self.open_trajectory(
+            self._format,
+            self._hdf5_driver,
+            rdcc_nbytes=self._rdcc_nbytes,
+            rdcc_w0=self._rdcc_w0,
+            rdcc_nslots=self._rdcc_nslots,
+            fast_load=True,
+        )
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._trajectory)
 
     @property
@@ -617,7 +630,7 @@ class Trajectory:
         return self._trajectory.unit_cell_warning
 
     @property
-    def unit_cells_raw(self):
+    def unit_cells_raw(self) -> FloatArray | None:
         return self._trajectory.unit_cells_raw
 
     def calculate_coordinate_span(self) -> None:
@@ -632,15 +645,17 @@ class Trajectory:
         self._min_span = min_span
 
     @property
-    def max_span(self):
+    def max_span(self) -> FloatArray:
         if self._max_span is None:
             self.calculate_coordinate_span()
+        assert self._max_span is not None
         return self._max_span
 
     @property
-    def min_span(self):
+    def min_span(self) -> FloatArray:
         if self._min_span is None:
             self.calculate_coordinate_span()
+        assert self._min_span is not None
         return self._min_span
 
     def to_absolute_coordinates(
@@ -669,7 +684,9 @@ class Trajectory:
             2D array containing the absolute coordinates converted from fractionals.
 
         """
-        return self._trajectory.to_absolute_coordinates(fractional_coordinates, first, last, step)
+        return self._trajectory.to_absolute_coordinates(
+            fractional_coordinates, first, last, step
+        )
 
     def read_atomic_trajectory_many(
         self,
@@ -708,7 +725,7 @@ class Trajectory:
             last=last,
             step=step,
             fractional_coordinates=fractional_coordinates,
-            reference = reference,
+            reference=reference,
         )
 
     def read_configuration_trajectory(
@@ -792,7 +809,7 @@ class Trajectory:
             Value of the atom property as defined in the atom database.
 
         """
-        if (atom_symbol, atom_property) not in self._atom_cache.keys():
+        if (atom_symbol, atom_property) not in self._atom_cache:
             val = self._trajectory.get_atom_property(atom_symbol, atom_property)
             try:
                 numval = complex(val)
@@ -805,7 +822,7 @@ class Trajectory:
                     self._atom_cache[(atom_symbol, atom_property)] = numval
         return self._atom_cache[(atom_symbol, atom_property)]
 
-    def has_atom(self, symbol: str):
+    def has_atom(self, symbol: str) -> bool:
         return symbol in self.atoms
 
     def get_property_dict(self, symbol: str) -> dict[str, Any]:
@@ -988,7 +1005,10 @@ def create_average_atom(
             for element_name, element_count in atom_dictionary.items():
                 # weight color mixture by the atom volume
                 weights.append(
-                    float(database.get_atom_property(element_name, "vdw_radius") ** 3 * element_count)
+                    float(
+                        database.get_atom_property(element_name, "vdw_radius") ** 3
+                        * element_count
+                    )
                 )
 
             rgb = mix_colors(colours, weights)
@@ -1002,7 +1022,9 @@ def create_average_atom(
     return values
 
 
-def mix_colors(colors: list[tuple[int, int, int]], weights: list[float] | None = None) -> tuple[int, int, int]:
+def mix_colors(
+    colors: list[tuple[int, int, int]], weights: list[float] | None = None
+) -> tuple[int, int, int]:
     """Mix colors together.
 
     Parameters
@@ -1025,8 +1047,8 @@ def mix_colors(colors: list[tuple[int, int, int]], weights: list[float] | None =
         # should apparently produce a mixture which is similar to the
         # mixing of paints in the real world e.g. yellow + blue = green
         latents = [mixbox.rgb_to_latent(c) for c in colors]
-        z_mix  = [0.0] * mixbox.LATENT_SIZE
-        for latent, w in zip(latents, weights):
+        z_mix = [0.0] * mixbox.LATENT_SIZE
+        for latent, w in zip(latents, weights, strict=True):
             for i in range(len(latent)):
                 z_mix[i] += latent[i] * (w / total)
         return mixbox.latent_to_rgb(z_mix)
@@ -1036,7 +1058,7 @@ def mix_colors(colors: list[tuple[int, int, int]], weights: list[float] | None =
         # rgb average
         mix = [0.0, 0.0, 0.0]
 
-        for c, w in zip(colors, weights):
+        for c, w in zip(colors, weights, strict=True):
             for i in range(3):
                 mix[i] += ((c[i] / 255) ** 2.2) * w
 
@@ -1064,10 +1086,10 @@ class TrajectoryWriter:
         selected_atoms=None,
         *,
         positions_dtype=np.float64,
-        chunking_limit=(1,128),
+        chunking_limit=(1, 128),
         compression="none",
         initial_charges=None,
-        meta_block_size: int = 65536
+        meta_block_size: int = 65536,
     ):
         """Constructor.
 
@@ -1082,10 +1104,12 @@ class TrajectoryWriter:
         """
         self._h5_filename = Path(h5_filename)
         PLATFORM.create_directory(self._h5_filename.parent)
-        self._h5_file = h5py.File(self._h5_filename,
-                                  "w",
-                                  meta_block_size=meta_block_size,
-                                  libver=('earliest', 'v114'),)
+        self._h5_file = h5py.File(
+            self._h5_filename,
+            "w",
+            meta_block_size=meta_block_size,
+            libver=("earliest", "v114"),
+        )
 
         self._chemical_system = chemical_system
         self._last_configuration = None
@@ -1153,7 +1177,7 @@ class TrajectoryWriter:
             dictionary of propery physical units {property_name: unit}, by default None
 
         """
-        if "atom_database" not in self._h5_file.keys():
+        if "atom_database" not in self._h5_file:
             group = self._h5_file.create_group("/atom_database")
         else:
             group = self._h5_file["/atom_database"]
@@ -1320,12 +1344,14 @@ class TrajectoryWriter:
         n_atoms = self._chemical_system.total_number_of_atoms
         if self._last_configuration is not None:
             configuration_grp = self._h5_file["/configuration"]
-            for k, v in self._last_configuration.variables.items():
+            for k in self._last_configuration.variables:
                 dset = configuration_grp.get(k, None)
                 dset.resize((self._current_index, n_atoms, 3))
         self._h5_file.close()
 
-    def write_charges(self, charges: FloatArray, index: int, atom_indices: list[int] | None = None):
+    def write_charges(
+        self, charges: FloatArray, index: int, atom_indices: list[int] | None = None
+    ):
         """Writes atom charges into their dataset at the specified index.
 
         Parameters
@@ -1376,47 +1402,60 @@ class TrajectoryWriter:
             if variable_charge_dset is not None:
                 del self._h5_file[variable_charge_dset.name]
 
-    def write_array_fragment(self,
-                             data: FloatArray,
-                             dataset: str,
-                             atom_indices: list[int] | None = None,
-                             frame_indices: list[int] | None = None,
-                             units = None):
+    def write_array_fragment(
+        self,
+        data: FloatArray,
+        dataset: str,
+        atom_indices: list[int] | None = None,
+        frame_indices: list[int] | None = None,
+        units=None,
+    ):
         if units is None:
             units = {}
         if dataset in {"coordinates", "velocities", "gradients"}:
-            self.write_configuration_data(data,
-                                          dataset,
-                                          atom_indices= atom_indices,
-                                          frame_indices=frame_indices,
-                                          units= units)
+            self.write_configuration_data(
+                data,
+                dataset,
+                atom_indices=atom_indices,
+                frame_indices=frame_indices,
+                units=units,
+            )
             return
         dset = self._h5_file.get(dataset, None)
         if dset is None:
             dset = self._h5_file.create_dataset(
-                    dataset,
-                    shape=(self._n_steps,) if dataset != "unit_cell" else (self._n_steps, 3, 3),
-                    dtype=self._dtype,)
+                dataset,
+                shape=(self._n_steps,)
+                if dataset != "unit_cell"
+                else (self._n_steps, 3, 3),
+                dtype=self._dtype,
+            )
         dset.attrs["units"] = units.get(dataset, "")
         dset[frame_indices] = data
 
-
-    def write_configuration_data(self,
-                             data: FloatArray,
-                             dataset: str,
-                             atom_indices: list[int] | None = None,
-                             frame_indices: list[int] | None = None,
-                             units = None,):
+    def write_configuration_data(
+        self,
+        data: FloatArray,
+        dataset: str,
+        atom_indices: list[int] | None = None,
+        frame_indices: list[int] | None = None,
+        units=None,
+    ):
         configuration_grp = self._h5_file["/configuration"]
         dset = configuration_grp.get(dataset, None)
         if dset is None:
-            kwargs = {"compression": self._compression} if self._compression in self.allowed_compression else {}
+            kwargs = (
+                {"compression": self._compression}
+                if self._compression in self.allowed_compression
+                else {}
+            )
             dset = configuration_grp.create_dataset(
-                    dataset,
-                    shape=(self._n_steps, self._n_atoms, 3),
-                    chunks=(self.frame_chunks, self.atom_chunks, 3),
-                    dtype=self._dtype,
-                    **kwargs)
+                dataset,
+                shape=(self._n_steps, self._n_atoms, 3),
+                chunks=(self.frame_chunks, self.atom_chunks, 3),
+                dtype=self._dtype,
+                **kwargs,
+            )
         dset.attrs["units"] = units.get(dataset, "")
         if frame_indices is None:
             frame_indices = slice(None)
