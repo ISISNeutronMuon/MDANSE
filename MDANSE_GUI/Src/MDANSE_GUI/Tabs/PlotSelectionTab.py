@@ -51,7 +51,7 @@ will <b>appear in the next tab.</b>
 class PlotSelectionTab(GeneralTab):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._core.add_button("Load .MDA results", self.load_files)
+        self._core.add_button("Load MDANSE results", self.load_files)
         self._visualiser._settings = self._settings
         self._visualiser._unit_lookup = self
         self._model.finished_loading.connect(self.tab_notification)
@@ -72,9 +72,14 @@ class PlotSelectionTab(GeneralTab):
     def load_files(self):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
-            "Load an MDA file (MDANSE analysis results)",
+            "Load an MDA file (MDANSE analysis results) or a trajectory",
             str(self.get_path("plot_selection")),
-            "MDANSE result files (*.mda);;HDF5 files (*.h5);;HDF5 files(*.hdf);;All files(*.*)",
+            "MDANSE output files (*.mda *.mdt);;"
+            "MDANSE analysis results (*.mda);;"
+            "MDANSE trajectories (*.mdt);;"
+            "HDF5 files (*.h5);;"
+            "HDF5 files(*.hdf);;"
+            "All files(*.*)",
         )
         if fnames is None:
             return

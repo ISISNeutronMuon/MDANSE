@@ -181,10 +181,18 @@ class SingleDataset:
                     source[self._name].attrs["scaling_factor"],
                 )
 
-        self._data_unit = source[self._name].attrs["units"]
+        try:
+            self._data_unit = source[self._name].attrs["units"]
+        except KeyError:
+            LOG.warning("Dataset %s did not have the 'units' attribute.", self._name)
+            self._data_unit = "unknown"
         self._n_dim = len(self._data.shape)
         self._data_shape = self._data.shape
-        self._axes_tag = source[self._name].attrs["axis"]
+        try:
+            self._axes_tag = source[self._name].attrs["axis"]
+        except KeyError:
+            LOG.warning("Dataset %s did not have the 'axis' attribute.", self._name)
+            self._axes_tag = "time" if "time" in source else "index"
 
         self.create_axes_tags(self._axes_tag, source)
 
