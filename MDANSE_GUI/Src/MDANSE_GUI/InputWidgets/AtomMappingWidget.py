@@ -44,7 +44,14 @@ class AtomMappingHelperDialog(QDialog):
     """
 
     def __init__(
-        self, field_widget: InputFileWidget, field: QLineEdit, parent, *args, **kwargs
+        self,
+        field_widget: InputFileWidget,
+        field: QLineEdit,
+        parent,
+        *args,
+        min_width: int = 500,
+        min_height: int | None = 600,
+        **kwargs,
     ):
         """
         Parameters
@@ -59,8 +66,8 @@ class AtomMappingHelperDialog(QDialog):
         super().__init__(parent, *args, **kwargs)
         self.setWindowTitle("Atom mapping helper")
         self.setModal(True)
-        self.min_width = kwargs.get("min_width", 500)
-        self.min_height = kwargs.get("min_width", 600)
+        self.min_width = min_width
+        self.min_height = min_height or min_width
         self.resize(self.min_width, self.min_height)
         self.setMinimumWidth(self.min_width)
         self.setMinimumHeight(self.min_height)
