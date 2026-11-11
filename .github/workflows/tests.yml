@@ -238,5 +238,5 @@ jobs:
 
           echo "Running script2_dcsf.py"
           python script2_dcsf.py
-          echo "Checking dcsf_256.mdt exists"
-          test -f ../mdanse_outputs/dcsf_256.mdt
+          echo "Checking dcsf_256.mda exists"
+          test -f ../mdanse_outputs/dcsf_256.mda
