@@ -22,7 +22,6 @@ from typing import Any
 
 import h5py
 import numpy as np
-import numpy.typing as npt
 from more_itertools import always_iterable
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, QPoint, Qt, Signal, Slot
 from qtpy.QtGui import QContextMenuEvent, QMouseEvent

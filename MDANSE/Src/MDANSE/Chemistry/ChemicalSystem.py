@@ -20,7 +20,7 @@ import itertools as it
 from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, SupportsInt
+from typing import TYPE_CHECKING, SupportsInt
 
 import h5py
 import more_itertools

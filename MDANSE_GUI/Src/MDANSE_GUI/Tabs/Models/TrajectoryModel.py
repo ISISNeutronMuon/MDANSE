@@ -21,7 +21,6 @@ from enum import Enum, auto
 from pathlib import Path
 
 from qtpy.QtCore import (
-    QDeadlineTimer,
     QModelIndex,
     QMutex,
     QObject,

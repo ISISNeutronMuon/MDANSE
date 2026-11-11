@@ -24,8 +24,6 @@ from qtpy.QtCore import Qt, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 from qtpy.QtWidgets import QComboBox, QTableView, QVBoxLayout, QWidget
 
-from MDANSE.Chemistry import ATOMS_DATABASE
-
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
 

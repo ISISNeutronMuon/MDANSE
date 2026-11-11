@@ -16,9 +16,8 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from os import SEEK_SET
 from pathlib import Path
-from typing import NamedTuple, TextIO
+from typing import NamedTuple
 
 import numpy as np
 from more_itertools import consume as drop

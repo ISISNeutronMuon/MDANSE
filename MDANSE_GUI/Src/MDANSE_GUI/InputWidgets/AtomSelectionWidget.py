@@ -19,7 +19,7 @@ import json
 from enum import Enum
 from pathlib import Path
 
-from qtpy.QtCore import QEvent, QObject, Qt, Signal, Slot
+from qtpy.QtCore import QEvent, Qt, Signal, Slot
 from qtpy.QtGui import (
     QStandardItem,
     QStandardItemModel,

@@ -18,7 +18,6 @@ from __future__ import annotations
 import struct
 from collections.abc import Iterator
 from itertools import islice
-from os import SEEK_SET
 from pathlib import Path
 from typing import Literal
 

@@ -21,9 +21,6 @@ from typing import SupportsFloat
 from MDANSE.Framework.Configurators.FloatConfigurator import FloatConfigurator
 from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
 
-with suppress(ImportError):
-    import MDAnalysis as mda
-
 
 @IConfigurator.register("MDAnalysisTimeStepConfigurator")
 class MDAnalysisTimeStepConfigurator(FloatConfigurator):

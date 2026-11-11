@@ -15,17 +15,12 @@
 #
 from __future__ import annotations
 
-import contextlib
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 import numpy as np
-import numpy.typing as npt
-from matplotlib.axes import Axes
-from matplotlib.lines import Line2D
 from more_itertools import ilen
 
 from MDANSE.MLogging import LOG
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
 if TYPE_CHECKING:

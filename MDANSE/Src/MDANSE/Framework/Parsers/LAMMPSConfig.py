@@ -20,11 +20,10 @@ from collections import namedtuple
 from collections.abc import Iterable, Sequence
 from itertools import starmap
 from pathlib import Path
-from string import ascii_uppercase as upcase
 from typing import Any, Literal
 
 import numpy as np
-from more_itertools import first, one, sort_together, split_before, spy
+from more_itertools import first, one, split_before, spy
 
 from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Parsers.LAMMPS import BoxStyle

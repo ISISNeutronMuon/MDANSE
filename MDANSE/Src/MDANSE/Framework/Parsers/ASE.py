@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable
 from functools import cached_property
 from pathlib import Path
 from typing import overload
@@ -23,8 +23,6 @@ from typing import overload
 from ase import Atoms
 from ase.io import iread, read
 from ase.io.trajectory import Trajectory as ASETrajectory
-
-from MDANSE.Framework.AtomMapping import AtomLabel
 
 from .Parser import Parser
 

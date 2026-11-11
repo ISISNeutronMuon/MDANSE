@@ -20,8 +20,6 @@ from typing import Any, ClassVar, Generic, ParamSpec, TypeVar
 
 from more_itertools import always_iterable
 
-from MDANSE.IO.IOUtils import UCDict
-
 P = ParamSpec("P")
 T = TypeVar("T", bound="RegisterFactory")
 

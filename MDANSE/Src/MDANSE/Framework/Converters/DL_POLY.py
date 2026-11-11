@@ -17,9 +17,6 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
-from more_itertools import consume as drop
-
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob

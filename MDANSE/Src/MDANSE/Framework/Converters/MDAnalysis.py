@@ -30,7 +30,7 @@ from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
 try:
-    import MDAnalysis as mda
+    import MDAnalysis as mda  # ruff: ignore[F401]
 
     mda_available = True
 except ImportError:

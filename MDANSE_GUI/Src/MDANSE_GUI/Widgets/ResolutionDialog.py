@@ -14,10 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
-import math
-
-import numpy as np
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import Signal
 from qtpy.QtWidgets import QApplication, QDialog, QVBoxLayout
 
 from MDANSE_GUI.Widgets.ResolutionWidget import ResolutionWidget

@@ -15,15 +15,14 @@
 #
 from __future__ import annotations
 
-import os
 from abc import abstractmethod
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QMessageLogger, QObject, QSettings, Signal, Slot
 from qtpy.QtWidgets import QListView, QWidget
 
-from MDANSE.Core.Settings import Option, Settings
+from MDANSE.Core.Settings import Settings
 from MDANSE.Framework.Units import measure, unit_lookup
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Session.Session import Session

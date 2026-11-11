@@ -24,7 +24,6 @@ from typing import Any
 import numpy as np
 from more_itertools import first, one, split_at
 
-from MDANSE.Framework.AtomMapping import AtomLabel
 from MDANSE.Framework.Units import measure
 from MDANSE.util_types import FloatArray
 
