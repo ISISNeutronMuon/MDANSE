@@ -448,12 +448,13 @@ def build_parsers() -> ArgumentParser:
         action="version",
         version=f"{version_summary(show_backend=False)}",
     )
-    parser.add_argument(
+    settings_group = parser.add_mutually_exclusive_group()
+    settings_group.add_argument(
         "--settings",
         help="Settings folder to use.",
         default=None,
     )
-    parser.add_argument(
+    settings_group.add_argument(
         "--local",
         help="Use local settings.",
         action="store_true",
@@ -476,7 +477,7 @@ def build_parsers() -> ArgumentParser:
 
 def main():
     LOG.setLevel("INFO")
-    print(f"MDANSE {MDANSE.__version__}")  # noqa: T201
+    print(f"MDANSE version {MDANSE.__version__}")  # noqa: T201
     parser = build_parsers()
     args: Namespace = parser.parse_args()
 
@@ -489,7 +490,7 @@ def main():
     # Reload databases with new paths.
     ATOMS_DATABASE._load()
 
-    if not vars(args):
+    if not hasattr(args, "func"):
         parser.print_help()
     else:
         args.func(args)
