@@ -26,6 +26,25 @@ from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.IO.IOUtils import UCDict
 from MDANSE.MLogging import LOG
 
+TRAJ_UNITS = {
+    "unit_cell": "nm",
+    "charge": "e",
+    "configuration/coordinates": "nm",
+    "configuration/velocities": "nm/ps",
+    "configuration/gradients": "amu*nm/ps",
+    "time": "ps",
+    "composition/atom_indices": "N/A",
+}
+TRAJ_AXES = {
+    "unit_cell": "time|index|index",
+    "charge": "composition/atom_indices",
+    "configuration/coordinates": "time|composition/atom_indices|index",
+    "configuration/velocities": "time|composition/atom_indices|index",
+    "configuration/gradients": "time|composition/atom_indices|index",
+    "time": "index",
+    "composition/atom_indices": "index",
+}
+
 
 class Converter(IJob, RegisterFactory["Converter"], ABC):
     """Outputs a trajectory in the MDT format."""
@@ -54,32 +73,15 @@ class Converter(IJob, RegisterFactory["Converter"], ABC):
 
         write_metadata(self, output_file)
 
-        try:
-            if "time" in output_file:
-                output_file["time"].attrs["units"] = "ps"
-                output_file["time"].attrs["axis"] = "time"
-                output_file["time"].attrs["name"] = "time"
+        for dset_name, dset_unit in TRAJ_UNITS.items():
+            if dset_name in output_file:
+                output_file[dset_name].attrs["units"] = dset_unit
+                output_file[dset_name].attrs["axis"] = TRAJ_AXES[dset_name]
+                output_file[dset_name].attrs["name"] = dset_name
 
-            if "box_size" in output_file:
-                output_file["box_size"].attrs["units"] = "nm"
-                output_file["box_size"].attrs["axis"] = "time"
-                output_file["box_size"].attrs["name"] = "box_size"
+        if "charge" in output_file and output_file["charge"].ndim == 2:
+            output_file[dset_name].attrs["axis"] = TRAJ_AXES[dset_name] + "|time"
 
-            if "configuration" in output_file:
-                output_file["configuration"].attrs["units"] = "nm"
-                output_file["configuration"].attrs["axis"] = "time"
-                output_file["configuration"].attrs["name"] = "configuration"
-
-            if "velocities" in output_file:
-                output_file["velocities"].attrs["units"] = "nm/ps"
-                output_file["velocities"].attrs["axis"] = "time"
-                output_file["velocities"].attrs["name"] = "velocities"
-
-            if "gradients" in output_file:
-                output_file["gradients"].attrs["units"] = "amu*nm/ps"
-                output_file["gradients"].attrs["axis"] = "time"
-                output_file["gradients"].attrs["name"] = "gradients"
-        finally:
-            output_file.close()
+        output_file.close()
 
         super().finalize()
