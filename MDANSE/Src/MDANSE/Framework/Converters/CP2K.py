@@ -15,7 +15,7 @@
 #
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 from more_itertools import all_equal
 
@@ -25,7 +25,10 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Parsers import CP2KCellFile, XYZFile
 from MDANSE.Framework.Units import measure
-from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
+from MDANSE.MolecularDynamics.Configuration import (
+    AbsoluteConfiguration,
+    PeriodicAbsoluteConfiguration,
+)
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
@@ -83,9 +86,10 @@ class CP2K(Converter):
         "FileWithAtomDataConfigurator",
         {
             "wildcard": "Cell files (*.cell);;All files (*)",
-            "default": "INPUT_FILENAME.cell",
+            "default": "",
             "label": "CP2K unit cell file (.cell)",
             "parser": CP2KCellFile,
+            "optional": True,
         },
     )
     settings["unit_cell"] = (
@@ -112,6 +116,13 @@ class CP2K(Converter):
         },
     )
 
+    FILE_MAPPING: ClassVar[dict[str, str]] = {
+        "coordinates": "pos_file",
+        "cell": "cell_file",
+        "velocities": "vel_file",
+        "forces": "force_file",
+    }
+
     def initialize(self):
         """
         Initialize the job.
@@ -120,15 +131,13 @@ class CP2K(Converter):
         super().initialize()
 
         self.files = {
-            "coordinates": self.configuration["pos_file"].instance,
-            "cell": self.configuration["cell_file"].instance,
+            key: self.configuration[ref].instance
+            for key, ref in self.FILE_MAPPING.items()
+            if self.configuration[ref].instance
         }
 
-        if vfile := self.configuration["vel_file"].instance:
-            self.files["velocities"] = vfile
-
-        if ffile := self.configuration["force_file"].instance:
-            self.files["forces"] = ffile
+        if "coordinates" not in self.files:
+            raise CP2KConverterError("No coordinates file provided.")
 
         for attr in ("time_step", "n_frames"):
             if not all_equal(getattr(file, attr) for file in self.files.values()):
@@ -180,23 +189,29 @@ class CP2K(Converter):
         }
         if self.configuration["unit_cell"]["apply"]:
             data["cell"] = self.configuration["unit_cell"]["value"]
-        else:
+        elif "cell" in data:
             data["cell"] = UnitCell(data["cell"])
+        else:
+            data["cell"] = None
 
-        real_conf = PeriodicAbsoluteConfiguration(
-            data.pop("coordinates"),
-            data.pop("cell"),
-            **data,
-        )
+        if data["cell"] is not None:
+            conf = PeriodicAbsoluteConfiguration(
+                data.pop("coordinates"),
+                data.pop("cell"),
+                **data,
+            )
+        else:
+            data.pop("cell")
+            conf = AbsoluteConfiguration(data.pop("coordinates"), **data)
 
         if self.configuration["fold"]["value"]:
-            real_conf.fold_coordinates()
+            conf.fold_coordinates()
 
         time = index * self.files["coordinates"].time_step * self.UNITS["time"]
 
         # A snapshot is created out of the current configuration.
         self._trajectory.dump_configuration(
-            real_conf,
+            conf,
             time,
             units={
                 "time": "ps",
