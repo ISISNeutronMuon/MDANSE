@@ -21,18 +21,17 @@ import numpy as np
 import vtk
 from qtpy.QtCore import QTimer, Signal
 
-from MDANSE.Core.Settings import Option, Settings
+from MDANSE.Core.Settings import Setting
 from MDANSE.MLogging import LOG
 
 from .MolecularViewer import MolecularViewer
 
 
-@Settings.parametrise(
-    display_disco=Option(True, group="startup", comment="Display disco logo."),
-    animate_disco=Option(True, group="startup", comment="Animate disco logo."),
-)
 class MolecularViewerExtended(MolecularViewer):
     """MolecularViewer which emits atom index when clicked."""
+
+    display_disco = Setting(True, group="startup", comment="Display disco logo.")
+    animate_disco = Setting(True, group="startup", comment="Animate disco logo.")
 
     clicked_atom_index = Signal(int)
 
