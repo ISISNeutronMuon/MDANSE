@@ -35,7 +35,8 @@ from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
-from MDANSE.Core.Settings import Setting
+from MDANSE.Core.Settings import Option, Setting, Settings
+from MDANSE.Framework.Converters.Converter import TRAJ_AXES, TRAJ_UNITS
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray, IntArray
@@ -85,6 +86,51 @@ def get_mpl_colours():
     return [mpl_to_hex(col) for col in colours]
 
 
+def guess_axis(dset_name: str, source_object: h5py.File) -> str:
+    """Find the likely plot axes for the dataset based on its dimensions.
+
+    This is meant to enable plotting of trajectories created with
+    MDANSE 2.0.0-2.0.3, before trajectory datasets had been given
+    valid plotting tags. It is not guaranteed to be accurate, but
+    will enable plotting in most cases.
+
+    Parameters
+    ----------
+    dset_name : str
+        Dataset key in the input file
+    source_object : h5py.File
+        An open HDF5 file object.
+
+    Returns
+    -------
+    str
+        Plotting axis tag composed of names separated by '|' characters.
+    """
+    new_tags = []
+    target_shape = source_object[dset_name].shape
+    time_steps = len(source_object["time"]) if "time" in source_object else -1
+    atom_count = (
+        len(source_object["composition/atom_indices"])
+        if "composition/atom_indices" in source_object
+        else -1
+    )
+    for ax_len in target_shape:
+        if ax_len == time_steps:
+            new_tags.append("time")
+        elif ax_len == atom_count:
+            new_tags.append("composition/atom_indices")
+        else:
+            new_tags.append("index")
+    return "|".join(new_tags)
+
+
+@Settings.parametrise(
+    colour_map=Option(
+        "viridis",
+        group="matplotlib",
+        comment="Name of the default matplotlib colormap to be used in 2D plots.",
+    ),
+)
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
 
@@ -182,14 +228,16 @@ class SingleDataset:
             self._data_unit = source[self._name].attrs["units"]
         except KeyError:
             LOG.warning("Dataset %s did not have the 'units' attribute.", self._name)
-            self._data_unit = "unknown"
+            self._data_unit = TRAJ_UNITS.get(self._name, "unknown")
         self._n_dim = len(self._data.shape)
         self._data_shape = self._data.shape
         try:
             self._axes_tag = source[self._name].attrs["axis"]
         except KeyError:
             LOG.warning("Dataset %s did not have the 'axis' attribute.", self._name)
-            self._axes_tag = "time" if "time" in source else "index"
+            self._axes_tag = TRAJ_AXES.get(self._name, "")
+        if not self._axes_tag:
+            self._axes_tag = guess_axis(self._name, source)
 
         self.create_axes_tags(self._axes_tag, source)
 
@@ -311,7 +359,11 @@ class SingleDataset:
             else:
                 axis_key = aname
                 self._axes[axis_key] = source[axis_key][:]
-                self._axes_units[axis_key] = source[axis_key].attrs["units"]
+                try:
+                    self._axes_units[axis_key] = source[axis_key].attrs["units"]
+                except KeyError:
+                    LOG.warning("Axis %s is missing the 'units' attribute", axis_key)
+                    self._axes_units[axis_key] = "N/A"
             self._axes_order.append(axis_key)
             self._axes_scaling[axis_key] = 1.0
             self._current_units[axis_key] = self._axes_units[axis_key]
