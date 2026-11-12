@@ -86,12 +86,13 @@ def build_parser():
         "have finished running.",
         default=None,
     )
-    parser.add_argument(
+    settings_group = parser.add_mutually_exclusive_group()
+    settings_group.add_argument(
         "--settings",
         help="Settings folder to use.",
         default=None,
     )
-    parser.add_argument(
+    settings_group.add_argument(
         "--local",
         help="Use local settings.",
         action="store_true",
