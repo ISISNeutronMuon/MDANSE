@@ -39,6 +39,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Framework.Units import UNITS_MANAGER
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
 
 
@@ -108,32 +109,35 @@ class UnitModel(QStandardItemModel):
     @Slot(dict)
     def addNewUnit(self, info: dict):
         unit_name = info["name"]
-        if UNITS_MANAGER.has_unit(unit_name):
-            return None
-        else:
-            UNITS_MANAGER.add_unit(
-                unit_name,
-                *[
-                    info[key]
-                    for key in [
-                        "factor",
-                        "kg",
-                        "m",
-                        "s",
-                        "K",
-                        "mol",
-                        "A",
-                        "cd",
-                        "rad",
-                        "sr",
-                    ]
-                ],
+        if conflict := UNITS_MANAGER.has_conflict(unit_name):
+            LOG.warning(
+                f"Name conflict between {unit_name} and {' and '.join(conflict)}"
             )
-            UNITS_MANAGER.save()
-            item = QStandardItem(unit_name)
-            item.setEditable(False)
-            item.setData(unit_name)
-            self.appendRow(item)
+            return None
+
+        UNITS_MANAGER.add_unit(
+            unit_name,
+            *[
+                info[key]
+                for key in [
+                    "factor",
+                    "kg",
+                    "m",
+                    "s",
+                    "K",
+                    "mol",
+                    "A",
+                    "cd",
+                    "rad",
+                    "sr",
+                ]
+            ],
+        )
+        UNITS_MANAGER.save()
+        item = QStandardItem(unit_name)
+        item.setEditable(False)
+        item.setData(unit_name)
+        self.appendRow(item)
 
 
 class UnitsEditor(QDialog):
