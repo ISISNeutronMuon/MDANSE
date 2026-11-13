@@ -188,7 +188,8 @@ class MDANSEMainWindow(QMainWindow):
         if app_instance is not None:
             self.app_instance = app_instance
             app_instance.aboutToQuit.connect(self._session.save)
-            app_instance.applicationStateChanged.connect(self.show_on_activation)
+            if app_instance.platformName() == "cocoa":
+                app_instance.applicationStateChanged.connect(self.show_on_activation)
 
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
