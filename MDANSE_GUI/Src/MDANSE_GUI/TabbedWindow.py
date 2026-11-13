@@ -369,8 +369,11 @@ class MDANSEMainWindow(QMainWindow):
         if self.system_tray_icon.isVisible():
             if not self.really_closing:
                 event.ignore()
-                self.hide()
-                self.show_systray_warning()
+                if self.isFullScreen():
+                    self.setWindowState(Qt.WindowState.WindowMinimized)
+                else:
+                    self.hide()
+                    self.show_systray_warning()
             else:
                 super().closeEvent(event)
         if not event.spontaneous() or not self.isVisible():
