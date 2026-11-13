@@ -16,11 +16,11 @@
 from __future__ import annotations
 
 import json
-from enum import Enum, auto
-from typing import TYPE_CHECKING, Any, Self
+from enum import auto
+from typing import TYPE_CHECKING, Any, Self, TypeAlias
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
-from MDANSE.IO.IOUtils import json_handler
+from MDANSE.IO.IOUtils import UCEnum, json_handler
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
-class OperationType(Enum):
+class OperationType(UCEnum):
     """OperationType Enum for standardisation of names."""
 
     SET = auto()
@@ -41,11 +41,8 @@ class OperationType(Enum):
     AND = INTERSECTION
     DIFF = DIFFERENCE
 
-    @classmethod
-    def _missing_(cls, value: str):
-        if not isinstance(value, str):
-            return None
-        return vars(cls).get(value.upper())
+
+OpsList: TypeAlias = list[tuple[str, dict[str, Any]]]
 
 
 class SelectionBuilder:
@@ -57,10 +54,12 @@ class SelectionBuilder:
         Starting point to build Selection builder on in json format.
     """
 
-    def __init__(self, basis: dict | str | Path | None = None):
-        self.ops = self.load(basis) if basis else []
+    ops: OpsList
 
-    def __getitem__(self, key: int | slice) -> tuple[str, dict[str, Any]]:
+    def __init__(self, basis: dict | str | Path | None = None):
+        self.load(basis)
+
+    def __getitem__(self, key: int | slice) -> Self:
         new = type(self)()
         if isinstance(key, int):
             new.ops = [self.ops[key]]
@@ -86,10 +85,10 @@ class SelectionBuilder:
             Dictionary of new order of operations.
 
         """
-        self.ops = [self[ind] for ind in new_order]
+        self.ops = [self.ops[ind] for ind in new_order]
         return self
 
-    def load(self, source: dict | str | Path):
+    def load(self, source: dict | str | Path | None, *, append: bool = False) -> None:
         """Load a selection builder from a dump.
 
         Parameters
@@ -98,10 +97,31 @@ class SelectionBuilder:
             Source json file or string or dict to use.
 
         """
+        new_ops = self.parse(source)
+        if append:
+            self.ops.extend(new_ops)
+            return
+        self.ops = new_ops
+
+    def parse(self, source: dict | str | Path | None) -> OpsList:
+        """Load a selection builder from a dump.
+
+        Parameters
+        ----------
+        source : dict | str | Path
+            Source json file or string or dict to use.
+
+        """
+        ops: OpsList = []
+        if source is None:
+            return ops
+
         value = json_handler(source)
+
         for _, val in sorted(value.items(), key=lambda x: x[0]):
             params = val.copy()
-            self.ops.append(params.pop("function_name"), params)
+            ops.append((params.pop("function_name"), params))
+        return ops
 
     @property
     def as_selection(self) -> ReusableSelection:
