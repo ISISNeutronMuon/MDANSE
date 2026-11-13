@@ -36,49 +36,20 @@ from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.IO.AtomInfo import atom_info
 from MDANSE.MLogging import LOG
-from MDANSE.MolecularDynamics.Trajectory import (
-    Trajectory,
-    check_hdf5_driver,
-    chemical_system_summary,
-    trajectory_summary,
+from MDANSE.Scripts.tui import MDANSETui
+
+from .funcs import (
+    execute_analysis,
+    execute_converter,
+    execute_element,
+    execute_results,
+    show_trajectory_contents,
 )
 from MDANSE.Results.MDAFile import MDAFile
 
 
 class CommandLineParserError(Exception):
     pass
-
-
-def get_hdf5_contents(file_object: h5py.File):
-    key_list = []
-
-    def save_key(name, obj):
-        if isinstance(obj, h5py.Dataset):
-            key_list.append(name)
-
-    file_object.visititems(save_key)
-    return key_list
-
-
-def show_trajectory_contents(args: Namespace):
-    trajectory_path = args.file_name
-    if not trajectory_path:
-        return
-    trajectory_name = Path.cwd() / trajectory_path
-    instance = (
-        Trajectory(trajectory_name, hdf5_driver="core")
-        if check_hdf5_driver()
-        else Trajectory(trajectory_name)
-    )
-    result = trajectory_summary(instance)
-    result += chemical_system_summary(instance.chemical_system)
-    traj_arrays = get_hdf5_contents(instance.file)
-    result += "====DATA ARRAYS====\n"
-    result += "\n".join(
-        f"{name}: type={instance.file[name].dtype}, shape={instance.file[name].shape}"
-        for name in traj_arrays
-    )
-    print(result)
 
 
 def show_results_contents(filename: str, *, verbose: bool) -> None:
@@ -401,6 +372,23 @@ def _element_parser(subparsers: _SubParsersAction) -> Any:
     return element
 
 
+def _tui_parser(subparsers: _SubParsersAction) -> Any:
+    tui = subparsers.add_parser(
+        "tui",
+        help="Start the MDANSE text user interface (TUI).",
+        formatter_class=RawDescriptionHelpFormatter,
+        description=textwrap.dedent(
+            """
+            Start the interactive TUI environment of MDANSE allowing you to
+            run various calculations.
+
+            For more information
+        """
+        ),
+    )
+    return tui
+
+
 def build_parsers() -> ArgumentParser:
     parser = ArgumentParser(
         prog="mdanse",
@@ -413,6 +401,7 @@ def build_parsers() -> ArgumentParser:
         running an analysis and viewing the results.
 
         Find out more about specific subcommands by running:
+        mdanse tui -h
         mdanse convert -h
         mdanse analysis -h
         mdanse traj -h
@@ -450,6 +439,7 @@ def build_parsers() -> ArgumentParser:
         (_converter_parser(subparsers), execute_converter),
         (_analysis_parser(subparsers), execute_analysis),
         (_results_parser(subparsers), execute_results),
+        (_tui_parser(subparsers), MDANSETui().cmdloop),
     ]:
         subparser.set_defaults(func=function)
     return parser
@@ -471,7 +461,7 @@ def main():
     ATOMS_DATABASE._load()
 
     if not hasattr(args, "func"):
-        parser.print_help()
+        MDANSETui().cmdloop()
     else:
         args.func(args)
 
