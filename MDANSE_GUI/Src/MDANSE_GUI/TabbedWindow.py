@@ -188,6 +188,7 @@ class MDANSEMainWindow(QMainWindow):
         if app_instance is not None:
             self.app_instance = app_instance
             app_instance.aboutToQuit.connect(self._session.save)
+            app_instance.applicationStateChanged.connect(self.show_on_activation)
 
         self.settings_editor = UserSettingsEditor(self, current_session=self._session)
 
@@ -417,6 +418,11 @@ class MDANSEMainWindow(QMainWindow):
     @Slot(Qt.CheckState)
     def set_systray_warning_flag(self, show_again: Qt.CheckState):
         self.warn_about_systray = show_again == Qt.CheckState.Checked
+
+    @Slot(Qt.ApplicationState)
+    def show_on_activation(self, new_state: Qt.ApplicationState):
+        if new_state == Qt.ApplicationState.ApplicationActive:
+            self.show_window_right_size()
 
     def createCommonModels(self):
         self._trajectory_model = TrajectoryModel()
