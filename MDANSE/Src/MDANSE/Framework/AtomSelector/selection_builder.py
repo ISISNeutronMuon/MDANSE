@@ -16,11 +16,11 @@
 from __future__ import annotations
 
 import json
-from enum import Enum, auto
-from typing import TYPE_CHECKING, Any
+from enum import auto
+from typing import TYPE_CHECKING, Any, Self, TypeAlias
 
 from MDANSE.Framework.AtomSelector.selector import ReusableSelection
-from MDANSE.IO.IOUtils import json_handler
+from MDANSE.IO.IOUtils import UCEnum, json_handler
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from MDANSE.MolecularDynamics.Trajectory import Trajectory
 
 
-class OperationType(Enum):
+class OperationType(UCEnum):
     """OperationType Enum for standardisation of names."""
 
     SET = auto()
@@ -41,11 +41,8 @@ class OperationType(Enum):
     AND = INTERSECTION
     DIFF = DIFFERENCE
 
-    @classmethod
-    def _missing_(cls, value: str):
-        if not isinstance(value, str):
-            return None
-        return vars(cls).get(value.upper())
+
+OpsList: TypeAlias = list[tuple[str, dict[str, Any]]]
 
 
 class SelectionBuilder:
@@ -57,10 +54,12 @@ class SelectionBuilder:
         Starting point to build Selection builder on in json format.
     """
 
-    def __init__(self, basis: dict | str | Path | None = None):
-        self.ops = self.load(basis) if basis else []
+    ops: OpsList
 
-    def __getitem__(self, key: int | slice) -> tuple[str, dict[str, Any]]:
+    def __init__(self, basis: dict | str | Path | None = None):
+        self.load(basis)
+
+    def __getitem__(self, key: int | slice) -> Self:
         new = type(self)()
         if isinstance(key, int):
             new.ops = [self.ops[key]]
@@ -86,10 +85,10 @@ class SelectionBuilder:
             Dictionary of new order of operations.
 
         """
-        self.ops = [self[ind] for ind in new_order]
+        self.ops = [self.ops[ind] for ind in new_order]
         return self
 
-    def load(self, source: dict | str | Path):
+    def load(self, source: dict | str | Path | None, *, append: bool = False) -> None:
         """Load a selection builder from a dump.
 
         Parameters
@@ -98,10 +97,31 @@ class SelectionBuilder:
             Source json file or string or dict to use.
 
         """
+        new_ops = self.parse(source)
+        if append:
+            self.ops.extend(new_ops)
+            return
+        self.ops = new_ops
+
+    def parse(self, source: dict | str | Path | None) -> OpsList:
+        """Load a selection builder from a dump.
+
+        Parameters
+        ----------
+        source : dict | str | Path
+            Source json file or string or dict to use.
+
+        """
+        ops: OpsList = []
+        if source is None:
+            return ops
+
         value = json_handler(source)
+
         for _, val in sorted(value.items(), key=lambda x: x[0]):
             params = val.copy()
-            self.ops.append(params.pop("function_name"), params)
+            ops.append((params.pop("function_name"), params))
+        return ops
 
     @property
     def as_selection(self) -> ReusableSelection:
@@ -177,17 +197,17 @@ class SelectionBuilder:
         """
         return {key: val for key, val in args.items() if val}
 
-    def select_all(self) -> None:
+    def select_all(self) -> Self:
         """Select all the atoms in the trajectory."""
         self.ops.append(("select_all", {}))
         return self
 
-    def select_none(self) -> None:
+    def select_none(self) -> Self:
         """Set an empty selection."""
         self.ops.append(("select_none", {}))
         return self
 
-    def invert_selection(self) -> None:
+    def invert_selection(self) -> Self:
         """Invert the current selection for the input trajectory.
 
         Return a set of all the indices that are present in the trajectory
@@ -205,7 +225,7 @@ class SelectionBuilder:
         index_slice: Sequence[int] | None = None,
         atom_types: Sequence[str] = (),
         atom_names: Sequence[str] = (),
-    ) -> None:
+    ) -> Self:
         """Select specific atoms in the trajectory.
 
         Atoms can be selected based
@@ -247,7 +267,7 @@ class SelectionBuilder:
         self,
         *,
         operation_type: OperationType = OperationType.UNION,
-    ) -> None:
+    ) -> Self:
         """Select all atoms with the dummy property.
 
         Parameters
@@ -257,13 +277,14 @@ class SelectionBuilder:
         """
         operation_type = OperationType(operation_type).name.lower()
         self.ops.append(("select_dummy", {"operation_type": operation_type}))
+        return self
 
     def select_molecules(
         self,
         *,
         operation_type: OperationType = OperationType.UNION,
         molecule_names: Sequence[str],
-    ) -> None:
+    ) -> Self:
         """Selects all the atoms belonging to the specified molecule types.
 
         Parameters
@@ -290,7 +311,7 @@ class SelectionBuilder:
         *,
         operation_type: OperationType = OperationType.UNION,
         atom_labels: Sequence[str],
-    ) -> None:
+    ) -> Self:
         """Select atoms with a specific label in the trajectory.
 
         A residue name can be used as a label by MDANSE.
@@ -319,7 +340,7 @@ class SelectionBuilder:
         *,
         operation_type: OperationType = OperationType.UNION,
         rdkit_pattern: str,
-    ) -> None:
+    ) -> Self:
         """Select atoms according to the SMARTS string given as input.
 
         This will only work if molecules and bonds have been detected in the system.
@@ -352,7 +373,7 @@ class SelectionBuilder:
         frame_number: int = 0,
         position_minimum: Sequence[float] | None = None,
         position_maximum: Sequence[float] | None = None,
-    ) -> None:
+    ) -> Self:
         """Select atoms based on their positions at a specified frame number.
 
         Lower and upper limits of x, y and z coordinates can be given as input.
@@ -386,7 +407,7 @@ class SelectionBuilder:
         frame_number: int = 0,
         sphere_centre: tuple[float, float, float],
         sphere_radius: float,
-    ) -> None:
+    ) -> Self:
         """Select atoms within a sphere.
 
         Selects atoms at a given distance from a fixed point in space,

@@ -24,10 +24,11 @@ from enum import Enum
 from functools import singledispatch
 from itertools import count, filterfalse, islice
 from pathlib import Path
+from textwrap import TextWrapper
 from typing import TYPE_CHECKING, Any, Protocol, SupportsComplex, TypeVar, overload
 
 import numpy as np
-from more_itertools import first_true, last, take, value_chain
+from more_itertools import first, first_true, last, take, value_chain
 
 from MDANSE.MLogging import LOG
 
@@ -137,7 +138,7 @@ def _(value: Path) -> dict[Any, Any]:
         with value.open(encoding="utf-8") as file:
             return json.load(file)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Unable to open ({value}) as json file .") from _
+        raise FileNotFoundError(f"File ({value}) not found.") from None
     except Exception as err:
         raise ValueError("Unable to load JSON string.") from err
 
@@ -611,3 +612,87 @@ def ordinal_suffix(index: int) -> str:
             return "rd"
         case _:
             return "th"
+
+
+def tabulate(
+    table: dict[str, Sequence[SupportsStr]],
+    types: dict[str, type | tuple[type, ...]],
+    *,
+    header: str = "-",
+    max_width: int = 10000,
+    max_length: int | None = None,
+):
+    """Write a dictionary of sequences as a table.
+
+    Each key represents a column.
+
+    Parameters
+    ----------
+    table : dict[str, Sequence[SupportsStr]]
+        Table of data to write.
+    types : dict[str, type]
+        Data types in table.
+    header : str
+        Character to use to separate headers from body.
+    max_width : int
+        Maximum width for each line, beyond this will be truncated with "..."
+    max_length : int, optional
+        Max length of table to print.
+
+    Examples
+    --------
+    >>> cats = {"name": ("Moggy", "William"), "age": (3, 7)}
+    >>> types = {"name": str, "age": int}
+    >>> tabulate(cats, types)
+    name    age
+    ------- --------
+    Moggy          3
+    William        7
+    Table: 2x2
+    """
+
+    width = {}
+    fmt = {}
+    for col, rows in table.items():
+        typ = types[col]
+
+        if typ is float:
+            width[col] = max(len(col), 10)
+            fmt[col] = "{:10.5f}"
+        elif typ is (float, float, float):
+            width[col] = max(len(col), 32)
+            # fmt[col] = "{!r}"
+            fmt[col] = "{0[0]:10.5f} {0[1]:10.5f} {0[2]:10.5f}"
+        elif typ is int:
+            width[col] = max(len(col), 8)
+            fmt[col] = "{:8d}"
+        elif typ is bool:
+            width[col] = max(len(col), 5)
+            fmt[col] = "{:5s}"
+        elif typ is str:
+            width[col] = max(
+                len(val)
+                for val in value_chain(col, islice(rows, max_length), last(rows))
+            )
+
+            fmt[col] = f"{{:{width[col]}s}}"
+        else:
+            width[col] = max(
+                len(str(val))
+                for val in value_chain(col, islice(rows, max_length), last(rows))
+            )
+            fmt[col] = f"{{!s:{width[col]}s}}"
+
+    wrapper = TextWrapper(width=max_width, placeholder="...")
+
+    out = [
+        " ".join(f"{col:{width[col]}s}" for col in table),
+        " ".join(header[0] * width[col] for col in table),
+    ]
+
+    out.extend(
+        " ".join(fmt[col].format(datum) for col, datum in zip(table, row, strict=True))
+        for row in islice(zip(*table.values(), strict=True), max_length)
+    )
+    out.append(f"Table: {len(table)}x{len(first(table.values())) if table else 0}")
+    return "\n".join(map(wrapper.fill, out))
