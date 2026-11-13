@@ -124,6 +124,13 @@ class RecentFileAction(QAction):
         comment="Show a message when closing the main window if the GUI is still running in the background.",
     )
 )
+@Settings.parametrise(
+    notify_via_systray=Option(
+        value=True,
+        group="notifications",
+        comment="Pop up a system tray notification every time when closing the main window.",
+    )
+)
 class MDANSEMainWindow(QMainWindow):
     """The main window of the MDANSE GUI."""
 
@@ -383,11 +390,14 @@ class MDANSEMainWindow(QMainWindow):
             "MDANSE GUI is still running in the background."
             " Use the system tray icon to bring the main window back, or to exit."
         )
-        self.system_tray_icon.showMessage(
-            "MDANSE_GUI is still running",
-            "Use the system tray icon to show the main window or exit.",
-            self.app_instance.windowIcon() if self.app_instance is not None else None,
-        )
+        if self.notify_via_systray:
+            self.system_tray_icon.showMessage(
+                "MDANSE_GUI is still running",
+                "Use the system tray icon to show the main window or exit.",
+                self.app_instance.windowIcon()
+                if self.app_instance is not None
+                else None,
+            )
         if self.warn_about_systray:
             _popup = QMessageBox(
                 QMessageBox.Icon.Information,
