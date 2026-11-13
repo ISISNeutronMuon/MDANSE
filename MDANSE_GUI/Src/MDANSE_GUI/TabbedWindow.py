@@ -35,6 +35,7 @@ from qtpy.QtGui import QCloseEvent, QDesktopServices, QIcon
 from qtpy.QtWidgets import (
     QAction,
     QApplication,
+    QCheckBox,
     QMainWindow,
     QMenu,
     QMenuBar,
@@ -44,6 +45,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Core.Platform import version_summary
+from MDANSE.Core.Settings import Option, Settings
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -73,6 +75,14 @@ if TYPE_CHECKING:
 MDANSE_CODE_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE")
 MDANSE_EXAMPLES_WEBSITE = QUrl("https://github.com/ISISNeutronMuon/MDANSE-Examples")
 MDANSE_DOCS_WEBSITE = QUrl("https://mdanse.readthedocs.io/en/latest/")
+
+MDANSE_GUI_SHUTDOWN_WARNING = (
+    "The GUI is now hidden, but will keep running in the background."
+    " Use the MDANSE GUI system tray icon to show the main window again,"
+    " or to close the GUI completely.\n"
+    "If this is not your preferred behaviour, you can disable the system"
+    " tray icon in the GUI settings in the 'startup' group."
+)
 
 
 class RecentFileAction(QAction):
@@ -107,6 +117,20 @@ class RecentFileAction(QAction):
         self.external_function(str(self.file_path))
 
 
+@Settings.parametrise(
+    warn_about_systray=Option(
+        value=True,
+        group="notifications",
+        comment="Show a message when closing the main window if the GUI is still running in the background.",
+    )
+)
+@Settings.parametrise(
+    notify_via_systray=Option(
+        value=True,
+        group="notifications",
+        comment="Pop up a system tray notification every time when closing the main window.",
+    )
+)
 class MDANSEMainWindow(QMainWindow):
     """The main window of the MDANSE GUI."""
 
@@ -346,6 +370,7 @@ class MDANSEMainWindow(QMainWindow):
             if not self.really_closing:
                 event.ignore()
                 self.hide()
+                self.show_systray_warning()
             else:
                 super().closeEvent(event)
         if not event.spontaneous() or not self.isVisible():
@@ -358,6 +383,37 @@ class MDANSEMainWindow(QMainWindow):
             self._job_holder.jobs_still_running
             or self._trajectory_model.running_loaders
         )
+
+    def show_systray_warning(self):
+        """Show a message box telling the user that the GUI is still running in the background."""
+        LOG.info(
+            "MDANSE GUI is still running in the background."
+            " Use the system tray icon to bring the main window back, or to exit."
+        )
+        if self.notify_via_systray:
+            self.system_tray_icon.showMessage(
+                "MDANSE_GUI is still running",
+                "Use the system tray icon to show the main window or exit.",
+                self.app_instance.windowIcon()
+                if self.app_instance is not None
+                else None,
+            )
+        if self.warn_about_systray:
+            _popup = QMessageBox(
+                QMessageBox.Icon.Information,
+                "The GUI is still running",
+                MDANSE_GUI_SHUTDOWN_WARNING,
+                parent=self,
+            )
+            show_again_checkbox = QCheckBox("Show this warning again", self)
+            show_again_checkbox.setChecked(self.warn_about_systray)
+            show_again_checkbox.checkStateChanged.connect(self.set_systray_warning_flag)
+            _popup.setCheckBox(show_again_checkbox)
+            _popup.show()
+
+    @Slot(Qt.CheckState)
+    def set_systray_warning_flag(self, show_again: Qt.CheckState):
+        self.warn_about_systray = show_again == Qt.CheckState.Checked
 
     def createCommonModels(self):
         self._trajectory_model = TrajectoryModel()
