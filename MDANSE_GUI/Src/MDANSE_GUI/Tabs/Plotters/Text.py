@@ -31,11 +31,8 @@ if TYPE_CHECKING:
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from qtpy.QtWidgets import QTextBrowser
 
-    from MDANSE_GUI.Tabs.Models.PlottingContext import (
-        PlotArgs,
-        PlottingContext,
-        SingleDataset,
-    )
+    from MDANSE.Framework.Plotting.MDAFile import SingleDataset
+    from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs, PlottingContext
 
 FIXED_UNITS = {"rlu"}
 

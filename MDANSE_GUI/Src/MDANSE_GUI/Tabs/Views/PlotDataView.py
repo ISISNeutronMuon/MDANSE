@@ -28,12 +28,13 @@ from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
 from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
+from MDANSE.Framework.Plotting.MDAFile import MDAFile, SingleDataset
 from MDANSE.Framework.QVectors.IQVectors import WIDTH_NONZERO_LIMIT
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
 from MDANSE.util_types import FloatArray
-from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem, MDADataStructure
-from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext, SingleDataset
+from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem
+from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
 from MDANSE_GUI.Tabs.Visualisers.DataPlotter import DataPlotter
 from MDANSE_GUI.Tabs.Visualisers.TextInfo import TextInfo
 
@@ -513,7 +514,7 @@ class PlotDataView(QTreeView):
         index = self.indexAt(e.pos())
         model = self.model()
         inner_node = model.inner_object(index)
-        if isinstance(inner_node, MDADataStructure):
+        if isinstance(inner_node, MDAFile):
             data_nodes = model.itemFromIndex(index).recursive_children(
                 recursion_limit=-1
             )
@@ -699,7 +700,7 @@ class PlotDataView(QTreeView):
     def quick_plot_data(
         self,
         data_nodes: list[BasicPlotDataItem],
-        mda_data_structure: MDADataStructure,
+        mda_data_structure: MDAFile,
         *,
         main_only: bool = False,
     ):
@@ -709,7 +710,7 @@ class PlotDataView(QTreeView):
         ----------
         data_nodes : list[BasicPlotDataItem]
             Data model items collected for plotting.
-        mda_data_structure : MDADataStructure
+        mda_data_structure : MDAFile
             The common HDF5 file from which the datasets originate.
         main_only: bool
             if True, only plot datasets with the 'main' tag
