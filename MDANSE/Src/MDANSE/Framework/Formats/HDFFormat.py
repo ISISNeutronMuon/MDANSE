@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 json_decoder = json.decoder.JSONDecoder()
 
 
-def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
+def check_metadata(hdf5_file: h5py.File) -> dict[str, str] | None:
     """Extract metadata from an MDANSE HDF5 file.
 
     Parameters
@@ -53,7 +53,7 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
     """
     meta_dict = {}
 
-    def put_into_dict(name: str, obj: bytes):
+    def put_into_dict(name: str, obj: h5py.Group | h5py.Dataset) -> str | None:
         """Put an entry from an HDF5 dataset into a dictionary, as string.
 
         This helper function is used together with the visititems method
@@ -69,13 +69,17 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
         obj : bytes
             contents of the dataset (text stored as 'bytes')
         """
+        if isinstance(obj, h5py.Group):
+            return None
+
         try:
             string = obj[:][0]
         except TypeError:
             try:
                 string = obj[0]
             except TypeError:
-                return
+                return None
+
         try:
             string = string.decode()
         except KeyError:
@@ -90,9 +94,9 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str]:
     try:
         meta = hdf5_file["metadata"]
     except KeyError:
-        return
-    else:
-        meta.visititems(put_into_dict)
+        return None
+
+    meta.visititems(put_into_dict)
 
     meta_dict["file header"] = "\n" + hdf5_file.attrs.get("header", "no header")
 
