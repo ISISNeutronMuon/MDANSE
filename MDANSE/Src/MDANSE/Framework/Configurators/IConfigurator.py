@@ -18,7 +18,7 @@ from __future__ import annotations
 import abc
 import json
 from collections.abc import Iterator, Sequence
-from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, NamedTuple
 from warnings import warn
 
 from more_itertools import value_chain
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 
 ERROR_LENGTH_MIN = len("OK")
-
+ValidLogs = Literal["no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"]
 
 class ConfiguratorWarning(Warning):
     """Reports a problem with one of the job inputs.

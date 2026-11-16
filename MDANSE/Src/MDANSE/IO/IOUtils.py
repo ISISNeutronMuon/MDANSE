@@ -936,6 +936,10 @@ def tabulate(
     max_length : int, optional
         Max length of table to print.
 
+    Raises
+    ------
+    ValueError : Table columns different lengths.
+
     Examples
     --------
     >>> cats = {"name": ("Moggy", "William"), "age": (3, 7)}
@@ -948,17 +952,26 @@ def tabulate(
     Table: 2x2
     """
 
+    tab_len = len(first(table.values()))
+    if any(len(col) != tab_len for col in table.values()):
+        raise ValueError("Table columns differ in length.")
+
     width = {}
     fmt = {}
     for col, rows in table.items():
         typ = types[col]
 
-        if typ is float:
+        if isinstance(typ, str):
+            fmt[col] = typ
+            width[col] = max(
+                len(format(val, typ))
+                for val in value_chain(col, islice(rows, max_length))
+            )
+        elif typ is float:
             width[col] = max(len(col), 10)
             fmt[col] = "{:10.5f}"
         elif typ is (float, float, float):
             width[col] = max(len(col), 32)
-            # fmt[col] = "{!r}"
             fmt[col] = "{0[0]:10.5f} {0[1]:10.5f} {0[2]:10.5f}"
         elif typ is int:
             width[col] = max(len(col), 8)
@@ -969,14 +982,14 @@ def tabulate(
         elif typ is str:
             width[col] = max(
                 len(val)
-                for val in value_chain(col, islice(rows, max_length), last(rows))
+                for val in value_chain(col, islice(rows, max_length))
             )
 
             fmt[col] = f"{{:{width[col]}s}}"
         else:
             width[col] = max(
                 len(str(val))
-                for val in value_chain(col, islice(rows, max_length), last(rows))
+                for val in value_chain(col, islice(rows, max_length))
             )
             fmt[col] = f"{{!s:{width[col]}s}}"
 
@@ -991,5 +1004,7 @@ def tabulate(
         " ".join(fmt[col].format(datum) for col, datum in zip(table, row, strict=True))
         for row in islice(zip(*table.values(), strict=True), max_length)
     )
-    out.append(f"Table: {len(table)}x{len(first(table.values())) if table else 0}")
+    if max_length is not None and tab_len > max_length:
+        out.append("...")
+    out.append(f"Table: {len(table)}x{tab_len}")
     return "\n".join(map(wrapper.fill, out))

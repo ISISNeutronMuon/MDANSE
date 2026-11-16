@@ -15,11 +15,14 @@
 #
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from more_itertools import value_chain
 
 from MDANSE.MLogging import LOG
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurators import IConfigurator
 
 
 class ConfigurationError(Exception):
@@ -52,7 +55,7 @@ class Configurable:
         Constructor
         """
 
-        self._configuration = {}
+        self._configuration: dict[str, IConfigurator] = {}
 
         self._configured = False
 

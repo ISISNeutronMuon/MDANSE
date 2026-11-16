@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+from typing import SupportsInt
 
 from MDANSE.Framework.Configurators.IConfigurator import (
     IConfigurator,
@@ -52,7 +53,7 @@ class IntegerConfigurator(IConfigurator):
 
         self._exclude = exclude if exclude is not None else ()
 
-    def configure(self, value):
+    def configure(self, value: str | SupportsInt):
         """
         Configure an integer value.
 
@@ -67,8 +68,8 @@ class IntegerConfigurator(IConfigurator):
 
         try:
             value = int(value)
-        except (TypeError, ValueError) as e:
-            self.error_status = "Wrong input for an integer: " + str(e)
+        except (TypeError, ValueError) as err:
+            self.error_status = f"Wrong input for an integer: {err}"
             return
 
         if self.choices and value not in self.choices:

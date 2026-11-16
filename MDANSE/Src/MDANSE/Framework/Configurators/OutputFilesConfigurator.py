@@ -15,13 +15,18 @@
 #
 from __future__ import annotations
 
+from collections.abc import Sequence
 from pathlib import Path
+from typing import Literal, TypeAlias
 
 from more_itertools import first_true
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ValidLogs
 from MDANSE.Framework.Formats.IFormat import IFormat
+
+ValidFormats = Literal["MDAFormat", "TextFormat", "FileInMemory"]
+ValidParams: TypeAlias = tuple[Path | str, Sequence[ValidFormats], ValidLogs]
 
 
 @IConfigurator.register("OutputFilesConfigurator")
@@ -46,8 +51,15 @@ class OutputFilesConfigurator(IConfigurator):
     FileInMemory is not available when running from the GUI.
     """
 
-    log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
-    _default = (
+    log_options: tuple[ValidLogs, ...] = (
+        "no logs",
+        "DEBUG",
+        "INFO",
+        "WARN",
+        "ERROR",
+        "CRITICAL",
+    )
+    _default: ValidParams = (
         "OUTPUT_FILENAME",
         ["MDAFormat", "TextFormat", "FileInMemory"],
         "no logs",
@@ -55,7 +67,9 @@ class OutputFilesConfigurator(IConfigurator):
     label = "Analysis result files (name and format)"
     tooltip = "It is possible to use MDAFormat and TextFormat simultaneously."
 
-    def __init__(self, name: str, formats: list[str] | None = None, **kwargs):
+    def __init__(
+        self, name: str, formats: Sequence[ValidFormats] | None = None, **kwargs
+    ):
         """Initialise the values of the output file name parser.
 
         Parameters
@@ -75,7 +89,7 @@ class OutputFilesConfigurator(IConfigurator):
         )
         self.forbidden_files = []
 
-    def configure(self, value):
+    def configure(self, value: Path | str | ValidParams):
         """Configure a set of output files for an analysis.
 
         :param value: the output files specifications. Must be a 3-tuple whose 1st element \
@@ -84,6 +98,9 @@ class OutputFilesConfigurator(IConfigurator):
         """
 
         self._original_input = value
+
+        if isinstance(value, (str, Path)):
+            value = (value, self.formats, "no logs")
 
         root, formats, logs = value
         root = Path(root)

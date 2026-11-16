@@ -49,7 +49,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
 
         super().__init__(name, **kwargs)
 
-    def configure(self, value):
+    def configure(self, value: int | str | None):
         """
         Configure the input interpolation order.
 
@@ -70,6 +70,7 @@ class InterpolationOrderConfigurator(IntegerConfigurator):
             value = self._default
 
         super().configure(value)
+        value: int = self["value"]
 
         trajConfig = self.configurable[self.dependencies["trajectory"]]
         traj_has_velocities = trajConfig["instance"].has_variable("velocities")

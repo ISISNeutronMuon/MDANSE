@@ -16,14 +16,24 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal, TypeAlias
 
 import numpy as np
 from more_itertools import first_true
 
 from MDANSE import PLATFORM
-from MDANSE.Framework.Configurators.IConfigurator import IConfigurator
+from MDANSE.Framework.Configurators.IConfigurator import IConfigurator, ValidLogs
 from MDANSE.Framework.Formats.IFormat import IFormat
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
+
+_BaseParams: TypeAlias = tuple[
+    str,
+    int,
+    tuple[int, int] | int,
+    str,
+    ValidLogs,
+]
+ValidParams: TypeAlias = _BaseParams | tuple[*_BaseParams, int]
 
 
 @IConfigurator.register("OutputTrajectoryConfigurator")
@@ -64,8 +74,11 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self.forbidden_files = []
         self._chunk_limit = (1, 128)
 
-    def configure(self, value: tuple):
+    def configure(self, value: ValidParams | str):
         self._original_input = value
+
+        if isinstance(value, str):
+            value = (value, *self._default[1:])
 
         root, dtype, chunk_size, compression, logs = value[:5]
 
