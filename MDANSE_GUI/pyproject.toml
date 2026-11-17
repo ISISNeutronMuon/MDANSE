@@ -40,11 +40,11 @@ dependencies = [
     "PyQt6",
     "PyYAML",
     "tomlkit",
-    "setuptools-git-versioning>=3.0,<4",
 ]
 
 [dependency-groups]
 dev = [
+  "setuptools-git-versioning>=3.0,<4",
   {include-group = "test"},
   {include-group = "lint"}
 ]
