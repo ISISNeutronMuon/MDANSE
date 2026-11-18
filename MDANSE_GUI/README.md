@@ -8,7 +8,7 @@ Molecular Dynamics Analysis for Neutron Scattering Experiments (MDANSE) software
 The GUI depends on the [MDANSE package](https://pypi.org/project/MDANSE).
 
 > [!NOTE]
-> The default behaviour of MDANSE_GUI has changed in version 2.0.3
+> The default behaviour of MDANSE_GUI has changed in version 2.0.2
 > where the system tray icon has been added to the interface.
 > When the system tray icon of the MDANSE GUI is present, closing
 > the main window does not close the software, and the main window
