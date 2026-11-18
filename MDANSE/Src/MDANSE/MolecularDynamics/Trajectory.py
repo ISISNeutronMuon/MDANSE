@@ -1396,7 +1396,7 @@ class TrajectoryWriter:
             dset = self._h5_file.create_dataset(
                     dataset,
                     shape=(self._n_steps,) if dataset != "unit_cell" else (self._n_steps, 3, 3),
-                    dtype=self._dtype,)
+                    dtype=np.float64 if dataset in {"time", "unit_cell"} else self._dtype,)
         dset.attrs["units"] = units.get(dataset, "")
         dset[frame_indices] = data
 
