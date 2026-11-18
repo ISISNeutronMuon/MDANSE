@@ -305,6 +305,9 @@ to acknowledge explicitly the contributions done in the past
 by Bachir Aoun, Vania Calandrini, Paolo Calligari, Gael Goret,
 Remi Perenon and Rastislav Turanyi.
 
+The current MDANSE logo is an adapted version of the design contributed by
+Ashley Meigh in 2024.
+
 The MDANSE project is supported by ISIS Neutron and Muon Source, Science
 and Technology Facilities Council, UKRI.
 In the past, it was supported by Ada Lovelace Centre
