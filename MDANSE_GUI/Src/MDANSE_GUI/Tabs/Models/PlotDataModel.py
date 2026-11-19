@@ -25,8 +25,8 @@ from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Framework.Plotting.MDAFile import MDAFile
 from MDANSE.MLogging import LOG
+from MDANSE.Results.MDAFile import MDAFile
 from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
 EXCLUDE = {"metadata"}

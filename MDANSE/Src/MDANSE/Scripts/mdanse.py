@@ -34,7 +34,6 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Platform import PLATFORM, version_summary
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Plotting.MDAFile import MDAFile
 from MDANSE.IO.AtomInfo import atom_info
 from MDANSE.MLogging import LOG
 from MDANSE.MolecularDynamics.Trajectory import (
@@ -43,6 +42,7 @@ from MDANSE.MolecularDynamics.Trajectory import (
     chemical_system_summary,
     trajectory_summary,
 )
+from MDANSE.Results.MDAFile import MDAFile
 
 
 class CommandLineParserError(Exception):

@@ -117,7 +117,7 @@ class Vectors(Plotter):
                     labels = iter(("Found", "Used"))
 
                     for ind, (_x, curve) in enumerate(dataset.curves_vs_axis("|q|")):
-                        lab = plotlabel if dataset._n_dim != 2 else next(labels)
+                        lab = plotlabel if dataset.n_dims != 2 else next(labels)
                         width = (
                             0.8 * abs(np.min(np.diff(curve[0])))
                             if len(curve[0]) > 1

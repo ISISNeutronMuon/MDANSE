@@ -9,7 +9,7 @@ from more_itertools import ilen, nth, first
 from qtpy import QtCore, QtGui, QtWidgets
 
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext
-from MDANSE.Framework.Plotting.MDAFile import SingleDataset
+from MDANSE.Results.MDAFile import SingleDataset
 
 WORK_DIR = Path(__file__).parent
 

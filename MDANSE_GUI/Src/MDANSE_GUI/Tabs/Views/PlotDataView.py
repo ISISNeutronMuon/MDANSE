@@ -28,10 +28,10 @@ from qtpy.QtGui import QContextMenuEvent, QMouseEvent
 from qtpy.QtWidgets import QAbstractItemView, QMenu, QTreeView
 
 from MDANSE.Framework.Configurators.QVectorsConfigurator import QVectorsConfigurator
-from MDANSE.Framework.Plotting.MDAFile import MDAFile, SingleDataset
 from MDANSE.Framework.QVectors.IQVectors import WIDTH_NONZERO_LIMIT
 from MDANSE.Framework.Units import measure
 from MDANSE.MLogging import LOG
+from MDANSE.Results.MDAFile import MDAFile, SingleDataset
 from MDANSE.util_types import FloatArray
 from MDANSE_GUI.Tabs.Models.PlotDataModel import BasicPlotDataItem
 from MDANSE_GUI.Tabs.Models.PlottingContext import PlottingContext

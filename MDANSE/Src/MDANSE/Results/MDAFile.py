@@ -17,21 +17,40 @@ from __future__ import annotations
 
 import copy
 import functools
+import sys
+from collections.abc import Iterator, Mapping
 from contextlib import suppress
 from itertools import islice
+from itertools import product as cart_prod
 from math import prod
 from pathlib import Path, PurePath
 from textwrap import shorten
-from typing import TYPE_CHECKING, Any
+from types import TracebackType
+from typing import TYPE_CHECKING, Any, Protocol, Self
 
 import h5py
 import numpy as np
-from more_itertools import first, locate, nth, nth_product, one
+from more_itertools import (
+    argmax,
+    collapse,
+    first,
+    locate,
+    nth,
+    nth_product,
+    one,
+    prepend,
+    transpose,
+)
 
 from MDANSE.Core.Settings import Setting
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
+from MDANSE.Framework.Units import Unit, measure
+from MDANSE.IO.IOUtils import parse_index, summarise_array
 from MDANSE.MLogging import LOG
-from MDANSE.util_types import FloatArray, IntArray
+from MDANSE.util_types import ComplexArray, FloatArray, IntArray
+
+if sys.version_info < (3, 15):
+    from types import MappingProxyType as frozendict
 
 try:
     from matplotlib.pyplot import colormaps as mpl_colormaps
@@ -41,13 +60,27 @@ except ImportError:
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Sequence
 
+    class ProcessFunction(Protocol):
+        def __call__(
+            self,
+            *,
+            comment_character: str = "#",
+            main_axis: str | None = None,
+            units: Mapping[str, str | Unit | float] = frozendict({}),
+        ) -> tuple[list[str], Iterator[Iterable[float]]]: ...
+
 
 class MDAFile:
     """Representation of an MDA file."""
 
     def __init__(self, source: Path | str) -> None:
-        self._file = h5py.File(source)
+        self._file = h5py.File(source, "r")
         self._metadata = check_metadata(self._file)
+
+        if self._metadata is None:
+            self.close()
+            raise ValueError(f"Not a .mda type file {source}")
+
         # Ensure only mda type file are loaded in Plot Creator Tab
         output_metadata = self._metadata["inputs/output_files"]
 
@@ -61,20 +94,50 @@ class MDAFile:
         self.all_children = list[PurePath]()
         self._file.visititems(self._get_ds)
 
-    def __getitem__(self, key: str) -> h5py.Dataset:
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[Exception] | None,
+        exc_value: Exception | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        if getattr(self, "_file", None) is not None:
+            self.close()
+
+    def items(self, *, main: bool = True) -> Generator[tuple[str, SingleDataset]]:
+        if main:
+            yield from zip(
+                map(str, self.main_dataset_paths), self.main_datasets, strict=True
+            )
+            return
+
+        yield from zip(map(str, self.all_dataset_paths), self.all_datasets, strict=True)
+
+    def as_dict(self, *, main: bool = True) -> dict[str, SingleDataset]:
+        return dict(self.items(main=main))
+
+    def close(self) -> None:
+        """Close the HDF5 file."""
+        self._file.close()
+
+    def __getitem__(self, key: str) -> SingleDataset:
         keys = self.find_paths(key)
         found = one(
             keys,
-            too_long=ValueError(f"Multiple matching keys for {key} ({', '.join(map(str, keys))})"),
+            too_long=KeyError(
+                f"Multiple matching keys for {key} ({', '.join(map(str, keys))})"
+            ),
             too_short=KeyError(f"Key ({key}) not found"),
         )
-        return self._file[found]
+        return SingleDataset(str(found), self._file)
 
-    def find_paths(self, key: str) -> list[PurePath]:
-        return [pth for pth in self.all_dataset_paths if pth.match(key)]
-
-    def find_datasets(self, key: str) -> list[h5py.Dataset]:
-        return [self._file[str(pth)] for pth in self.find_paths(key)]
+    def __contains__(self, key: str) -> bool:
+        return any(p.match(key) for p in self.all_dataset_paths)
 
     @property
     def filename(self) -> str:
@@ -121,11 +184,23 @@ class MDAFile:
                 str(pth), self._file, linestyle="--" if "partial" in tags else "-"
             )
 
+    def find_paths(self, key: str) -> list[PurePath]:
+        """Find all paths matching key."""
+        return [pth for pth in self.all_dataset_paths if pth.match(key)]
+
+    def find_raw_datasets(self, key: str) -> list[h5py.Dataset]:
+        """Find all raw datasets matching key."""
+        return [self._file[str(pth)] for pth in self.find_paths(key)]
+
+    def find_datasets(self, key: str) -> list[SingleDataset]:
+        """Find all datasets matching key as :class:`SingleDataset`."""
+        return [SingleDataset(str(pth), self._file) for pth in self.find_paths(key)]
+
     def _get_ds(self, name: str, obj: h5py.Group | h5py.Dataset) -> None:
         if isinstance(obj, h5py.Dataset):
             self.all_children.append(PurePath(name))
 
-    def _get_tags(self, pth: PurePath | str) -> dict[str, Any]:
+    def _get_tags(self, pth: PurePath | str) -> Mapping[str, Any]:
         return self._file[str(pth)].attrs
 
     def _is_main(self, pth: PurePath | str) -> bool:
@@ -152,15 +227,11 @@ class MDAFile:
             text += "\n The header output was truncated. Use verbose for full output\n"
         return text
 
-    def close(self) -> None:
-        """Close the HDF5 file."""
-        self._file.close()
-
 
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
 
-    colour_map= Setting(
+    colour_map = Setting(
         "viridis",
         group="matplotlib",
         comment="Name of the default matplotlib colormap to be used in 2D plots.",
@@ -196,7 +267,6 @@ class SingleDataset:
         self._imaginary_data = None
         self._valid = True
         self._scaling_factor = 1.0
-        self._main_axis = None
         self._axes: dict[str, FloatArray] = {}
         self._axes_units: dict[str, str] = {}
         self._current_units: dict[str, str] = {}
@@ -206,6 +276,8 @@ class SingleDataset:
         self._yerror: FloatArray | None = None
 
         self.configure(source, **kwargs)
+        _, self._main_axis = self.longest_axis()
+        self.set_data_limits(":", self._main_axis)
 
     @functools.singledispatchmethod
     def configure(self, source: h5py.File | None, **kwargs) -> None:
@@ -227,7 +299,7 @@ class SingleDataset:
         self._filename = source.filename
         self.create_labels(self._filename)
         try:
-            self._data = source[self._name][:]
+            data: ComplexArray | FloatArray = source[self._name][:]
         except KeyError:
             LOG.debug(f"{self._name} is not a dataset in the file")
             self._valid = False
@@ -237,11 +309,11 @@ class SingleDataset:
             self._valid = False
             return
 
-        temp_array = np.imag(self._data)
+        temp_array = np.imag(data)
         if not np.allclose(temp_array, 0.0):
             self._imaginary_data = temp_array
 
-        self._data = np.real(self._data)
+        self._data = np.real(data)
 
         with suppress(KeyError):
             try:
@@ -252,8 +324,6 @@ class SingleDataset:
                 )
 
         self._data_unit = source[self._name].attrs["units"]
-        self._n_dim = len(self._data.shape)
-        self._data_shape = self._data.shape
         self._axes_tag = source[self._name].attrs["axis"]
 
         self.create_axes_tags(self._axes_tag, source)
@@ -262,7 +332,7 @@ class SingleDataset:
     def _(
         self,
         _source: None,
-        data: FloatArray | None = None,
+        data: FloatArray,
         *,
         data_unit: str = "none",
         scaling_factor: float = 1.0,
@@ -304,20 +374,12 @@ class SingleDataset:
             "medium": self._name,
             "full": self._name,
         }
-        if data is None:
-            self._data = None
-            self._use_scaling = False
-            self._data_shape = next(iter(plot_axes.values())).shape
-            self._n_dim = 1
-        elif uneven_array:
+
+        if uneven_array:
             self._data = data
-            self._n_dim = 1
-            self._data_shape = (len(data),)
             self._use_scaling = False
         else:
             self._data = np.real(data)
-            self._n_dim = len(self._data.shape)
-            self._data_shape = self._data.shape
 
         self._scaling_factor = scaling_factor
         self._xerror = xerror
@@ -326,7 +388,7 @@ class SingleDataset:
         self._data_unit = data_unit
 
         if plot_axes is None:
-            for ax_number, npoints in enumerate(self._data.shape):
+            for ax_number, npoints in enumerate(self.shape):
                 axis_key = f"index{ax_number}"
                 self._axes[axis_key] = np.arange(npoints)
                 self._axes_units[axis_key] = "N/A"
@@ -346,7 +408,41 @@ class SingleDataset:
             self._axes_scaling[axis_key] = 1.0
             self._current_units[axis_key] = self._axes_units[axis_key]
 
-    def create_axes_tags(self, axes_tag: str, source: h5py.File):
+    def summary(
+        self,
+        *,
+        rows: int | None = None,
+        cols: int | None = None,
+        separator: str = ",",
+        fmt: str | None = None,
+    ) -> str:
+        """Display summary of dataset.
+
+        Parameters
+        ----------
+        rows : int, optional
+            Rows of data to display (all if ``None``).
+        cols : int, optional
+            Columns of data to display (all if ``None``).
+        separator : str
+            Separator to use.
+        fmt : str, optional
+            Format for data in table.
+
+        Returns
+        -------
+        str
+            Text summary.
+        """
+        return (
+            "\n".join(self.make_dataset_header())
+            + "\n"
+            + summarise_array(
+                self._data, rows=rows, cols=cols, separator=separator, arr_fmt=fmt
+            )
+        )
+
+    def create_axes_tags(self, axes_tag: str, source: h5py.File) -> None:
         """Find the right axes datasets for the current dataset.
 
         Parameters
@@ -395,7 +491,7 @@ class SingleDataset:
             An axis for plotting the dataset, after unit conversion
 
         """
-        return self._axes[axis_key] * self._axes_scaling[axis_key]
+        return self._axes[axis_key] * self._axes_scaling.get(axis_key, 1.0)
 
     @staticmethod
     def axis_true_name(axis_key: str) -> str:
@@ -420,8 +516,8 @@ class SingleDataset:
         """
         return f"{self.axis_true_name(axis_key)} ({self._current_units[axis_key]})"
 
-    def set_current_units(self, unit_lookup):
-        """Update the unit based on the unit lookup of the PlottingContext."""
+    def set_current_units(self, unit_lookup) -> None:
+        """Update the unit based on the unit lookup."""
         if unit_lookup is None:
             return
 
@@ -430,7 +526,7 @@ class SingleDataset:
             self._axes_scaling[axis_name] = factor
             self._current_units[axis_name] = new_unit
 
-    def create_labels(self, root_name: str):
+    def create_labels(self, root_name: str) -> None:
         """Create several labels of different length for the plot legend.
 
         Parameters
@@ -457,8 +553,9 @@ class SingleDataset:
         """
         if self._imaginary_data is None:
             return None
-        new_dataset = SingleDataset(f"{self._name}_imag", None)
-        new_dataset._data = self._imaginary_data.copy()
+        new_dataset = SingleDataset(
+            f"{self._name}_imag", None, data=self._imaginary_data.copy()
+        )
         new_dataset.create_labels(self._filename)
         for attr in [
             "_axes",
@@ -472,45 +569,7 @@ class SingleDataset:
             setattr(new_dataset, attr, copy.deepcopy(getattr(self, attr)))
         return new_dataset
 
-    @staticmethod
-    def parse_token(token: str, max_len: int) -> Iterable[int]:
-        """Parse a token component into an appropriate value for dimension slicing.
-
-        Parameters
-        ----------
-        token : str
-            Token to parse.
-        max_len : int
-            Size of array for un-ended slices.
-
-        Returns
-        -------
-        Iterable[int]
-            Parsed values.
-
-        Examples
-        --------
-        >>> parse_token("3:5", 10)
-        range(3, 5)
-        >>> parse_token("3:60:2", 5)
-        range(3, 5, 2)
-        >>> parse_token("8", 10)
-        (8, )
-        >>> parse_token("6-8", 10)
-        range(6, 8)
-        """
-        if ":" in token:
-            slice_parts = map(int, token.split(":"))
-            slc = slice(*slice_parts).indices(max_len)
-            return range(*slc)
-
-        if "-" in token:
-            start, stop = map(int, token.split("-"))
-            return range(start, stop + 1)
-
-        return (int(token),)
-
-    def set_data_limits(self, limit_string: str, main_axis: str = ""):
+    def set_data_limits(self, limit_string: str, main_axis: str = "") -> None:
         """Parse the string used for selecting a subset of data.
 
         Parameters
@@ -535,7 +594,7 @@ class SingleDataset:
 
         for token in limit_string.split(";"):
             try:
-                add_ord(self.parse_token(token, max_len))
+                add_ord(parse_index(token, max_len))
             except Exception as err:
                 LOG.error(
                     "Ignoring invalid token (%r) in set_data_limits.\n %s", token, err
@@ -561,19 +620,17 @@ class SingleDataset:
         Returns
         -------
         str
+            Name of axis unit.
+        str
             Name of the longest axis.
-
         """
-        length = -1
-        best_unit = "none"
-        best_axis = "none"
-        for aname, aunit in self._axes_units.items():
-            xaxis = self._axes[aname]
-            xlen = len(xaxis)
-            if xlen > length:
-                length = xlen
-                best_unit = aunit
-                best_axis = aname
+        if not self._axes_units:
+            return ("none", "none")
+
+        n = argmax(self._axes_units.values(), key=len)
+        best_axis, best_unit = nth(
+            self._axes_units.items(), n, default=("none", "none")
+        )
         return best_unit, best_axis
 
     @property
@@ -581,6 +638,16 @@ class SingleDataset:
         """Axes which are likely to be dependent."""
         la = self.longest_axis()[1] if not self._main_axis else self._main_axis
         return {aname: axis for aname, axis in self._axes.items() if aname != la}
+
+    @property
+    def shape(self) -> tuple[int, ...]:
+        """Shape of underlying data."""
+        return self._data.shape
+
+    @property
+    def n_dims(self) -> int:
+        """Number of dimensions in underlying data."""
+        return self._data.ndim
 
     @property
     def data(self) -> FloatArray:
@@ -630,7 +697,7 @@ class SingleDataset:
             A string label for the plot legend or a number for Text plotter.
 
         """
-        if self._n_dim < 2:
+        if self.n_dims < 2:
             return ""
 
         label = "at "
@@ -664,7 +731,7 @@ class SingleDataset:
                 return str(float(picked_value))
         return label.rstrip(", ")
 
-    def curve_ind(self, limits: int | None = None, /):
+    def curve_ind(self, limits: int | None = None, /) -> islice[int]:
         """Get indices of valid axes.
 
         Parameters
@@ -810,7 +877,7 @@ class SingleDataset:
         main_axis_index = self.main_axis_index(main_axis)
         other_labels = self._axis_labels(main_axis)
 
-        match self._data.ndim:
+        match self.n_dims:
             case 1:
                 pass
             case 2 if main_axis_index == 1:
@@ -878,6 +945,270 @@ class SingleDataset:
         return tuple(
             label for i, label in enumerate(self._axes) if i != main_axis_index
         )
+
+    @property
+    def processors(self) -> frozendict[int, ProcessFunction]:
+        return frozendict(
+            {
+                1: self._as_1D_table,
+                2: self._as_2D_table,
+            }
+        )
+
+    def as_table(
+        self,
+        *,
+        comment_character: str = "#",
+        main_axis: str | None = None,
+        units: Mapping[str, str | Unit | float] | None = frozendict({}),
+    ) -> tuple[list[str], Iterator[Iterable[float]]]:
+        """Wrapper for appropriately handling ND data."""
+        if units is None:
+            units = frozendict({})
+
+        return self.processors.get(self.n_dims, self._as_ND_table)(
+            main_axis=main_axis, comment_character=comment_character, units=units
+        )
+
+    def make_dataset_header(self, comment_character: str = "#") -> list[str]:
+        """Return the dataset informartion as text.
+
+        Extracts information related to the input dataset, and converts them
+        into text. Returns a list of strings.
+
+        Parameters
+        ----------
+        dataset : SingleDataset
+            A dataset from MDANSE analysis results.
+        comment_character : str, optional
+            character used as prefix of the text header, by default '#'
+
+        Returns
+        -------
+        list[str]
+            list of header lines
+
+        """
+        lines = [
+            f"{comment_character} Dataset name: {self._name}",
+            f"{comment_character} from file {self._filename}",
+            f"{comment_character} Contains axes: "
+            + ", ".join(map(str, self.available_x_axes())),
+            f"{comment_character} data unit is {self._data_unit}",
+        ]
+        return lines
+
+    @staticmethod
+    def _get_unit(from_unit: str, unit: float | Unit | str) -> float:
+        """Get conversion factor for given unit."""
+        match unit:
+            case float() | int():
+                conversion_factor = unit
+            case Unit():
+                conversion_factor = measure(1.0, from_unit, equivalent=True).toval(
+                    unit._uname
+                )
+            case str():
+                conversion_factor = measure(1.0, from_unit, equivalent=True).toval(unit)
+            case _:
+                conversion_factor = 1.0
+
+        return conversion_factor
+
+    def _as_1D_table(
+        self,
+        *,
+        comment_character="#",
+        units: Mapping[str, str | Unit | float] = frozendict({}),
+        main_axis: str | None = None,
+    ) -> tuple[list[str], Iterator[Iterable[float]]]:
+        """Turn a 1D array into text.
+
+        Formats a 1D array as a 2-column table with a commented header.
+        The first column is determined using the information stored
+        in the PlottingContext.
+
+        Parameters
+        ----------
+        dataset : PlotArgs
+            A SingleDataset with the GUI parameters.
+
+        Returns
+        -------
+        list[str]
+            Header lines.
+        Iterator[Iterable[float]]
+            A data table with 2 columns.
+
+        """
+        header_lines = self.make_dataset_header(comment_character=comment_character)
+        best_unit, best_axis = self.longest_axis()
+        xaxis_unit = units.get(best_axis, best_unit)
+
+        conversion_factor = self._get_unit(best_unit, xaxis_unit)
+
+        header_lines.append(f"{comment_character} units of x axis here: {xaxis_unit}")
+        header_lines.append(
+            f"{comment_character} col1:{best_axis}:{xaxis_unit} col2:data:{self._data_unit}"
+        )
+
+        return header_lines, zip(
+            self._axes[best_axis] * conversion_factor, self.data, strict=True
+        )
+
+    def _as_2D_table(
+        self,
+        *,
+        comment_character="#",
+        main_axis: str | None = None,
+        units: Mapping[str, str | Unit | float] = frozendict({}),
+    ) -> tuple[list[str], Iterator[Iterable[float]]]:
+        """Convert a 2D data array into text.
+
+        Parameters
+        ----------
+        dataset : PlotArgs
+            A SingleDataset with the GUI parameters.
+        main_axis : str or None
+            Main axis to plot.
+
+        Returns
+        -------
+        list[str]
+            Header lines.
+        2D Iterator or Iterators
+            A data table
+
+            0. Axes->
+            A  0,0 1,0 2,0 3,0 ...
+            x  0,1 ⋱   2,1 3,1 ...
+            e  0,2   ⋱
+            s  0,3 1,3 ...
+            |  ⋮
+            v
+
+        """
+        header_lines = self.make_dataset_header(comment_character)
+
+        new_axes = {}
+        new_axes_units = {}
+        axis_numbers = {}
+
+        flip_array = main_axis is not None and main_axis in self.available_x_axes()[1:]
+
+        for n, ax_key in enumerate(self.available_x_axes()):
+            axis = self._axes[ax_key]
+            axis_unit = self._axes_units[ax_key]
+
+            new_unit = units.get(ax_key, axis_unit)
+            conv_factor = self._get_unit(axis_unit, new_unit)
+
+            new_axes[ax_key] = axis * conv_factor
+            new_axes_units[ax_key] = new_unit
+            axis_numbers[n] = ax_key
+
+            LOG.debug(f"process_2D_data: axis {ax_key} has length {len(axis)}")
+
+            rc = "column" if n else "row"
+            header_lines.append(
+                f"{comment_character} first {rc} is {ax_key} in units {new_unit}"
+            )
+
+        LOG.debug(f"Data shape: {self._data.shape}")
+        try:
+            best_unit, best_axis = (
+                self._axes_units[main_axis],
+                main_axis,
+            )
+        except KeyError:
+            best_unit, best_axis = self.longest_axis()
+
+        curves_limit = self._data.shape[0] if flip_array else self._data.shape[1]
+
+        # Add corner nil
+        xaxis = prepend("_", new_axes[axis_numbers[flip_array]].flat)
+
+        # Add axes to data
+        data_lines = (
+            (x[0], x[1][1])
+            for x in self.curves_vs_axis(
+                (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
+            )
+        )
+
+        # Put xaxis in
+        temp = prepend(xaxis, data_lines)
+
+        # Flatten each row
+        temp = map(collapse, temp)
+
+        if flip_array:
+            return header_lines, transpose(temp)
+
+        return header_lines, temp
+
+    def _as_ND_table(
+        self,
+        *,
+        comment_character="#",
+        units: Mapping[str, str | Unit | float] = frozendict({}),
+        main_axis: str | None = None,
+    ) -> tuple[list[str], Iterator[Iterable[float]]]:
+        """Convert an N-dimensional data array into text.
+
+        Parameters
+        ----------
+        dataset : PlotArgs
+            A SingleDataset with the GUI parameters.
+        main_axis : str or None
+            Main axis to plot.
+
+        Returns
+        -------
+        list[str]
+            Header lines.
+        Iterator[Iterable[float]]
+            Data table of x,y,z,... data
+
+        """
+
+        header_lines = self.make_dataset_header(comment_character)
+        new_axes = {}
+        new_axes_units = {}
+        axis_numbers = {}
+
+        for n, ax_key in enumerate(self.available_x_axes()):
+            axis_unit = self._axes_units[ax_key]
+            new_unit = units.get(ax_key, axis_unit)
+            conv_factor = self._get_unit(axis_unit, new_unit)
+
+            axis = self._axes[ax_key]
+            new_axes[ax_key] = conv_factor * axis
+            new_axes_units[ax_key] = new_unit
+            axis_numbers[n] = ax_key
+            LOG.debug("process_ND_data: axis %s has length %d.", ax_key, len(axis))
+
+        for ax_num, ax_key in enumerate(new_axes):
+            header_lines.append(
+                f"{comment_character} {ax_num} column is {ax_key} in units {new_axes_units[ax_key]}"
+            )
+
+        LOG.debug(f"Data shape: {self._data.shape}")
+
+        ax_lengths = [len(new_axes[ax_num]) for ax_num in axis_numbers.values()]
+        LOG.debug(f"Axis lengths: {ax_lengths}")
+        LOG.debug(f"Axis sequence: {axis_numbers}")
+
+        # Attach axis indices
+        temp = zip(
+            cart_prod(*(new_axes[ind] for ind in axis_numbers.values())),
+            self.data.ravel(),
+            strict=True,
+        )
+        # Flatten each row
+        temp = map(collapse, temp)
+
+        return header_lines, temp
 
     def __repr__(self) -> str:
         return f"SingleDataset({self._name!r}, {self._filename!r})"
