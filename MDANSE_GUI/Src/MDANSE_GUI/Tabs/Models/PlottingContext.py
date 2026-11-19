@@ -111,6 +111,7 @@ class PlottingContext(QStandardItemModel):
         self._ndim_highest = 3
         self._all_xunits = []
         self._best_xunits = []
+        self._unit_preference = {}
         self._colour_list = get_mpl_colours()
         self._last_colour_list = get_mpl_colours()
         self._last_colour = 0
@@ -294,7 +295,7 @@ class PlottingContext(QStandardItemModel):
             for x in (
                 new_dataset._name,
                 getattr(optional_values, "legend_label", new_dataset._labels["medium"]),
-                new_dataset._data_shape,
+                new_dataset.shape,
                 new_dataset._data_unit,
                 new_dataset.longest_axis()[-1],
                 "",
@@ -354,7 +355,7 @@ class PlottingContext(QStandardItemModel):
         longest_axes = []
         unit_to_axname = {}
         for dataset in self._datasets.values():
-            n_dimensions = dataset._n_dim
+            n_dimensions = dataset.n_dims
             if n_dimensions not in all_dimensions:
                 all_dimensions.append(n_dimensions)
             best_units, best_axis = dataset.longest_axis()
