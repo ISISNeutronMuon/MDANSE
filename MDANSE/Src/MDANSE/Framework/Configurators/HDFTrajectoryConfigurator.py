@@ -109,7 +109,7 @@ def guess_hdf5_trajectory_parameters(
     trajectory_instance = Trajectory(fname, fast_load=True)
     traj_length = len(trajectory_instance)
     chunk_size = trajectory_instance.chunk_size()
-    bytes_per_num = trajectory_instance.dtype_size()
+    bytes_per_num = trajectory_instance.bytes_per_num()
     if chunk_size < 0 or bytes_per_num < 0:
         return None, None
     cache_size = 200 * traj_length * chunk_size * 3 * bytes_per_num

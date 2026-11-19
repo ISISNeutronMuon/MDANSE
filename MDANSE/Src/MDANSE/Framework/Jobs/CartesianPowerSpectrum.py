@@ -34,7 +34,11 @@ class CartesianPowerSpectrum(CartesianCorrelationFunction):
         "Analysis",
         "Dynamics",
     )
-    PREDICTORS = ("instrument_resolution",)
+    PREDICTORS = (
+        "instrument_resolution",
+        "memory",
+        "running_mode",
+    )
 
     settings = copy.deepcopy(CartesianCorrelationFunction.settings)
     settings = list(settings.items())
