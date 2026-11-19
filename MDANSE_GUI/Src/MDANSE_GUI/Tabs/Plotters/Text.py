@@ -15,12 +15,8 @@
 #
 from __future__ import annotations
 
-from itertools import product as cart_prod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from more_itertools import collapse, prepend, transpose
-
-from MDANSE.Framework.Units import measure
 from MDANSE.IO.IOUtils import summarise_array_2D
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
@@ -31,7 +27,6 @@ if TYPE_CHECKING:
     from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Toolbar
     from qtpy.QtWidgets import QTextBrowser
 
-    from MDANSE.Framework.Plotting.MDAFile import SingleDataset
     from MDANSE_GUI.Tabs.Models.PlottingContext import PlotArgs, PlottingContext
 
 FIXED_UNITS = {"rlu"}
@@ -103,34 +98,6 @@ class DatasetFormatter:
         for databundle in self._plotting_context.datasets().values():
             yield self.process_data(databundle, main_axis=databundle.main_axis)
 
-    def make_dataset_header(self, dataset: SingleDataset, comment_character="#"):
-        """Return the dataset informartion as text.
-
-        Extracts information related to the input dataset, and converts them
-        into text. Returns a list of strings.
-
-        Parameters
-        ----------
-        dataset : SingleDataset
-            A dataset from MDANSE analysis results.
-        comment_character : str, optional
-            character used as prefix of the text header, by default '#'
-
-        Returns
-        -------
-        list[str]
-            list of header lines
-
-        """
-        lines = [
-            f"{comment_character} Dataset name: {dataset._name}",
-            f"{comment_character} from file {dataset._filename}",
-            f"{comment_character} Contains axes: "
-            + ", ".join(map(str, dataset.available_x_axes())),
-            f"{comment_character} data unit is {dataset._data_unit}",
-        ]
-        return lines, comment_character
-
     def join_for_gui(
         self,
         header_lines: list[str],
@@ -156,230 +123,13 @@ class DatasetFormatter:
         main_axis: str | None = None,
     ):
         """Wrapper for appropriately handling ND data."""
-        dataset = databundle.dataset
+        assert self._plotting_context
 
-        if dataset._n_dim == 1:
-            return self.process_1D_data(databundle)
-        if dataset._n_dim == 2:
-            return self.process_2D_data(databundle, main_axis=main_axis)
-
-        return self.process_ND_data(databundle)
-
-    def process_1D_data(
-        self,
-        databundle: PlotArgs,
-    ) -> tuple[list[str], Iterator[Iterator[float]]]:
-        """Turn a 1D array into text.
-
-        Formats a 1D array as a 2-column table with a commented header.
-        The first column is determined using the information stored
-        in the PlottingContext.
-
-        Parameters
-        ----------
-        dataset : PlotArgs
-            A SingleDataset with the GUI parameters.
-
-        Returns
-        -------
-        list[str]
-            Header lines.
-        FloatArray
-            A data table with 2 columns.
-
-        """
-        dataset = databundle.dataset
-        header_lines, _ = self.make_dataset_header(
-            dataset, comment_character=self._comment
+        return databundle.dataset.as_table(
+            comment_character=self._comment,
+            main_axis=main_axis,
+            units=self._plotting_context._unit_preference,
         )
-        best_unit, best_axis = dataset.longest_axis()
-        xaxis_unit = self._plotting_context.get_conversion_factor(best_unit)
-
-        try:
-            conversion_factor = measure(1.0, best_unit, equivalent=True).toval(
-                xaxis_unit
-            )
-        except Exception:
-            conversion_factor = 1.0
-            # return f"Could not convert {best_unit} to {xaxis_unit}."
-
-        header_lines.append(f"{self._comment} units of x axis here: {xaxis_unit}")
-        header_lines.append(
-            f"{self._comment} col1:{best_axis}:{xaxis_unit} col2:data:{dataset._data_unit}"
-        )
-
-        return header_lines, zip(
-            dataset._axes[best_axis] * conversion_factor, dataset.data, strict=True
-        )
-
-    def process_2D_data(
-        self,
-        databundle: PlotArgs,
-        *,
-        main_axis: str | None = None,
-    ) -> tuple[list[str], Iterator[Iterator[float]]]:
-        """Convert a 2D data array into text.
-
-        Parameters
-        ----------
-        dataset : PlotArgs
-            A SingleDataset with the GUI parameters.
-        main_axis : str or None
-            Main axis to plot.
-
-        Returns
-        -------
-        list[str]
-            Header lines.
-        2D Iterator or Iterators
-            A data table
-
-            0. Axes->
-            A  0,0 1,0 2,0 3,0 ...
-            x  0,1 ⋱   2,1 3,1 ...
-            e  0,2   ⋱
-            s  0,3 1,3 ...
-            |  ⋮
-            v
-
-        """
-        dataset = databundle.dataset
-
-        header_lines, comment_char = self.make_dataset_header(
-            dataset, comment_character=self._comment
-        )
-
-        new_axes = {}
-        new_axes_units = {}
-        axis_numbers = {}
-
-        flip_array = (
-            main_axis is not None and main_axis in dataset.available_x_axes()[1:]
-        )
-
-        for n, ax_key in enumerate(dataset.available_x_axes()):
-            axis = dataset._axes[ax_key]
-            axis_unit = dataset._axes_units[ax_key]
-            new_unit = self._plotting_context.get_conversion_factor(axis_unit)
-            conv_factor = measure(1.0, axis_unit, equivalent=True).toval(new_unit)
-
-            new_axes[ax_key] = axis * conv_factor
-            new_axes_units[ax_key] = new_unit
-            axis_numbers[n] = ax_key
-
-            LOG.debug(f"process_2D_data: axis {ax_key} has length {len(axis)}")
-
-            rc = "column" if n else "row"
-            header_lines.append(
-                f"{comment_char} first {rc} is {ax_key} in units {new_unit}"
-            )
-
-        LOG.debug(f"Data shape: {dataset._data.shape}")
-        try:
-            best_unit, best_axis = (
-                dataset._axes_units[databundle.main_axis],
-                databundle.main_axis,
-            )
-        except KeyError:
-            best_unit, best_axis = dataset.longest_axis()
-
-        if self._is_preview:
-            curves_limit = self._preview_columns if flip_array else self._preview_lines
-        else:
-            curves_limit = (
-                dataset._data.shape[0] if flip_array else dataset._data.shape[1]
-            )
-
-        # Add corner nil
-        xaxis = prepend("_", new_axes[axis_numbers[flip_array]].flat)
-
-        # Add axes to data
-        data_lines = (
-            (x[0], x[1][1])
-            for x in dataset.curves_vs_axis(
-                (best_unit, best_axis), max_limit=curves_limit, skip_label_text=True
-            )
-        )
-
-        # Put xaxis in
-        temp = prepend(xaxis, data_lines)
-
-        # Flatten each row
-        temp = map(collapse, temp)
-
-        if flip_array:
-            return header_lines, transpose(temp)
-
-        return header_lines, temp
-
-    def process_ND_data(
-        self,
-        databundle: PlotArgs,
-        *,
-        main_axis: str | None = None,
-    ) -> tuple[list[str], Iterator[Iterator[float]]]:
-        """Convert an N-dimensional data array into text.
-
-        Parameters
-        ----------
-        dataset : PlotArgs
-            A SingleDataset with the GUI parameters.
-        main_axis : str or None
-            Main axis to plot.
-
-        Returns
-        -------
-        list[str]
-            Header lines.
-        Iterator[Iterator[float]]
-            Data table of x,y,z,... data
-
-        """
-        dataset = databundle.dataset
-
-        header_lines, comment_char = self.make_dataset_header(
-            dataset, comment_character=self._comment
-        )
-        new_axes = {}
-        new_axes_units = {}
-        axis_numbers = {}
-
-        for n, ax_key in enumerate(dataset.available_x_axes()):
-            axis_unit = dataset._axes_units[ax_key]
-            new_unit = self._plotting_context.get_conversion_factor(axis_unit)
-            conv_factor = (
-                measure(1.0, axis_unit, equivalent=True).toval(new_unit)
-                if axis_unit not in FIXED_UNITS
-                else 1.0
-            )
-
-            axis = dataset._axes[ax_key]
-            new_axes[ax_key] = conv_factor * axis
-            new_axes_units[ax_key] = new_unit
-            axis_numbers[n] = ax_key
-            LOG.debug("process_ND_data: axis %s has length %d.", ax_key, len(axis))
-
-        for ax_num, ax_key in enumerate(new_axes):
-            header_lines.append(
-                f"{comment_char} {ax_num} column is {ax_key} in units {new_axes_units[ax_key]}"
-            )
-
-        LOG.debug(f"Data shape: {dataset._data.shape}")
-
-        ax_lengths = [len(new_axes[ax_num]) for ax_num in axis_numbers.values()]
-        LOG.debug(f"Axis lengths: {ax_lengths}")
-        LOG.debug(f"Axis sequence: {axis_numbers}")
-
-        # Attach axis indices
-        temp = zip(
-            cart_prod(*(new_axes[ind] for ind in axis_numbers.values())),
-            dataset.data.ravel(),
-            strict=True,
-        )
-        # Flatten each row
-        temp = map(collapse, temp)
-
-        return header_lines, temp
 
 
 @Plotter.register("Text")
@@ -395,6 +145,8 @@ class Text(Plotter):
     of physical units.
     """
 
+    _curve_limit_per_dataset: ClassVar[int] = 12
+
     def __init__(self) -> None:
         super().__init__()
         self._figure = None
@@ -403,11 +155,10 @@ class Text(Plotter):
         self._backup_curves = []
         self._backup_limits = []
         self._formatter = DatasetFormatter()
-        self._curve_limit_per_dataset = 12
         self._pc_backup = None
         self.height_max, self.length_max = 0.0, 0.0
 
-    def clear(self, figure: QTextBrowser = None):
+    def clear(self, figure: QTextBrowser | None = None):
         """Clear the output text widget.
 
         Optionally sets the input to be the new

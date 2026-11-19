@@ -867,3 +867,44 @@ def ordinal_suffix(index: int) -> str:
             return "rd"
         case _:
             return "th"
+
+
+def parse_index(index: str, max_len: int) -> Iterable[int]:
+    """Parse a string index into an appropriate value for dimension slicing.
+
+    Parameters
+    ----------
+    index : str
+        Index to parse.
+    max_len : int
+        Size of array for un-ended slices.
+
+    Returns
+    -------
+    Iterable[int]
+        Parsed values.
+
+    Examples
+    --------
+    >>> parse_index("3:5", 10)
+    range(3, 5)
+    >>> parse_index("3:60:2", 5)
+    range(3, 5, 2)
+    >>> parse_index("8", 10)
+    (8, )
+    >>> parse_index("6-8", 10)
+    range(6, 8)
+    """
+    if index == ":":
+        return range(max_len)
+
+    if ":" in index:
+        slice_parts = map(int, index.split(":"))
+        slc = slice(*slice_parts).indices(max_len)
+        return range(*slc)
+
+    if "-" in index:
+        start, stop = map(int, index.split("-"))
+        return range(start, stop + 1)
+
+    return (int(index),)
