@@ -188,7 +188,7 @@ class ScatteringLengthDensityProfile(IJob):
         box_coords -= np.floor(box_coords)
 
         axis_index = self.configuration["axis"]["index"]
-        self._extent += np.linalg.norm(conf.unit_cell.direct[axis_index])
+        extent_increment = np.linalg.norm(conf.unit_cell.direct[axis_index])
 
         slice_volume_ang3 = 1e3 * conf.unit_cell.volume / self._n_bins
 
@@ -201,7 +201,7 @@ class ScatteringLengthDensityProfile(IJob):
                 range=(0.0, 1.0),
             )
 
-        return index, (slice_volume_ang3, dp_per_frame)
+        return index, (slice_volume_ang3, dp_per_frame, extent_increment)
 
     def combine(self, index: int, data: tuple[float, dict[str, FloatArray]]) -> None:
         """Combine results together.
@@ -214,7 +214,8 @@ class ScatteringLengthDensityProfile(IJob):
             Axis length and density profile.
         """
 
-        slice_volume, density_profile = data
+        slice_volume, density_profile, extent_increment = data
+        self._extent += extent_increment
 
         for element, hist in density_profile.items():
             self._outputData[f"dp/number/{element}"] += hist / slice_volume
