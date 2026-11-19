@@ -223,3 +223,20 @@ jobs:
           test -f ../mdanse_outputs/ndtsf_atm1_atm2.mda
           echo "Checking ndtsf_atm1atm2.mda exists"
           test -f ../mdanse_outputs/ndtsf_atm1atm2.mda
+
+      - name: Run tutorial 5 scripts
+        working-directory: MDANSE-Examples/tutorials/tutorial5-hydrodynamics/mdanse_inputs
+        run: |
+          set -euxo pipefail
+
+          echo "Running tutorial 5 scripts"
+
+          echo "Running script1_conversion.py"
+          python script1_conversion.py
+          echo "Checking converted_trajectory.mdt exists"
+          test -f ../mdanse_outputs/converted_trajectory.mdt
+
+          echo "Running script2_dcsf.py"
+          python script2_dcsf.py
+          echo "Checking dcsf_256.mda exists"
+          test -f ../mdanse_outputs/dcsf_256.mda
