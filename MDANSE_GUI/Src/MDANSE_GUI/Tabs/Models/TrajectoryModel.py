@@ -113,6 +113,7 @@ class TrajectoryModel(QStandardItemModel):
         self._trajectory_instances = {}
         self._trajectory_status = {}
         self._loading_threads = {}
+        self.open_files = set()
         self._next_number = itertools.count()
         self.running_loaders = 0
 
@@ -129,6 +130,14 @@ class TrajectoryModel(QStandardItemModel):
     @Slot(tuple)
     def append_object(self, input: tuple) -> int:
         full_name, label = input
+        full_path = str(Path(full_name).resolve())
+        if full_path in self.open_files:
+            LOG.warning(
+                "File %s is already open in the Trajectory Model and will NOT be loaded again.",
+                full_path,
+            )
+            return
+        self.open_files.add(full_path)
         retval = next(self._next_number)
         self._node_numbers.append(retval)
         self._trajectory_paths[retval] = full_name
@@ -213,5 +222,12 @@ class TrajectoryModel(QStandardItemModel):
         if instance:
             instance.close()
         self.free_name.emit(str(filename))
+        full_path = str(Path(filename).resolve())
+        if full_path in self.open_files:
+            self.open_files.remove(full_path)
+        else:
+            LOG.warning(
+                "The file %s is being removed, but it not listed as open.", full_path
+            )
         self._node_numbers.pop(self._node_numbers.index(node_number))
         self._loading_threads.pop(node_number)
