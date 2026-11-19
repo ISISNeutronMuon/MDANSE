@@ -229,9 +229,9 @@ class SimpleInstrument:
 class InstrumentInfo(QTextBrowser):
     error = Signal(str)
 
-    def __init__(self, *args, **kwargs):
-        self._header = kwargs.pop("header", "")
-        self._footer = kwargs.pop("footer", "")
+    def __init__(self, *args, header: str = "", footer: str = "", **kwargs):
+        self._header = header
+        self._footer = footer
         super().__init__(*args, **kwargs)
         self.setOpenExternalLinks(True)
         self.setHtml("")

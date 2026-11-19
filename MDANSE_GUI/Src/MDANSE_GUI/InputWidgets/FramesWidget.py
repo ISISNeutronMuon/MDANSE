@@ -18,14 +18,20 @@ from __future__ import annotations
 from qtpy.QtGui import QIntValidator
 from qtpy.QtWidgets import QLabel, QLineEdit
 
+from MDANSE.Framework.Configurators import HDFTrajectoryConfigurator
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.InputWidgets.WidgetBase import WidgetBase
 
 
 class FramesWidget(WidgetBase):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        *args,
+        trajectory_configurator: HDFTrajectoryConfigurator | None = None,
+        **kwargs,
+    ):
         super().__init__(*args, layout_type="QGridLayout", **kwargs)
-        trajectory_configurator = kwargs.get("trajectory_configurator")
+
         if trajectory_configurator is not None:
             try:
                 self._last_frame = trajectory_configurator["length"]

@@ -36,9 +36,9 @@ class DistHistCutoffConfigurator(RangeConfigurator):
 
     label = "Distance histogram binning"
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name, *, max_value: bool = True, **kwargs):
         super().__init__(name, **kwargs)
-        self._max_value = kwargs.get("max_value", True)
+        self._max_value = max_value
         self.prediction = PredictionSettings(
             key="value",
             label="Interatomic distance",
