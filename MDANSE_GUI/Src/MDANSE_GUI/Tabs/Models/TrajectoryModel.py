@@ -137,7 +137,6 @@ class TrajectoryModel(QStandardItemModel):
                 full_path,
             )
             return
-        
         self.open_files.add(full_path)
         retval = next(self._next_number)
         self._node_numbers.append(retval)
