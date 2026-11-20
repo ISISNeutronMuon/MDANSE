@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 from qtpy.QtCore import QMessageLogger, QSettings, Slot
 from qtpy.QtWidgets import QFileDialog, QWidget
 
+from MDANSE.Core.Settings import Setting
 from MDANSE_GUI.MolecularViewer import MolecularViewerExtended
 from MDANSE_GUI.Tabs.GeneralTab import GeneralTab
 from MDANSE_GUI.Tabs.Layouts.MultiPanel import MultiPanel
@@ -49,10 +50,32 @@ the atom over all simulation frames.
 
 
 class TrajectoryTab(GeneralTab):
+    reopen_trajectories = Setting(
+        True, group="startup", comment="Reopen trajectories on starting MDANSE."
+    )
+    open_trajectories = Setting[tuple[str, ...]](
+        (),
+        group="trajectories",
+        comment="Previously opened trajectories",
+        visible=False,
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._core.add_button("Load .MDT Trajectories", self.load_trajectories)
         self._model.finished_loading.connect(self.tab_notification)
+
+        self._model.finished_loading.connect(self._update_trajectories)
+        self._model.free_name.connect(self._update_trajectories)
+
+        if self.reopen_trajectories:
+            for traj in self.open_trajectories:
+                self.load_trajectory(traj)
+
+    @Slot()
+    def _update_trajectories(self):
+        if self.reopen_trajectories:
+            self.open_trajectories = tuple(self._core._model._trajectory_paths.values())
 
     @Slot()
     def load_trajectories(self):
@@ -81,6 +104,7 @@ class TrajectoryTab(GeneralTab):
         if len(fname) > 0:
             short_name = fpath.name
             self._core._model.append_object((fname, short_name))
+
             self._session.protect_filename(fname)
 
     @classmethod
