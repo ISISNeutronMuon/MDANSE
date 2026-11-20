@@ -1,4 +1,5 @@
 from __future__ import annotations
+from MDANSE.Core.Settings import Setting
 
 from collections.abc import Iterator
 from pathlib import Path
@@ -166,8 +167,9 @@ def test_get_w_default(settings: type[Settings]):
 
 def test_parametrise(settings: type[Settings]):
 
-    @settings.parametrise(favourite=Option("pike", group="fish"))
     class Florp:
+        favourite = Setting("pike", group="fish")
+
         def __init__(self) -> None: ...
 
         def update(self) -> None:

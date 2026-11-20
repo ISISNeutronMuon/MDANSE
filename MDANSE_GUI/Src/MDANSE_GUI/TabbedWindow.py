@@ -45,7 +45,7 @@ from qtpy.QtWidgets import (
 )
 
 from MDANSE.Core.Platform import version_summary
-from MDANSE.Core.Settings import Option, Settings
+from MDANSE.Core.Settings import Setting
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.ElementsDatabaseEditor import ElementsDatabaseEditor
 from MDANSE_GUI.PeriodicTableViewer import PeriodicTableViewer
@@ -117,22 +117,19 @@ class RecentFileAction(QAction):
         self.external_function(str(self.file_path))
 
 
-@Settings.parametrise(
-    warn_about_systray=Option(
-        value=True,
+class MDANSEMainWindow(QMainWindow):
+    """The main window of the MDANSE GUI."""
+
+    warn_about_systray = Setting(
+        True,
         group="notifications",
         comment="Show a message when closing the main window if the GUI is still running in the background.",
     )
-)
-@Settings.parametrise(
-    notify_via_systray=Option(
-        value=True,
+    notify_via_systray = Setting(
+        True,
         group="notifications",
         comment="Pop up a system tray notification every time when closing the main window.",
     )
-)
-class MDANSEMainWindow(QMainWindow):
-    """The main window of the MDANSE GUI."""
 
     # write signal to send a single path to trajectory tab to load recent files
     signal_recent_trajectory_file = Signal(str)
