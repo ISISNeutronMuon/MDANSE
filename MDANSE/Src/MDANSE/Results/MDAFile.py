@@ -25,7 +25,8 @@ from itertools import product as cart_prod
 from math import prod
 from pathlib import Path, PurePath
 from textwrap import shorten
-from typing import TYPE_CHECKING, Any, Protocol
+from types import TracebackType
+from typing import TYPE_CHECKING, Any, Protocol, Self
 
 import h5py
 import numpy as np
@@ -72,8 +73,13 @@ class MDAFile:
     """Representation of an MDA file."""
 
     def __init__(self, source: Path | str) -> None:
-        self._file = h5py.File(source)
+        self._file = h5py.File(source, "r")
         self._metadata = check_metadata(self._file)
+
+        if self._metadata is None:
+            self.close()
+            raise ValueError(f"Not a .mda type file {source}")
+
         # Ensure only mda type file are loaded in Plot Creator Tab
         output_metadata = self._metadata["inputs/output_files"]
 
@@ -87,6 +93,37 @@ class MDAFile:
         self.all_children = list[PurePath]()
         self._file.visititems(self._get_ds)
 
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[Exception] | None,
+        exc_value: Exception | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        if getattr(self, "_file", None) is not None:
+            self.close()
+
+    def items(self, *, main: bool = True) -> Generator[tuple[str, SingleDataset]]:
+        if main:
+            yield from zip(
+                map(str, self.main_dataset_paths), self.main_datasets, strict=True
+            )
+            return
+
+        yield from zip(map(str, self.all_dataset_paths), self.all_datasets, strict=True)
+
+    def as_dict(self, *, main: bool = True) -> dict[str, SingleDataset]:
+        return dict(self.items(main=main))
+
+    def close(self) -> None:
+        """Close the HDF5 file."""
+        self._file.close()
+
     def __getitem__(self, key: str) -> SingleDataset:
         keys = self.find_paths(key)
         found = one(
@@ -98,17 +135,8 @@ class MDAFile:
         )
         return SingleDataset(str(found), self._file)
 
-    def find_paths(self, key: str) -> list[PurePath]:
-        """Find all paths matching key."""
-        return [pth for pth in self.all_dataset_paths if pth.match(key)]
-
-    def find_raw_datasets(self, key: str) -> list[h5py.Dataset]:
-        """Find all raw datasets matching key."""
-        return [self._file[str(pth)] for pth in self.find_paths(key)]
-
-    def find_datasets(self, key: str) -> list[SingleDataset]:
-        """Find all datasets matching key as :class:`SingleDataset`."""
-        return [SingleDataset(str(pth), self._file) for pth in self.find_paths(key)]
+    def __contains__(self, key: str) -> bool:
+        return any(p.match(key) for p in self.all_dataset_paths)
 
     @property
     def filename(self) -> str:
@@ -155,11 +183,23 @@ class MDAFile:
                 str(pth), self._file, linestyle="--" if "partial" in tags else "-"
             )
 
+    def find_paths(self, key: str) -> list[PurePath]:
+        """Find all paths matching key."""
+        return [pth for pth in self.all_dataset_paths if pth.match(key)]
+
+    def find_raw_datasets(self, key: str) -> list[h5py.Dataset]:
+        """Find all raw datasets matching key."""
+        return [self._file[str(pth)] for pth in self.find_paths(key)]
+
+    def find_datasets(self, key: str) -> list[SingleDataset]:
+        """Find all datasets matching key as :class:`SingleDataset`."""
+        return [SingleDataset(str(pth), self._file) for pth in self.find_paths(key)]
+
     def _get_ds(self, name: str, obj: h5py.Group | h5py.Dataset) -> None:
         if isinstance(obj, h5py.Dataset):
             self.all_children.append(PurePath(name))
 
-    def _get_tags(self, pth: PurePath | str) -> dict[str, Any]:
+    def _get_tags(self, pth: PurePath | str) -> Mapping[str, Any]:
         return self._file[str(pth)].attrs
 
     def _is_main(self, pth: PurePath | str) -> bool:
@@ -185,10 +225,6 @@ class MDAFile:
         if not verbose:
             text += "\n The header output was truncated. Use verbose for full output\n"
         return text
-
-    def close(self) -> None:
-        """Close the HDF5 file."""
-        self._file.close()
 
 
 @Settings.parametrise(
@@ -373,7 +409,32 @@ class SingleDataset:
             self._axes_scaling[axis_key] = 1.0
             self._current_units[axis_key] = self._axes_units[axis_key]
 
-    def create_axes_tags(self, axes_tag: str, source: h5py.File):
+    def summary(
+        self,
+        *,
+        lines: int | None = None,
+        cols: int | None = None,
+        separator: str = ",",
+        fmt: str = "{}",
+    ) -> str:
+        data: Iterable[Iterable[float]] = iter(self._data)
+
+        if lines is not None:
+            data = islice(data, lines)
+        if cols is not None:
+            data = (islice(x, cols) for x in data)
+
+        text_data = "\n".join(
+            separator.join(format(x, fmt) for x in line) for line in data
+        )
+
+        if next(data, None) is not None:
+            text_data += "\n..."
+
+        header, _ = self.make_dataset_header()
+        return "\n".join(header) + "\n" + text_data
+
+    def create_axes_tags(self, axes_tag: str, source: h5py.File) -> None:
         """Find the right axes datasets for the current dataset.
 
         Parameters
@@ -422,7 +483,7 @@ class SingleDataset:
             An axis for plotting the dataset, after unit conversion
 
         """
-        return self._axes[axis_key] * self._axes_scaling[axis_key]
+        return self._axes[axis_key] * self._axes_scaling.get(axis_key, 1.0)
 
     @staticmethod
     def axis_true_name(axis_key: str) -> str:
@@ -447,8 +508,8 @@ class SingleDataset:
         """
         return f"{self.axis_true_name(axis_key)} ({self._current_units[axis_key]})"
 
-    def set_current_units(self, unit_lookup):
-        """Update the unit based on the unit lookup of the PlottingContext."""
+    def set_current_units(self, unit_lookup) -> None:
+        """Update the unit based on the unit lookup."""
         if unit_lookup is None:
             return
 
@@ -457,7 +518,7 @@ class SingleDataset:
             self._axes_scaling[axis_name] = factor
             self._current_units[axis_name] = new_unit
 
-    def create_labels(self, root_name: str):
+    def create_labels(self, root_name: str) -> None:
         """Create several labels of different length for the plot legend.
 
         Parameters
@@ -500,7 +561,7 @@ class SingleDataset:
             setattr(new_dataset, attr, copy.deepcopy(getattr(self, attr)))
         return new_dataset
 
-    def set_data_limits(self, limit_string: str, main_axis: str = ""):
+    def set_data_limits(self, limit_string: str, main_axis: str = "") -> None:
         """Parse the string used for selecting a subset of data.
 
         Parameters
@@ -664,7 +725,7 @@ class SingleDataset:
                 return str(float(picked_value))
         return label.rstrip(", ")
 
-    def curve_ind(self, limits: int | None = None, /):
+    def curve_ind(self, limits: int | None = None, /) -> islice[int]:
         """Get indices of valid axes.
 
         Parameters
@@ -883,12 +944,12 @@ class SingleDataset:
     def processors(self) -> frozendict[int, ProcessFunction]:
         return frozendict(
             {
-                1: self.process_1D_data,
-                2: self.process_2D_data,
+                1: self._as_1D_table,
+                2: self._as_2D_table,
             }
         )
 
-    def process_data(
+    def as_table(
         self,
         *,
         comment_character: str = "#",
@@ -899,7 +960,7 @@ class SingleDataset:
         if units is None:
             units = frozendict({})
 
-        return self.processors.get(self.n_dims, self.process_ND_data)(
+        return self.processors.get(self.n_dims, self._as_ND_table)(
             main_axis=main_axis, comment_character=comment_character, units=units
         )
 
@@ -950,7 +1011,7 @@ class SingleDataset:
 
         return conversion_factor
 
-    def process_1D_data(
+    def _as_1D_table(
         self,
         *,
         comment_character="#",
@@ -991,7 +1052,7 @@ class SingleDataset:
             self._axes[best_axis] * conversion_factor, self.data, strict=True
         )
 
-    def process_2D_data(
+    def _as_2D_table(
         self,
         *,
         comment_character="#",
@@ -1082,7 +1143,7 @@ class SingleDataset:
 
         return header_lines, temp
 
-    def process_ND_data(
+    def _as_ND_table(
         self,
         *,
         comment_character="#",

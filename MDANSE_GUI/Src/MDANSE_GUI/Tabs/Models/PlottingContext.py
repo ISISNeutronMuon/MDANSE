@@ -28,9 +28,9 @@ from matplotlib.markers import MarkerStyle
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
-from MDANSE.Framework.Plotting.MDAFile import SingleDataset
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
+from MDANSE.Results.MDAFile import SingleDataset
 from MDANSE.util_types import FloatArray
 
 if TYPE_CHECKING:

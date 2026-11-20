@@ -136,7 +136,7 @@ class DatasetFormatter:
         """Wrapper for appropriately handling ND data."""
         assert self._plotting_context
 
-        return databundle.dataset.process_data(
+        return databundle.dataset.as_table(
             comment_character=self._comment,
             main_axis=main_axis,
             units=self._plotting_context._unit_preference,

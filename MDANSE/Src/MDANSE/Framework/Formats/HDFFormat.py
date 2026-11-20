@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 json_decoder = json.decoder.JSONDecoder()
 
 
-def check_metadata(hdf5_file: h5py.File) -> dict[str, str] | None:
+def check_metadata(hdf5_file: h5py.File) -> dict | list | str | None:
     """Extract metadata from an MDANSE HDF5 file.
 
     Parameters
@@ -53,7 +53,7 @@ def check_metadata(hdf5_file: h5py.File) -> dict[str, str] | None:
     """
     meta_dict = {}
 
-    def put_into_dict(name: str, obj: h5py.Group | h5py.Dataset) -> str | None:
+    def put_into_dict(name: str, obj: h5py.Group | h5py.Dataset):
         """Put an entry from an HDF5 dataset into a dictionary, as string.
 
         This helper function is used together with the visititems method

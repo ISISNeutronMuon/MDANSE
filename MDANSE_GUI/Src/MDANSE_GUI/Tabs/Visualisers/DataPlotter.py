@@ -27,8 +27,8 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from MDANSE.Framework.Plotting.MDAFile import SingleDataset
 from MDANSE.MLogging import LOG
+from MDANSE.Results.MDAFile import SingleDataset
 from MDANSE_GUI.Tabs.Models.PlottingContext import (
     PlottingContext,
     get_mpl_lines,
