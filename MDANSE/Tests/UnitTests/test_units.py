@@ -21,11 +21,11 @@ from random import random
 from typing import TypeVar, Union
 
 import pytest
-from MDANSE.Framework.Units import _PREFIXES, UnitError, _Unit, measure, Dims
+from MDANSE.Framework.Units import _PREFIXES, UnitError, Unit, measure, Dims
 
 T = TypeVar("T")
 
-def _measure_or_val(m_o_v: T) -> Union[_Unit, T]:
+def _measure_or_val(m_o_v: T) -> Union[Unit, T]:
     """Convert a value to a measure or leave if not (val, unit)."""
     if isinstance(m_o_v, (tuple, list)):
         return measure(*m_o_v)

@@ -35,6 +35,7 @@ from qtpy.QtWidgets import (
     QLabel,
     QLineEdit,
     QListView,
+    QMessageBox,
     QPushButton,
 )
 
@@ -109,10 +110,27 @@ class UnitModel(QStandardItemModel):
     @Slot(dict)
     def addNewUnit(self, info: dict):
         unit_name = info["name"]
+
         if conflict := UNITS_MANAGER.has_conflict(unit_name):
-            LOG.warning(
-                f"Name conflict between {unit_name} and {' and '.join(conflict)}"
-            )
+            if unit_name in UNITS_MANAGER.units:
+                msg = f"Unit ({unit_name!r}) already defined"
+            else:
+                # Refine info
+                base = {
+                    unit
+                    for unit in UNITS_MANAGER.units
+                    if any(c.endswith(unit) for c in conflict)
+                }
+                msg = (
+                    f"Name conflict between new unit ({unit_name!r}) and "
+                    f"existing units ({' and '.join(map(repr, base))}) due to:\n"
+                    f"{' and '.join(conflict)}"
+                )
+
+            err = QMessageBox(QMessageBox.Icon.Warning, "Unable to add unit", msg)
+            err.exec()
+
+            LOG.error(msg)
             return None
 
         UNITS_MANAGER.add_unit(

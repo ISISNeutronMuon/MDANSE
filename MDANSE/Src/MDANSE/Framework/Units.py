@@ -147,7 +147,7 @@ class UnitError(Exception):
     pass
 
 
-class _Unit:
+class Unit:
     """Unit handler.
 
     Handles all basic functions of units with correct dimensionality
@@ -212,14 +212,14 @@ class _Unit:
         dim = udict.get("dimension", ())
         return cls(uname, factor, Dims(*dim))
 
-    def __add__(self, other: _Unit) -> Self:
-        """Add two _Unit instances.
+    def __add__(self, other: Unit) -> Self:
+        """Add two Unit instances.
 
         To be added, the units have to be analog or equivalent.
 
         Parameters
         ----------
-        other : _Unit
+        other : Unit
            Unit to add.
 
         Raises
@@ -247,8 +247,8 @@ class _Unit:
 
         return u
 
-    def __sub__(self, other: _Unit) -> Self:
-        """Subtract _Unit instances.
+    def __sub__(self, other: Unit) -> Self:
+        """Subtract Unit instances.
 
         To be subtracted, the units have to be analog or equivalent.
 
@@ -270,14 +270,14 @@ class _Unit:
 
         return u
 
-    def __truediv__(self, other: Complex | Real | _Unit) -> Self:
-        """Divide two _Unit instances.
+    def __truediv__(self, other: Complex | Real | Unit) -> Self:
+        """Divide two Unit instances.
 
         To be divided, the units have to be analog or equivalent.
 
         Parameters
         ----------
-        other : _Unit
+        other : Unit
            Unit to add.
 
         Raises
@@ -295,21 +295,21 @@ class _Unit:
         u = copy.deepcopy(self)
         if isinstance(other, (Complex, Real)):
             u._factor /= other
-        elif isinstance(other, _Unit):
+        elif isinstance(other, Unit):
             u._div_by(other)
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
         return u
 
-    def __floordiv__(self, other: Real | _Unit) -> Self:
-        """Divide two _Unit instances and truncate.
+    def __floordiv__(self, other: Real | Unit) -> Self:
+        """Divide two Unit instances and truncate.
 
         To be divided, the units have to be analog or equivalent.
 
         Parameters
         ----------
-        other : _Unit
+        other : Unit
            Unit to add.
 
         Raises
@@ -327,7 +327,7 @@ class _Unit:
         u = copy.deepcopy(self)
         if isinstance(other, Real):
             u._factor //= other
-        elif isinstance(other, _Unit):
+        elif isinstance(other, Unit):
             u._div_by(other)
 
             if u._factor.imag:
@@ -339,8 +339,8 @@ class _Unit:
 
         return u
 
-    def __mul__(self, other: Real | Complex | _Unit) -> Self:
-        """Multiply _Unit instances or scaling factors.
+    def __mul__(self, other: Real | Complex | Unit) -> Self:
+        """Multiply Unit instances or scaling factors.
 
         Examples
         --------
@@ -355,7 +355,7 @@ class _Unit:
         u = copy.deepcopy(self)
         if isinstance(other, (Real, Complex)):
             u._factor *= other
-        elif isinstance(other, _Unit):
+        elif isinstance(other, Unit):
             u._mult_by(other)
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
@@ -363,7 +363,7 @@ class _Unit:
         return u
 
     def __pow__(self, n: float) -> Self:
-        """Raise a _Unit to a factor.
+        """Raise a Unit to a factor.
 
         Examples
         --------
@@ -379,7 +379,7 @@ class _Unit:
         return output_unit
 
     def __float__(self) -> float:
-        """Return the value of a _Unit coerced to float.
+        """Return the value of a Unit coerced to float.
 
         Examples
         --------
@@ -393,7 +393,7 @@ class _Unit:
         return float(self.toval())
 
     def __int__(self) -> int:
-        """Return the value of a _Unit coerced to integer.
+        """Return the value of a Unit coerced to integer.
 
         Notes
         ------
@@ -406,8 +406,8 @@ class _Unit:
         """
         return int(self.toval())
 
-    def __ceil__(self) -> _Unit:
-        """Ceil of a _Unit value in canonical units.
+    def __ceil__(self) -> Unit:
+        """Ceil of a Unit value in canonical units.
 
         Examples
         --------
@@ -426,15 +426,15 @@ class _Unit:
 
         if r._ounit is not None:
             val = math.ceil(r.toval(r._ounit))
-            newu = _Unit("au", val)
-            newu *= _Unit.from_str(r._ounit)
+            newu = Unit("au", val)
+            newu *= Unit.from_str(r._ounit)
             return newu.ounit(r._ounit)
         else:
             r._factor = math.ceil(r._factor)
             return r
 
-    def __floor__(self) -> _Unit:
-        """Floor of a _Unit value in canonical units.
+    def __floor__(self) -> Unit:
+        """Floor of a Unit value in canonical units.
 
         Examples
         --------
@@ -453,15 +453,15 @@ class _Unit:
 
         if r._ounit is not None:
             val = math.floor(r.toval(r._ounit))
-            newu = _Unit("au", val)
-            newu *= _Unit.from_str(r._ounit)
+            newu = Unit("au", val)
+            newu *= Unit.from_str(r._ounit)
             return newu.ounit(r._ounit)
         else:
             r._factor = math.floor(r._factor)
             return r
 
-    def __round__(self, ndigits: int | None = None) -> _Unit:
-        """Round of a _Unit value in canonical units.
+    def __round__(self, ndigits: int | None = None) -> Unit:
+        """Round of a Unit value in canonical units.
 
         Examples
         --------
@@ -480,8 +480,8 @@ class _Unit:
 
         if r._ounit is not None:
             val = round(r.toval(r._ounit), ndigits)
-            newu = _Unit("au", val)
-            newu *= _Unit.from_str(r._ounit)
+            newu = Unit("au", val)
+            newu *= Unit.from_str(r._ounit)
             return newu.ounit(r._ounit)
         else:
             r._factor = round(r._factor, ndigits)
@@ -491,8 +491,8 @@ class _Unit:
     floor = __floor__
     round = __round__
 
-    def __iadd__(self, other: _Unit) -> Self:
-        """Add _Unit instances.
+    def __iadd__(self, other: Unit) -> Self:
+        """Add Unit instances.
 
         See Also
         --------
@@ -513,7 +513,7 @@ class _Unit:
         return self
 
     def __itruediv__(self, other: Complex | Real | Self):
-        """Divide _Unit instances.
+        """Divide Unit instances.
 
         See Also
         --------
@@ -522,7 +522,7 @@ class _Unit:
 
         if isinstance(other, (Real, Complex)):
             self._factor /= other
-        elif isinstance(other, _Unit):
+        elif isinstance(other, Unit):
             self._div_by(other)
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
@@ -530,7 +530,7 @@ class _Unit:
         return self
 
     def __ifloordiv__(self, other):
-        """Divide _Unit instances and truncate.
+        """Divide Unit instances and truncate.
 
         See Also
         --------
@@ -540,9 +540,9 @@ class _Unit:
         self._factor = math.floor(self._factor)
         return self
 
-    def __imul__(self, other: Real | Complex | _Unit) -> Self:
+    def __imul__(self, other: Real | Complex | Unit) -> Self:
         """
-        Multiply _Unit instances.
+        Multiply Unit instances.
 
         See Also
         --------
@@ -551,7 +551,7 @@ class _Unit:
 
         if isinstance(other, (Real, Complex)):
             self._factor *= other
-        elif isinstance(other, _Unit):
+        elif isinstance(other, Unit):
             self._mult_by(other)
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
@@ -567,8 +567,8 @@ class _Unit:
 
         return self
 
-    def __isub__(self, other: _Unit) -> Self:
-        """Subtract _Unit instances.  See __sub__."""
+    def __isub__(self, other: Unit) -> Self:
+        """Subtract Unit instances.  See __sub__."""
 
         if self.is_analog(other):
             self._factor -= other._factor
@@ -582,8 +582,8 @@ class _Unit:
 
         return self
 
-    def __radd__(self, other: _Unit) -> Self:
-        """Add _Unit instances.
+    def __radd__(self, other: Unit) -> Self:
+        """Add Unit instances.
 
         See Also
         --------
@@ -591,32 +591,32 @@ class _Unit:
         """
         return self.__add__(other)
 
-    def __rdiv__(self, other: Real | Complex | _Unit) -> Self:
+    def __rdiv__(self, other: Real | Complex | Unit) -> Self:
         u = copy.deepcopy(self)
         if isinstance(other, (Real, Complex)):
             u._factor /= other
-        elif isinstance(other, _Unit):
+        elif isinstance(other, Unit):
             u._div_by(other)
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
         return u
 
-    def __rmul__(self, other: Real | Complex | _Unit) -> Self:
-        """Multiply _Unit instances.  See __mul__."""
+    def __rmul__(self, other: Real | Complex | Unit) -> Self:
+        """Multiply Unit instances.  See __mul__."""
 
         u = copy.deepcopy(self)
         if isinstance(other, (Real, Complex)):
             u._factor *= other
-        elif isinstance(other, _Unit):
+        elif isinstance(other, Unit):
             u._mult_by(other)
         else:
             raise UnitError(f"Invalid operand {other} with type {type(other)}")
 
         return u
 
-    def __rsub__(self, other: _Unit) -> _Unit:
-        """Subtract _Unit instances.  See __sub__."""
+    def __rsub__(self, other: Unit) -> Unit:
+        """Subtract Unit instances.  See __sub__."""
 
         return other.__sub__(self)
 
@@ -656,12 +656,12 @@ class _Unit:
 
         return s
 
-    def _div_by(self, other: _Unit) -> None:
+    def _div_by(self, other: Unit) -> None:
         """Compute divided unit including new dimensionality.
 
         Parameters
         ----------
-        other : _Unit
+        other : Unit
             Factor to divide by.
 
         Raises
@@ -695,12 +695,12 @@ class _Unit:
         self._ounit = None
         self._out_factor = None
 
-    def _mult_by(self, other: _Unit) -> None:
+    def _mult_by(self, other: Unit) -> None:
         """Compute multiplied unit including new dimensionality.
 
         Parameters
         ----------
-        other : _Unit
+        other : Unit
             Factor to multiply by.
 
         Raises
@@ -747,14 +747,14 @@ class _Unit:
 
         return self._factor
 
-    def is_analog(self, other: _Unit) -> bool:
+    def is_analog(self, other: Unit) -> bool:
         """Whether two units are analog.
 
         Analog units are units whose dimension vector exactly matches.
 
         Parameters
         ----------
-        other : _Unit
+        other : Unit
             Unit to test.
 
         Returns
@@ -773,7 +773,7 @@ class _Unit:
         """
         return self._dimension == other._dimension
 
-    def get_equivalence_factor(self, other: _Unit) -> float | None:
+    def get_equivalence_factor(self, other: Unit) -> float | None:
         """Returns the equivalence factor if other unit is equivalent.
 
         Equivalent units are units whose dimension are related through a constant
@@ -781,7 +781,7 @@ class _Unit:
 
         Parameters
         ----------
-        other : _Unit
+        other : Unit
             Potentially equivalent unit.
 
         Returns
@@ -840,7 +840,7 @@ class _Unit:
         1 J
         """
 
-        out_factor = _Unit.from_str(ounit)
+        out_factor = Unit.from_str(ounit)
 
         if not self.is_analog(out_factor) and not self.equivalent:
             raise UnitError(f"The units {self._uname} and {ounit} are not compatible.")
@@ -857,11 +857,11 @@ class _Unit:
         return self
 
     def sqrt(self) -> Self:
-        """Square root of a _Unit.
+        """Square root of a Unit.
 
         Returns
         -------
-        _Unit
+        Unit
             New unit which is sqrt of original.
 
         Examples
@@ -903,7 +903,7 @@ class _Unit:
         if ounit is None:
             return newu._factor
 
-        out_factor = _Unit.from_str(ounit)
+        out_factor = Unit.from_str(ounit)
 
         if newu.is_analog(out_factor):
             newu._div_by(out_factor)
@@ -933,7 +933,7 @@ class _Unit:
 
         Returns
         -------
-        _Unit
+        Unit
             Expected unit.
 
         Raises
@@ -967,7 +967,7 @@ class _Unit:
         return reduce(mul, map(cls._parse_component, s.split(" ")), cls._au())
 
     @classmethod
-    def from_str(cls, s: str) -> _Unit:
+    def from_str(cls, s: str) -> Unit:
         """Parse general string into unit description.
 
         Parameters
@@ -977,7 +977,7 @@ class _Unit:
 
         Returns
         -------
-        _Unit
+        Unit
             Parsed unit.
 
         Raises
@@ -990,11 +990,11 @@ class _Unit:
 
         match list(map(str.strip, s.split("/"))):
             case [value]:
-                unit = _Unit._parse_unit(value)
+                unit = Unit._parse_unit(value)
             case ["1", den]:
-                unit = _Unit._au() / _Unit._parse_unit(den)
+                unit = Unit._au() / Unit._parse_unit(den)
             case [num, den]:
-                unit = _Unit._parse_unit(num) / _Unit._parse_unit(den)
+                unit = Unit._parse_unit(num) / Unit._parse_unit(den)
             case _:
                 raise UnitError(f"Invalid unit: {s}")
 
@@ -1011,7 +1011,7 @@ class _Unit:
 class UnitsManager(Database):
     """Database dictionary for handling units."""
 
-    _UNITS: ClassVar[ChainMap[str, _Unit]] = ChainMap()
+    _UNITS: ClassVar[ChainMap[str, Unit]] = ChainMap()
 
     _DEFAULT_DATABASE = PLATFORM.base_directory / "MDANSE" / "Framework" / "units.json"
     _LOCAL_PATH = Path("units.json")
@@ -1026,7 +1026,7 @@ class UnitsManager(Database):
                         k: {"factor": v.factor, "dimension": v.dimension}
                         for k, v in o.units
                     }
-                case _Unit(factor=fac, dimension=dim):
+                case Unit(factor=fac, dimension=dim):
                     return {"factor": fac, "dimension": tuple(dim)}
                 case _:
                     return super().default(o)
@@ -1048,7 +1048,7 @@ class UnitsManager(Database):
         rad: int = 0,
         sr: int = 0,
     ):
-        UnitsManager._UNITS[uname] = _Unit(
+        UnitsManager._UNITS[uname] = Unit(
             uname, factor, Dims(kg, m, s, K, mol, A, cd, rad, sr)
         )
 
@@ -1056,7 +1056,7 @@ class UnitsManager(Database):
         if uname in UnitsManager._UNITS:
             del UnitsManager._UNITS[uname]
 
-    def get_unit(self, uname: str) -> _Unit | None:
+    def get_unit(self, uname: str) -> Unit | None:
         return UnitsManager._UNITS.get(uname, None)
 
     def has_unit(self, uname: str) -> bool:
@@ -1078,7 +1078,7 @@ class UnitsManager(Database):
         if alldefaults is None:
             alldefaults = self.possible_units
 
-        units = {f"{pref}{uname}" for pref in _PREFIXES}
+        units = self.with_prefixes({uname}) | {uname}
         if conflict := units & alldefaults:
             return conflict
         return None
@@ -1095,11 +1095,11 @@ class UnitsManager(Database):
         super()._load(user_database, default_database)
 
         defaults = {
-            name: _Unit.from_json(name, udict)
+            name: Unit.from_json(name, udict)
             for name, udict in self._default_data.items()
         }
         custom = {
-            name: _Unit.from_json(name, udict) for name, udict in self._data.items()
+            name: Unit.from_json(name, udict) for name, udict in self._data.items()
         }
 
         alldefaults = self.with_prefixes(defaults)
@@ -1124,12 +1124,12 @@ class UnitsManager(Database):
             json.dump(UnitsManager._UNITS.maps[0], fout, indent=4, cls=self.Encoder)
 
     @property
-    def units(self) -> MutableMapping[str, _Unit]:
+    def units(self) -> MutableMapping[str, Unit]:
         """Direct access to unit database."""
         return UnitsManager._UNITS
 
     @classmethod
-    def filter_by_dimension(cls, dims: Dims) -> dict[str, _Unit]:
+    def filter_by_dimension(cls, dims: Dims) -> dict[str, Unit]:
         return {
             name: unit for name, unit in cls._UNITS.items() if unit.dimension == dims
         }
@@ -1140,13 +1140,13 @@ class UnitsManager(Database):
         dim: Literal[
             "energy", "velocities", "gradients", "time", "length", "reciprocal", "mass"
         ],
-    ) -> dict[str, _Unit]:
+    ) -> dict[str, Unit]:
         return cls.filter_by_dimension(_COMMON_DIMS[dim])
 
 
 def measure(
     val: float, iunit: str = "au", ounit: str = "", *, equivalent: bool = False
-) -> _Unit:
+) -> Unit:
     """Create a unit bearing object.
 
     Parses i/ounits and returns the relevant data object.
@@ -1164,7 +1164,7 @@ def measure(
 
     Returns
     -------
-    _Unit
+    Unit
         Desired unit.
 
     Examples
@@ -1173,10 +1173,10 @@ def measure(
     1 ang
     """
     if iunit:
-        unit = _Unit.from_str(iunit)
+        unit = Unit.from_str(iunit)
         unit *= val
     else:
-        unit = _Unit("au", val)
+        unit = Unit("au", val)
 
     unit.equivalent = equivalent
 
@@ -1287,4 +1287,4 @@ for a, b, factor in (
         6.02214076e23,
     ),  # J/m --> J/m mol
 ):
-    _Unit.add_equivalence(a, b, factor)
+    Unit.add_equivalence(a, b, factor)
