@@ -61,7 +61,7 @@ class RGBValidator(QValidator):
 
     def validate(
         self, input_string: str, position: int
-    ) -> tuple[QValidator.State, int, str]:
+    ) -> tuple[QValidator.State, str, int]:
         """Implementation of the virtual method of QValidator.
         It takes in the string from a QLineEdit and the cursor position,
         and an enum value of the validator state. Widgets will reject

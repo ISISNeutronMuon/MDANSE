@@ -134,7 +134,7 @@ class ASE(Converter):
         """
         super().initialize()
 
-        self.trajectory_file = self.configuration["trajectory_file"].instance
+        self.trajectory_file = self.configuration["trajectory_file"].parser_instance
         self._isPeriodic = None
         self._backup_cell = None
         self._keep_running = True

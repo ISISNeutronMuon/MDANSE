@@ -50,6 +50,7 @@ from MDANSE_GUI.InputWidgets import (
     CorrelationFramesWidget,
     DerivativeOrderWidget,
     DistHistCutoffWidget,
+    ExtXYZColumnWidget,
     FloatWidget,
     FramesWidget,
     HDFTrajectoryWidget,
@@ -106,6 +107,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "MDAnalysisCoordinateFileConfigurator": MDAnalysisCoordinateFileWidget,
     "MDAnalysisTopologyFileConfigurator": MDAnalysisTopologyFileWidget,
     "FileWithAtomDataConfigurator": InputFileWidget,
+    "MultiFileWithAtomDataConfigurator": MultiInputFileWidget,
     "RunningModeConfigurator": RunningModeWidget,
     "WeightsConfigurator": WeightsWidget,
     "MultipleChoicesConfigurator": MultipleCombosWidget,
@@ -130,6 +132,7 @@ widget_lookup = {  # these all come from MDANSE_GUI.InputWidgets
     "MDTrajTimeStepConfigurator": MDAnalysisMDTrajTimeStepWidget,
     "MDTrajTrajectoryFileConfigurator": MultiInputFileWidget,
     "MDTrajTopologyFileConfigurator": MDTrajTopologyFileWidget,
+    "ExtXYZColumnMapConfigurator": ExtXYZColumnWidget,
 }
 
 

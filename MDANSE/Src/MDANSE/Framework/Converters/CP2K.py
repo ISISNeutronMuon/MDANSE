@@ -131,9 +131,9 @@ class CP2K(Converter):
         super().initialize()
 
         self.files = {
-            key: self.configuration[ref].instance
+            key: self.configuration[ref].parser_instance
             for key, ref in self.FILE_MAPPING.items()
-            if self.configuration[ref].instance
+            if self.configuration[ref].parser_instance
         }
 
         if "coordinates" not in self.files:
