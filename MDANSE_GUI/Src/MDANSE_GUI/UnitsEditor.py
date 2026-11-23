@@ -35,10 +35,12 @@ from qtpy.QtWidgets import (
     QLabel,
     QLineEdit,
     QListView,
+    QMessageBox,
     QPushButton,
 )
 
 from MDANSE.Framework.Units import UNITS_MANAGER
+from MDANSE.MLogging import LOG
 from MDANSE_GUI.Widgets.GeneralWidgets import InputDialog, InputVariable
 
 
@@ -108,32 +110,52 @@ class UnitModel(QStandardItemModel):
     @Slot(dict)
     def addNewUnit(self, info: dict):
         unit_name = info["name"]
-        if UNITS_MANAGER.has_unit(unit_name):
+
+        if conflict := UNITS_MANAGER.has_conflict(unit_name):
+            if unit_name in UNITS_MANAGER.units:
+                msg = f"Unit ({unit_name!r}) already defined"
+            else:
+                # Refine info
+                base = {
+                    unit
+                    for unit in UNITS_MANAGER.units
+                    if any(c.endswith(unit) for c in conflict)
+                }
+                msg = (
+                    f"Name conflict between new unit ({unit_name!r}) and "
+                    f"existing units ({' and '.join(map(repr, base))}) due to:\n"
+                    f"{' and '.join(conflict)}"
+                )
+
+            err = QMessageBox(QMessageBox.Icon.Warning, "Unable to add unit", msg)
+            err.exec()
+
+            LOG.error(msg)
             return None
-        else:
-            UNITS_MANAGER.add_unit(
-                unit_name,
-                *[
-                    info[key]
-                    for key in [
-                        "factor",
-                        "kg",
-                        "m",
-                        "s",
-                        "K",
-                        "mol",
-                        "A",
-                        "cd",
-                        "rad",
-                        "sr",
-                    ]
-                ],
-            )
-            UNITS_MANAGER.save()
-            item = QStandardItem(unit_name)
-            item.setEditable(False)
-            item.setData(unit_name)
-            self.appendRow(item)
+
+        UNITS_MANAGER.add_unit(
+            unit_name,
+            *[
+                info[key]
+                for key in [
+                    "factor",
+                    "kg",
+                    "m",
+                    "s",
+                    "K",
+                    "mol",
+                    "A",
+                    "cd",
+                    "rad",
+                    "sr",
+                ]
+            ],
+        )
+        UNITS_MANAGER.save()
+        item = QStandardItem(unit_name)
+        item.setEditable(False)
+        item.setData(unit_name)
+        self.appendRow(item)
 
 
 class UnitsEditor(QDialog):
