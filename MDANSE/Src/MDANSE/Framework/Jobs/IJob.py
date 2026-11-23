@@ -81,6 +81,7 @@ os.environ.update(
     NUMEXPR_NUM_THREADS = '1'
 )
 
+from numpy import array
 
 ########################################################
 # Initialise settings                                  #
