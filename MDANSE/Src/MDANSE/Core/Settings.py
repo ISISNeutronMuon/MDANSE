@@ -19,7 +19,7 @@ import copy
 from collections import ChainMap, defaultdict
 from collections.abc import Callable, Generator, Mapping
 from contextlib import contextmanager
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
 from typing import (
     Any,
     ClassVar,
@@ -128,7 +128,7 @@ class Settings:
         ),
     }
 
-    SAVE_TYPE_MAPPING: TypeMap = {Path: str}
+    SAVE_TYPE_MAPPING: TypeMap = {Path: str, PosixPath: str, WindowsPath: str}
 
     @classmethod
     def __call__(cls):
