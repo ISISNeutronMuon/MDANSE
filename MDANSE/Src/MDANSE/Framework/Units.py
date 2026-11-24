@@ -799,7 +799,7 @@ class Unit:
         --------
         >>> a = measure(1., "1/m")
         >>> a.get_equivalence_factor(measure(1., "J/mol"))
-        0.000119627
+        0.119627
         >>> print(a.get_equivalence_factor(measure(1., "ang")))
         None
         """

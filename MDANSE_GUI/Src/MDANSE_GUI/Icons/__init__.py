@@ -15,18 +15,17 @@
 #
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from qtpy.QtCore import QDir
 from qtpy.QtGui import QIcon
 
-if TYPE_CHECKING:
-    from pathlib import Path
-
 
 class PyQtIcons:
     def __init__(self, path: Path | str):
-        self.res_dir = QDir(path)
+        path = Path(path)
+        self.res_dir = QDir(str(path))
         self._icons = {pth.stem: QIcon(str(pth)) for pth in path.glob("*.png")}
 
 

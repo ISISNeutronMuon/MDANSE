@@ -94,13 +94,13 @@ class AtomsDatabase(Database):
     >>> h1 = ATOMS_DATABASE["H1"]
     >>>
     >>> # Return a set of the properties stored in the database
-    >>> l = ATOMS_DATABASE.properties()
+    >>> l = ATOMS_DATABASE.properties
     >>>
     >>> # Return the atomic weight of U235 atom
     >>> w = ATOMS_DATABASE["U235"]["atomic_weight"]
     >>>
     >>> # Returns the atoms stored currently in the database
-    >>> atoms = ATOMS_DATABASE.atoms()
+    >>> atoms = ATOMS_DATABASE.atoms
     """
 
     _DEFAULT_DATABASE = Path(__file__).parent / "atoms.json"

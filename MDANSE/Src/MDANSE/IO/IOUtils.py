@@ -385,7 +385,7 @@ def head_tail(coll: Sequence[T]) -> Generator[tuple[Sequence[T], Sequence[T]]]:
     [('', 'bye'), ('b', 'ye'), ('by', 'e'), ('bye', '')]
     """
 
-    for i in range(len(coll)):
+    for i in range(len(coll) + 1):
         yield coll[:i], coll[i:]
 
 

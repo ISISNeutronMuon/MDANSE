@@ -33,7 +33,7 @@ jobs:
 
       - name: Run unit tests
         working-directory: MDANSE
-        run: pytest
+        run: pytest --doctest-modules Tests Src/MDANSE
 
 
   test_GUI:
@@ -74,7 +74,7 @@ jobs:
 
       - name: Run GUI unit tests
         working-directory: MDANSE_GUI
-        run: pytest
+        run: pytest --doctest-modules Tests Src/MDANSE_GUI
 
   test_tutorials:
     name: (${{ matrix.os }}-${{ matrix.python-version }}) Build MDANSE, checkout MDANSE-Examples and run the tutorials
