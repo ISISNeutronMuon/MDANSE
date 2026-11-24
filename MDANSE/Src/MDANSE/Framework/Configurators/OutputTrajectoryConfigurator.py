@@ -52,7 +52,7 @@ class OutputTrajectoryConfigurator(IConfigurator):
     """
 
     log_options = ("no logs", "DEBUG", "INFO", "WARN", "ERROR", "CRITICAL")
-    _default = ("OUTPUT_TRAJECTORY", 64, (1, 128), "none", "no logs")
+    _default: _BaseParams = ("OUTPUT_TRAJECTORY", 64, (1, 128), "none", "no logs")
     label = "MDANSE output trajectory"
     tooltip = (
         "Values are: filename, data type, chunk size, compression, logfile output."
@@ -75,10 +75,10 @@ class OutputTrajectoryConfigurator(IConfigurator):
         self._chunk_limit = (1, 128)
 
     def configure(self, value: ValidParams | str):
-        self._original_input = value
-
         if isinstance(value, str):
             value = (value, *self._default[1:])
+
+        self._original_input = value
 
         root, dtype, chunk_size, compression, logs = value[:5]
 

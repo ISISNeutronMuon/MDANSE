@@ -97,10 +97,10 @@ class OutputFilesConfigurator(IConfigurator):
         :type value: 3-tuple
         """
 
-        self._original_input = value
-
         if isinstance(value, (str, Path)):
-            value = (value, self.formats, "no logs")
+            value = (value, ("MDAFormat",), "no logs")
+
+        self._original_input = value
 
         root, formats, logs = value
         root = Path(root)

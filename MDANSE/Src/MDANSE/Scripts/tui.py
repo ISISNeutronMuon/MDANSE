@@ -14,18 +14,21 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# ruff: file-ignore[PLR0911]
+# ruff: file-ignore[T201, PLR0911]
 from __future__ import annotations
+from MDANSE.Core.Platform import PLATFORM
 
 import cmd
+import csv
+import sys
 from argparse import Namespace
 from collections.abc import Callable, Iterable, Sequence
 from difflib import get_close_matches
+from itertools import islice
 from operator import itemgetter
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import cast
 
-import h5py
 from more_itertools import split_before, value_chain
 
 from MDANSE.Framework.AtomSelector.selection_builder import (
@@ -51,58 +54,87 @@ from MDANSE.MolecularDynamics.Trajectory import (
     chemical_system_summary,
     trajectory_summary,
 )
+from MDANSE.Results.MDAFile import MDAFile
 from MDANSE.Scripts.funcs import (
     execute_analysis,
     execute_converter,
     execute_element,
-    execute_results,
 )
 from MDANSE.util_types import FloatArray
 
-OPS_MAP = {
-    "=": OperationType.SET,
-    "SET": OperationType.SET,
-    "&": OperationType.INTERSECTION,
-    "+": OperationType.UNION,
-    "|": OperationType.UNION,
-    "UNION": OperationType.UNION,
-    "ADD": OperationType.UNION,
-    "-": OperationType.DIFFERENCE,
-    "DIFF": OperationType.DIFFERENCE,
-    "DIFFERENCE": OperationType.DIFFERENCE,
-}
+try:
+    import readline
+except ImportError:
+    readline = None
 
-VALID_PROPS = {
-    alias: prop
-    for prop, aliases in {
-        "charge": ("charge", "q"),
-        "fractional_coordinates": (
-            "fractional_coordinates",
-            "frac",
-            "fractional",
-            "frac_coords",
-        ),
-        "coordinates": ("coordinates", "abs", "absolute", "pos", "position", "coords"),
-        "types": ("types", "species", "spec"),
-        "index": ("index", "indices", "ind"),
-        "name": ("name", "names", "label", "labels"),
-        "cluster": ("cluster", "groups"),
-        "molecule": ("molecule", "mol"),
-        "dummy": ("dummy",),
-    }.items()
-    for alias in aliases
-}
-PROP_TYPES = {
-    "charge": float,
-    "fractional_coordinates": (float, float, float),
-    "coordinates": (float, float, float),
-    "types": str,
-    "index": int,
-    "name": str,
-    "cluster": str,
-    "molecule": str,
-    "dummy": bool,
-}
+try:
+    import matplotlib.pyplot as mpl
+
+    matplotlib_available = True
+except ImportError:
+    matplotlib_available = False
+
+
+if sys.version_info < (3, 15):
+    from types import MappingProxyType as frozendict
+
+OPS_MAP = frozendict(
+    {
+        "=": OperationType.SET,
+        "SET": OperationType.SET,
+        "&": OperationType.INTERSECTION,
+        "+": OperationType.UNION,
+        "|": OperationType.UNION,
+        "UNION": OperationType.UNION,
+        "ADD": OperationType.UNION,
+        "-": OperationType.DIFFERENCE,
+        "DIFF": OperationType.DIFFERENCE,
+        "DIFFERENCE": OperationType.DIFFERENCE,
+    }
+)
+
+VALID_PROPS = frozendict(
+    {
+        alias: prop
+        for prop, aliases in {
+            "charge": ("charge", "q"),
+            "fractional_coordinates": (
+                "fractional_coordinates",
+                "frac",
+                "fractional",
+                "frac_coords",
+            ),
+            "coordinates": (
+                "coordinates",
+                "abs",
+                "absolute",
+                "pos",
+                "position",
+                "coords",
+            ),
+            "types": ("types", "species", "spec"),
+            "index": ("index", "indices", "ind"),
+            "name": ("name", "names", "label", "labels"),
+            "cluster": ("cluster", "groups"),
+            "molecule": ("molecule", "mol"),
+            "dummy": ("dummy",),
+        }.items()
+        for alias in aliases
+    }
+)
+PROP_TYPES = frozendict(
+    {
+        "charge": float,
+        "fractional_coordinates": (float, float, float),
+        "coordinates": (float, float, float),
+        "types": str,
+        "index": int,
+        "name": str,
+        "cluster": str,
+        "molecule": str,
+        "dummy": bool,
+    }
+)
 PROPS = frozenset(VALID_PROPS)
 CONVERTERS = tuple(Converter.registry.raw_mapping.values())
 ANALYSES = tuple(IJob.registry.raw_mapping.values())
@@ -130,16 +162,21 @@ class MDANSETui(cmd.Cmd):
     DEFAULT_TABLE = 20
     prompt = "mdanse > "
     identchars = cmd.IDENTCHARS + "/"
+    hist_file_size = 50
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.builder = SelectionBuilder()
         self.trajectory: Trajectory | None = None
-        self.analysis: h5py.File | None = None
+        self.results: MDAFile | None = None
         self.atom_alias: dict[str, str] | None = None
         self.partial_charge: dict[str, list[int]] | None = None
         self.frame: int = 0
         self._update_prompt()
+
+    @property
+    def _hist_file(self) -> Path:
+        return PLATFORM.application_directory / "tui_hist"
 
     def emptyline(self): ...
 
@@ -149,8 +186,8 @@ class MDANSETui(cmd.Cmd):
             if self.trajectory is not None
             else "",
             frame=f"({self.frame})" if self.frame else "",
-            analysis=f" Analysis:{Path(self.analysis.filename).name}"
-            if self.analysis is not None
+            analysis=f" Res:{Path(self.results.filename).name}"
+            if self.results is not None
             else "",
             charge=" Charge:True" if self.partial_charge is not None else "",
             trans=" Alias:True" if self.atom_alias is not None else "",
@@ -159,11 +196,28 @@ class MDANSETui(cmd.Cmd):
     def _info(self, *args, **kwargs):
         print(*args, **kwargs, file=self.stdout)
 
+    def _display(self, line: str, *args, **kwargs):
+        """Print while not destroying prompt."""
+        self._info("\n", *args, **kwargs)
+        self.stdout.flush()
+
+        self._info(f"{self.prompt}{line}", end="", **kwargs)
+        self.stdout.flush()
+
     def _fail(self, cause: str, caller: str = ""):
         self._info(cause)
         if caller:
             self._info()
             self.do_help(caller)
+
+    def preloop(self):
+        if readline and self._hist_file.is_file():
+            readline.read_history_file(self._hist_file)
+
+    def postloop(self):
+        if readline:
+            readline.set_history_length(self.hist_file_size)
+            readline.write_history_file(self._hist_file)
 
     def cmdloop(self, *_):
         super().cmdloop()
@@ -193,6 +247,45 @@ class MDANSETui(cmd.Cmd):
         if possible := [word for word in words if word.startswith(curr)]:
             return possible
         return get_close_matches(curr, words, cutoff=0.1)
+
+    def results_match(self, text: str) -> list[str]:
+        """Get paths matching paths from results.
+
+        Parameters
+        ----------
+        results : MDAFile
+            File to check.
+        text : str
+
+
+        Returns
+        -------
+        list[str]
+            FIXME: Add docs.
+
+        Examples
+        --------
+        FIXME: Add docs.
+
+        """
+        if self.results is None:
+            self._info("\nNo results, try '?results'")
+            return []
+
+        path = PurePath(text)
+
+        if text.endswith("/"):
+            base, file = text, ""
+        else:
+            base, file = path.parent, path.name
+
+        base = PurePath(base)
+        self._display("results print "+text, f"{base=}, {file=}")
+        return [
+            str(pth.relative_to(base))[len(file):]
+            for pth in self.results.all_dataset_paths
+            if str(pth).startswith(str(base / file))
+        ]
 
     @staticmethod
     def path_match(text: str) -> list[str]:
@@ -334,35 +427,147 @@ class MDANSETui(cmd.Cmd):
 
     def complete_results(
         self, text: str, line: str, _begidx: str, _endidx: str
-    ) -> list[str]:
+    ) -> list[str] | tuple[str, ...]:
+        ops = ("summary", "load", "clear", "print", "save", "plot")
         match parse(line.removeprefix("results")):
             case []:
-                return ["verbose", *self.path_match("")]
-            case [word] if "verbose".startswith(word):
+                return ops
+            case [word] if not line.endswith(" "):
+                return self.fuzzy_complete(word, ops)
+            case ["summary"] if not line.endswith(" "):
                 return self.fuzzy_complete(word, ["verbose", *self.path_match(word)])
-            case [pth] | ["verbose", pth]:
+            case ["summary", word] if "verbose".startswith(word):
+                return self.fuzzy_complete(word, ["verbose", *self.path_match(word)])
+            case ["load"] if line.endswith(" "):
+                return self.path_match("")
+            case ["summary" | "load", pth] | ["summary", "verbose", pth]:
                 return self.path_match(pth)
+            case ["print"] if self.results is not None and line.endswith(" "):
+                return list(map(str, self.results.all_children))
+            case (
+                ["print", ds] | ["print", "full", ds] | ["save", ds] | ["plot", ds]
+            ) if self.results is not None:
+                self._display(line, self.results_match(ds))
+                return self.results_match(ds)
+            case ["save", ds, pth] if self.results is not None and ds in self.results:
+                return self.path_match(pth)
+            case ["plot", ds, key] if self.results is not None and ds in self.results:
+                return self.fuzzy_complete(
+                    key, list(self.results[ds]._axes) + self.path_match(key)
+                )
+            case ["plot", ds, key, pth] if (
+                self.results is not None and ds in self.results
+            ):
+                return self.path_match(pth)
+            case ["save" | "print" | "plot", *_] if self.results is None:
+                self._display(line, "No results, try '?results'")
+                return []
             case _:
-                self._info("\nUnknown completion")
+                self._display(line, "Unknown completion")
                 return []
 
     def do_results(self, args: str):
         """Print information about a results file.
 
         Usage:
-        results [verbose] PATH
+        results clear
+        results load PATH
+        results summary [verbose] [PATH]
+        results print [full] [DATASET]
+        results save DATASET [PATH]
+        results plot DATASET [AXIS] [PATH]
 
         verbose prints full information about the `mda` file.
         """
         match parse(args):
             case []:
                 self._fail("No arguments provided.", "results")
-            case [path]:
-                execute_results(Namespace(file_name=path, verbose=False))
-            case ["verbose", path]:
-                execute_results(Namespace(file_name=path, verbose=True))
+            case ["summary" | "print" | "save" | "plot", *_] if self.results is None:
+                self._info("No results, try '?results'")
+            case ["plot", *_] if not matplotlib_available:
+                self._info("Matplotlib unavailable. Can't plot.")
+
+            case ["clear"]:
+                if self.results:
+                    self.results.close()
+                self.results = None
+                self._update_prompt()
+            case ["load", path]:
+                try:
+                    self.results = MDAFile(path)
+                except ValueError as err:
+                    self._info(err)
+                    return
+                self._update_prompt()
+            case ["print" | "summary"] | ["print" | "summary", "verbose"]:
+                self._info(self.results.summary(verbose="verbose" in args))
+            case ["summary", path] | ["summary", "verbose", path]:
+                self._info(MDAFile(path).summary(verbose="verbose" in args))
+
+            case ["print", ds] | ["print", "full", ds]:
+                try:
+                    dataset = self.results[ds]
+                except KeyError:
+                    self._info(f"Key ({ds!r}) not in results.")
+                    return
+
+                header, data = dataset.as_table()
+
+                self._info("\n".join(header) + "\n")
+
+                data_o = data
+                if args.split()[1] != "full":
+                    data, data_o = (islice(x, 20) for x in islice(data, 10)), data
+
+                self._info("\n".join(", ".join(str(x) for x in row) for row in data))
+
+                if next(data_o, None) is not None:
+                    self._info("\n...")
+
+            case ["save", ds, out] if self.results is not None:
+                with open(out, "w") as out_file:
+                    header, data = self.results[ds].as_table()
+
+                    out_file.writelines(map("{}\n".format, header))
+                    writer = csv.writer(out_file)
+                    writer.writerows(data)
+
+            case ["plot", ds] if self.results is not None:
+                self._plt(self.results, ds).show()
+
+            case ["plot", ds, axis] if (
+                self.results is not None and axis in self.results[ds]._axes
+            ):
+                self._plt(self.results, ds, axis).show()
+
+            case ["plot", ds, axis, out] if (
+                self.results is not None and axis in self.results[ds]._axes
+            ):
+                self._plt(self.results, ds, axis).savefig(out)
+
+            case ["plot", ds, out] if self.results is not None:
+                self._plt(self.results, ds).savefig(out)
+
             case _:
                 self._fail(f"Unknown args: {args}.", "results")
+
+    def _plt(self, file: MDAFile, name: str, axis: str | None = None) -> mpl.Figure:
+        dataset = file[name]
+
+        if axis is None:
+            _, axis = dataset.longest_axis()
+
+        dataset.set_data_limits(":", axis)
+
+        fig, ax = mpl.subplots(1)
+        fig.suptitle(str(dataset))
+
+        for label, (x, y) in dataset.curves_vs_axis(axis, 9):
+            ax.plot(x, y, label=label)
+        ax.set_xlabel(f"{axis} ({dataset._axes_units[axis]})")
+        fig.legend()
+
+        return fig
 
     def do_element(self, args: str):
         """Get information about an element or elements.
@@ -516,15 +721,13 @@ class MDANSETui(cmd.Cmd):
     def complete_analysis(
         self, text: str, line: str, _begidx: str, _endidx: str
     ) -> list[str] | tuple[str, ...]:
-        ops = ("list", "save", "run", "load", "print")
+        ops = ("list", "save", "run")
 
         match parse(line.removeprefix("analysis")):
             case []:
                 return [*ops, *ANALYSES]
             case ["save" | "run"]:
                 return ANALYSES
-            case ["load" | "print", pth] if not line.endswith(" "):
-                return self.path_match(pth)
             case ["save" | "run", anal] if anal in ANALYSES:
                 return self.path_match("")
             case ["save" | "run", word] if not line.endswith(" "):
@@ -555,20 +758,6 @@ class MDANSETui(cmd.Cmd):
                 execute_analysis(
                     Namespace(list=True, name=None, output=None, traj=None)
                 )
-            case ["clear"]:
-                if self.analysis:
-                    self.analysis.close()
-                self.analysis = None
-                self._update_prompt()
-            case ["print"] if self.analysis is not None:
-                ...
-            case ["load", path]:
-                self.analysis = h5py.File(path)
-                self._update_prompt()
-            case ["print", path]:
-                ...
-            case ["print", *_] if self.trajectory is None:
-                self._info("No trajectory, try '?trajectory'")
             case [name] if name in IJob.registry.raw_mapping.values():
                 execute_analysis(
                     Namespace(list=False, name=name, output=None, traj=None)
@@ -579,6 +768,8 @@ class MDANSETui(cmd.Cmd):
                 )
             case ["run", name, output] if name in ANALYSES:
                 self._run_job(name, [output])
+                self.analysis = MDAFile(output)
+                self._update_prompt()
             case ["run", name] if name in ANALYSES:
                 self._run_job(name, [])
             case _:
@@ -767,6 +958,10 @@ class MDANSETui(cmd.Cmd):
         trajectory print [full] PROPERTIES...
         """
         match parse(args):
+            case ["summary" | "chemical_system" | "frame" | "print", *_] if (
+                self.trajectory is None
+            ):
+                self._info("No trajectory, try '?trajectory'")
             case ["load", path]:
                 try:
                     self.trajectory = Trajectory(path)
@@ -805,9 +1000,6 @@ class MDANSETui(cmd.Cmd):
                     properties=properties,
                     max_length=self.DEFAULT_TABLE,
                 )
-
-            case _ if self.trajectory is None:
-                self._info("No trajectory, try '?trajectory'")
 
         self._update_prompt()
 

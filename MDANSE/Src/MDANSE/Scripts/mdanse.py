@@ -27,15 +27,13 @@ from argparse import (
 from pathlib import Path
 from typing import Any
 
-import h5py
-
 import MDANSE
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Core.Platform import PLATFORM, version_summary
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.IO.AtomInfo import atom_info
 from MDANSE.MLogging import LOG
+from MDANSE.Results.MDAFile import MDAFile
 from MDANSE.Scripts.tui import MDANSETui
 
 from .funcs import (
@@ -45,7 +43,6 @@ from .funcs import (
     execute_results,
     show_trajectory_contents,
 )
-from MDANSE.Results.MDAFile import MDAFile
 
 
 class CommandLineParserError(Exception):
@@ -125,56 +122,6 @@ def save_converter(
         script_name = f"script_template_{input_job_name}.py"
     job.save(script_name)
     print(f"Script has been saved as {script_name}")
-
-
-def execute_element(args: Namespace):
-    element = args.name
-    database = Trajectory(args.traj) if args.traj else ATOMS_DATABASE
-    match_str = args.search
-    list_flag = args.list
-    if list_flag:
-        std_output = database.atoms
-    elif match_str:
-        std_output = [name for name in database.atoms if element in name]
-        if not std_output:
-            std_output = (
-                f"No element names containing the string '{element}' were found."
-            )
-    elif database.has_atom(element):
-        std_output = atom_info(element, database=database)
-    else:
-        std_output = f"Element {element} is not the atom database."
-    print(std_output)
-
-
-def execute_converter(args: Namespace):
-    if args.list:
-        show_jobs(show_converters=True)
-        return
-    if args.name and args.output:
-        save_converter(args.name, script_name=args.output)
-        return
-    if args.name:
-        show_single_job(args.name)
-
-
-def execute_analysis(args: Namespace):
-    if args.traj:
-        raise NotImplementedError(
-            "Setting up a script for a specific trajectory is not possible at the moment."
-        )
-    if args.list:
-        show_jobs()
-        return
-    if args.name and args.output:
-        save_job(args.name, trajectory_path=args.traj, script_name=args.output)
-        return
-    if args.name:
-        show_single_job(args.name)
-
-
-def execute_results(args: Namespace):
-    show_results_contents(args.file_name, verbose=args.verbose)
 
 
 def _converter_parser(subparsers: _SubParsersAction) -> Any:

@@ -26,7 +26,6 @@ import h5py
 from MDANSE.Chemistry import ATOMS_DATABASE
 from MDANSE.Framework.Converters.Converter import Converter
 from MDANSE.Framework.Jobs.IJob import IJob
-from MDANSE.Framework.Plotting.MDAFile import MDAFile
 from MDANSE.IO.AtomInfo import atom_info
 from MDANSE.MolecularDynamics.Trajectory import (
     Trajectory,
@@ -34,6 +33,7 @@ from MDANSE.MolecularDynamics.Trajectory import (
     chemical_system_summary,
     trajectory_summary,
 )
+from MDANSE.Results.MDAFile import MDAFile
 
 
 def get_hdf5_contents(file_object: h5py.File):
