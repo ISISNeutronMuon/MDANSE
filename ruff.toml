@@ -32,7 +32,7 @@ select = [
     "I",   # Isort
     "RUF", # Ruff specific
     "FURB",# Refurb
-    # "PERF",# Perflint
+    "PERF",# Perflint
     # "D",   # Pydocstyle
     "UP",  # Pyupgrade
     "T20",   # Print
