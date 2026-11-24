@@ -38,7 +38,7 @@ from MDANSE import PLATFORM
 from MDANSE.Chemistry import ATOMS_DATABASE
 
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
-from MDANSE.IO.IOUtils import UCEnum, summarise_array, str_to_num
+from MDANSE.IO.IOUtils import UCEnum, summarise_array_1D, str_to_num
 from MDANSE.Trajectory.FileTrajBase import TrajDataArray
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
@@ -111,7 +111,7 @@ def trajectory_summary(traj: Trajectory, *, use_html: bool = False) -> str:
         if len(time_axis) < 1:
             timeline = "N/A\n"
         else:
-            timeline = f"[{summarise_array(time_axis, maxlen=5, arr_fmt='5.4f')}]\n"
+            timeline = f"[{summarise_array_1D(time_axis, maxlen=5, arr_fmt='5.4f')}]\n"
 
     filename = html.escape(f"{traj.filename}")
     if use_html:
