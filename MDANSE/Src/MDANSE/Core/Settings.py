@@ -19,7 +19,7 @@ import copy
 from collections import ChainMap, defaultdict
 from collections.abc import Callable, Generator, Mapping
 from contextlib import contextmanager
-from pathlib import Path
+from pathlib import Path, PosixPath, WindowsPath
 from typing import (
     Any,
     ClassVar,
@@ -32,6 +32,7 @@ from typing import (
 )
 
 import tomlkit
+from more_itertools import first
 from tomlkit.items import Item
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
@@ -128,7 +129,7 @@ class Settings:
         ),
     }
 
-    SAVE_TYPE_MAPPING: TypeMap = {Path: str}
+    SAVE_TYPE_MAPPING: TypeMap = {Path: str, PosixPath: str, WindowsPath: str}
 
     @classmethod
     def __call__(cls):
@@ -225,7 +226,14 @@ class Settings:
 
             LOG.debug("Group: %s", grp_key)
             for key, val in grp.items():
-                if new_type := cls.SAVE_TYPE_MAPPING.get(type(val.value)):
+                if new_type := first(
+                    (
+                        new
+                        for old, new in cls.SAVE_TYPE_MAPPING.items()
+                        if isinstance(val.value, old)
+                    ),
+                    default=None,
+                ):
                     to_write = new_type(val.value)
                 else:
                     to_write = val.value

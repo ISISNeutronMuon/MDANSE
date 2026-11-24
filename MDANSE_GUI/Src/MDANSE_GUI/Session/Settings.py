@@ -109,7 +109,7 @@ class GUISettings(QStandardItemModel):
                     )
                     value_item.setData(value.value)
                 else:
-                    value_item = QStandardItem(value.value)
+                    value_item = QStandardItem(str(value.value))
                     value_item.setData(value.value)
 
                 key_item.setData(value.name)
