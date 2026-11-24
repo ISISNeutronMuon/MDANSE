@@ -18,18 +18,17 @@ from __future__ import annotations
 from abc import abstractmethod
 from pathlib import Path
 from traceback import format_exc
-from typing import TypeVar
+from typing import Self
 
 import h5py
 from qtpy.QtCore import QModelIndex, QMutex, QObject, Qt, Signal, Slot
 from qtpy.QtGui import QStandardItem, QStandardItemModel
 
 from MDANSE.Core.Platform import PLATFORM
-from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.MLogging import LOG
+from MDANSE.Results.MDAFile import MDAFile
 from MDANSE_GUI.Session.RecentFiles import RecentFiles
 
-Self = TypeVar("Self", bound="BasicPlotDataItem")
 EXCLUDE = {"metadata"}
 
 
@@ -138,26 +137,6 @@ class DataFileItem(BasicPlotDataItem):
         return self.data(role=Qt.ItemDataRole.UserRole)
 
 
-class MDADataStructure:
-    """Loads plotting-related information from an MDA file."""
-
-    def __init__(self, filename: str):
-        self._file = h5py.File(filename)
-        self._metadata = check_metadata(self._file)
-        # Ensure only mda type file are loaded in Plot Creator Tab
-        output_metadata = self._metadata["inputs/output_files"]
-        if (
-            not isinstance(output_metadata[1], list)
-            or "MDAFormat" not in output_metadata[1]
-        ):
-            self.close()
-            raise ValueError(f"Not a .mda type file {filename}")
-
-    def close(self):
-        """Close the HDF5 file."""
-        self._file.close()
-
-
 class PlotDataModel(QStandardItemModel):
     """Stores plottable items from an MDA file.
 
@@ -190,7 +169,7 @@ class PlotDataModel(QStandardItemModel):
         return self.recent_files.json_file_path
 
     @Slot(str)
-    def add_file(self, filename: str):
+    def add_file(self, filename: Path | str):
         """Add to the model all the plottable datasets from a file.
 
         Parameters
@@ -200,7 +179,7 @@ class PlotDataModel(QStandardItemModel):
 
         """
         try:
-            new_datafile = MDADataStructure(filename)
+            new_datafile = MDAFile(filename)
         except Exception as e:
             LOG.error("Invalid: %s, error message: %s", e, format_exc())
         else:
@@ -214,7 +193,7 @@ class PlotDataModel(QStandardItemModel):
             self.recent_files.store_recently_used_filename(filename)
             self._next_number += 1
 
-    def inner_object(self, index: QModelIndex) -> MDADataStructure | h5py.Dataset:
+    def inner_object(self, index: QModelIndex) -> MDAFile | h5py.Dataset:
         """For a Qt model index, return its corresponding HDF5 object.
 
         Parameters
@@ -224,7 +203,7 @@ class PlotDataModel(QStandardItemModel):
 
         Returns
         -------
-        MDADataStructure | h5py.Dataset
+        MDAFile | h5py.Dataset
             Either a wrapper around the MDA file, or a dataset from the file.
 
         """
@@ -238,7 +217,7 @@ class PlotDataModel(QStandardItemModel):
             return data_structure._file[data_path]
         return data_structure
 
-    def parent_object(self, index: QModelIndex) -> MDADataStructure:
+    def parent_object(self, index: QModelIndex) -> MDAFile:
         """For a Qt index of a dataset, return the wrapper object of the HDF5 file.
 
         Parameters
@@ -248,7 +227,7 @@ class PlotDataModel(QStandardItemModel):
 
         Returns
         -------
-        MDADataStructure
+        MDAFile
             A wrapper around the MDA file.
 
         """
@@ -256,7 +235,7 @@ class PlotDataModel(QStandardItemModel):
         number = model_item.file_number()
         return self._nodes[number]
 
-    def removeRow(self, row: int, parent: QModelIndex = None):
+    def removeRow(self, row: int, parent: QModelIndex | None = None):
         """Delete a row from the model."""
         self.mutex.lock()
         try:

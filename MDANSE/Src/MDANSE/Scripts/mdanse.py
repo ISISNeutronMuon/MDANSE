@@ -13,6 +13,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+
+# ruff: file-ignore[T201]
 from __future__ import annotations
 
 import textwrap
@@ -40,15 +42,11 @@ from MDANSE.MolecularDynamics.Trajectory import (
     chemical_system_summary,
     trajectory_summary,
 )
+from MDANSE.Results.MDAFile import MDAFile
 
 
 class CommandLineParserError(Exception):
     pass
-
-
-def show_element_info(element):
-    if element:
-        print(ATOMS_DATABASE.info(element))  # noqa: T201
 
 
 def get_hdf5_contents(file_object: h5py.File):
@@ -80,30 +78,12 @@ def show_trajectory_contents(args: Namespace):
         f"{name}: type={instance.file[name].dtype}, shape={instance.file[name].shape}"
         for name in traj_arrays
     )
-    print(result)  # noqa: T201
+    print(result)
 
 
-def show_results_contents(filename: str, *, verbose: bool) -> str:
-    text = str(filename) + "\n"
-    with h5py.File(filename) as source:
-        text += "===HEADER===\n"
-        if verbose:
-            for attr in source.attrs:
-                text += f"{attr}: {source.attrs[attr]}\n"
-        else:
-            for attr in source.attrs:
-                text += f"{attr}\n"
-                for line in source.attrs[attr].split("\n"):
-                    if "=" in line:
-                        text += line[:80] + "\n"
-        text += "===DATASETS===\n"
-        for key in get_hdf5_contents(source):
-            text += f"{key}: type={source[key].dtype}, shape={source[key].shape}\n"
-        if not verbose:
-            text += (
-                "\n The header output was truncated. Use --verbose for full output\n"
-            )
-    print(text)  # noqa: T201
+def show_results_contents(filename: str, *, verbose: bool) -> None:
+    instance = MDAFile(filename)
+    print(instance.summary(verbose=verbose))
 
 
 def show_jobs(*, show_converters: bool = False):
@@ -127,7 +107,7 @@ def show_jobs(*, show_converters: bool = False):
                 *sorted(" -> ".join(analysis[1:]) for analysis in analyses),
             ]
         )
-    print(output)  # noqa: T201
+    print(output)
 
 
 def show_single_job(job_name: str):
@@ -148,7 +128,7 @@ def show_single_job(job_name: str):
     # tab_fmt = "{:<20}{!s:>40}{!s:>10}"
     for iname, (ival, ilabel) in parameters.items():
         result += f"- {iname!s:<25}: default={ival!s:<50} # {ilabel!s:>25}\n"
-    print(result)  # noqa: T201
+    print(result)
 
 
 def save_job(
@@ -162,7 +142,7 @@ def save_job(
     if not script_name:
         script_name = f"script_template_{input_job_name}.py"
     job.save(script_name)
-    print(f"Script has been saved as {script_name}")  # noqa: T201
+    print(f"Script has been saved as {script_name}")
 
 
 def save_converter(
@@ -173,7 +153,7 @@ def save_converter(
     if not script_name:
         script_name = f"script_template_{input_job_name}.py"
     job.save(script_name)
-    print(f"Script has been saved as {script_name}")  # noqa: T201
+    print(f"Script has been saved as {script_name}")
 
 
 def execute_element(args: Namespace):
@@ -193,7 +173,7 @@ def execute_element(args: Namespace):
         std_output = atom_info(element, database=database)
     else:
         std_output = f"Element {element} is not the atom database."
-    print(std_output)  # noqa: T201
+    print(std_output)
 
 
 def execute_converter(args: Namespace):
@@ -477,7 +457,7 @@ def build_parsers() -> ArgumentParser:
 
 def main():
     LOG.setLevel("INFO")
-    print(f"MDANSE version {MDANSE.__version__}")  # noqa: T201
+    print(f"MDANSE version {MDANSE.__version__}")
     parser = build_parsers()
     args: Namespace = parser.parse_args()
 
