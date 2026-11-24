@@ -15,13 +15,13 @@
 #
 from __future__ import annotations
 
-from itertools import islice
 from itertools import product as cart_prod
 from typing import TYPE_CHECKING
 
 from more_itertools import collapse, prepend, transpose
 
 from MDANSE.Framework.Units import measure
+from MDANSE.IO.IOUtils import summarise_array_2D
 from MDANSE.MLogging import LOG
 from MDANSE_GUI.Tabs.Plotters.Plotter import Plotter
 
@@ -141,25 +141,14 @@ class DatasetFormatter:
         separator: str = ",",
     ):
         """Combine the header text with the data array into a string."""
-        if self._is_preview:
-            data = islice(data_array, self._preview_lines)
-            data = (islice(x, self._preview_columns) for x in data)
-        else:
-            data = data_array
 
-        text_data = "\n".join(
-            separator.join(
-                str(round(x, self._rounding_prec))
-                if hasattr(x, "__round__")
-                else str(x)
-                for x in line
-            )
-            for line in data
+        text_data = summarise_array_2D(
+            data_array,
+            rows=self._preview_lines if self._is_preview else None,
+            cols=self._preview_columns if self._is_preview else None,
+            arr_fmt=f".{self._preview_columns}f",
+            separator=separator,
         )
-
-        # If not empty
-        if self._is_preview and next(data_array, None) is not None:
-            text_data += "\n..."
 
         new_header = "\n".join(header_lines)
         return new_header + "\n" + text_data
