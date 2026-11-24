@@ -228,9 +228,9 @@ class Settings:
             for key, val in grp.items():
                 if new_type := first(
                     (
-                        typ
-                        for kls, typ in cls.SAVE_TYPE_MAPPING.items()
-                        if isinstance(val.value, kls)
+                        new
+                        for old, new in cls.SAVE_TYPE_MAPPING.items()
+                        if isinstance(val.value, old)
                     ),
                     default=None,
                 ):
