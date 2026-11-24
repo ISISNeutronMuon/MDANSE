@@ -30,12 +30,12 @@ from collections.abc import (
 )
 from enum import Enum
 from functools import partial, singledispatch
-from itertools import count, filterfalse, islice
+from itertools import count, filterfalse, islice, tee
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, SupportsComplex, TypeVar, overload
 
 import numpy as np
-from more_itertools import first, first_true, last, take, value_chain
+from more_itertools import first, first_true, ilen, last, spy, take, value_chain
 
 from MDANSE.MLogging import LOG
 
@@ -423,10 +423,10 @@ def get_trailing_digits(inp: str) -> tuple[str, int]:
 
 
 def summarise_array(
-    array: Sequence,
+    array: Iterable,
     *,
-    rows: int = 20,
-    cols: int = 6,
+    rows: int | None = 20,
+    cols: int | None = 6,
     show: int = 3,
     arr_fmt: str | None = None,
     separator: str = ",",
@@ -442,22 +442,33 @@ def summarise_array(
 
     Parameters
     ----------
-    array : Sequence
+    array : Iterable
         Array to summarise.
-    maxlen : int
-        Maximum length before elision (min 4).
+    rows : int
+        Max rows to display.
+    cols : int
+        Max columns to display.
     show : int
-        Number of elements to show.
+        Number to show in summarised rows.
     arr_fmt : str, optional
         Format values in array before printing.
+    separator : str
+        Character separating columns.
+    placeholder : str
+        Character denoting truncated array.
+    placeholder_vert : str
+        Character denoting truncated array (vertical).
+    placeholder_diag : str
+        Character denoting truncated array (diagonal).
 
     Returns
     -------
     str
         Summarised array.
     """
-    if isinstance(first(array), Sequence):
-        summarise_array_2D(
+    (trial,), array = spy(array)
+    if isinstance(trial, Iterable):
+        return summarise_array_2D(
             array,
             rows=rows,
             cols=cols,
@@ -468,21 +479,21 @@ def summarise_array(
             placeholder_vert=placeholder_vert,
             placeholder_diag=placeholder_diag,
         )
-    else:
-        summarise_array_1D(
-            array,
-            maxlen=cols,
-            show=show,
-            arr_fmt=arr_fmt,
-            separator=separator,
-            placeholder=placeholder,
-        )
+
+    return summarise_array_1D(
+        array,
+        maxlen=cols,
+        show=show,
+        arr_fmt=arr_fmt,
+        separator=separator,
+        placeholder=placeholder,
+    )
 
 
 def summarise_array_1D(
-    array: Sequence,
+    array: Iterable,
     *,
-    maxlen: int = 6,
+    maxlen: int | None = 6,
     show: int = 3,
     arr_fmt: str | None = None,
     separator=", ",
@@ -496,7 +507,7 @@ def summarise_array_1D(
 
     Parameters
     ----------
-    array : Sequence
+    array : Iterable
         Array to summarise.
     maxlen : int
         Maximum length before elision (min 4).
@@ -520,23 +531,28 @@ def summarise_array_1D(
     '0, 1, 2, 3, 4, 5, 6, 7, 8, 9'
     >>> summarise_array_1D(range(10), show=6)
     '0, 1, 2, 3, 4, 5, ..., 9'
-    >>> summarise_array_1D([x / 3 for x in range(10)], arr_fmt="3.1f")
+
+    # Also able to work with Generators
+    >>> summarise_array_1D((x / 3 for x in range(10)), arr_fmt="3.1f")
     '0.0, 0.3, 0.7, ..., 3.0'
     """
     fmt = str if arr_fmt is None else lambda x: format(x, arr_fmt)
+
+    array, tmp = tee(array)
+    arr_len = ilen(tmp)
     arr = map(fmt, array)
 
-    if maxlen is None or len(array) <= maxlen or len(array) < show + 1:
+    if maxlen is None or arr_len <= maxlen or arr_len < show + 1:
         return separator.join(arr)
 
     return separator.join(value_chain(take(show, arr), placeholder, last(arr)))
 
 
 def summarise_array_2D(
-    array: Sequence[Sequence],
+    array: Iterable[Iterable],
     *,
-    rows: int = 6,
-    cols: int = 6,
+    rows: int | None = 6,
+    cols: int | None = 6,
     show: int = 3,
     arr_fmt: str | None = None,
     separator: str = ",",
@@ -551,7 +567,7 @@ def summarise_array_2D(
 
     Parameters
     ----------
-    array : Sequence[Sequence]
+    array : Iterable[Iterable]
         Array to summarise.
     rows : int
         Max rows to display.
@@ -579,28 +595,13 @@ def summarise_array_2D(
     --------
     >>> import numpy as np
     >>> print(summarise_array_2D(np.eye(10, 10)))
-    1.0,0.0,0.0,...,0.0
     0.0,1.0,0.0,...,0.0
     0.0,0.0,1.0,...,0.0
     0.0,0.0,0.0,...,0.0
+    0.0,0.0,0.0,...,0.0
      ⋮   ⋮   ⋮   ⋱
     0.0,0.0,0.0,...,1.0
-    >>> print(summarise_array_2D(
-    ...       np.eye(10, 10),
-    ...       rows=15,
-    ...       placeholder="???",
-    ...       separator=" | "))
-    1.0 | 0.0 | 0.0 | ??? | 0.0
-    0.0 | 1.0 | 0.0 | ??? | 0.0
-    0.0 | 0.0 | 1.0 | ??? | 0.0
-    0.0 | 0.0 | 0.0 | ??? | 0.0
-    0.0 | 0.0 | 0.0 | ??? | 0.0
-    0.0 | 0.0 | 0.0 | ??? | 0.0
-    0.0 | 0.0 | 0.0 | ??? | 0.0
-    0.0 | 0.0 | 0.0 | ??? | 0.0
-    0.0 | 0.0 | 0.0 | ??? | 0.0
-    0.0 | 0.0 | 0.0 | ??? | 1.0
-    >>> print(summarise_array_2D(np.eye(10, 10), rows=15, cols=10))
+    >>> print(summarise_array_2D(np.eye(10, 10), rows=15, cols=None))
     1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
     0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
     0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -611,6 +612,23 @@ def summarise_array_2D(
     0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0
     0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0
     0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0
+
+    # Also able to work with Generators
+    >>> print(summarise_array_2D(
+    ...       ((x for x in range(10)) for _ in range(10)),
+    ...       rows=15,
+    ...       placeholder="???",
+    ...       separator=" | "))
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
+    0 | 1 | 2 | ??? | 9
     """
     summarise_row = partial(
         summarise_array_1D,
@@ -621,15 +639,18 @@ def summarise_array_2D(
         placeholder=placeholder,
     )
 
-
+    array, tmp, tmp2 = tee(array, 3)
+    n_rows = ilen(tmp)
     outp = map(summarise_row, array)
-    if rows is None or len(array) <= rows or len(array) < show + 1:
+    if rows is None or n_rows <= rows or n_rows < show + 1:
         return "\n".join(outp)
+
+    n_cols = cols or ilen(first(tmp2))
 
     fmt = str if arr_fmt is None else lambda x: format(x, arr_fmt)
     col_width = len(fmt(first(first(array)))) + len(separator)
     placeholder_line = (
-        f"{placeholder_vert:^{col_width}}" * (cols - 3)
+        f"{placeholder_vert:^{col_width}}" * (n_cols - 3)
         + f"{placeholder_diag:^{len(placeholder)}}".rstrip()
     )
     return "\n".join(value_chain(take(rows - 2, outp), placeholder_line, last(outp)))
