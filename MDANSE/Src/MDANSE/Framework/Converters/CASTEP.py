@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from importlib.util import find_spec
+
 import numpy as np
 
 from MDANSE.Chemistry.ChemicalSystem import ChemicalSystem
@@ -26,12 +28,17 @@ from MDANSE.MolecularDynamics.Configuration import PeriodicAbsoluteConfiguration
 from MDANSE.MolecularDynamics.Trajectory import TrajectoryWriter
 from MDANSE.MolecularDynamics.UnitCell import UnitCell
 
+co_available = find_spec("castep_outputs") is not None
+
 
 @IJob.register("CASTEP")
 @Converter.register("CASTEP")
 class CASTEP(Converter):
     """Converts a Castep Trajectory into an MDT trajectory file."""
 
+    enabled = co_available
+    requires_extras = ("castep",)
+    category = ("Converters", "General")
     label = "CASTEP"
 
     settings = {}
@@ -125,10 +132,11 @@ class CASTEP(Converter):
             unit_cell = self.configuration["unit_cell"]["value"]
         else:
             unit_cell = UnitCell(np.vstack(frame["h"]))
-        coords = np.vstack(tuple(arr[1] for arr in frame["R"]))
+
+        coords = frame["R"]
         variables = {
-            "velocities": np.vstack(tuple(arr[1] for arr in frame["V"])),
-            "gradients": np.vstack(tuple(arr[1] for arr in frame["F"])),
+            "velocities": frame["V"],
+            "gradients": frame["F"],
         }
 
         conf = PeriodicAbsoluteConfiguration(coords, unit_cell, **variables)

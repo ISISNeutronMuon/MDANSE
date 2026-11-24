@@ -49,7 +49,7 @@ dev = [
   {include-group = "lint"},
   {include-group = "external"},
 ]
-external=["MDAnalysis", "ase", "mdtraj", "finufft", "pymixbox"]
+external=["castep_outputs>=0.3.4", "MDAnalysis", "ase", "mdtraj", "finufft", "pymixbox"]
 test=["pytest", "pytest-timeout"]
 lint=["ruff<0.17"]
 
@@ -58,9 +58,10 @@ cli=["tqdm"]
 ase=["ase"]
 mdanalysis=["MDAnalysis"]
 mdtraj=["mdtraj"]
+castep=["castep_outputs>=0.3.4"]
 finufft=["finufft"]
 pymixbox=["pymixbox"]
-all=["MDANSE[ase,cli,mdanalysis,mdtraj,finufft,pymixbox]"]
+all=["MDANSE[ase,cli,mdanalysis,mdtraj,finufft,pymixbox,castep]"]
 
 [project.urls]
 homepage = "https://pypi.org/project/MDANSE"
