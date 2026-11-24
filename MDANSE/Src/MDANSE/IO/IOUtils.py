@@ -29,13 +29,13 @@ from collections.abc import (
     Sequence,
 )
 from enum import Enum
-from functools import singledispatch
+from functools import partial, singledispatch
 from itertools import count, filterfalse, islice
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, SupportsComplex, TypeVar, overload
 
 import numpy as np
-from more_itertools import first_true, last, take, value_chain
+from more_itertools import first, first_true, last, take, value_chain
 
 from MDANSE.MLogging import LOG
 
@@ -385,7 +385,7 @@ def head_tail(coll: Sequence[T]) -> Generator[tuple[Sequence[T], Sequence[T]]]:
     [('', 'bye'), ('b', 'ye'), ('by', 'e'), ('bye', '')]
     """
 
-    for i in range(len(coll)):
+    for i in range(len(coll) + 1):
         yield coll[:i], coll[i:]
 
 
@@ -423,7 +423,16 @@ def get_trailing_digits(inp: str) -> tuple[str, int]:
 
 
 def summarise_array(
-    array: Sequence, *, maxlen: int = 6, show: int = 3, arr_fmt: str | None = None
+    array: Sequence,
+    *,
+    rows: int = 20,
+    cols: int = 6,
+    show: int = 3,
+    arr_fmt: str | None = None,
+    separator: str = ",",
+    placeholder: str = "...",
+    placeholder_vert: str = "⋮",
+    placeholder_diag: str = "⋱",
 ) -> str:
     """
     Return a summarised string of the array.
@@ -446,27 +455,184 @@ def summarise_array(
     -------
     str
         Summarised array.
+    """
+    if isinstance(first(array), Sequence):
+        summarise_array_2D(
+            array,
+            rows=rows,
+            cols=cols,
+            show=show,
+            arr_fmt=arr_fmt,
+            separator=separator,
+            placeholder=placeholder,
+            placeholder_vert=placeholder_vert,
+            placeholder_diag=placeholder_diag,
+        )
+    else:
+        summarise_array_1D(
+            array,
+            maxlen=cols,
+            show=show,
+            arr_fmt=arr_fmt,
+            separator=separator,
+            placeholder=placeholder,
+        )
+
+
+def summarise_array_1D(
+    array: Sequence,
+    *,
+    maxlen: int = 6,
+    show: int = 3,
+    arr_fmt: str | None = None,
+    separator=", ",
+    placeholder="...",
+) -> str:
+    """
+    Return a summarised string of the array.
+
+    Long arrays are elided with ``placeholder``.
+    Short arrays are left as-is.
+
+    Parameters
+    ----------
+    array : Sequence
+        Array to summarise.
+    maxlen : int
+        Maximum length before elision (min 4).
+    show : int
+        Number of elements to show.
+    arr_fmt : str, optional
+        Format values in array before printing.
+
+    Returns
+    -------
+    str
+        Summarised array.
 
     Examples
     --------
-    >>> summarise_array(range(10))
+    >>> summarise_array_1D(range(10))
     '0, 1, 2, ..., 9'
-    >>> summarise_array(range(4))
+    >>> summarise_array_1D(range(4))
     '0, 1, 2, 3'
-    >>> summarise_array(range(10), maxlen=15)
+    >>> summarise_array_1D(range(10), maxlen=15)
     '0, 1, 2, 3, 4, 5, 6, 7, 8, 9'
-    >>> summarise_array(range(10), show=6)
+    >>> summarise_array_1D(range(10), show=6)
     '0, 1, 2, 3, 4, 5, ..., 9'
-    >>> summarise_array([x / 3 for x in range(10)], arr_fmt="3.1f")
+    >>> summarise_array_1D([x / 3 for x in range(10)], arr_fmt="3.1f")
     '0.0, 0.3, 0.7, ..., 3.0'
     """
     fmt = str if arr_fmt is None else lambda x: format(x, arr_fmt)
     arr = map(fmt, array)
 
-    if len(array) <= maxlen or len(array) < show + 1:
-        return ", ".join(arr)
+    if maxlen is None or len(array) <= maxlen or len(array) < show + 1:
+        return separator.join(arr)
 
-    return ", ".join(value_chain(take(show, arr), "...", last(arr)))
+    return separator.join(value_chain(take(show, arr), placeholder, last(arr)))
+
+
+def summarise_array_2D(
+    array: Sequence[Sequence],
+    *,
+    rows: int = 6,
+    cols: int = 6,
+    show: int = 3,
+    arr_fmt: str | None = None,
+    separator: str = ",",
+    placeholder: str = "...",
+    placeholder_vert: str = "⋮",
+    placeholder_diag: str = "⋱",
+) -> str:
+    """Return a summarised string of the array.
+
+    Long arrays are elided with ``placeholder``.
+    Short arrays are left as-is.
+
+    Parameters
+    ----------
+    array : Sequence[Sequence]
+        Array to summarise.
+    rows : int
+        Max rows to display.
+    cols : int
+        Max columns to display.
+    show : int
+        Number to show in summarised rows.
+    arr_fmt : str, optional
+        Format values in array before printing.
+    separator : str
+        Character separating columns.
+    placeholder : str
+        Character denoting truncated array.
+    placeholder_vert : str
+        Character denoting truncated array (vertical).
+    placeholder_diag : str
+        Character denoting truncated array (diagonal).
+
+    Returns
+    -------
+    str
+        Summarised array.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> print(summarise_array_2D(np.eye(10, 10)))
+    1.0,0.0,0.0,...,0.0
+    0.0,1.0,0.0,...,0.0
+    0.0,0.0,1.0,...,0.0
+    0.0,0.0,0.0,...,0.0
+     ⋮   ⋮   ⋮   ⋱
+    0.0,0.0,0.0,...,1.0
+    >>> print(summarise_array_2D(
+    ...       np.eye(10, 10),
+    ...       rows=15,
+    ...       placeholder="???",
+    ...       separator=" | "))
+    1.0 | 0.0 | 0.0 | ??? | 0.0
+    0.0 | 1.0 | 0.0 | ??? | 0.0
+    0.0 | 0.0 | 1.0 | ??? | 0.0
+    0.0 | 0.0 | 0.0 | ??? | 0.0
+    0.0 | 0.0 | 0.0 | ??? | 0.0
+    0.0 | 0.0 | 0.0 | ??? | 0.0
+    0.0 | 0.0 | 0.0 | ??? | 0.0
+    0.0 | 0.0 | 0.0 | ??? | 0.0
+    0.0 | 0.0 | 0.0 | ??? | 0.0
+    0.0 | 0.0 | 0.0 | ??? | 1.0
+    >>> print(summarise_array_2D(np.eye(10, 10), rows=15, cols=10))
+    1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+    0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+    0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+    0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0
+    0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0
+    0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,0.0
+    0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0
+    0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0
+    0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0
+    0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0
+    """
+    summarise_row = partial(
+        summarise_array_1D,
+        maxlen=cols,
+        show=show,
+        arr_fmt=arr_fmt,
+        separator=separator,
+        placeholder=placeholder,
+    )
+
+
+    outp = map(summarise_row, array)
+    if rows is None or len(array) <= rows or len(array) < show + 1:
+        return "\n".join(outp)
+
+    fmt = str if arr_fmt is None else lambda x: format(x, arr_fmt)
+    col_width = len(fmt(first(first(array)))) + len(separator)
+    placeholder_line = (
+        f"{placeholder_vert:^{col_width}}" * (cols - 3)
+        + f"{placeholder_diag:^{len(placeholder)}}".rstrip()
+    )
+    return "\n".join(value_chain(take(rows - 2, outp), placeholder_line, last(outp)))
 
 
 @overload
