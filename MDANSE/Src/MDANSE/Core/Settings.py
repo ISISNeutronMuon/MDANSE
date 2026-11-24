@@ -32,6 +32,7 @@ from typing import (
 )
 
 import tomlkit
+from more_itertools import first
 from tomlkit.items import Item
 from tomlkit.parser import ParseError
 from tomlkit.toml_file import TOMLFile
@@ -225,7 +226,14 @@ class Settings:
 
             LOG.debug("Group: %s", grp_key)
             for key, val in grp.items():
-                if new_type := cls.SAVE_TYPE_MAPPING.get(type(val.value)):
+                if new_type := first(
+                    (
+                        typ
+                        for kls, typ in cls.SAVE_TYPE_MAPPING.items()
+                        if isinstance(val.value, kls)
+                    ),
+                    default=None,
+                ):
                     to_write = new_type(val.value)
                 else:
                     to_write = val.value
