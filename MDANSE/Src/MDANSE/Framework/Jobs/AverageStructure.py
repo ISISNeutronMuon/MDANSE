@@ -16,13 +16,17 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from MDANSE import PLATFORM
 from MDANSE.Framework.Jobs.IJob import IJob
 from MDANSE.Framework.Units import measure
-from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices
+from MDANSE.MolecularDynamics.TrajectoryUtils import group_atom_indices_precalculated
+
+if TYPE_CHECKING:
+    from MDANSE.Framework.Configurators.MemoryConfigurator import MemoryConfigurator
 
 try:
     from ase.atoms import Atom, Atoms
@@ -31,6 +35,37 @@ try:
     ase_available = True
 except ImportError:
     ase_available = False
+
+
+def avgs_memory_per_atom(
+    mem_conf: MemoryConfigurator, n_atoms: int = 1
+) -> tuple[int, int, int]:
+    """Calculate the memory requirements of a DISF calculation.
+
+    The data size is fixed as 8 bytes per number, since the arrays allocated
+    by numpy in this analysis are most likely going to be float64, even
+    if the coordinates in the input trajectory are float32.
+
+    Parameters
+    ----------
+    mem_conf : MemoryConfigurator
+        The configurator instance which contains the needed inputs
+    n_atoms : int, optional
+        Use a specific number of atoms in the calculation, by default 1
+
+    Returns
+    -------
+    tuple[int, int int]
+        MB per atom, per chunk and per n_atoms from input, respectively
+    """
+    trajectory = mem_conf.configurable[mem_conf.dependencies["trajectory"]]["instance"]
+    frame_config = mem_conf.configurable[mem_conf.dependencies["frames"]]
+    n_dimensions = 3
+    n_frames = frame_config["number"]
+    data_size = 8
+    chunk_size = trajectory.chunk_size(array_name="position")
+    prefactor = 5.5 * n_frames * n_dimensions * data_size / 2**20
+    return (prefactor, chunk_size * prefactor, n_atoms * prefactor)
 
 
 @IJob.register("AverageStructure")
@@ -53,6 +88,8 @@ class AverageStructure(IJob):
     label = "Average Structure"
 
     category = ("Trajectory",)
+
+    PREDICTORS = ("memory",)
 
     ancestor = ["hdf_trajectory", "molecular_viewer"]
 
@@ -81,6 +118,16 @@ class AverageStructure(IJob):
             "default": "Angstrom",
         },
     )
+    settings["memory"] = (
+        "MemoryConfigurator",
+        {
+            "dependencies": {
+                "trajectory": "trajectory",
+                "frames": "frames",
+            },
+            "mem_function": avgs_memory_per_atom,
+        },
+    )
     settings["output_files"] = (
         "OutputStructureConfigurator",
         {"format": "vasp", "label": "Output structure file name and format"},
@@ -92,11 +139,11 @@ class AverageStructure(IJob):
         """
         super().initialize()
 
-        self.grouped_indices = group_atom_indices(
+        self.grouped_indices = group_atom_indices_precalculated(
             self.trajectory,
             self.configuration["frames"]["number"],
             n_proc=1,
-            memory_scale_factor=2,
+            max_group_size=self.configuration["memory"]["atoms_per_step"][0],
         )
         self.numberOfSteps = len(self.grouped_indices)
 
