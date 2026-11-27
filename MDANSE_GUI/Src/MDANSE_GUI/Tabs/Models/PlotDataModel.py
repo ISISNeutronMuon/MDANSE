@@ -147,7 +147,7 @@ class MDADataStructure:
         # Ensure only mda type file are loaded in Plot Creator Tab
         output_metadata = self._metadata["inputs/output_files"]
         if not isinstance(output_metadata[1], list):
-            LOG.warning("Not an .mda type file %s", filename)
+            LOG.warning("Not an MDANSE file type %s", filename)
 
     def close(self):
         """Close the HDF5 file."""

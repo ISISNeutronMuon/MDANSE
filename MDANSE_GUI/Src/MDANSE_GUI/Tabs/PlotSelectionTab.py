@@ -72,7 +72,7 @@ class PlotSelectionTab(GeneralTab):
     def load_files(self):
         fnames = QFileDialog.getOpenFileNames(
             self._core,
-            "Load an MDA file (MDANSE analysis results) or a trajectory",
+            "Load an MDANSE file (MDANSE analysis results or a trajectory)",
             str(self.get_path("plot_selection")),
             "MDANSE output files (*.mda *.mdt);;"
             "MDANSE analysis results (*.mda);;"
