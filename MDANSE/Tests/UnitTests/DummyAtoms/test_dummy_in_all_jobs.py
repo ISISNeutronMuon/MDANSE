@@ -15,7 +15,7 @@ ALL_ANALYSIS_JOBS = [
     ("CenterOfMassesTrajectory", ["/configuration/coordinates", "/unit_cell", "/time"]),
     ("CurrentCorrelationFunction", ["ccf"]),
     ("Density", ["density"]),
-    ("DensityOfStates", ["dos","vcf"]),
+    ("DensityOfStates", ["dos", "vcf"]),
     ("DipoleAutoCorrelationFunction", ["dacf"]),
     ("DynamicCoherentStructureFactor", ["dcsf"]),
     ("DynamicIncoherentStructureFactor", ["disf"]),
@@ -50,35 +50,40 @@ ALL_ANALYSIS_JOBS = [
 
 
 start_parameters = {
-    'derivative_order': 2,  # Order of the derivative of the dipole moment
-    'grouping_level': 'molecule',  # Grouping level. The partial results can be separated between different molecule types.
-    'frames': [0, 100, 1, 50],  # Frame sampling and correlation frames. The values are: first frame, last frame, step size.
-    'instrument_resolution': ('ideal', {}),  # Instrument resolution function
-    'molecule_name': 'Du1_H2_O1',  # Molecule type
-    'molecule_and_axis': ('Du1_H2_O1', 1, 2),  # Axis in a molecule. Molecule type and the indices of atoms defining a vector in the molecule.
-    'per_axis': False,  # Decompose the results into per-axis contributions
-    'polynomial_order': '2',  # Maximum Legendre polynomial order. All the orders up to this one will be calculated.
-    'trajectory_filter': """{
+    "derivative_order": 2,  # Order of the derivative of the dipole moment
+    "grouping_level": "molecule",  # Grouping level. The partial results can be separated between different molecule types.
+    "frames": [
+        0,
+        100,
+        1,
+        50,
+    ],  # Frame sampling and correlation frames. The values are: first frame, last frame, step size.
+    "instrument_resolution": ("ideal", {}),  # Instrument resolution function
+    "molecule_name": "Du1_H2_O1",  # Molecule type
+    "molecule_and_axis": (
+        "Du1_H2_O1",
+        1,
+        2,
+    ),  # Axis in a molecule. Molecule type and the indices of atoms defining a vector in the molecule.
+    "per_axis": False,  # Decompose the results into per-axis contributions
+    "polynomial_order": "2",  # Maximum Legendre polynomial order. All the orders up to this one will be calculated.
+    "trajectory_filter": """{
         "filter": "Butterworth",
         "attributes": {
             "order": 2,
             "attenuation_type": "lowpass",
             "cutoff_freq": 10.0
         }
-    }"""
+    }""",
 }
-
 
 
 @pytest.fixture(scope="module")
 def qvector_grid():
-    return ('SphericalLatticeQVectors',
-        {'force_equal_weights': False,
-        'n_samples': 10000,
-        'n_vectors': 5,
-        'seed': 5551,
-        'shells': [10.0, 31.0, 10.0],
-        'width': 1.0})
+    return (
+        "DispersionLatticeQVectors",
+        {"n_steps": 4, "start": [0, 0, 0], "step": [1, 0, 0]},
+    )
 
 
 @pytest.mark.parametrize("job_info", ALL_ANALYSIS_JOBS)
@@ -95,18 +100,20 @@ def test_analysis_one_atom_total(generate_benchmarks, job_info, qvector_grid, tm
         temp_name = result_file.with_suffix("")
 
     parameters = copy.deepcopy(start_parameters)
-    parameters.update({
-        "output_files": (temp_name, ("MDAFormat",), "INFO"),
-        "r_values": (0.0, 0.8, 0.01),
-        "frames": None,
-        "running_mode": ("single-core",),
-        "trajectory": trajname,
-    })
+    parameters.update(
+        {
+            "output_files": (temp_name, ("MDAFormat",), "INFO"),
+            "r_values": (0.0, 0.8, 0.01),
+            "frames": None,
+            "running_mode": ("single-core",),
+            "trajectory": trajname,
+        }
+    )
     if jobname != "StaticStructureFactor3D":
-        parameters.update({"q_vectors" : qvector_grid})
+        parameters.update({"q_vectors": qvector_grid})
 
     if jobname in {"CenterOfMassesTrajectory", "TrajectoryEditor", "TrajectoryFilter"}:
-        parameters["output_files"] = (temp_name,  64, (128, 128), "none", "INFO")
+        parameters["output_files"] = (temp_name, 64, (128, 128), "none", "INFO")
         out_file = temp_name.with_suffix(".mdt")
         output_format = "MDT"
     elif jobname in {"AverageStructure"}:
@@ -130,10 +137,12 @@ def test_analysis_one_atom_total(generate_benchmarks, job_info, qvector_grid, tm
 
         assert out_file.is_file()
 
-        compare_hdf5(out_file,
-                     result_file,
-                     tuple(data_keys),
-                     startswith=True,
-                     compare_axis=True,
-                     atol=5e-5,
-                     rtol=5e-5)
+        compare_hdf5(
+            out_file,
+            result_file,
+            tuple(data_keys),
+            startswith=True,
+            compare_axis=True,
+            atol=5e-5,
+            rtol=5e-5,
+        )
