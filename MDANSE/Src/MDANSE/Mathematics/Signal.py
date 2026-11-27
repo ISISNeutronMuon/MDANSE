@@ -241,8 +241,8 @@ def differentiate_many(a, dt=1.0, order=1):
         ts[0] = np.sum(a[:6] * coeffs[0].reshape((6, 1, 1)), axis=0)
         ts[1] = np.sum(a[:6] * coeffs[1].reshape((6, 1, 1)), axis=0)
         ts[2] = np.sum(a[:6] * coeffs[2].reshape((6, 1, 1)), axis=0)
-        ts[-2] = np.sum(a[-6:] * coeffs[3].reshape((6, 1, 1)), axis=0)
-        ts[-1] = np.sum(a[-6:] * coeffs[4].reshape((6, 1, 1)), axis=0)
+        ts[-2] = np.sum(a[-6:] * coeffs[4].reshape((6, 1, 1)), axis=0)
+        ts[-1] = np.sum(a[-6:] * coeffs[5].reshape((6, 1, 1)), axis=0)
         ts[3:-2] = (
             -4 * a[:-5]
             + 30 * a[1:-4]
