@@ -417,14 +417,14 @@ class SingleDataset:
 
         Examples
         --------
-        >>> parse_token("3:5", 10)
+        >>> SingleDataset.parse_token("3:5", 10)
         range(3, 5)
-        >>> parse_token("3:60:2", 5)
+        >>> SingleDataset.parse_token("3:60:2", 5)
         range(3, 5, 2)
-        >>> parse_token("8", 10)
-        (8, )
-        >>> parse_token("6-8", 10)
-        range(6, 8)
+        >>> SingleDataset.parse_token("8", 10)
+        (8,)
+        >>> SingleDataset.parse_token("6-8", 10)
+        range(6, 9)
         """
         if ":" in token:
             slice_parts = map(int, token.split(":"))

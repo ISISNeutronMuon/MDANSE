@@ -858,9 +858,9 @@ class FilterDesigner(QDialog):
 
         Examples
         --------
-        >>> self.to_dB(100)
+        >>> FilterDesigner.to_dB(100)
         np.float64(40.0)
-        >>> conv(-10)
+        >>> FilterDesigner.to_dB(-10)
         np.float64(20.0)
         """
         return 20 * np.log10(abs(x))
