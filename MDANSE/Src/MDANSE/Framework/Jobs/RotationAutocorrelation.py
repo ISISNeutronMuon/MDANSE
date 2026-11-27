@@ -53,16 +53,12 @@ class RotationAutocorrelation(IJob):
         "CorrelationFramesConfigurator",
         {"dependencies": {"trajectory": "trajectory"}},
     )
-    settings["molecule"] = (
+    settings["molecule_name"] = (
         "MoleculeSelectionConfigurator",
         {
             "default": "",
             "dependencies": {"trajectory": "trajectory"},
         },
-    )
-    settings["atom_selection"] = (
-        "AtomSelectionConfigurator",
-        {"dependencies": {"trajectory": "trajectory"}},
     )
     settings["output_files"] = ("OutputFilesConfigurator", {})
     settings["running_mode"] = ("RunningModeConfigurator", {})
@@ -72,7 +68,7 @@ class RotationAutocorrelation(IJob):
         super().initialize()
 
         molecules = self.trajectory.chemical_system.clusters[
-            self.configuration["molecule"]["value"]
+            self.configuration["molecule_name"]["value"]
         ]
 
         self._indices = set(self.trajectory.atom_indices)
@@ -92,27 +88,27 @@ class RotationAutocorrelation(IJob):
         self.grouped_indices = group_cluster_indices(self.trajectory.chemical_system)
 
         self._outputData.add(
-            "time",
+            "/rac/axes/time",
             "LineOutputVariable",
             self.configuration["frames"]["duration"],
             units="ps",
         )
 
         self._outputData.add(
-            "frame",
+            "/rac/axes/frame",
             "LineOutputVariable",
             np.arange(self.configuration["frames"]["number"]),
             units="ps",
         )
 
         self._outputData.add(
-            "axis_index",
+            "/rac/axes/axis_index",
             "LineOutputVariable",
             np.arange(
                 self.configuration["trajectory"][
                     "instance"
                 ].chemical_system.number_of_molecules(
-                    self.configuration["molecule"]["value"],
+                    self.configuration["molecule_name"]["value"],
                 ),
             ),
             units="au",
@@ -120,17 +116,17 @@ class RotationAutocorrelation(IJob):
 
         for axis in "xyz":
             self._outputData.add(
-                f"rotation_around_{axis}",
+                f"/rac/rotation/around_{axis}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["number"],),
-                axis="frame",
+                axis="/rac/axes/frame",
                 units="au",
             )
             self._outputData.add(
-                f"{axis}_rotation_ac",
+                f"/rac/ac/{axis}",
                 "LineOutputVariable",
                 (self.configuration["frames"]["n_frames"],),
-                axis="time",
+                axis="/rac/axes/time",
                 units="au",
                 main_result=True,
             )
@@ -198,15 +194,15 @@ class RotationAutocorrelation(IJob):
 
         """
         for ax_ind, axis in enumerate("xyz"):
-            self._outputData[f"{axis}_rotation_ac"] += x[0][ax_ind]
-            self._outputData[f"rotation_around_{axis}"] += x[1][:, ax_ind]
+            self._outputData[f"/rac/ac/{axis}"] += x[0][ax_ind]
+            self._outputData[f"/rac/rotation/around_{axis}"] += x[1][:, ax_ind]
 
     def finalize(self):
         """Normalise and write out the results."""
 
         for axis in "xyz":
-            self._outputData[f"{axis}_rotation_ac"] /= self.numberOfSteps
-            self._outputData[f"rotation_around_{axis}"] /= self.numberOfSteps
+            self._outputData[f"/rac/ac/{axis}"] /= self.numberOfSteps
+            self._outputData[f"/rac/rotation/around_{axis}"] /= self.numberOfSteps
 
         self._outputData.write(
             self.configuration["output_files"]["root"],

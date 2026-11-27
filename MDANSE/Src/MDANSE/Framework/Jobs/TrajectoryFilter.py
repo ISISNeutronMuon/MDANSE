@@ -131,6 +131,10 @@ class TrajectoryFilter(IJob):
         self.n_frame_chunks = n_time_steps
         self.atoms_per_chunk = atoms_per_chunk
         self.frames_per_chunk = frames_per_chunk
+        self.atom_index_mapping = {
+            orig_index: output_index
+            for output_index, orig_index in enumerate(self.trajectory.atom_indices)
+        }
 
         filter_config = json.loads(self.configuration["trajectory_filter"]["value"])
 
@@ -232,7 +236,7 @@ class TrajectoryFilter(IJob):
         self._output_trajectory.write_array_fragment(
             x,
             "coordinates",
-            atom_indices=atom_indices,
+            atom_indices=[self.atom_index_mapping[index] for index in atom_indices],
         )
         if index:
             return
