@@ -87,12 +87,12 @@ class MoleculeSelectionConfigurator(IConfigurator):
             self.error_status = "Invalid input value."
             return
 
-        if value in self.choices:
-            self.error_status = "OK"
-            self["value"] = value
-        else:
+        if value not in self.choices:
             self.error_status = (
                 f"Molecule {value} is not present in the trajectory."
                 f" Valid options were: {','.join(mol for mol in self.choices)}"
             )
-            self["value"] = self._default
+            return
+
+        self.error_status = "OK"
+        self["value"] = value

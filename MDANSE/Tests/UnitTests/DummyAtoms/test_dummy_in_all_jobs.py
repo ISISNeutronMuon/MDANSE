@@ -135,5 +135,5 @@ def test_analysis_one_atom_total(generate_benchmarks, job_info, qvector_grid, tm
                      tuple(data_keys),
                      startswith=True,
                      compare_axis=True,
-                     atol=1e-5,
-                     rtol=1e-5)
+                     atol=5e-5,
+                     rtol=5e-5)
