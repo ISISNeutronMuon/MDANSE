@@ -35,7 +35,7 @@ from more_itertools import first, locate, nth, nth_product
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
 from qtpy.QtGui import QColor, QStandardItem, QStandardItemModel
 
-from MDANSE.Core.Settings import Option, Setting, Settings
+from MDANSE.Core.Settings import Setting
 from MDANSE.Framework.Converters.Converter import TRAJ_AXES, TRAJ_UNITS
 from MDANSE.IO.IOUtils import summarise_array
 from MDANSE.MLogging import LOG
@@ -49,6 +49,16 @@ if TYPE_CHECKING:
 NUMBERS_FOR_SLICE = 3
 NUMBERS_FOR_RANGE = 2
 SCALE_FACTOR_FORMAT = "3.3f"
+
+
+BACKUP_TRAJECTORY_UNITS = {
+    "charge": "e",
+    "time": "ps",
+    "unit_cell": "nm",
+    "coordinates": "nm",
+    "velocities": "nm/ps",
+    "forces": "Da nm / ps2",
+}
 
 
 class PlotArgs(NamedTuple):
@@ -124,13 +134,6 @@ def guess_axis(dset_name: str, source_object: h5py.File) -> str:
     return "|".join(new_tags)
 
 
-@Settings.parametrise(
-    colour_map=Option(
-        "viridis",
-        group="matplotlib",
-        comment="Name of the default matplotlib colormap to be used in 2D plots.",
-    ),
-)
 class SingleDataset:
     """Manages a plottable data set from an .mda file."""
 
@@ -359,11 +362,17 @@ class SingleDataset:
             else:
                 axis_key = aname
                 self._axes[axis_key] = source[axis_key][:]
-                try:
-                    self._axes_units[axis_key] = source[axis_key].attrs["units"]
-                except KeyError:
-                    LOG.warning("Axis %s is missing the 'units' attribute", axis_key)
-                    self._axes_units[axis_key] = "N/A"
+                axis_unit = str(source[axis_key].attrs.get("units", "")).strip()
+                if not axis_unit:
+                    axis_unit = BACKUP_TRAJECTORY_UNITS.get(
+                        axis_key.split("/")[-1].lower(), "N/A"
+                    )
+                    LOG.warning(
+                        "Axis %s is missing the 'units' attribute. Using %s",
+                        axis_key,
+                        axis_unit,
+                    )
+                self._axes_units[axis_key] = axis_unit
             self._axes_order.append(axis_key)
             self._axes_scaling[axis_key] = 1.0
             self._current_units[axis_key] = self._axes_units[axis_key]
