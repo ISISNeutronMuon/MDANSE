@@ -60,12 +60,6 @@ class MoleculeSelectionConfigurator(IConfigurator):
             return
 
         self._original_input = value
-        if value is None:
-            value = self._default
-
-        if not isinstance(value, str):
-            self.error_status = "Invalid input value."
-            return
 
         trajectory_configurator = self.configurable[self.dependencies["trajectory"]]
         if not trajectory_configurator.valid:
@@ -76,11 +70,29 @@ class MoleculeSelectionConfigurator(IConfigurator):
             "instance"
         ].chemical_system.unique_molecules()
 
+        if not len(self.choices):
+            self.error_status = (
+                "The trajectory does not contain molecule definitions."
+                " You can find molecules using TrajectoryEditor."
+            )
+            return
+
+        if value is None:
+            value = self.choices[0]
+            self.warning_status = (
+                f"No molecule name specified. Using the first available name: {value}"
+            )
+
+        if not isinstance(value, str):
+            self.error_status = "Invalid input value."
+            return
+
         if value in self.choices:
             self.error_status = "OK"
             self["value"] = value
         else:
             self.error_status = (
-                "The specified molecule name is not present in the trajectory."
+                f"Molecule {value} is not present in the trajectory."
+                f" Valid options were: {','.join(mol for mol in self.choices)}"
             )
             self["value"] = self._default
