@@ -83,6 +83,10 @@ class RootMeanSquareFluctuation(IJob):
 
         all_names = self.trajectory.atom_names
         self._names = [all_names[index] for index in self.trajectory.atom_indices]
+        self.atom_index_mapping = {
+            orig_index: output_index
+            for output_index, orig_index in enumerate(self.trajectory.atom_indices)
+        }
 
         self._outputData.add(
             "rmsf/axes/indices/all",
@@ -182,8 +186,9 @@ class RootMeanSquareFluctuation(IJob):
         atom_index_group = self.grouped_indices[step_index]
         # The symbol of the atom.
         for arr_index, at_index in enumerate(atom_index_group):
-            self._outputData["rmsf/all"][at_index] = x[arr_index]
-            name = self._names[at_index]
+            output_index = self.atom_index_mapping[at_index]
+            self._outputData["rmsf/all"][output_index] = x[arr_index]
+            name = self._names[output_index]
             self._outputData[f"rmsf/{name}"][self.ele_idxs[name]] = x[arr_index]
             self.ele_idxs[name] += 1
 
