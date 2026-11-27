@@ -14,6 +14,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 from __future__ import annotations
+import MDANSE.Trajectory.FileTrajBase
 
 import copy
 import html
@@ -22,7 +23,7 @@ from collections import Counter, defaultdict
 from enum import auto
 from operator import itemgetter
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, Generic, overload
 
 import h5py
 import numpy as np
@@ -39,7 +40,7 @@ from MDANSE.Chemistry import ATOMS_DATABASE
 
 from MDANSE.Framework.Formats.HDFFormat import check_metadata
 from MDANSE.IO.IOUtils import UCEnum, summarise_array, str_to_num
-from MDANSE.Trajectory.FileTrajBase import TrajDataArray
+from MDANSE.Trajectory.FileTrajBase import TrajDataArray, TrajectoryFile
 from MDANSE.Trajectory.H5MDTrajectory import H5MDTrajectory
 from MDANSE.Trajectory.MdanseTrajectory import MdanseTrajectory
 from MDANSE.util_types import FloatArray
@@ -167,6 +168,7 @@ def chemical_system_summary(cs: ChemicalSystem) -> str:
     return html.escape(text)
 
 
+
 class Trajectory:
     """Stores the current state of the trajectory.
 
@@ -185,7 +187,7 @@ class Trajectory:
                  rdcc_nbytes: int | None = None,
                  rdcc_nslots: int | None = None,
                  rdcc_w0: float | None = None,
-                 fast_load: bool = False):
+                 fast_load: bool = False) -> None:
         self._filename = filename
         self._hdf5_driver = hdf5_driver
         self._rdcc_nbytes = rdcc_nbytes
@@ -263,6 +265,17 @@ class Trajectory:
                 overlap = set(cluster).intersection(self.atom_indices)
                 temp_dict[mol_name] += len(overlap)
         return {k: v for k, v in temp_dict.items() if v}
+
+    @property
+    def cluster_indices(self) -> dict[int, tuple[str, str]]:
+        """Mapping of index to the containing cluster."""
+        out = dict.fromkeys(self.atom_indices, ("None", "None"))
+        for mol_name in self.chemical_system.clusters:
+            for cluster in self.chemical_system.clusters[mol_name]:
+                overlaps = set(cluster).intersection(self.atom_indices)
+                out.update((overlap, (mol_name, cluster)) for overlap in overlaps)
+
+        return out
 
     def chunk_size(self, array_name: str = "position") -> int:
         """Return the number of atoms in a single chunk of the HDF5 dataset."""
@@ -471,6 +484,10 @@ class Trajectory:
 
         return "MDANSE"
 
+    @overload
+    def open_trajectory(self, trajectory_format: Literal["MDANSE"], *_, **__) -> MdanseTrajectory: ...
+    @overload
+    def open_trajectory(self, trajectory_format: Literal["H5MD"], *_, **__) -> H5MDTrajectory: ...
     def open_trajectory(self,
                         trajectory_format,
                         hdf5_driver,
@@ -479,7 +496,7 @@ class Trajectory:
                         rdcc_w0: float | None = None,
                         rdcc_nslots: int | None = None,
                         fast_load: bool = False
-                        ):
+                        ) -> TrajectoryFile:
         trajectory_class = available_formats[trajectory_format]
         trajectory = trajectory_class(self._filename,
                                       hdf5_driver=hdf5_driver,
