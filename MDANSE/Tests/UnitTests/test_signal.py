@@ -36,3 +36,23 @@ def test_result_values(diff_result, output_plots: bool = False):
                 mpl.savefig(f"derivative_comparison_{j}_{k}.png")
                 mpl.close()
     npt.assert_allclose(diff_result, new_result)
+
+
+@pytest.mark.parametrize("order", [1, 2, 3, 4, 5])
+def test_differentiate_many_matches_differentiate(order):
+    expected = np.empty_like(mock_3D_trajectory)
+    for j in range(mock_3D_trajectory.shape[1]):
+        for k in range(mock_3D_trajectory.shape[2]):
+            expected[:, j, k] = differentiate(mock_3D_trajectory[:, j, k], dt=0.5, order=order)
+    actual = differentiate_many(mock_3D_trajectory, dt=0.5, order=order)
+    npt.assert_allclose(actual, expected)
+
+
+def test_differentiate_many_order_5_exact_polynomial():
+    dt = 0.25
+    t = np.arange(10, dtype=np.float64) * dt
+    # Degree-5 polynomial: 5th-order finite difference recovers exact derivative at all points.
+    poly = (t**5 - 2.0 * t**3 + 3.0 * t)[:, None, None]
+    expected = (5.0 * t**4 - 6.0 * t**2 + 3.0)[:, None, None]
+    actual = differentiate_many(poly, dt=dt, order=5)
+    npt.assert_allclose(actual, expected, rtol=1e-11, atol=1e-11)
