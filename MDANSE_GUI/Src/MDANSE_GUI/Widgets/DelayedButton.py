@@ -21,9 +21,11 @@ from qtpy.QtWidgets import QPushButton
 class DelayedButton(QPushButton):
     needs_updating = Signal()
 
-    def __init__(self, *args, **kwargs):
-        delay_time = kwargs.pop("delay", 1000)
-        inactive_message = kwargs.pop("inactive_text", "Starting...")
+    def __init__(
+        self, *args, delay: float = 1000, inactive_text: str = "Starting...", **kwargs
+    ):
+        delay_time = delay
+        inactive_message = inactive_text
         super().__init__(*args, **kwargs)
 
         self._delay_time = delay_time

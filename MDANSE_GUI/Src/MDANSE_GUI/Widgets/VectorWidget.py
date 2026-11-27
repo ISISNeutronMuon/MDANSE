@@ -15,6 +15,8 @@
 #
 from __future__ import annotations
 
+from typing import Literal
+
 from qtpy.QtCore import Signal, Slot
 from qtpy.QtGui import QDoubleValidator, QIntValidator
 from qtpy.QtWidgets import (
@@ -28,8 +30,14 @@ from qtpy.QtWidgets import (
 class VectorWidget(QWidget):
     value_changed = Signal(list)
 
-    def __init__(self, *args, dtype=None, **kwargs) -> None:
-        label_text = kwargs.pop("label", "Vector input")
+    def __init__(
+        self,
+        *args,
+        label: str = "Vector input",
+        dtype: Literal["int", "float"] = "float",
+        **kwargs,
+    ) -> None:
+        label_text = label
         super().__init__(*args, **kwargs)
         if dtype == "int":
             self._dtype = "int"
